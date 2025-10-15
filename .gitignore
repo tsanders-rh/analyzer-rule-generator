@@ -48,3 +48,6 @@ examples/output/*.yaml
 # OS
 .DS_Store
 Thumbs.db
+demo.gif
+demo.mp4
+examples/output/jdk21/demo-output.yaml

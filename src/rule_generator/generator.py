@@ -90,10 +90,16 @@ class AnalyzerRuleGenerator:
         # Build links
         links = self._build_links(pattern)
 
+        # Create description
+        if pattern.target_pattern:
+            description = f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}"
+        else:
+            description = f"{pattern.source_pattern} usage detected (removed API)"
+
         # Create rule
         rule = AnalyzerRule(
             ruleID=rule_id,
-            description=f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}",
+            description=description,
             effort=effort,
             category=category,
             labels=labels,
@@ -211,6 +217,13 @@ class AnalyzerRuleGenerator:
         if complexity == 'TRIVIAL':
             return Category.MANDATORY
 
+        # API removals should be mandatory regardless of complexity
+        # Look for keywords in rationale that indicate removal/deprecation
+        rationale_lower = pattern.rationale.lower()
+        removal_keywords = ['removed', 'removal', 'deprecated for removal', 'no longer available', 'deleted']
+        if any(keyword in rationale_lower for keyword in removal_keywords):
+            return Category.MANDATORY
+
         # Everything else is potential (needs evaluation)
         return Category.POTENTIAL
 
@@ -242,7 +255,11 @@ class AnalyzerRuleGenerator:
             Message text
         """
         message = f"{pattern.rationale}\n\n"
-        message += f"Replace `{pattern.source_pattern}` with `{pattern.target_pattern}`."
+
+        if pattern.target_pattern:
+            message += f"Replace `{pattern.source_pattern}` with `{pattern.target_pattern}`."
+        else:
+            message += f"Remove usage of `{pattern.source_pattern}` (API has been removed)."
 
         if pattern.example_before and pattern.example_after:
             message += f"\n\nBefore:\n```\n{pattern.example_before}\n```\n\n"

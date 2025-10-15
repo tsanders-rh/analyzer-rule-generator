@@ -70,12 +70,12 @@ class OpenAIProvider(LLMProvider):
 class AnthropicProvider(LLMProvider):
     """Anthropic Claude API provider."""
 
-    def __init__(self, model: str = "claude-3-5-sonnet-20241022", api_key: Optional[str] = None):
+    def __init__(self, model: str = "claude-3-7-sonnet-20250219", api_key: Optional[str] = None):
         """
         Initialize Anthropic provider.
 
         Args:
-            model: Model name (default: claude-3-5-sonnet-20241022)
+            model: Model name (default: claude-3-7-sonnet-20250219)
             api_key: API key (defaults to ANTHROPIC_API_KEY env var)
         """
         try:

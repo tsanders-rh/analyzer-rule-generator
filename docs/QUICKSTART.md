@@ -34,7 +34,8 @@ python scripts/generate_rules.py \
   --source openjdk17 \
   --target openjdk21 \
   --output examples/output/jdk21/applet-removal.yaml \
-  --provider anthropic
+  --provider anthropic \
+  --model claude-3-7-sonnet-20250219
 ```
 
 **What this does:**

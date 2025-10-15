@@ -224,6 +224,26 @@ class AnalyzerRuleGenerator:
         if any(keyword in rationale_lower for keyword in removal_keywords):
             return Category.MANDATORY
 
+        # Property/configuration renames and updates should be mandatory (mechanical changes)
+        # Look for patterns that indicate simple property migrations
+        property_keywords = [
+            'properties have been updated',
+            'properties have been renamed',
+            'property has been renamed',
+            'property has been updated',
+            'should be replaced with',
+            'now use',
+            'instead of'
+        ]
+        if any(keyword in rationale_lower for keyword in property_keywords):
+            # Check if this looks like a simple property rename (similar structure)
+            if pattern.target_pattern and pattern.source_pattern:
+                source_parts = pattern.source_pattern.split('.')
+                target_parts = pattern.target_pattern.split('.')
+                # If both are dotted properties with similar depth, likely a simple rename
+                if len(source_parts) >= 3 and len(target_parts) >= 3:
+                    return Category.MANDATORY
+
         # Everything else is potential (needs evaluation)
         return Category.POTENTIAL
 

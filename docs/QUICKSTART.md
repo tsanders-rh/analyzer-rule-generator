@@ -171,8 +171,36 @@ export GOOGLE_API_KEY="your-key"
 - LLM extraction is best-effort
 - For critical migrations, use the hybrid approach (see [AI vs Manual Comparison](ai-vs-manual-comparison.md))
 
+## Submitting Rules to Konveyor
+
+After generating rules, you can prepare them for submission to the official Konveyor rulesets repository:
+
+```bash
+# Prepare submission package with tests
+python scripts/prepare_submission.py \
+  --rules examples/output/spring-boot-4.0/migration-rules.yaml \
+  --source spring-boot-3.5 \
+  --target spring-boot-4.0 \
+  --guide-url "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide" \
+  --output submission/spring-boot-4.0 \
+  --data-dir-name mongodb
+```
+
+This creates a complete submission package with:
+- Rule YAML file
+- Test template with test cases for each rule
+- Test data directory structure
+- README with submission instructions
+
+See [Konveyor Submission Guide](konveyor-submission-guide.md) for complete details on:
+- Creating test applications
+- Running tests with Kantra
+- Submitting pull requests
+- CI/CD requirements
+
 ## Next Steps
 
+- **Submit to Konveyor**: See [Konveyor Submission Guide](konveyor-submission-guide.md)
 - **Test your rules**: Use the generated rules with [Konveyor analyzer](https://github.com/konveyor/analyzer-lsp)
 - **Learn the hybrid approach**: See [AI vs Manual Comparison](ai-vs-manual-comparison.md)
 - **Advanced usage**: Check [Architecture Overview](ARCHITECTURE.md)

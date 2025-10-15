@@ -1,0 +1,124 @@
+rulesPath: ../migration-rules.yaml
+providers:
+- name: java
+  dataPath: data/mongodb
+tests:
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00001
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00002
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00003
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00004
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00005
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00006
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00007
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00008
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00009
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00010
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00011
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00012
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00013
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00014
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00015
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00016
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00017
+  testCases:
+  - name: tc-1
+    analysisParams:
+      mode: source-only
+    hasIncidents:
+      atLeast: 1

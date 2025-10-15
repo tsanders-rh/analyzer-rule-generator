@@ -1,0 +1,269 @@
+"""
+Rule generation - Convert migration patterns to Konveyor analyzer rule format.
+
+Generates analyzer rules with:
+- Rule ID (auto-generated)
+- When conditions (pattern matching)
+- Effort scoring
+- Messages with migration guidance
+- Links to documentation
+"""
+from typing import List, Optional, Dict, Any
+
+from .schema import AnalyzerRule, MigrationPattern, Category, Link, LocationType
+
+
+class AnalyzerRuleGenerator:
+    """Generate Konveyor analyzer rules from migration patterns."""
+
+    def __init__(
+        self,
+        source_framework: Optional[str] = None,
+        target_framework: Optional[str] = None
+    ):
+        """
+        Initialize rule generator.
+
+        Args:
+            source_framework: Source framework name (e.g., "spring-boot")
+            target_framework: Target framework name (e.g., "quarkus")
+        """
+        self.source_framework = source_framework
+        self.target_framework = target_framework
+        self._rule_counter = 0
+
+    def generate_rules(self, patterns: List[MigrationPattern]) -> List[AnalyzerRule]:
+        """
+        Generate analyzer rules from extracted patterns.
+
+        Args:
+            patterns: List of migration patterns
+
+        Returns:
+            List of AnalyzerRule objects
+        """
+        rules = []
+        for pattern in patterns:
+            rule = self._pattern_to_rule(pattern)
+            if rule:
+                rules.append(rule)
+
+        return rules
+
+    def _pattern_to_rule(self, pattern: MigrationPattern) -> Optional[AnalyzerRule]:
+        """
+        Convert a migration pattern to an analyzer rule.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            AnalyzerRule object or None if pattern cannot be converted
+        """
+        # Skip if we don't have enough info to create a when condition
+        if not pattern.source_fqn and not pattern.source_pattern:
+            print(f"Warning: Skipping pattern without FQN or pattern: {pattern.rationale}")
+            return None
+
+        # Generate rule ID
+        rule_id = self._create_rule_id()
+
+        # Build when condition
+        when_condition = self._build_when_condition(pattern)
+
+        if not when_condition:
+            print(f"Warning: Could not build when condition for: {pattern.rationale}")
+            return None
+
+        # Map complexity to effort (1-10 scale)
+        effort = self._map_complexity_to_effort(pattern.complexity)
+
+        # Determine category
+        category = self._determine_category(pattern)
+
+        # Build labels
+        labels = self._build_labels()
+
+        # Build message
+        message = self._build_message(pattern)
+
+        # Build links
+        links = self._build_links(pattern)
+
+        # Create rule
+        rule = AnalyzerRule(
+            ruleID=rule_id,
+            description=f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}",
+            effort=effort,
+            category=category,
+            labels=labels,
+            when=when_condition,
+            message=message,
+            links=links if links else None,
+            customVariables=[],
+            tag=None
+        )
+
+        return rule
+
+    def _create_rule_id(self) -> str:
+        """
+        Generate unique rule ID.
+
+        Returns:
+            Rule ID (e.g., "spring-boot-to-quarkus-00001")
+        """
+        self._rule_counter += 1
+
+        if self.source_framework and self.target_framework:
+            prefix = f"{self.source_framework}-to-{self.target_framework}"
+        else:
+            prefix = "migration"
+
+        # Format: prefix-00001
+        rule_id = f"{prefix}-{self._rule_counter:05d}"
+
+        return rule_id
+
+    def _build_when_condition(self, pattern: MigrationPattern) -> Optional[Dict[str, Any]]:
+        """
+        Build when condition for pattern matching.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            When condition dict or None if cannot be built
+        """
+        if not pattern.source_fqn:
+            # If no FQN, we can't create a proper when condition for static analysis
+            return None
+
+        # Determine location (default to TYPE if not specified)
+        location = pattern.location_type or LocationType.TYPE
+
+        # Build java.referenced condition
+        java_referenced = {
+            "pattern": pattern.source_fqn,
+            "location": location.value
+        }
+
+        # If there are alternative FQNs (e.g., javax vs jakarta), use OR condition
+        if pattern.alternative_fqns and len(pattern.alternative_fqns) > 0:
+            conditions = [
+                {"java.referenced": {
+                    "pattern": pattern.source_fqn,
+                    "location": location.value
+                }}
+            ]
+
+            for alt_fqn in pattern.alternative_fqns:
+                conditions.append({
+                    "java.referenced": {
+                        "pattern": alt_fqn,
+                        "location": location.value
+                    }
+                })
+
+            return {"or": conditions}
+        else:
+            return {"java.referenced": java_referenced}
+
+    def _map_complexity_to_effort(self, complexity: str) -> int:
+        """
+        Map migration complexity to effort score (1-10).
+
+        Args:
+            complexity: Complexity level (TRIVIAL, LOW, MEDIUM, HIGH, EXPERT)
+
+        Returns:
+            Effort score (1-10)
+        """
+        complexity = complexity.upper()
+
+        mapping = {
+            'TRIVIAL': 1,
+            'LOW': 3,
+            'MEDIUM': 5,
+            'HIGH': 7,
+            'EXPERT': 10
+        }
+
+        return mapping.get(complexity, 5)
+
+    def _determine_category(self, pattern: MigrationPattern) -> Category:
+        """
+        Determine rule category based on complexity and pattern info.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            Category enum value
+        """
+        complexity = pattern.complexity.upper()
+
+        # High complexity changes are usually mandatory (require action)
+        if complexity in ['HIGH', 'EXPERT']:
+            return Category.MANDATORY
+
+        # Trivial changes are usually mandatory (easy wins)
+        if complexity == 'TRIVIAL':
+            return Category.MANDATORY
+
+        # Everything else is potential (needs evaluation)
+        return Category.POTENTIAL
+
+    def _build_labels(self) -> List[str]:
+        """
+        Build labels for rule.
+
+        Returns:
+            List of labels
+        """
+        labels = []
+
+        if self.source_framework:
+            labels.append(f"konveyor.io/source={self.source_framework}")
+
+        if self.target_framework:
+            labels.append(f"konveyor.io/target={self.target_framework}")
+
+        return labels
+
+    def _build_message(self, pattern: MigrationPattern) -> str:
+        """
+        Build migration guidance message.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            Message text
+        """
+        message = f"{pattern.rationale}\n\n"
+        message += f"Replace `{pattern.source_pattern}` with `{pattern.target_pattern}`."
+
+        if pattern.example_before and pattern.example_after:
+            message += f"\n\nBefore:\n```\n{pattern.example_before}\n```\n\n"
+            message += f"After:\n```\n{pattern.example_after}\n```"
+
+        return message
+
+    def _build_links(self, pattern: MigrationPattern) -> Optional[List[Link]]:
+        """
+        Build documentation links.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            List of Link objects or None
+        """
+        if not pattern.documentation_url:
+            return None
+
+        return [Link(
+            url=pattern.documentation_url,
+            title=f"{self.target_framework or 'Migration'} Documentation"
+        )]

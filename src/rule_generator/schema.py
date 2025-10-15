@@ -98,7 +98,7 @@ class MigrationPattern(BaseModel):
     """
     # Core pattern info
     source_pattern: str = Field(..., description="What to look for (e.g., '@Stateless')")
-    target_pattern: str = Field(..., description="What to replace with (e.g., '@ApplicationScoped')")
+    target_pattern: Optional[str] = Field(None, description="What to replace with (e.g., '@ApplicationScoped'). May be null for removals.")
     rationale: str = Field(..., description="Why this change is needed")
 
     # For generating 'when' conditions

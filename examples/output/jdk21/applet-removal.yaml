@@ -1,159 +1,177 @@
-- ruleID: jdk-21-applet-api-removal-00001
-  description: java.applet.Applet usage detected
-  effort: 7
-  category: mandatory
-  labels:
-  - konveyor.io/source=openjdk17
-  - konveyor.io/target=openjdk21+
-  when:
-    or:
-    - java.referenced:
-        pattern: java.applet.Applet
-        location: IMPORT
-    - java.referenced:
-        pattern: java.applet.Applet
-        location: TYPE
-    - java.referenced:
-        pattern: java.applet.Applet
-        location: INHERITANCE
-    - java.referenced:
-        pattern: java.applet.Applet
-        location: CONSTRUCTOR_CALL
-  message: 'The Applet API has been removed in JDK 21 (JEP 504). Applets are no longer
-    supported by modern browsers. Consider migrating to:
-
-    - Java Web Start (if still supported in your environment)
-
-    - Modern web technologies (HTML5, JavaScript)
-
-    - Desktop applications using JavaFX or Swing'
-  links:
-  - url: https://openjdk.org/jeps/504
-    title: JDK 21 Applet API Removal
-  customVariables: []
-- ruleID: jdk-21-applet-api-removal-00002
-  description: java.applet.AppletContext usage detected
-  effort: 7
-  category: mandatory
-  labels:
-  - konveyor.io/source=openjdk17
-  - konveyor.io/target=openjdk21+
-  when:
-    or:
-    - java.referenced:
-        pattern: java.applet.AppletContext
-        location: IMPORT
-    - java.referenced:
-        pattern: java.applet.AppletContext
-        location: TYPE
-    - java.referenced:
-        pattern: java.applet.AppletContext
-        location: INHERITANCE
-  message: The AppletContext interface has been removed in JDK 21 (JEP 504). This
-    interface was part of the deprecated Applet API. Migrate to modern deployment
-    technologies.
-  links:
-  - url: https://openjdk.org/jeps/504
-    title: JDK 21 Applet API Removal
-  customVariables: []
-- ruleID: jdk-21-applet-api-removal-00003
-  description: java.applet.AppletStub usage detected
-  effort: 7
-  category: mandatory
-  labels:
-  - konveyor.io/source=openjdk17
-  - konveyor.io/target=openjdk21+
-  when:
-    or:
-    - java.referenced:
-        pattern: java.applet.AppletStub
-        location: IMPORT
-    - java.referenced:
-        pattern: java.applet.AppletStub
-        location: TYPE
-    - java.referenced:
-        pattern: java.applet.AppletStub
-        location: INHERITANCE
-  message: The AppletStub interface has been removed in JDK 21 (JEP 504). This interface
-    was part of the deprecated Applet API. Migrate to modern deployment technologies.
-  links:
-  - url: https://openjdk.org/jeps/504
-    title: JDK 21 Applet API Removal
-  customVariables: []
-- ruleID: jdk-21-applet-api-removal-00004
-  description: java.applet.AudioClip usage detected
+- ruleID: openjdk17-to-openjdk21-00001
+  description: java.applet.Applet should be replaced with Use AWT alternatives
   effort: 5
-  category: mandatory
+  category: potential
   labels:
   - konveyor.io/source=openjdk17
-  - konveyor.io/target=openjdk21+
+  - konveyor.io/target=openjdk21
   when:
-    or:
-    - java.referenced:
-        pattern: java.applet.AudioClip
-        location: IMPORT
-    - java.referenced:
-        pattern: java.applet.AudioClip
-        location: TYPE
-    - java.referenced:
-        pattern: java.applet.AudioClip
-        location: INHERITANCE
-  message: The AudioClip interface has been removed in JDK 21 (JEP 504). For audio
-    playback, use javax.sound.sampled.Clip instead.
+    java.referenced:
+      pattern: java.applet.Applet
+      location: TYPE
+  message: 'The Applet API is being removed as it''s obsolete with no browser support
+
+
+    Replace `java.applet.Applet` with `Use AWT alternatives`.'
   links:
   - url: https://openjdk.org/jeps/504
-    title: JDK 21 Applet API Removal
+    title: openjdk21 Documentation
   customVariables: []
-- ruleID: jdk-21-applet-api-removal-00005
-  description: javax.swing.JApplet usage detected
+- ruleID: openjdk17-to-openjdk21-00002
+  description: java.applet.AppletContext should be replaced with Use AWT alternatives
   effort: 5
-  category: mandatory
+  category: potential
   labels:
   - konveyor.io/source=openjdk17
-  - konveyor.io/target=openjdk21+
+  - konveyor.io/target=openjdk21
   when:
-    or:
-    - java.referenced:
-        pattern: javax.swing.JApplet
-        location: IMPORT
-    - java.referenced:
-        pattern: javax.swing.JApplet
-        location: TYPE
-    - java.referenced:
-        pattern: javax.swing.JApplet
-        location: INHERITANCE
-    - java.referenced:
-        pattern: javax.swing.JApplet
-        location: CONSTRUCTOR_CALL
-  message: "JApplet has been removed in JDK 21 (JEP 504). For Swing applications,\
-    \ migrate to JFrame or JPanel. Example:\n  Before: public class MyApplet extends\
-    \ JApplet\n  After:  public class MyApp extends JFrame"
+    java.referenced:
+      pattern: java.applet.AppletContext
+      location: TYPE
+  message: 'The Applet API is being removed as it''s obsolete with no browser support
+
+
+    Replace `java.applet.AppletContext` with `Use AWT alternatives`.'
   links:
   - url: https://openjdk.org/jeps/504
-    title: JDK 21 Applet API Removal
+    title: openjdk21 Documentation
   customVariables: []
-- ruleID: jdk-21-applet-api-removal-00006
-  description: java.beans.AppletInitializer usage detected
-  effort: 7
-  category: mandatory
+- ruleID: openjdk17-to-openjdk21-00003
+  description: java.applet.AppletStub should be replaced with Use AWT alternatives
+  effort: 5
+  category: potential
   labels:
   - konveyor.io/source=openjdk17
-  - konveyor.io/target=openjdk21+
+  - konveyor.io/target=openjdk21
   when:
-    or:
-    - java.referenced:
-        pattern: java.beans.AppletInitializer
-        location: IMPORT
-    - java.referenced:
-        pattern: java.beans.AppletInitializer
-        location: TYPE
-    - java.referenced:
-        pattern: java.beans.AppletInitializer
-        location: INHERITANCE
-  message: The AppletInitializer interface has been removed in JDK 21 (JEP 504). This
-    interface was part of the deprecated Applet API. Migrate to modern deployment
-    technologies.
+    java.referenced:
+      pattern: java.applet.AppletStub
+      location: TYPE
+  message: 'The Applet API is being removed as it''s obsolete with no browser support
+
+
+    Replace `java.applet.AppletStub` with `Use AWT alternatives`.'
   links:
   - url: https://openjdk.org/jeps/504
-    title: JDK 21 Applet API Removal
+    title: openjdk21 Documentation
+  customVariables: []
+- ruleID: openjdk17-to-openjdk21-00004
+  description: java.applet.AudioClip should be replaced with Use javax.sound alternatives
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21
+  when:
+    java.referenced:
+      pattern: java.applet.AudioClip
+      location: TYPE
+  message: 'The Applet API is being removed as it''s obsolete with no browser support
+
+
+    Replace `java.applet.AudioClip` with `Use javax.sound alternatives`.'
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: openjdk21 Documentation
+  customVariables: []
+- ruleID: openjdk17-to-openjdk21-00005
+  description: java.beans.AppletInitializer should be replaced with Use AWT alternatives
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21
+  when:
+    java.referenced:
+      pattern: java.beans.AppletInitializer
+      location: TYPE
+  message: 'The Applet API is being removed as it''s obsolete with no browser support
+
+
+    Replace `java.beans.AppletInitializer` with `Use AWT alternatives`.'
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: openjdk21 Documentation
+  customVariables: []
+- ruleID: openjdk17-to-openjdk21-00006
+  description: javax.swing.JApplet should be replaced with Use JFrame or JPanel alternatives
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21
+  when:
+    java.referenced:
+      pattern: javax.swing.JApplet
+      location: TYPE
+  message: 'The Applet API is being removed as it''s obsolete with no browser support
+
+
+    Replace `javax.swing.JApplet` with `Use JFrame or JPanel alternatives`.'
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: openjdk21 Documentation
+  customVariables: []
+- ruleID: openjdk17-to-openjdk21-00007
+  description: URL.getContent() cast to AudioClip should be replaced with Use javax.sound
+    alternatives
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21
+  when:
+    java.referenced:
+      pattern: java.net.URL
+      location: METHOD_CALL
+  message: 'URL.getContent() will no longer return AudioClip instances since the AudioClip
+    interface is being removed
+
+
+    Replace `URL.getContent() cast to AudioClip` with `Use javax.sound alternatives`.'
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: openjdk21 Documentation
+  customVariables: []
+- ruleID: openjdk17-to-openjdk21-00008
+  description: URLConnection.getContent() cast to AudioClip should be replaced with
+    Use javax.sound alternatives
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21
+  when:
+    java.referenced:
+      pattern: java.net.URLConnection
+      location: METHOD_CALL
+  message: 'URLConnection.getContent() will no longer return AudioClip instances since
+    the AudioClip interface is being removed
+
+
+    Replace `URLConnection.getContent() cast to AudioClip` with `Use javax.sound alternatives`.'
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: openjdk21 Documentation
+  customVariables: []
+- ruleID: openjdk17-to-openjdk21-00009
+  description: import java.applet.* should be replaced with Remove import and use
+    alternatives
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21
+  when:
+    java.referenced:
+      pattern: java.applet
+      location: IMPORT
+  message: 'The entire java.applet package is being removed as it''s obsolete with
+    no browser support
+
+
+    Replace `import java.applet.*` with `Remove import and use alternatives`.'
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: openjdk21 Documentation
   customVariables: []

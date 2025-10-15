@@ -211,6 +211,13 @@ class AnalyzerRuleGenerator:
         if complexity == 'TRIVIAL':
             return Category.MANDATORY
 
+        # API removals should be mandatory regardless of complexity
+        # Look for keywords in rationale that indicate removal/deprecation
+        rationale_lower = pattern.rationale.lower()
+        removal_keywords = ['removed', 'removal', 'deprecated for removal', 'no longer available', 'deleted']
+        if any(keyword in rationale_lower for keyword in removal_keywords):
+            return Category.MANDATORY
+
         # Everything else is potential (needs evaluation)
         return Category.POTENTIAL
 

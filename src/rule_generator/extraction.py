@@ -99,11 +99,11 @@ class MigrationPatternExtractor:
 5. **Alternative FQNs**: List any alternative fully qualified names (e.g., ["jakarta.ejb.Stateless"] for javax→jakarta migration)
 6. **Category**: One of: dependency, annotation, api, configuration, other
 7. **Complexity**: One of:
-   - TRIVIAL: Mechanical find-replace (e.g., package rename)
-   - LOW: Straightforward API equivalents
-   - MEDIUM: Requires understanding context
-   - HIGH: Architectural changes needed
-   - EXPERT: Likely needs human review
+   - TRIVIAL: Mechanical find-replace (e.g., package rename, simple import changes)
+   - LOW: Straightforward API equivalents with 1:1 replacement
+   - MEDIUM: Requires understanding context or minor refactoring
+   - HIGH: Removed/deprecated APIs requiring architectural changes
+   - EXPERT: Complex architectural changes needing human review
 8. **Rationale**: Brief explanation of why this change is needed
 9. **Documentation URL**: Link to relevant documentation (if available in guide)
 10. **Example Before/After**: Code examples if present

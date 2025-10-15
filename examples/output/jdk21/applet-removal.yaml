@@ -1,0 +1,159 @@
+- ruleID: jdk-21-applet-api-removal-00001
+  description: java.applet.Applet usage detected
+  effort: 7
+  category: mandatory
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21+
+  when:
+    or:
+    - java.referenced:
+        pattern: java.applet.Applet
+        location: IMPORT
+    - java.referenced:
+        pattern: java.applet.Applet
+        location: TYPE
+    - java.referenced:
+        pattern: java.applet.Applet
+        location: INHERITANCE
+    - java.referenced:
+        pattern: java.applet.Applet
+        location: CONSTRUCTOR_CALL
+  message: 'The Applet API has been removed in JDK 21 (JEP 504). Applets are no longer
+    supported by modern browsers. Consider migrating to:
+
+    - Java Web Start (if still supported in your environment)
+
+    - Modern web technologies (HTML5, JavaScript)
+
+    - Desktop applications using JavaFX or Swing'
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: JDK 21 Applet API Removal
+  customVariables: []
+- ruleID: jdk-21-applet-api-removal-00002
+  description: java.applet.AppletContext usage detected
+  effort: 7
+  category: mandatory
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21+
+  when:
+    or:
+    - java.referenced:
+        pattern: java.applet.AppletContext
+        location: IMPORT
+    - java.referenced:
+        pattern: java.applet.AppletContext
+        location: TYPE
+    - java.referenced:
+        pattern: java.applet.AppletContext
+        location: INHERITANCE
+  message: The AppletContext interface has been removed in JDK 21 (JEP 504). This
+    interface was part of the deprecated Applet API. Migrate to modern deployment
+    technologies.
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: JDK 21 Applet API Removal
+  customVariables: []
+- ruleID: jdk-21-applet-api-removal-00003
+  description: java.applet.AppletStub usage detected
+  effort: 7
+  category: mandatory
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21+
+  when:
+    or:
+    - java.referenced:
+        pattern: java.applet.AppletStub
+        location: IMPORT
+    - java.referenced:
+        pattern: java.applet.AppletStub
+        location: TYPE
+    - java.referenced:
+        pattern: java.applet.AppletStub
+        location: INHERITANCE
+  message: The AppletStub interface has been removed in JDK 21 (JEP 504). This interface
+    was part of the deprecated Applet API. Migrate to modern deployment technologies.
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: JDK 21 Applet API Removal
+  customVariables: []
+- ruleID: jdk-21-applet-api-removal-00004
+  description: java.applet.AudioClip usage detected
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21+
+  when:
+    or:
+    - java.referenced:
+        pattern: java.applet.AudioClip
+        location: IMPORT
+    - java.referenced:
+        pattern: java.applet.AudioClip
+        location: TYPE
+    - java.referenced:
+        pattern: java.applet.AudioClip
+        location: INHERITANCE
+  message: The AudioClip interface has been removed in JDK 21 (JEP 504). For audio
+    playback, use javax.sound.sampled.Clip instead.
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: JDK 21 Applet API Removal
+  customVariables: []
+- ruleID: jdk-21-applet-api-removal-00005
+  description: javax.swing.JApplet usage detected
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21+
+  when:
+    or:
+    - java.referenced:
+        pattern: javax.swing.JApplet
+        location: IMPORT
+    - java.referenced:
+        pattern: javax.swing.JApplet
+        location: TYPE
+    - java.referenced:
+        pattern: javax.swing.JApplet
+        location: INHERITANCE
+    - java.referenced:
+        pattern: javax.swing.JApplet
+        location: CONSTRUCTOR_CALL
+  message: "JApplet has been removed in JDK 21 (JEP 504). For Swing applications,\
+    \ migrate to JFrame or JPanel. Example:\n  Before: public class MyApplet extends\
+    \ JApplet\n  After:  public class MyApp extends JFrame"
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: JDK 21 Applet API Removal
+  customVariables: []
+- ruleID: jdk-21-applet-api-removal-00006
+  description: java.beans.AppletInitializer usage detected
+  effort: 7
+  category: mandatory
+  labels:
+  - konveyor.io/source=openjdk17
+  - konveyor.io/target=openjdk21+
+  when:
+    or:
+    - java.referenced:
+        pattern: java.beans.AppletInitializer
+        location: IMPORT
+    - java.referenced:
+        pattern: java.beans.AppletInitializer
+        location: TYPE
+    - java.referenced:
+        pattern: java.beans.AppletInitializer
+        location: INHERITANCE
+  message: The AppletInitializer interface has been removed in JDK 21 (JEP 504). This
+    interface was part of the deprecated Applet API. Migrate to modern deployment
+    technologies.
+  links:
+  - url: https://openjdk.org/jeps/504
+    title: JDK 21 Applet API Removal
+  customVariables: []

@@ -435,11 +435,94 @@ podman machine start
 
 ## CI/CD Integration
 
-The Konveyor rulesets repository runs automated tests on all PRs:
+The Konveyor rulesets repository runs automated tests on all PRs using GitHub Actions.
 
-1. **Linting** - YAML syntax validation
-2. **Test execution** - All .test.yaml files run with Kantra
-3. **Rule validation** - Schema validation for rule structure
+### What CI Tests
+
+1. **YAML Linting** - Validates YAML syntax
+   - All `.yaml` files must be valid YAML
+   - Proper indentation (2 spaces)
+   - No syntax errors
+
+2. **Rule Schema Validation** - Validates rule structure
+   - Required fields: `ruleID`, `description`, `effort`, `when`, `message`
+   - Valid categories: `mandatory`, `potential`, `optional`
+   - Effort in range 1-10
+
+3. **Test Execution** - Runs all `.test.yaml` files with Kantra
+   - Each rule must have at least one test
+   - Tests must pass (expected incidents found)
+   - Test data must compile/be valid
+
+### Ensuring CI Success
+
+Our generated files already meet CI requirements:
+
+**✅ Generated Rules (`migration-rules.yaml`):**
+- Valid YAML format
+- All required fields present
+- Proper schema structure
+
+**✅ Generated Tests (`migration-rules.test.yaml`):**
+- Test case for every rule
+- Proper `rulesPath` reference
+- Valid `provider` and `dataPath` configuration
+
+**✅ Generated Test Data:**
+- Compil able code (when using `generate_test_data.py`)
+- Valid build files (pom.xml, package.json, etc.)
+- Contains violations for each rule
+
+### Pre-Flight CI Check
+
+Before submitting your PR, run these local checks to ensure CI will pass:
+
+```bash
+# 1. Validate YAML syntax
+yamllint migration-rules.yaml
+# or
+python -c "import yaml; yaml.safe_load(open('migration-rules.yaml'))"
+
+# 2. Run tests with Kantra (this is what CI does)
+kantra test tests/migration-rules.test.yaml
+
+# 3. Verify test data compiles
+cd tests/data/mongodb
+mvn compile  # for Java
+# npm install && npm run build  # for TypeScript
+# go build  # for Go
+```
+
+### Common CI Failures
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| YAML syntax error | Invalid YAML | Check indentation, quotes |
+| Test file not found | Wrong `rulesPath` | Ensure relative path is correct |
+| No incidents found | Test data doesn't trigger rule | Add violations to test code |
+| Test data won't compile | Missing dependencies | Update pom.xml/package.json |
+| Schema validation failed | Missing required field | Add all required rule fields |
+
+### GitHub Actions Workflow
+
+The CI runs approximately:
+
+```yaml
+name: Test Rules
+on: [pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Kantra
+        run: |
+          # Download and install Kantra
+      - name: Run Tests
+        run: |
+          # For each .test.yaml file:
+          kantra test <test-file>.test.yaml
+```
 
 Your PR must pass all checks before merging.
 

@@ -173,10 +173,10 @@ export GOOGLE_API_KEY="your-key"
 
 ## Submitting Rules to Konveyor
 
-After generating rules, you can prepare them for submission to the official Konveyor rulesets repository:
+After generating rules, you can prepare them for submission to the official Konveyor rulesets repository using our automated workflow:
 
+### Step 1: Prepare Submission Package
 ```bash
-# Prepare submission package with tests
 python scripts/prepare_submission.py \
   --rules examples/output/spring-boot-4.0/migration-rules.yaml \
   --source spring-boot-3.5 \
@@ -186,11 +186,37 @@ python scripts/prepare_submission.py \
   --data-dir-name mongodb
 ```
 
-This creates a complete submission package with:
+This creates:
 - Rule YAML file
 - Test template with test cases for each rule
 - Test data directory structure
 - README with submission instructions
+
+### Step 2: Generate Test Data with AI
+```bash
+python scripts/generate_test_data.py \
+  --rules examples/output/spring-boot-4.0/migration-rules.yaml \
+  --output submission/spring-boot-4.0/tests/data/mongodb \
+  --source spring-boot-3.5 \
+  --target spring-boot-4.0 \
+  --guide-url "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide" \
+  --provider anthropic \
+  --model claude-3-7-sonnet-20250219
+```
+
+This generates:
+- Complete `pom.xml` with correct dependencies
+- Java application code with violations for each rule
+- Comments mapping code to rule IDs
+
+### Step 3: Test and Submit
+```bash
+# Test locally with Kantra
+kantra test submission/spring-boot-4.0/tests/*.test.yaml
+
+# Copy to Konveyor rulesets fork and submit PR
+# See detailed guide for complete instructions
+```
 
 See [Konveyor Submission Guide](konveyor-submission-guide.md) for complete details on:
 - Creating test applications

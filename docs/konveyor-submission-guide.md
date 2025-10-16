@@ -105,6 +105,33 @@ python scripts/generate_rules.py \
 
 ### Phase 2: Prepare Test Data
 
+You can generate test data either **automatically with AI** or manually.
+
+#### Option A: Generate Test Data with AI (Recommended)
+
+Use the AI-powered test data generator to automatically create test code:
+
+```bash
+python scripts/generate_test_data.py \
+  --rules examples/output/spring-boot-4.0/migration-rules.yaml \
+  --output submission/spring-boot-4.0/tests/data/mongodb \
+  --source spring-boot-3.5 \
+  --target spring-boot-4.0 \
+  --guide-url "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide" \
+  --provider anthropic \
+  --model claude-3-7-sonnet-20250219
+```
+
+This generates:
+- ✅ Complete `pom.xml` with correct dependencies
+- ✅ Java application code with violations for each rule
+- ✅ Comments mapping code to rule IDs
+- ✅ Realistic usage patterns for static analysis
+
+**Review the generated code** to ensure it properly triggers the rules.
+
+#### Option B: Create Test Data Manually
+
 Create a test application that contains code violations the rules should detect.
 
 **Directory Structure:**

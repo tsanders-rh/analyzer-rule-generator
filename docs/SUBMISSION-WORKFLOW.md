@@ -28,10 +28,24 @@ python scripts/prepare_submission.py \
   --data-dir-name mongodb
 ```
 
-### 3. Complete Test Data
-Edit the generated test files:
-- `submission/spring-boot-4.0/tests/data/mongodb/pom.xml` - Add dependencies
-- `submission/spring-boot-4.0/tests/data/mongodb/src/main/java/com/example/Application.java` - Add code with violations
+### 3. Generate Test Data with AI
+```bash
+python scripts/generate_test_data.py \
+  --rules rules/spring-boot-4.0.yaml \
+  --output submission/spring-boot-4.0/tests/data/mongodb \
+  --source spring-boot-3.5 \
+  --target spring-boot-4.0 \
+  --guide-url "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide" \
+  --provider anthropic \
+  --model claude-3-7-sonnet-20250219
+```
+
+This automatically generates:
+- ✅ Complete `pom.xml` with dependencies
+- ✅ Java code with violations for each rule
+- ✅ Comments mapping code to rule IDs
+
+*Alternatively, you can manually create test data - see the full guide for details.*
 
 ### 4. Test Locally
 ```bash

@@ -88,6 +88,24 @@ python scripts/generate_rules.py \
   --provider google
 ```
 
+## Viewing Generated Rules
+
+Generate an interactive HTML viewer to browse your rules:
+
+```bash
+python scripts/generate_rule_viewer.py \
+  --rules examples/output/spring-boot-4.0/migration-rules.yaml \
+  --output viewer.html \
+  --open
+```
+
+This creates a searchable, filterable web interface with:
+- ✅ Expand/collapse rule details
+- ✅ Search by ID, description, or pattern
+- ✅ Filter by category and effort level
+- ✅ Statistics and summaries
+- ✅ Syntax highlighting for code
+
 ## Output
 
 The tool generates a YAML file with Konveyor analyzer rules:

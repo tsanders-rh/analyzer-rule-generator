@@ -16,6 +16,48 @@ from .schema import MigrationPattern, LocationType
 from .llm import LLMProvider
 
 
+def detect_language_from_frameworks(source: str, target: str) -> str:
+    """
+    Detect programming language based on framework names.
+
+    Args:
+        source: Source framework name
+        target: Target framework name
+
+    Returns:
+        Language identifier: 'java', 'javascript', 'typescript', or 'unknown'
+    """
+    # Combine source and target for analysis
+    frameworks = f"{source} {target}".lower()
+
+    # JavaScript/TypeScript frameworks
+    js_ts_keywords = [
+        'react', 'angular', 'vue', 'node', 'npm', 'typescript', 'javascript',
+        'patternfly', 'next', 'nuxt', 'svelte', 'ember', 'webpack', 'vite',
+        'express', 'nestjs', 'gatsby', 'redux'
+    ]
+
+    # Java frameworks
+    java_keywords = [
+        'spring', 'jakarta', 'javax', 'jboss', 'wildfly', 'tomcat',
+        'hibernate', 'jpa', 'ejb', 'servlet', 'jdk', 'openjdk',
+        'quarkus', 'micronaut', 'maven', 'gradle'
+    ]
+
+    # Check for JS/TS patterns
+    if any(keyword in frameworks for keyword in js_ts_keywords):
+        # If TypeScript is explicitly mentioned, return typescript
+        if 'typescript' in frameworks:
+            return 'typescript'
+        return 'javascript'
+
+    # Check for Java patterns
+    if any(keyword in frameworks for keyword in java_keywords):
+        return 'java'
+
+    return 'unknown'
+
+
 class MigrationPatternExtractor:
     """Extract migration patterns from guide content using LLM."""
 
@@ -78,13 +120,54 @@ class MigrationPatternExtractor:
     ) -> str:
         """Build LLM prompt for pattern extraction."""
 
+        # Detect language for language-specific instructions
+        language = "unknown"
+        if source_framework and target_framework:
+            language = detect_language_from_frameworks(source_framework, target_framework)
+
         frameworks = ""
         if source_framework and target_framework:
-            frameworks = f"Migration: {source_framework} → {target_framework}\n\n"
+            frameworks = f"Migration: {source_framework} → {target_framework}\n"
+            frameworks += f"Detected Language: {language}\n\n"
+
+        # Language-specific instructions
+        lang_instructions = ""
+        if language in ["javascript", "typescript"]:
+            lang_instructions = """
+**IMPORTANT - JavaScript/TypeScript Detection Instructions:**
+For JavaScript/TypeScript patterns, use these specific fields:
+- **provider_type**: Set to "builtin"
+- **source_fqn**: Use a regex pattern to match the code (e.g., "import\\s*\\{\\s*Chip\\s*\\}\\s*from\\s*['\"]@patternfly/react-core['\"]")
+- **file_pattern**: Specify file extensions (e.g., "*.{ts,tsx,js,jsx}")
+- **location_type**: Can be null for builtin provider
+
+Example for React component import:
+```json
+{
+  "source_pattern": "import { Chip } from '@patternfly/react-core'",
+  "target_pattern": "import { Label } from '@patternfly/react-core'",
+  "source_fqn": "import\\\\s*\\\\{\\\\s*Chip\\\\s*\\\\}\\\\s*from\\\\s*['\\\"]@patternfly/react-core['\\\"]",
+  "provider_type": "builtin",
+  "file_pattern": "*.{ts,tsx,js,jsx}",
+  "location_type": null
+}
+```
+
+"""
+        else:
+            lang_instructions = """
+**Java Detection Instructions:**
+For Java patterns, use these fields:
+- **provider_type**: Set to "java" (or leave null for auto-detection)
+- **source_fqn**: Fully qualified class name (e.g., "javax.ejb.Stateless")
+- **location_type**: One of ANNOTATION, IMPORT, METHOD_CALL, TYPE, INHERITANCE, PACKAGE
+- **file_pattern**: Can be null
+
+"""
 
         prompt = f"""Analyze this migration guide and extract specific code migration patterns for static analysis rule generation.
 
-{frameworks}For each pattern you find, identify:
+{frameworks}{lang_instructions}For each pattern you find, identify:
 
 1. **Source Pattern**: The old code/annotation/configuration (e.g., "@Stateless")
 2. **Target Pattern**: The new replacement (e.g., "@ApplicationScoped")
@@ -134,6 +217,8 @@ Return your findings as a JSON array. Each pattern should be an object with thes
   "complexity": "TRIVIAL|LOW|MEDIUM|HIGH|EXPERT",
   "category": "string",
   "concern": "string",
+  "provider_type": "java|builtin or null",
+  "file_pattern": "string or null",
   "rationale": "string",
   "example_before": "string or null",
   "example_after": "string or null",
@@ -191,6 +276,8 @@ Return ONLY the JSON array, no additional commentary."""
                     complexity=data["complexity"],
                     category=data["category"],
                     concern=data.get("concern", "general"),
+                    provider_type=data.get("provider_type"),
+                    file_pattern=data.get("file_pattern"),
                     rationale=data["rationale"],
                     example_before=data.get("example_before"),
                     example_after=data.get("example_after"),

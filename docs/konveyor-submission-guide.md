@@ -8,7 +8,9 @@ This guide documents the process for submitting AI-generated analyzer rules to t
 
 ### 1. Install Kantra
 
-Kantra is Konveyor's CLI tool for analyzing applications and testing rules.
+Kantra is Konveyor's CLI tool for analyzing applications and testing rules. You can use either the native binary or run it in a container.
+
+#### Option A: Native Binary (Recommended)
 
 **Installation:**
 ```bash
@@ -23,12 +25,48 @@ sudo mv kantra /usr/local/bin/
 chmod +x /usr/local/bin/kantra
 
 # Verify installation
-kantra --version
+kantra version
 ```
 
 **Requirements:**
-- Podman 4+ or Docker 24+
-- For Mac/Windows: Start a podman machine first
+- Podman 4+ or Docker 24+ (Kantra uses containers internally to run the analyzer)
+
+```bash
+# For Mac/Windows: Start podman machine before using Kantra
+podman machine init
+podman machine start
+
+# Verify podman is running
+podman ps
+```
+
+#### Option B: Container Image
+
+Run Kantra directly from the container image without installing the binary:
+
+```bash
+# Using Podman (recommended)
+podman run -v $(pwd):/app:Z quay.io/konveyor/kantra:latest version
+
+# Using Docker
+docker run -v $(pwd):/app quay.io/konveyor/kantra:latest version
+```
+
+**When to use containers:**
+- Don't want to install the binary
+- Running in CI/CD pipelines
+- Ensuring consistent environment across team
+
+**Usage examples:**
+```bash
+# Test rules with Podman
+podman run -v $(pwd):/app:Z quay.io/konveyor/kantra:latest test /app/tests/my-rules.test.yaml
+
+# Test rules with Docker
+docker run -v $(pwd):/app quay.io/konveyor/kantra:latest test /app/tests/my-rules.test.yaml
+```
+
+**Note:** The rest of this guide uses `kantra` command for brevity. If using containers, replace `kantra` with the appropriate `podman run` or `docker run` command.
 
 ### 2. Fork and Clone Konveyor Rulesets
 

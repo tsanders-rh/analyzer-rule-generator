@@ -113,6 +113,10 @@ class MigrationPattern(BaseModel):
     category: str = Field(..., description="Rule category")
     concern: str = Field(default="general", description="Migration concern/topic for grouping (e.g., 'mongodb', 'security', 'web')")
 
+    # Provider configuration
+    provider_type: Optional[str] = Field(default=None, description="Provider type: 'java' or 'builtin' (auto-detected if not specified)")
+    file_pattern: Optional[str] = Field(default=None, description="File pattern for builtin.filecontent (e.g., '*.{ts,tsx,js,jsx}')")
+
     # Optional context
     example_before: Optional[str] = Field(None, description="Example code before migration")
     example_after: Optional[str] = Field(None, description="Example code after migration")

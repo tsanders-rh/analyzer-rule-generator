@@ -200,35 +200,53 @@ class AnalyzerRuleGenerator:
             # If no FQN, we can't create a proper when condition for static analysis
             return None
 
-        # Determine location (default to TYPE if not specified)
-        location = pattern.location_type or LocationType.TYPE
+        # Check provider type
+        provider = pattern.provider_type or "java"  # Default to java for backward compatibility
 
-        # Build java.referenced condition
-        java_referenced = {
-            "pattern": pattern.source_fqn,
-            "location": location.value
-        }
+        if provider == "builtin":
+            # Build builtin.filecontent condition
+            condition = {
+                "builtin.filecontent": {
+                    "pattern": pattern.source_fqn  # For builtin, source_fqn contains regex
+                }
+            }
 
-        # If there are alternative FQNs (e.g., javax vs jakarta), use OR condition
-        if pattern.alternative_fqns and len(pattern.alternative_fqns) > 0:
-            conditions = [
-                {"java.referenced": {
-                    "pattern": pattern.source_fqn,
-                    "location": location.value
-                }}
-            ]
+            # Add file pattern if specified
+            if pattern.file_pattern:
+                condition["builtin.filecontent"]["filePattern"] = pattern.file_pattern
 
-            for alt_fqn in pattern.alternative_fqns:
-                conditions.append({
-                    "java.referenced": {
-                        "pattern": alt_fqn,
+            return condition
+
+        else:  # Java provider
+            # Determine location (default to TYPE if not specified)
+            location = pattern.location_type or LocationType.TYPE
+
+            # Build java.referenced condition
+            java_referenced = {
+                "pattern": pattern.source_fqn,
+                "location": location.value
+            }
+
+            # If there are alternative FQNs (e.g., javax vs jakarta), use OR condition
+            if pattern.alternative_fqns and len(pattern.alternative_fqns) > 0:
+                conditions = [
+                    {"java.referenced": {
+                        "pattern": pattern.source_fqn,
                         "location": location.value
-                    }
-                })
+                    }}
+                ]
 
-            return {"or": conditions}
-        else:
-            return {"java.referenced": java_referenced}
+                for alt_fqn in pattern.alternative_fqns:
+                    conditions.append({
+                        "java.referenced": {
+                            "pattern": alt_fqn,
+                            "location": location.value
+                        }
+                    })
+
+                return {"or": conditions}
+            else:
+                return {"java.referenced": java_referenced}
 
     def _map_complexity_to_effort(self, complexity: str) -> int:
         """

@@ -98,7 +98,8 @@ class MigrationPatternExtractor:
    - PACKAGE: For package references
 5. **Alternative FQNs**: List any alternative fully qualified names (e.g., ["jakarta.ejb.Stateless"] for javax→jakarta migration)
 6. **Category**: One of: dependency, annotation, api, configuration, other
-7. **Complexity**: One of:
+7. **Concern**: The specific migration concern/topic this pattern addresses (e.g., "mongodb", "security", "web", "testing", "applet-removal"). This will be used to group related patterns into separate files. Use lowercase-with-hyphens format.
+8. **Complexity**: One of:
    - TRIVIAL: Mechanical find-replace (e.g., package rename, removing unused imports)
    - LOW: Straightforward 1:1 API replacement with minimal code changes
    - MEDIUM: API changes requiring minor refactoring or logic updates
@@ -111,9 +112,9 @@ class MigrationPatternExtractor:
    - Changing API calls with similar alternatives = MEDIUM
    - Replacing core component types (e.g., Applet → JFrame) = HIGH
    - Migrating entire frameworks or patterns = EXPERT
-8. **Rationale**: Brief explanation of why this change is needed
-9. **Documentation URL**: Link to relevant documentation (if available in guide)
-10. **Example Before/After**: Code examples if present
+9. **Rationale**: Brief explanation of why this change is needed
+10. **Documentation URL**: Link to relevant documentation (if available in guide)
+11. **Example Before/After**: Code examples if present
 
 ---
 MIGRATION GUIDE CONTENT:
@@ -132,6 +133,7 @@ Return your findings as a JSON array. Each pattern should be an object with thes
   "alternative_fqns": ["string"] or [],
   "complexity": "TRIVIAL|LOW|MEDIUM|HIGH|EXPERT",
   "category": "string",
+  "concern": "string",
   "rationale": "string",
   "example_before": "string or null",
   "example_after": "string or null",
@@ -188,6 +190,7 @@ Return ONLY the JSON array, no additional commentary."""
                     alternative_fqns=data.get("alternative_fqns", []),
                     complexity=data["complexity"],
                     category=data["category"],
+                    concern=data.get("concern", "general"),
                     rationale=data["rationale"],
                     example_before=data.get("example_before"),
                     example_after=data.get("example_after"),

@@ -7,8 +7,10 @@ Generates analyzer rules with:
 - Effort scoring
 - Messages with migration guidance
 - Links to documentation
+- Multiple file output grouped by concern
 """
 from typing import List, Optional, Dict, Any
+from collections import defaultdict
 
 from .schema import AnalyzerRule, MigrationPattern, Category, Link, LocationType
 
@@ -19,7 +21,8 @@ class AnalyzerRuleGenerator:
     def __init__(
         self,
         source_framework: Optional[str] = None,
-        target_framework: Optional[str] = None
+        target_framework: Optional[str] = None,
+        rule_file_name: Optional[str] = None
     ):
         """
         Initialize rule generator.
@@ -27,9 +30,11 @@ class AnalyzerRuleGenerator:
         Args:
             source_framework: Source framework name (e.g., "spring-boot")
             target_framework: Target framework name (e.g., "quarkus")
+            rule_file_name: Base name of the rule file (without .yaml extension)
         """
         self.source_framework = source_framework
         self.target_framework = target_framework
+        self.rule_file_name = rule_file_name
         self._rule_counter = 0
 
     def generate_rules(self, patterns: List[MigrationPattern]) -> List[AnalyzerRule]:
@@ -49,6 +54,39 @@ class AnalyzerRuleGenerator:
                 rules.append(rule)
 
         return rules
+
+    def generate_rules_by_concern(self, patterns: List[MigrationPattern]) -> Dict[str, List[AnalyzerRule]]:
+        """
+        Generate analyzer rules grouped by concern.
+
+        Args:
+            patterns: List of migration patterns
+
+        Returns:
+            Dictionary mapping concern names to lists of AnalyzerRule objects
+        """
+        # Group patterns by concern
+        patterns_by_concern = defaultdict(list)
+        for pattern in patterns:
+            concern = pattern.concern or "general"
+            patterns_by_concern[concern].append(pattern)
+
+        # Generate rules for each concern
+        rules_by_concern = {}
+        for concern, concern_patterns in patterns_by_concern.items():
+            # Reset rule counter for each concern
+            self._rule_counter = 0
+
+            rules = []
+            for pattern in concern_patterns:
+                rule = self._pattern_to_rule(pattern)
+                if rule:
+                    rules.append(rule)
+
+            if rules:
+                rules_by_concern[concern] = rules
+
+        return rules_by_concern
 
     def _pattern_to_rule(self, pattern: MigrationPattern) -> Optional[AnalyzerRule]:
         """
@@ -112,22 +150,39 @@ class AnalyzerRuleGenerator:
 
         return rule
 
-    def _create_rule_id(self) -> str:
+    def _create_rule_id(self, concern: Optional[str] = None) -> str:
         """
-        Generate unique rule ID.
+        Generate unique rule ID following Konveyor convention.
+
+        Convention from https://github.com/konveyor/rulesets/blob/main/CONTRIBUTING.md:
+        - Must contain the rule file name
+        - Use 5-digit numbers
+        - Increment by 10 each time
+
+        Args:
+            concern: Optional concern/topic for multi-file output (will be used in rule ID)
 
         Returns:
-            Rule ID (e.g., "spring-boot-to-quarkus-00001")
+            Rule ID (e.g., "patternfly-v5-to-patternfly-v6-00000")
         """
+        # Increment counter by 10 following Konveyor convention
+        rule_number = self._rule_counter * 10
         self._rule_counter += 1
 
-        if self.source_framework and self.target_framework:
+        if self.rule_file_name:
+            prefix = self.rule_file_name
+        elif self.source_framework and self.target_framework:
             prefix = f"{self.source_framework}-to-{self.target_framework}"
         else:
             prefix = "migration"
 
-        # Format: prefix-00001
-        rule_id = f"{prefix}-{self._rule_counter:05d}"
+        # Add concern suffix if provided (for multi-file output)
+        # Note: When using multi-file output, the concern is already in the filename,
+        # so we don't include it in the rule ID to avoid duplication
+        # The rule ID will match the filename without concern
+
+        # Format: prefix-00000 (5 digits, incrementing by 10)
+        rule_id = f"{prefix}-{rule_number:05d}"
 
         return rule_id
 

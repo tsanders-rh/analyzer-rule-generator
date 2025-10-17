@@ -111,6 +111,7 @@ class MigrationPattern(BaseModel):
     # Metadata
     complexity: str = Field(..., description="Migration complexity (trivial, low, medium, high, expert)")
     category: str = Field(..., description="Rule category")
+    concern: str = Field(default="general", description="Migration concern/topic for grouping (e.g., 'mongodb', 'security', 'web')")
 
     # Optional context
     example_before: Optional[str] = Field(None, description="Example code before migration")

@@ -2,6 +2,8 @@
 
 Generate Konveyor analyzer rules from migration guides in 3 easy steps.
 
+https://raw.githubusercontent.com/konveyor/rulesets/main/default/generated/quarkus/218-jms-to-reactive-quarkus.windup.yaml
+
 ## Prerequisites
 
 ```bash
@@ -43,7 +45,26 @@ python scripts/generate_rules.py \
 2. Uses Claude to extract migration patterns
 3. Generates Konveyor rules automatically
 
-## Example 2: Generate from Local File
+## Example 2: TypeScript/React Migration (PatternFly)
+
+The tool automatically detects non-Java migrations and uses the builtin provider:
+
+```bash
+python scripts/generate_rules.py \
+  --guide examples/guides/patternfly-v5-to-v6.md \
+  --source patternfly-v5 \
+  --target patternfly-v6 \
+  --output examples/output/patternfly-v6/migration-rules.yaml \
+  --provider anthropic
+```
+
+**What this generates:**
+- Builtin provider rules with regex patterns
+- File patterns for TypeScript/React files (`*.{tsx,jsx}`)
+- Detection of prop changes, import updates, CSS variable renames
+- Works for TypeScript, JavaScript, Go, Python, and more
+
+## Example 3: Generate from Local File
 
 ```bash
 python scripts/generate_rules.py \
@@ -54,7 +75,7 @@ python scripts/generate_rules.py \
   --provider openai
 ```
 
-## Example 3: Use Different LLM Providers
+## Example 4: Use Different LLM Providers
 
 **Anthropic Claude (recommended):**
 ```bash
@@ -108,7 +129,11 @@ This creates a searchable, filterable web interface with:
 
 ## Output
 
-The tool generates a YAML file with Konveyor analyzer rules:
+The tool generates a YAML file with Konveyor analyzer rules. The format depends on the detected language:
+
+### Java Provider Rules
+
+For Java migrations, rules use the `java.referenced` provider:
 
 ```yaml
 - ruleID: spring-boot-to-quarkus-00001
@@ -128,6 +153,25 @@ The tool generates a YAML file with Konveyor analyzer rules:
       title: "Quarkus REST Guide"
 ```
 
+### Builtin Provider Rules
+
+For TypeScript, JavaScript, Go, Python, and other languages, rules use the `builtin.filecontent` provider:
+
+```yaml
+- ruleID: patternfly-v5-to-patternfly-v6-00001
+  description: isDisabled should be replaced with isAriaDisabled
+  effort: 3
+  category: potential
+  labels:
+    - konveyor.io/source=patternfly-v5
+    - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: isDisabled\s*[=:]
+      filePattern: '*.{tsx,jsx,ts,js}'
+  message: "The isDisabled prop has been renamed to isAriaDisabled..."
+```
+
 ## Command Line Options
 
 | Option | Required | Description | Example |
@@ -142,28 +186,40 @@ The tool generates a YAML file with Konveyor analyzer rules:
 
 ## Tips for Best Results
 
-### 1. Choose Good Migration Guides
+### 1. Supports Multiple Languages
+The tool automatically detects the language and generates appropriate rules:
+
+- ✅ **Java**: Uses `java.referenced` provider with FQNs and location types
+- ✅ **TypeScript/React**: Uses `builtin.filecontent` with regex patterns for `.tsx/.jsx` files
+- ✅ **Go**: Detects imports and syntax, generates builtin rules for `.go` files
+- ✅ **Python**: Detects module imports, generates builtin rules for `.py` files
+- ✅ **CSS/SCSS**: Detects CSS custom properties and selectors
+
+### 2. Choose Good Migration Guides
 ✅ **Good:**
-- Official upgrade guides with code examples
+- Official upgrade guides with code examples (Spring Boot, React, PatternFly)
 - Technical documentation with API changes
 - JEPs, RFCs, or specification documents
+- Component library migration guides (PatternFly v5→v6, Material-UI, etc.)
 
 ❌ **Bad:**
 - Marketing content or blog posts
 - Guides without specific API details
 - Purely conceptual documentation
 
-### 2. Use Descriptive Framework Names
+### 3. Use Descriptive Framework Names
 ```bash
 # Good
 --source openjdk17 --target openjdk21
 --source spring-boot-2 --target spring-boot-3
+--source patternfly-v5 --target patternfly-v6
+--source react-16 --target react-18
 
 # Less helpful
 --source old --target new
 ```
 
-### 3. Review and Refine
+### 4. Review and Refine
 The AI-generated rules are a starting point. Always:
 1. Review the generated rules
 2. Test against real code

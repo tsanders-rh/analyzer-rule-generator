@@ -259,6 +259,24 @@
             font-size: 14px;
         }
 
+        .current-ruleset {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: none;
+        }
+
+        .current-ruleset.visible {
+            display: block;
+        }
+
+        .current-ruleset .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+
         .controls {
             background: white;
             padding: 20px;
@@ -599,14 +617,17 @@
             </div>
             <div class="header-content">
                 <h1>Rule Viewer</h1>
-                <div class="subtitle" id="header-subtitle">
-                    Interactive viewer for Konveyor analyzer rules
-                </div>
                 <div class="header-actions" id="header-actions" style="display: none;">
                     <button onclick="loadNewRules()">📁 Load Different Rules</button>
                 </div>
             </div>
         </header>
+
+        <div class="current-ruleset" id="current-ruleset" style="display: none;">
+            <div class="subtitle" id="header-subtitle">
+                Interactive viewer for Konveyor analyzer rules
+            </div>
+        </div>
 
         <div class="loader-section" id="loader-section">
             <h2>Load Rules</h2>
@@ -833,6 +854,7 @@
 
             // Hide loader, show controls and stats
             document.getElementById('loader-section').style.display = 'none';
+            document.getElementById('current-ruleset').classList.add('visible');
             document.getElementById('controls').classList.add('visible');
             document.getElementById('stats').classList.add('visible');
             document.getElementById('rules-container').classList.add('visible');

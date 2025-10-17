@@ -378,6 +378,44 @@
             display: block;
         }
 
+        .ruleset-section {
+            margin-bottom: 30px;
+        }
+
+        .ruleset-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .ruleset-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px 25px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #0066cc;
+        }
+
+        .ruleset-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+        }
+
+        .ruleset-count {
+            background: #0066cc;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .ruleset-rules {
+            background: white;
+        }
+
         .rule {
             border-bottom: 1px solid #e0e0e0;
             transition: background-color 0.2s;
@@ -655,7 +693,8 @@
                 <div class="examples">
                     <h3>Try these examples:</h3>
                     <div class="example-links">
-                        <a class="example-link" onclick="loadExample('https://raw.githubusercontent.com/konveyor/rulesets/main/default/generated/00-discovery.windup.yaml')">Konveyor Discovery Rules</a>
+                        <a class="example-link" onclick="loadExample('https://github.com/konveyor/rulesets/tree/main/default/generated/spring-framework')">Spring Framework Rules (Directory)</a>
+                        <a class="example-link" onclick="loadExample('https://raw.githubusercontent.com/konveyor/rulesets/main/default/generated/00-discovery.windup.yaml')">Discovery Rules (Single File)</a>
                     </div>
                 </div>
             </div>
@@ -783,10 +822,109 @@
             return url;
         }
 
+        function parseGitHubUrl(url) {
+            // Parse GitHub directory URL to extract owner, repo, branch, and path
+            // Supports: https://github.com/owner/repo/tree/branch/path
+            const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)\/tree\/([^\/]+)\/(.+)/);
+            if (match) {
+                return {
+                    owner: match[1],
+                    repo: match[2],
+                    branch: match[3],
+                    path: match[4],
+                    isDirectory: true
+                };
+            }
+            return null;
+        }
+
+        async function fetchGitHubDirectoryContents(owner, repo, path, branch = 'main') {
+            // Use GitHub API to list directory contents
+            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+            }
+            const contents = await response.json();
+
+            // Filter for YAML files only (excluding test files)
+            const yamlFiles = contents.filter(item =>
+                item.type === 'file' &&
+                (item.name.endsWith('.yaml') || item.name.endsWith('.yml')) &&
+                !item.name.includes('.test.')
+            );
+
+            return yamlFiles;
+        }
+
+        async function loadRulesFromGitHubDirectory(owner, repo, path, branch) {
+            showMessage('Fetching directory contents from GitHub...', 'success');
+
+            try {
+                const files = await fetchGitHubDirectoryContents(owner, repo, path, branch);
+
+                if (files.length === 0) {
+                    throw new Error('No YAML rule files found in this directory');
+                }
+
+                showMessage(`Found ${files.length} rule file(s), loading...`, 'success');
+
+                // Fetch all rule files in parallel
+                const rulesByFile = {};
+                const fetchPromises = files.map(async (file) => {
+                    try {
+                        const response = await fetch(file.download_url);
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        const text = await response.text();
+                        const rules = jsyaml.load(text);
+                        return {
+                            filename: file.name,
+                            rules: Array.isArray(rules) ? rules : [rules]
+                        };
+                    } catch (error) {
+                        console.warn(`Failed to load ${file.name}: ${error.message}`);
+                        return null;
+                    }
+                });
+
+                const results = await Promise.all(fetchPromises);
+
+                // Build rulesByFile object
+                results.forEach(result => {
+                    if (result && result.rules.length > 0) {
+                        rulesByFile[result.filename] = result.rules;
+                    }
+                });
+
+                if (Object.keys(rulesByFile).length === 0) {
+                    throw new Error('Failed to load any rules from directory');
+                }
+
+                const totalRules = Object.values(rulesByFile).reduce((sum, rules) => sum + rules.length, 0);
+                const source = `github.com/${owner}/${repo}/${path}`;
+
+                displayRulesGrouped(rulesByFile, source);
+
+            } catch (error) {
+                showMessage(`Error loading directory: ${error.message}`);
+            }
+        }
+
         async function loadFromUrl() {
             let url = document.getElementById('rule-url').value.trim();
             if (!url) {
                 showMessage('Please enter a URL');
+                return;
+            }
+
+            // Check if it's a GitHub directory URL
+            const githubDir = parseGitHubUrl(url);
+            if (githubDir) {
+                // Load from GitHub directory
+                await loadRulesFromGitHubDirectory(githubDir.owner, githubDir.repo, githubDir.path, githubDir.branch);
                 return;
             }
 
@@ -886,6 +1024,68 @@
 
             clearMessage();
             showMessage(`Successfully loaded ${rules.length} rule${rules.length !== 1 ? 's' : ''} from ${source}`, 'success');
+        }
+
+        function displayRulesGrouped(rulesByFile, source) {
+            // Flatten all rules for stats and filtering
+            const allRules = [];
+            Object.values(rulesByFile).forEach(rules => allRules.push(...rules));
+            currentRules = allRules;
+
+            // Hide loader, show controls and stats
+            document.getElementById('loader-section').style.display = 'none';
+            document.getElementById('current-ruleset').classList.add('visible');
+            document.getElementById('controls').classList.add('visible');
+            document.getElementById('stats').classList.add('visible');
+            document.getElementById('rules-container').classList.add('visible');
+            document.getElementById('header-actions').style.display = 'block';
+
+            // Update header subtitle
+            const fileCount = Object.keys(rulesByFile).length;
+            document.getElementById('header-subtitle').textContent = `Viewing ${allRules.length} rule${allRules.length !== 1 ? 's' : ''} from ${fileCount} file${fileCount !== 1 ? 's' : ''} (${source})`;
+
+            // Calculate and render stats
+            const stats = calculateStats(allRules);
+            renderStats(stats);
+
+            // Render rules grouped by file
+            const container = document.getElementById('rules-container');
+            container.innerHTML = Object.entries(rulesByFile)
+                .map(([filename, rules]) => renderRuleset(filename, rules))
+                .join('');
+
+            // Add event listeners (remove old ones first)
+            const search = document.getElementById('search');
+            const categoryFilter = document.getElementById('category-filter');
+            const effortFilter = document.getElementById('effort-filter');
+
+            search.removeEventListener('input', filterRules);
+            categoryFilter.removeEventListener('change', filterRules);
+            effortFilter.removeEventListener('change', filterRules);
+
+            search.addEventListener('input', filterRules);
+            categoryFilter.addEventListener('change', filterRules);
+            effortFilter.addEventListener('change', filterRules);
+
+            clearMessage();
+            showMessage(`Successfully loaded ${allRules.length} rule${allRules.length !== 1 ? 's' : ''} from ${fileCount} file${fileCount !== 1 ? 's' : ''}`, 'success');
+        }
+
+        function renderRuleset(filename, rules) {
+            const ruleCount = rules.length;
+            const rulesetId = filename.replace(/[^a-zA-Z0-9]/g, '-');
+
+            return `
+                <div class="ruleset-section" id="ruleset-${rulesetId}">
+                    <div class="ruleset-header">
+                        <h2 class="ruleset-title">${escapeHtml(filename)}</h2>
+                        <span class="ruleset-count">${ruleCount} rule${ruleCount !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="ruleset-rules">
+                        ${rules.map(renderRule).join('')}
+                    </div>
+                </div>
+            `;
         }
 
         function loadNewRules() {

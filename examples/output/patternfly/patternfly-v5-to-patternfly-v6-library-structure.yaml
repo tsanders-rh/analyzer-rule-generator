@@ -1,0 +1,40 @@
+- ruleID: patternfly-v5-to-patternfly-v6-library-structure-00000
+  description: import { Area } from '@patternfly/react-charts'; should be replaced
+    with import { Area } from '@patternfly/react-charts/victory';
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    java.referenced:
+      pattern: '@patternfly/react-charts.Area'
+      location: IMPORT
+  message: 'Chart components have been reorganized under a ''victory'' directory to
+    support multiple chart libraries.
+
+
+    Replace `import { Area } from ''@patternfly/react-charts'';` with `import { Area
+    } from ''@patternfly/react-charts/victory'';`.
+
+
+    Before:
+
+    ```
+
+    import { Area } from ''@patternfly/react-charts'';
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Area } from ''@patternfly/react-charts/victory'';
+
+    ```'
+  links:
+  - url: https://www.npmjs.com/package/@patternfly/react-charts
+    title: patternfly-v6 Documentation
+  customVariables: []

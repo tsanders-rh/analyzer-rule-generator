@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Viewer: Rules: output</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0066cc 0%, #004494 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        header .subtitle {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+
+        .stats {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #0066cc;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .rules-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .ruleset-section {
+            margin-bottom: 30px;
+        }
+
+        .ruleset-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .ruleset-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px 25px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #0066cc;
+        }
+
+        .ruleset-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+        }
+
+        .ruleset-count {
+            background: #0066cc;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .ruleset-rules {
+            background: white;
+        }
+
+        .rule {
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.2s;
+        }
+
+        .rule:last-child {
+            border-bottom: none;
+        }
+
+        .rule:hover {
+            background: #f8f9fa;
+        }
+
+        .rule-header {
+            padding: 20px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .rule-header:hover {
+            background: #f0f0f0;
+        }
+
+        .expand-icon {
+            font-size: 14px;
+            color: #999;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .rule.expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .rule-title {
+            flex: 1;
+        }
+
+        .rule-id {
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 13px;
+            color: #0066cc;
+            font-weight: 600;
+        }
+
+        .rule-description {
+            font-size: 15px;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .rule-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-mandatory {
+            background: #fee;
+            color: #c00;
+        }
+
+        .badge-potential {
+            background: #fef3cd;
+            color: #856404;
+        }
+
+        .badge-optional {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .effort-badge {
+            background: #e0e0e0;
+            color: #666;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .rule-details {
+            display: none;
+            padding: 0 20px 20px 60px;
+            background: #fafafa;
+        }
+
+        .rule.expanded .rule-details {
+            display: block;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .detail-content {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .code-block {
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 13px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            line-height: 1.5;
+        }
+
+        .yaml-key {
+            color: #9cdcfe;
+        }
+
+        .yaml-value {
+            color: #ce9178;
+        }
+
+        .links-list {
+            list-style: none;
+        }
+
+        .links-list li {
+            margin-bottom: 8px;
+        }
+
+        .links-list a {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .links-list a:hover {
+            text-decoration: underline;
+        }
+
+        .labels-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .label-tag {
+            background: #e0e0e0;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+        }
+
+        .no-results {
+            padding: 60px 20px;
+            text-align: center;
+            color: #999;
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .controls-row {
+                flex-direction: column;
+            }
+
+            .rule-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .rule-meta {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Rules: output</h1>
+            <div class="subtitle">
+                Generated from output (7 files, 37 rules) • 2025-10-17 12:57:56
+            </div>
+        </header>
+
+        <div class="controls">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label for="search">Search</label>
+                    <input type="text" id="search" placeholder="Search rules by ID, description, or pattern...">
+                </div>
+                <div class="control-group">
+                    <label for="category-filter">Category</label>
+                    <select id="category-filter">
+                        <option value="">All Categories</option>
+                        <option value="mandatory">Mandatory</option>
+                        <option value="potential">Potential</option>
+                        <option value="optional">Optional</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="effort-filter">Effort</label>
+                    <select id="effort-filter">
+                        <option value="">All Effort Levels</option>
+                        <option value="1">1 (Trivial)</option>
+                        <option value="3">3 (Low)</option>
+                        <option value="5">5 (Medium)</option>
+                        <option value="7">7 (High)</option>
+                        <option value="10">10 (Expert)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stats-grid" id="stats">
+                <!-- Stats populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="rules-container" id="rules-container">
+            <!-- Rules populated by JavaScript -->
+        </div>
+
+        <footer>
+            <a href="https://konveyor.io" target="_blank" style="color: #0066cc;">Konveyor</a> •
+            <a href="https://github.com/konveyor/analyzer-lsp" target="_blank" style="color: #0066cc;">Analyzer LSP</a> •
+            Open Source Application Modernization
+        </footer>
+    </div>
+
+    <script>
+        const rulesByFile = {"jdk21/applet-removal.yaml": [{"ruleID": "openjdk17-to-openjdk21-00001", "description": "java.applet.Applet should be replaced with Use AWT components instead", "effort": 5, "category": "potential", "labels": ["konveyor.io/source=openjdk17", "konveyor.io/target=openjdk21"], "when": {"java.referenced": {"pattern": "java.applet.Applet", "location": "TYPE"}}, "message": "The Applet API is being removed as it's obsolete. Web browsers no longer support applets.\n\nReplace `java.applet.Applet` with `Use AWT components instead`.", "links": [{"url": "https://openjdk.org/jeps/504", "title": "openjdk21 Documentation"}], "customVariables": []}, {"ruleID": "openjdk17-to-openjdk21-00002", "description": "java.applet.AppletContext should be replaced with Use alternative APIs", "effort": 5, "category": "potential", "labels": ["konveyor.io/source=openjdk17", "konveyor.io/target=openjdk21"], "when": {"java.referenced": {"pattern": "java.applet.AppletContext", "location": "TYPE"}}, "message": "The Applet API is being removed as it's obsolete. Web browsers no longer support applets.\n\nReplace `java.applet.AppletContext` with `Use alternative APIs`.", "links": [{"url": "https://openjdk.org/jeps/504", "title": "openjdk21 Documentation"}], "customVariables": []}, {"ruleID": "openjdk17-to-openjdk21-00003", "description": "java.applet.AppletStub should be replaced with Use alternative APIs", "effort": 5, "category": "potential", "labels": ["konveyor.io/source=openjdk17", "konveyor.io/target=openjdk21"], "when": {"java.referenced": {"pattern": "java.applet.AppletStub", "location": "TYPE"}}, "message": "The Applet API is being removed as it's obsolete. Web browsers no longer support applets.\n\nReplace `java.applet.AppletStub` with `Use alternative APIs`.", "links": [{"url": "https://openjdk.org/jeps/504", "title": "openjdk21 Documentation"}], "customVariables": []}, {"ruleID": "openjdk17-to-openjdk21-00004", "description": "java.applet.AudioClip should be replaced with Use javax.sound APIs instead", "effort": 5, "category": "potential", "labels": ["konveyor.io/source=openjdk17", "konveyor.io/target=openjdk21"], "when": {"java.referenced": {"pattern": "java.applet.AudioClip", "location": "TYPE"}}, "message": "The Applet API is being removed as it's obsolete. Web browsers no longer support applets.\n\nReplace `java.applet.AudioClip` with `Use javax.sound APIs instead`.", "links": [{"url": "https://openjdk.org/jeps/504", "title": "openjdk21 Documentation"}], "customVariables": []}, {"ruleID": "openjdk17-to-openjdk21-00005", "description": "java.beans.AppletInitializer should be replaced with Use alternative APIs", "effort": 5, "category": "potential", "labels": ["konveyor.io/source=openjdk17", "konveyor.io/target=openjdk21"], "when": {"java.referenced": {"pattern": "java.beans.AppletInitializer", "location": "TYPE"}}, "message": "The Applet API is being removed as it's obsolete. Web browsers no longer support applets.\n\nReplace `java.beans.AppletInitializer` with `Use alternative APIs`.", "links": [{"url": "https://openjdk.org/jeps/504", "title": "openjdk21 Documentation"}], "customVariables": []}, {"ruleID": "openjdk17-to-openjdk21-00006", "description": "javax.swing.JApplet should be replaced with Use JFrame or JPanel instead", "effort": 5, "category": "potential", "labels": ["konveyor.io/source=openjdk17", "konveyor.io/target=openjdk21"], "when": {"java.referenced": {"pattern": "javax.swing.JApplet", "location": "TYPE"}}, "message": "The Applet API is being removed as it's obsolete. Web browsers no longer support applets.\n\nReplace `javax.swing.JApplet` with `Use JFrame or JPanel instead`.", "links": [{"url": "https://openjdk.org/jeps/504", "title": "openjdk21 Documentation"}], "customVariables": []}, {"ruleID": "openjdk17-to-openjdk21-00007", "description": "import java.applet.* should be replaced with Remove import", "effort": 1, "category": "mandatory", "labels": ["konveyor.io/source=openjdk17", "konveyor.io/target=openjdk21"], "when": {"java.referenced": {"pattern": "java.applet", "location": "IMPORT"}}, "message": "The entire java.applet package is being removed as it's obsolete.\n\nReplace `import java.applet.*` with `Remove import`.", "links": [{"url": "https://openjdk.org/jeps/504", "title": "openjdk21 Documentation"}], "customVariables": []}, {"ruleID": "openjdk17-to-openjdk21-00008", "description": "URL.getContent() cast to AudioClip should be replaced with Use javax.sound APIs instead", "effort": 5, "category": "potential", "labels": ["konveyor.io/source=openjdk17", "konveyor.io/target=openjdk21"], "when": {"java.referenced": {"pattern": "java.net.URL", "location": "METHOD_CALL"}}, "message": "URL.getContent() will no longer return AudioClip instances since the AudioClip interface is being removed.\n\nReplace `URL.getContent() cast to AudioClip` with `Use javax.sound APIs instead`.", "links": [{"url": "https://openjdk.org/jeps/504", "title": "openjdk21 Documentation"}], "customVariables": []}, {"ruleID": "openjdk17-to-openjdk21-00009", "description": "URLConnection.getContent() cast to AudioClip should be replaced with Use javax.sound APIs instead", "effort": 5, "category": "potential", "labels": ["konveyor.io/source=openjdk17", "konveyor.io/target=openjdk21"], "when": {"java.referenced": {"pattern": "java.net.URLConnection", "location": "METHOD_CALL"}}, "message": "URLConnection.getContent() will no longer return AudioClip instances since the AudioClip interface is being removed.\n\nReplace `URLConnection.getContent() cast to AudioClip` with `Use javax.sound APIs instead`.", "links": [{"url": "https://openjdk.org/jeps/504", "title": "openjdk21 Documentation"}], "customVariables": []}], "patternfly-v6/migration-rules.yaml": [{"ruleID": "patternfly-v5-to-patternfly-v6-00001", "description": "import { Chip } from '@patternfly/react-core'; should be replaced with import { Label } from '@patternfly/react-core';", "effort": 3, "category": "potential", "labels": ["konveyor.io/source=patternfly-v5", "konveyor.io/target=patternfly-v6"], "when": {"java.referenced": {"pattern": "@patternfly/react-core.Chip", "location": "IMPORT"}}, "message": "The Chip component is replaced by the Label component in PatternFly 6.\n\nReplace `import { Chip } from '@patternfly/react-core';` with `import { Label } from '@patternfly/react-core';`.\n\nBefore:\n```\nimport { Chip } from '@patternfly/react-core';\n```\n\nAfter:\n```\nimport { Label } from '@patternfly/react-core';\n```", "links": [{"url": "https://www.patternfly.org/v6/components/label", "title": "patternfly-v6 Documentation"}], "customVariables": []}, {"ruleID": "patternfly-v5-to-patternfly-v6-00002", "description": "import { Tile } from '@patternfly/react-core'; should be replaced with import { Card } from '@patternfly/react-core';", "effort": 3, "category": "potential", "labels": ["konveyor.io/source=patternfly-v5", "konveyor.io/target=patternfly-v6"], "when": {"java.referenced": {"pattern": "@patternfly/react-core.Tile", "location": "IMPORT"}}, "message": "The Tile component is replaced by the Card component in PatternFly 6.\n\nReplace `import { Tile } from '@patternfly/react-core';` with `import { Card } from '@patternfly/react-core';`.\n\nBefore:\n```\nimport { Tile } from '@patternfly/react-core';\n```\n\nAfter:\n```\nimport { Card } from '@patternfly/react-core';\n```", "links": [{"url": "https://www.patternfly.org/v6/components/card", "title": "patternfly-v6 Documentation"}], "customVariables": []}, {"ruleID": "patternfly-v5-to-patternfly-v6-00003", "description": "import { Text } from '@patternfly/react-core'; should be replaced with import { Content } from '@patternfly/react-core';", "effort": 3, "category": "potential", "labels": ["konveyor.io/source=patternfly-v5", "konveyor.io/target=patternfly-v6"], "when": {"java.referenced": {"pattern": "@patternfly/react-core.Text", "location": "IMPORT"}}, "message": "The Text component is renamed to Content in PatternFly 6.\n\nReplace `import { Text } from '@patternfly/react-core';` with `import { Content } from '@patternfly/react-core';`.\n\nBefore:\n```\nimport { Text } from '@patternfly/react-core';\n```\n\nAfter:\n```\nimport { Content } from '@patternfly/react-core';\n```", "links": [{"url": "https://www.patternfly.org/v6/components/content", "title": "patternfly-v6 Documentation"}], "customVariables": []}, {"ruleID": "patternfly-v5-to-patternfly-v6-00004", "description": "import { Area } from '@patternfly/react-charts'; should be replaced with import { Area } from '@patternfly/react-charts/victory';", "effort": 3, "category": "potential", "labels": ["konveyor.io/source=patternfly-v5", "konveyor.io/target=patternfly-v6"], "when": {"java.referenced": {"pattern": "@patternfly/react-charts.Area", "location": "IMPORT"}}, "message": "Chart components are moved under a 'victory' directory to support multiple chart libraries.\n\nReplace `import { Area } from '@patternfly/react-charts';` with `import { Area } from '@patternfly/react-charts/victory';`.\n\nBefore:\n```\nimport { Area } from '@patternfly/react-charts';\n```\n\nAfter:\n```\nimport { Area } from '@patternfly/react-charts/victory';\n```", "links": [{"url": "https://www.npmjs.com/package/@patternfly/react-charts", "title": "patternfly-v6 Documentation"}], "customVariables": []}, {"ruleID": "patternfly-v5-to-patternfly-v6-00005", "description": "import { ExpandableSection } from '@patternfly/react-core'; ... <ExpandableSection isActive={true}> should be replaced with import { ExpandableSection } from '@patternfly/react-core'; ... <ExpandableSection>", "effort": 5, "category": "mandatory", "labels": ["konveyor.io/source=patternfly-v5", "konveyor.io/target=patternfly-v6"], "when": {"java.referenced": {"pattern": "@patternfly/react-core.ExpandableSection", "location": "METHOD_CALL"}}, "message": "The 'isActive' prop is removed from the ExpandableSection component.\n\nReplace `import { ExpandableSection } from '@patternfly/react-core'; ... <ExpandableSection isActive={true}>` with `import { ExpandableSection } from '@patternfly/react-core'; ... <ExpandableSection>`.\n\nBefore:\n```\n<ExpandableSection isActive={true}>\n```\n\nAfter:\n```\n<ExpandableSection>\n```", "links": [{"url": "https://www.patternfly.org/v6/components/expandable-section", "title": "patternfly-v6 Documentation"}], "customVariables": []}], "patternfly/patternfly-v5-to-patternfly-v6-component-replacement.yaml": [{"ruleID": "patternfly-v5-to-patternfly-v6-component-replacement-00000", "description": "import { Chip } from '@patternfly/react-core'; should be replaced with import { Label } from '@patternfly/react-core';", "effort": 3, "category": "potential", "labels": ["konveyor.io/source=patternfly-v5", "konveyor.io/target=patternfly-v6"], "when": {"java.referenced": {"pattern": "@patternfly/react-core.Chip", "location": "IMPORT"}}, "message": "The 'Chip' component is replaced by the 'Label' component in PatternFly 6.\n\nReplace `import { Chip } from '@patternfly/react-core';` with `import { Label } from '@patternfly/react-core';`.\n\nBefore:\n```\nimport { Chip } from '@patternfly/react-core';\n```\n\nAfter:\n```\nimport { Label } from '@patternfly/react-core';\n```", "links": [{"url": "https://www.patternfly.org/v6/components/label", "title": "patternfly-v6 Documentation"}], "customVariables": []}, {"ruleID": "patternfly-v5-to-patternfly-v6-component-replacement-00010", "description": "import { Tile } from '@patternfly/react-core'; should be replaced with import { Card } from '@patternfly/react-core';", "effort": 3, "category": "potential", "labels": ["konveyor.io/source=patternfly-v5", "konveyor.io/target=patternfly-v6"], "when": {"java.referenced": {"pattern": "@patternfly/react-core.Tile", "location": "IMPORT"}}, "message": "The 'Tile' component is replaced by the 'Card' component in PatternFly 6.\n\nReplace `import { Tile } from '@patternfly/react-core';` with `import { Card } from '@patternfly/react-core';`.\n\nBefore:\n```\nimport { Tile } from '@patternfly/react-core';\n```\n\nAfter:\n```\nimport { Card } from '@patternfly/react-core';\n```", "links": [{"url": "https://www.patternfly.org/v6/components/card", "title": "patternfly-v6 Documentation"}], "customVariables": []}, {"ruleID": "patternfly-v5-to-patternfly-v6-component-replacement-00020", "description": "import { Text } from '@patternfly/react-core'; should be replaced with import { Content } from '@patternfly/react-core';", "effort": 3, "category": "potential", "labels": ["konveyor.io/source=patternfly-v5", "konveyor.io/target=patternfly-v6"], "when": {"java.referenced": {"pattern": "@patternfly/react-core.Text", "location": "IMPORT"}}, "message": "The 'Text' component is renamed to 'Content' in PatternFly 6.\n\nReplace `import { Text } from '@patternfly/react-core';` with `import { Content } from '@patternfly/react-core';`.\n\nBefore:\n```\nimport { Text } from '@patternfly/react-core';\n```\n\nAfter:\n```\nimport { Content } from '@patternfly/react-core';\n```", "links": [{"url": "https://www.patternfly.org/v6/components/content", "title": "patternfly-v6 Documentation"}], "customVariables": []}], "patternfly/patternfly-v5-to-patternfly-v6-library-structure.yaml": [{"ruleID": "patternfly-v5-to-patternfly-v6-library-structure-00000", "description": "import { Area } from '@patternfly/react-charts'; should be replaced with import { Area } from '@patternfly/react-charts/victory';", "effort": 3, "category": "potential", "labels": ["konveyor.io/source=patternfly-v5", "konveyor.io/target=patternfly-v6"], "when": {"java.referenced": {"pattern": "@patternfly/react-charts.Area", "location": "IMPORT"}}, "message": "Chart components have been reorganized under a 'victory' directory to support multiple chart libraries.\n\nReplace `import { Area } from '@patternfly/react-charts';` with `import { Area } from '@patternfly/react-charts/victory';`.\n\nBefore:\n```\nimport { Area } from '@patternfly/react-charts';\n```\n\nAfter:\n```\nimport { Area } from '@patternfly/react-charts/victory';\n```", "links": [{"url": "https://www.npmjs.com/package/@patternfly/react-charts", "title": "patternfly-v6 Documentation"}], "customVariables": []}], "spring-boot-4.0/migration-rules.yaml": [{"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00001", "description": "spring.data.mongodb.additional-hosts should be replaced with spring.mongodb.additional-hosts", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.additional-hosts", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.additional-hosts` with `spring.mongodb.additional-hosts`.\n\nBefore:\n```\nspring.data.mongodb.additional-hosts=host1,host2\n```\n\nAfter:\n```\nspring.mongodb.additional-hosts=host1,host2\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00002", "description": "spring.data.mongodb.authentication-database should be replaced with spring.mongodb.authentication-database", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.authentication-database", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.authentication-database` with `spring.mongodb.authentication-database`.\n\nBefore:\n```\nspring.data.mongodb.authentication-database=admin\n```\n\nAfter:\n```\nspring.mongodb.authentication-database=admin\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00003", "description": "spring.data.mongodb.database should be replaced with spring.mongodb.database", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.database", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.database` with `spring.mongodb.database`.\n\nBefore:\n```\nspring.data.mongodb.database=mydb\n```\n\nAfter:\n```\nspring.mongodb.database=mydb\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00004", "description": "spring.data.mongodb.host should be replaced with spring.mongodb.host", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.host", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.host` with `spring.mongodb.host`.\n\nBefore:\n```\nspring.data.mongodb.host=localhost\n```\n\nAfter:\n```\nspring.mongodb.host=localhost\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00005", "description": "spring.data.mongodb.password should be replaced with spring.mongodb.password", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.password", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.password` with `spring.mongodb.password`.\n\nBefore:\n```\nspring.data.mongodb.password=secret\n```\n\nAfter:\n```\nspring.mongodb.password=secret\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00006", "description": "spring.data.mongodb.port should be replaced with spring.mongodb.port", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.port", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.port` with `spring.mongodb.port`.\n\nBefore:\n```\nspring.data.mongodb.port=27017\n```\n\nAfter:\n```\nspring.mongodb.port=27017\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00007", "description": "spring.data.mongodb.protocol should be replaced with spring.mongodb.protocol", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.protocol", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.protocol` with `spring.mongodb.protocol`.\n\nBefore:\n```\nspring.data.mongodb.protocol=mongodb\n```\n\nAfter:\n```\nspring.mongodb.protocol=mongodb\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00008", "description": "spring.data.mongodb.replica-set-name should be replaced with spring.mongodb.replica-set-name", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.replica-set-name", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.replica-set-name` with `spring.mongodb.replica-set-name`.\n\nBefore:\n```\nspring.data.mongodb.replica-set-name=rs0\n```\n\nAfter:\n```\nspring.mongodb.replica-set-name=rs0\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00009", "description": "spring.data.mongodb.representation.uuid should be replaced with spring.mongodb.representation.uuid", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.representation.uuid", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.representation.uuid` with `spring.mongodb.representation.uuid`.\n\nBefore:\n```\nspring.data.mongodb.representation.uuid=java\n```\n\nAfter:\n```\nspring.mongodb.representation.uuid=java\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00010", "description": "spring.data.mongodb.ssl.bundle should be replaced with spring.mongodb.ssl.bundle", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.ssl.bundle", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.ssl.bundle` with `spring.mongodb.ssl.bundle`.\n\nBefore:\n```\nspring.data.mongodb.ssl.bundle=mybundle\n```\n\nAfter:\n```\nspring.mongodb.ssl.bundle=mybundle\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00011", "description": "spring.data.mongodb.ssl.enabled should be replaced with spring.mongodb.ssl.enabled", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.ssl.enabled", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.ssl.enabled` with `spring.mongodb.ssl.enabled`.\n\nBefore:\n```\nspring.data.mongodb.ssl.enabled=true\n```\n\nAfter:\n```\nspring.mongodb.ssl.enabled=true\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00012", "description": "spring.data.mongodb.uri should be replaced with spring.mongodb.uri", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.uri", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.uri` with `spring.mongodb.uri`.\n\nBefore:\n```\nspring.data.mongodb.uri=mongodb://localhost/test\n```\n\nAfter:\n```\nspring.mongodb.uri=mongodb://localhost/test\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00013", "description": "spring.data.mongodb.username should be replaced with spring.mongodb.username", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "spring.data.mongodb.username", "location": "PACKAGE"}}, "message": "MongoDB properties have been updated to reflect whether Spring Data MongoDB is required. Properties that don't require Spring Data MongoDB now use spring.mongodb prefix instead of spring.data.mongodb.\n\nReplace `spring.data.mongodb.username` with `spring.mongodb.username`.\n\nBefore:\n```\nspring.data.mongodb.username=user\n```\n\nAfter:\n```\nspring.mongodb.username=user\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00014", "description": "management.health.mongo.enabled should be replaced with management.health.mongodb.enabled", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "management.health.mongo.enabled", "location": "PACKAGE"}}, "message": "Management-related MongoDB properties have been renamed to use 'mongodb' rather than 'mongo' in their names for consistency.\n\nReplace `management.health.mongo.enabled` with `management.health.mongodb.enabled`.\n\nBefore:\n```\nmanagement.health.mongo.enabled=true\n```\n\nAfter:\n```\nmanagement.health.mongodb.enabled=true\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00015", "description": "management.metrics.mongo.command.enabled should be replaced with management.metrics.mongodb.command.enabled", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "management.metrics.mongo.command.enabled", "location": "PACKAGE"}}, "message": "Management-related MongoDB properties have been renamed to use 'mongodb' rather than 'mongo' in their names for consistency.\n\nReplace `management.metrics.mongo.command.enabled` with `management.metrics.mongodb.command.enabled`.\n\nBefore:\n```\nmanagement.metrics.mongo.command.enabled=true\n```\n\nAfter:\n```\nmanagement.metrics.mongodb.command.enabled=true\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00016", "description": "management.metrics.mongo.connectionpool.enabled should be replaced with management.metrics.mongodb.connectionpool.enabled", "effort": 3, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "management.metrics.mongo.connectionpool.enabled", "location": "PACKAGE"}}, "message": "Management-related MongoDB properties have been renamed to use 'mongodb' rather than 'mongo' in their names for consistency.\n\nReplace `management.metrics.mongo.connectionpool.enabled` with `management.metrics.mongodb.connectionpool.enabled`.\n\nBefore:\n```\nmanagement.metrics.mongo.connectionpool.enabled=true\n```\n\nAfter:\n```\nmanagement.metrics.mongodb.connectionpool.enabled=true\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}, {"ruleID": "spring-boot-3.5-to-spring-boot-4.0-00017", "description": "org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener should be replaced with org.mockito.junit.jupiter.MockitoExtension", "effort": 5, "category": "mandatory", "labels": ["konveyor.io/source=spring-boot-3.5", "konveyor.io/target=spring-boot-4.0"], "when": {"java.referenced": {"pattern": "org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener", "location": "TYPE"}}, "message": "The MockitoTestExecutionListener deprecated in Spring Boot 3.4 has been removed. Users should use MockitoExtension from Mockito itself for @Mock or @Captor annotated fields.\n\nReplace `org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener` with `org.mockito.junit.jupiter.MockitoExtension`.\n\nBefore:\n```\n@TestExecutionListeners(MockitoTestExecutionListener.class)\n```\n\nAfter:\n```\n@ExtendWith(MockitoExtension.class)\n```", "links": [{"url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mockito-captor-and-mock-annotations", "title": "spring-boot-4.0 Documentation"}], "customVariables": []}], "test/spring-boot-3-to-quarkus-3-dependency-injection.yaml": [{"ruleID": "spring-boot-3-to-quarkus-3-dependency-injection-00000", "description": "@Autowired should be replaced with @Inject", "effort": 3, "category": "potential", "labels": ["konveyor.io/source=spring-boot-3", "konveyor.io/target=quarkus-3"], "when": {"java.referenced": {"pattern": "org.springframework.beans.factory.annotation.Autowired", "location": "ANNOTATION"}}, "message": "Quarkus adheres to the Jakarta EE standards for dependency injection using @Inject instead of Spring's @Autowired.\n\nReplace `@Autowired` with `@Inject`.\n\nBefore:\n```\n@Service\npublic class UserService {\n @Autowired\n private UserRepository repository;\n}\n```\n\nAfter:\n```\n@ApplicationScoped\npublic class UserService {\n @Inject\n UserRepository repository;\n}\n```", "customVariables": []}], "test/spring-boot-3-to-quarkus-3-web.yaml": [{"ruleID": "spring-boot-3-to-quarkus-3-web-00000", "description": "@RestController should be replaced with @Path", "effort": 5, "category": "potential", "labels": ["konveyor.io/source=spring-boot-3", "konveyor.io/target=quarkus-3"], "when": {"java.referenced": {"pattern": "org.springframework.web.bind.annotation.RestController", "location": "ANNOTATION"}}, "message": "Quarkus uses JAX-RS standards for defining REST endpoints instead of Spring's specific annotations.\n\nReplace `@RestController` with `@Path`.\n\nBefore:\n```\n@RestController\n@RequestMapping(\"/api/users\")\npublic class UserController {\n @GetMapping\n public List<User> getUsers() {\n return userService.findAll();\n }\n}\n```\n\nAfter:\n```\n@Path(\"/api/users\")\npublic class UserController {\n @GET\n @Produces(MediaType.APPLICATION_JSON)\n public List<User> getUsers() {\n return userService.findAll();\n }\n}\n```", "customVariables": []}]};
+
+        // Calculate statistics
+        function calculateStats(rules) {
+            const stats = {
+                total: rules.length,
+                mandatory: rules.filter(r => r.category === 'mandatory').length,
+                potential: rules.filter(r => r.category === 'potential').length,
+                optional: rules.filter(r => r.category === 'optional').length,
+                effortCounts: {}
+            };
+
+            rules.forEach(rule => {
+                const effort = rule.effort;
+                stats.effortCounts[effort] = (stats.effortCounts[effort] || 0) + 1;
+            });
+
+            return stats;
+        }
+
+        // Render statistics
+        function renderStats(stats) {
+            const statsContainer = document.getElementById('stats');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Rules</div>
+                    <div class="stat-value">${stats.total}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Mandatory</div>
+                    <div class="stat-value">${stats.mandatory}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Potential</div>
+                    <div class="stat-value">${stats.potential}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Optional</div>
+                    <div class="stat-value">${stats.optional}</div>
+                </div>
+            `;
+        }
+
+        // Render a single rule
+        function renderRule(rule) {
+            const whenYaml = formatWhen(rule.when);
+            const links = rule.links || [];
+            const labels = rule.labels || [];
+
+            return `
+                <div class="rule" data-rule-id="${rule.ruleID}" data-category="${rule.category}" data-effort="${rule.effort}">
+                    <div class="rule-header" onclick="toggleRule(this)">
+                        <span class="expand-icon">▶</span>
+                        <div class="rule-title">
+                            <div class="rule-id">${rule.ruleID}</div>
+                            <div class="rule-description">${escapeHtml(rule.description)}</div>
+                        </div>
+                        <div class="rule-meta">
+                            <span class="badge badge-${rule.category}">${rule.category}</span>
+                            <span class="effort-badge">Effort: ${rule.effort}</span>
+                        </div>
+                    </div>
+                    <div class="rule-details">
+                        <div class="detail-section">
+                            <div class="detail-label">Message</div>
+                            <div class="detail-content">${formatMessage(rule.message)}</div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="detail-label">When Condition</div>
+                            <div class="code-block">${whenYaml}</div>
+                        </div>
+
+                        ${labels.length > 0 ? `
+                        <div class="detail-section">
+                            <div class="detail-label">Labels</div>
+                            <div class="labels-list">
+                                ${labels.map(l => `<span class="label-tag">${l}</span>`).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        ${links.length > 0 ? `
+                        <div class="detail-section">
+                            <div class="detail-label">Documentation Links</div>
+                            <ul class="links-list">
+                                ${links.map(l => `<li><a href="${l.url}" target="_blank">📄 ${l.title}</a></li>`).join('')}
+                            </ul>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Format when condition as YAML
+        function formatWhen(when) {
+            return escapeHtml(JSON.stringify(when, null, 2))
+                .replace(/"([^"]+)":/g, '<span class="yaml-key">"$1"</span>:')
+                .replace(/: "([^"]+)"/g, ': <span class="yaml-value">"$1"</span>');
+        }
+
+        // Format message with code blocks
+        function formatMessage(message) {
+            message = escapeHtml(message);
+            // Convert code blocks (between ```)
+            message = message.replace(/```([\s\S]*?)```/g, '<pre class="code-block">$1</pre>');
+            // Convert inline code (between `)
+            message = message.replace(/`([^`]+)`/g, '<code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 13px;">$1</code>');
+            // Convert newlines to <br>
+            message = message.replace(/\n/g, '<br>');
+            return message;
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Toggle rule expansion
+        function toggleRule(header) {
+            const rule = header.parentElement;
+            rule.classList.toggle('expanded');
+        }
+
+        // Filter rules
+        function filterRules() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const categoryFilter = document.getElementById('category-filter').value;
+            const effortFilter = document.getElementById('effort-filter').value;
+
+            const rules = document.querySelectorAll('.rule');
+            let visibleCount = 0;
+
+            rules.forEach(rule => {
+                const ruleText = rule.textContent.toLowerCase();
+                const category = rule.dataset.category;
+                const effort = rule.dataset.effort;
+
+                const matchesSearch = !searchTerm || ruleText.includes(searchTerm);
+                const matchesCategory = !categoryFilter || category === categoryFilter;
+                const matchesEffort = !effortFilter || effort === effortFilter;
+
+                if (matchesSearch && matchesCategory && matchesEffort) {
+                    rule.style.display = '';
+                    visibleCount++;
+                } else {
+                    rule.style.display = 'none';
+                }
+            });
+
+            // Show/hide no results message
+            const container = document.getElementById('rules-container');
+            const existing = container.querySelector('.no-results');
+            if (existing) existing.remove();
+
+            if (visibleCount === 0) {
+                container.innerHTML += `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <div>No rules match your filters</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Render ruleset section
+        function renderRuleset(filename, rules) {
+            const ruleCount = rules.length;
+            const rulesetId = filename.replace(/[^a-zA-Z0-9]/g, '-');
+
+            return `
+                <div class="ruleset-section" id="ruleset-${rulesetId}">
+                    <div class="ruleset-header">
+                        <h2 class="ruleset-title">${escapeHtml(filename)}</h2>
+                        <span class="ruleset-count">${ruleCount} rule${ruleCount !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="ruleset-rules">
+                        ${rules.map(renderRule).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize
+        function init() {
+            // Flatten rules for stats
+            const allRules = [];
+            Object.values(rulesByFile).forEach(rules => allRules.push(...rules));
+
+            const stats = calculateStats(allRules);
+            renderStats(stats);
+
+            // Render rules grouped by file
+            const container = document.getElementById('rules-container');
+
+            if (Object.keys(rulesByFile).length === 1) {
+                // Single file - no section headers
+                const rules = Object.values(rulesByFile)[0];
+                container.innerHTML = rules.map(renderRule).join('');
+            } else {
+                // Multiple files - show sections
+                container.innerHTML = Object.entries(rulesByFile)
+                    .map(([filename, rules]) => renderRuleset(filename, rules))
+                    .join('');
+            }
+
+            // Add event listeners
+            document.getElementById('search').addEventListener('input', filterRules);
+            document.getElementById('category-filter').addEventListener('change', filterRules);
+            document.getElementById('effort-filter').addEventListener('change', filterRules);
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -35,6 +35,26 @@ python scripts/generate_rules.py \
 
 ## How It Works
 
+```mermaid
+graph LR
+    A[📄 Migration Guide<br/>URL or File] --> B[🤖 LLM Analysis<br/>Pattern Extraction]
+    B --> C[🔍 Language Detection<br/>Java vs TypeScript/Go/Python]
+    C --> D{Language?}
+    D -->|Java| E[☕ Java Provider<br/>FQN + Location Type]
+    D -->|Other| F[🔧 Builtin Provider<br/>Regex + File Pattern]
+    E --> G[📋 Konveyor Rules<br/>YAML Format]
+    F --> G
+    G --> H[🔬 Konveyor Analyzer<br/>Static Analysis]
+
+    style A fill:#e1f5ff
+    style B fill:#fff4e1
+    style C fill:#f0e1ff
+    style G fill:#e1ffe1
+    style H fill:#ffe1e1
+```
+
+**Workflow Steps:**
+
 1. **Ingestion**: Fetches migration guide from URL or file
 2. **Language Detection**: Analyzes code examples to determine Java vs TypeScript/Go/Python/etc.
 3. **Extraction**: LLM identifies migration patterns with:
@@ -47,6 +67,28 @@ python scripts/generate_rules.py \
    - `message` with migration guidance
    - `effort` scores
    - `links` to documentation
+
+## Examples
+
+### Java Migration (Spring Boot to Quarkus)
+
+```bash
+python scripts/generate_rules.py \
+  --guide examples/guides/spring-boot-to-quarkus.md \
+  --source spring-boot \
+  --target quarkus \
+  --output examples/output/spring-boot-to-quarkus.yaml
+```
+
+### TypeScript/React Migration (PatternFly v5 to v6)
+
+```bash
+python scripts/generate_rules.py \
+  --guide examples/guides/patternfly-v5-to-v6.md \
+  --source patternfly-v5 \
+  --target patternfly-v6 \
+  --output examples/output/patternfly-v6/migration-rules.yaml
+```
 
 ## Example Output
 
@@ -101,9 +143,9 @@ See [Rule Viewers Guide](docs/RULE_VIEWERS.md) for more options.
 ## Documentation
 
 - [Quick Start Guide](docs/QUICKSTART.md)
-- [Architecture Overview](docs/ARCHITECTURE.md)
 - [Rule Viewers Guide](docs/RULE_VIEWERS.md)
-- [Contributing](docs/CONTRIBUTING.md)
+- [Konveyor Submission Guide](docs/konveyor-submission-guide.md)
+- [Java Rule Schema](docs/java-rule-schema.md)
 
 ## Integration with Konveyor
 

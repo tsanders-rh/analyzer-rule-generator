@@ -243,7 +243,7 @@ export GOOGLE_API_KEY="your-key"
 
 **Rules seem incomplete:**
 - LLM extraction is best-effort
-- For critical migrations, use the hybrid approach (see [AI vs Manual Comparison](ai-vs-manual-comparison.md))
+- Review and refine generated rules against real code for completeness
 
 ## Submitting Rules to Konveyor
 
@@ -302,8 +302,7 @@ See [Konveyor Submission Guide](konveyor-submission-guide.md) for complete detai
 
 - **Submit to Konveyor**: See [Konveyor Submission Guide](konveyor-submission-guide.md)
 - **Test your rules**: Use the generated rules with [Konveyor analyzer](https://github.com/konveyor/analyzer-lsp)
-- **Learn the hybrid approach**: See [AI vs Manual Comparison](ai-vs-manual-comparison.md)
-- **Advanced usage**: Check [Architecture Overview](ARCHITECTURE.md)
+- **View your rules**: See [Rule Viewers Guide](RULE_VIEWERS.md)
 
 ## Real-World Example
 

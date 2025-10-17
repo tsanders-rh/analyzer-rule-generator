@@ -36,21 +36,24 @@ python scripts/generate_rules.py \
 ## How It Works
 
 ```mermaid
-graph LR
-    A[📄 Migration Guide<br/>URL or File] --> B[🤖 LLM Analysis<br/>Pattern Extraction]
-    B --> C[🔍 Language Detection<br/>Java vs TypeScript/Go/Python]
-    C --> D{Language?}
-    D -->|Java| E[☕ Java Provider<br/>FQN + Location Type]
-    D -->|Other| F[🔧 Builtin Provider<br/>Regex + File Pattern]
-    E --> G[📋 Konveyor Rules<br/>YAML Format]
-    F --> G
-    G --> H[🔬 Konveyor Analyzer<br/>Static Analysis]
+flowchart TD
+    A[📄 Migration Guide] --> B[🤖 LLM Extraction]
+    B --> C{Language Detection}
 
-    style A fill:#e1f5ff
-    style B fill:#fff4e1
-    style C fill:#f0e1ff
-    style G fill:#e1ffe1
-    style H fill:#ffe1e1
+    C -->|Java| D[Java Provider<br/>✓ Fully Qualified Names<br/>✓ Location Types]
+    C -->|TypeScript/React/Go/Python| E[Builtin Provider<br/>✓ Regex Patterns<br/>✓ File Globs]
+
+    D --> F[📋 Konveyor Rules]
+    E --> F
+    F --> G[🔬 Analyzer]
+
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style C fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style D fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style E fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style F fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style G fill:#ffebee,stroke:#c62828,stroke-width:2px
 ```
 
 **Workflow Steps:**

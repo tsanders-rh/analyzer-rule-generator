@@ -1,0 +1,664 @@
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00001
+  description: spring.data.mongodb.additional-hosts should be replaced with spring.mongodb.additional-hosts
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.additional-hosts
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.additional-hosts` with `spring.mongodb.additional-hosts`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.additional-hosts=host1,host2
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.additional-hosts=host1,host2
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00002
+  description: spring.data.mongodb.authentication-database should be replaced with
+    spring.mongodb.authentication-database
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.authentication-database
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.authentication-database` with `spring.mongodb.authentication-database`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.authentication-database=admin
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.authentication-database=admin
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00003
+  description: spring.data.mongodb.database should be replaced with spring.mongodb.database
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.database
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.database` with `spring.mongodb.database`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.database=mydb
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.database=mydb
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00004
+  description: spring.data.mongodb.host should be replaced with spring.mongodb.host
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.host
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.host` with `spring.mongodb.host`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.host=localhost
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.host=localhost
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00005
+  description: spring.data.mongodb.password should be replaced with spring.mongodb.password
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.password
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.password` with `spring.mongodb.password`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.password=secret
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.password=secret
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00006
+  description: spring.data.mongodb.port should be replaced with spring.mongodb.port
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.port
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.port` with `spring.mongodb.port`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.port=27017
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.port=27017
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00007
+  description: spring.data.mongodb.protocol should be replaced with spring.mongodb.protocol
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.protocol
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.protocol` with `spring.mongodb.protocol`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.protocol=mongodb
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.protocol=mongodb
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00008
+  description: spring.data.mongodb.replica-set-name should be replaced with spring.mongodb.replica-set-name
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.replica-set-name
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.replica-set-name` with `spring.mongodb.replica-set-name`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.replica-set-name=rs0
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.replica-set-name=rs0
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00009
+  description: spring.data.mongodb.representation.uuid should be replaced with spring.mongodb.representation.uuid
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.representation.uuid
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.representation.uuid` with `spring.mongodb.representation.uuid`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.representation.uuid=java
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.representation.uuid=java
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00010
+  description: spring.data.mongodb.ssl.bundle should be replaced with spring.mongodb.ssl.bundle
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.ssl.bundle
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.ssl.bundle` with `spring.mongodb.ssl.bundle`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.ssl.bundle=mybundle
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.ssl.bundle=mybundle
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00011
+  description: spring.data.mongodb.ssl.enabled should be replaced with spring.mongodb.ssl.enabled
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.ssl.enabled
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.ssl.enabled` with `spring.mongodb.ssl.enabled`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.ssl.enabled=true
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.ssl.enabled=true
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00012
+  description: spring.data.mongodb.uri should be replaced with spring.mongodb.uri
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.uri
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.uri` with `spring.mongodb.uri`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.uri=mongodb://localhost/test
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.uri=mongodb://localhost/test
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00013
+  description: spring.data.mongodb.username should be replaced with spring.mongodb.username
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: spring.data.mongodb.username
+      location: PACKAGE
+  message: 'MongoDB properties have been updated to reflect whether Spring Data MongoDB
+    is required. Properties that don''t require Spring Data MongoDB now use spring.mongodb
+    prefix instead of spring.data.mongodb.
+
+
+    Replace `spring.data.mongodb.username` with `spring.mongodb.username`.
+
+
+    Before:
+
+    ```
+
+    spring.data.mongodb.username=user
+
+    ```
+
+
+    After:
+
+    ```
+
+    spring.mongodb.username=user
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00014
+  description: management.health.mongo.enabled should be replaced with management.health.mongodb.enabled
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: management.health.mongo.enabled
+      location: PACKAGE
+  message: 'Management-related MongoDB properties have been renamed to use ''mongodb''
+    rather than ''mongo'' in their names for consistency.
+
+
+    Replace `management.health.mongo.enabled` with `management.health.mongodb.enabled`.
+
+
+    Before:
+
+    ```
+
+    management.health.mongo.enabled=true
+
+    ```
+
+
+    After:
+
+    ```
+
+    management.health.mongodb.enabled=true
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00015
+  description: management.metrics.mongo.command.enabled should be replaced with management.metrics.mongodb.command.enabled
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: management.metrics.mongo.command.enabled
+      location: PACKAGE
+  message: 'Management-related MongoDB properties have been renamed to use ''mongodb''
+    rather than ''mongo'' in their names for consistency.
+
+
+    Replace `management.metrics.mongo.command.enabled` with `management.metrics.mongodb.command.enabled`.
+
+
+    Before:
+
+    ```
+
+    management.metrics.mongo.command.enabled=true
+
+    ```
+
+
+    After:
+
+    ```
+
+    management.metrics.mongodb.command.enabled=true
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00016
+  description: management.metrics.mongo.connectionpool.enabled should be replaced
+    with management.metrics.mongodb.connectionpool.enabled
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: management.metrics.mongo.connectionpool.enabled
+      location: PACKAGE
+  message: 'Management-related MongoDB properties have been renamed to use ''mongodb''
+    rather than ''mongo'' in their names for consistency.
+
+
+    Replace `management.metrics.mongo.connectionpool.enabled` with `management.metrics.mongodb.connectionpool.enabled`.
+
+
+    Before:
+
+    ```
+
+    management.metrics.mongo.connectionpool.enabled=true
+
+    ```
+
+
+    After:
+
+    ```
+
+    management.metrics.mongodb.connectionpool.enabled=true
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mongodb
+    title: spring-boot-4.0 Documentation
+  customVariables: []
+- ruleID: spring-boot-3.5-to-spring-boot-4.0-00017
+  description: org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener
+    should be replaced with org.mockito.junit.jupiter.MockitoExtension
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=spring-boot-3.5
+  - konveyor.io/target=spring-boot-4.0
+  when:
+    java.referenced:
+      pattern: org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener
+      location: TYPE
+  message: 'The MockitoTestExecutionListener deprecated in Spring Boot 3.4 has been
+    removed. Users should use MockitoExtension from Mockito itself for @Mock or @Captor
+    annotated fields.
+
+
+    Replace `org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener`
+    with `org.mockito.junit.jupiter.MockitoExtension`.
+
+
+    Before:
+
+    ```
+
+    @TestExecutionListeners(MockitoTestExecutionListener.class)
+
+    ```
+
+
+    After:
+
+    ```
+
+    @ExtendWith(MockitoExtension.class)
+
+    ```'
+  links:
+  - url: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#mockito-captor-and-mock-annotations
+    title: spring-boot-4.0 Documentation
+  customVariables: []

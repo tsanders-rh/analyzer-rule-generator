@@ -27,10 +27,10 @@ export OPENAI_API_KEY="your-key-here"
 
 # Generate rules from a migration guide
 python scripts/generate_rules.py \
-  --guide examples/guides/spring-boot-to-quarkus.md \
-  --source spring-boot \
-  --target quarkus \
-  --output examples/output/spring-boot-to-quarkus.yaml
+  --guide https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide \
+  --source spring-boot-3 \
+  --target spring-boot-4 \
+  --output examples/output/spring-boot-4.0/migration-rules.yaml
 ```
 
 ## How It Works
@@ -73,21 +73,21 @@ flowchart TD
 
 ## Examples
 
-### Java Migration (Spring Boot to Quarkus)
+### Java Migration (Spring Boot 3 to 4)
 
 ```bash
 python scripts/generate_rules.py \
-  --guide examples/guides/spring-boot-to-quarkus.md \
-  --source spring-boot \
-  --target quarkus \
-  --output examples/output/spring-boot-to-quarkus.yaml
+  --guide https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide \
+  --source spring-boot-3 \
+  --target spring-boot-4 \
+  --output examples/output/spring-boot-4.0/migration-rules.yaml
 ```
 
 ### TypeScript/React Migration (PatternFly v5 to v6)
 
 ```bash
 python scripts/generate_rules.py \
-  --guide examples/guides/patternfly-v5-to-v6.md \
+  --guide https://www.patternfly.org/get-started/upgrade/ \
   --source patternfly-v5 \
   --target patternfly-v6 \
   --output examples/output/patternfly-v6/migration-rules.yaml
@@ -98,21 +98,21 @@ python scripts/generate_rules.py \
 ### Java Provider Rules
 
 ```yaml
-- ruleID: spring-boot-to-quarkus-00001
-  description: Replace Spring @RestController with JAX-RS @Path
+- ruleID: spring-boot-3-to-spring-boot-4-00001
+  description: Replace deprecated Spring Boot 3 annotations
   effort: 3
   category: mandatory
   labels:
-    - konveyor.io/source=spring-boot
-    - konveyor.io/target=quarkus
+    - konveyor.io/source=spring-boot-3
+    - konveyor.io/target=spring-boot-4
   when:
     java.referenced:
       pattern: org.springframework.web.bind.annotation.RestController
       location: ANNOTATION
-  message: "Spring @RestController must be replaced with JAX-RS @Path annotation for Quarkus compatibility"
+  message: "Review Spring Boot 4.0 migration requirements for REST controllers"
   links:
-    - url: "https://quarkus.io/guides/rest-json"
-      title: "Quarkus REST Guide"
+    - url: "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
+      title: "Spring Boot 4.0 Migration Guide"
 ```
 
 ### Builtin Provider Rules (TypeScript/React/Go/Python)

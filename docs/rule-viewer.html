@@ -848,11 +848,13 @@
             }
             const contents = await response.json();
 
-            // Filter for YAML files only (excluding test files)
+            // Filter for rule YAML files only (exclude test files and ruleset.yaml metadata)
             const yamlFiles = contents.filter(item =>
                 item.type === 'file' &&
                 (item.name.endsWith('.yaml') || item.name.endsWith('.yml')) &&
-                !item.name.includes('.test.')
+                !item.name.includes('.test.') &&
+                item.name !== 'ruleset.yaml' &&
+                item.name !== 'ruleset.yml'
             );
 
             return yamlFiles;
@@ -880,9 +882,18 @@
                         }
                         const text = await response.text();
                         const rules = jsyaml.load(text);
+                        const ruleArray = Array.isArray(rules) ? rules : [rules];
+
+                        // Validate that this file contains actual rules (has ruleID field)
+                        const hasRules = ruleArray.some(rule => rule && rule.ruleID);
+                        if (!hasRules) {
+                            console.warn(`Skipping ${file.name}: no rules with ruleID found`);
+                            return null;
+                        }
+
                         return {
                             filename: file.name,
-                            rules: Array.isArray(rules) ? rules : [rules]
+                            rules: ruleArray
                         };
                     } catch (error) {
                         console.warn(`Failed to load ${file.name}: ${error.message}`);

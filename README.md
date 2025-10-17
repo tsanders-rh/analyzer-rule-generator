@@ -9,10 +9,12 @@ The Analyzer Rule Generator uses Large Language Models (LLMs) to automatically e
 ## Features
 
 - **Multiple Input Formats**: URLs, Markdown files, plain text
+- **Multi-Language Support**: Java, TypeScript/React, Go, Python, CSS, and more
 - **LLM-Powered Extraction**: Automatically identifies migration patterns, complexity, and conditions
 - **Konveyor Analyzer Format**: Generates rules compatible with analyzer-lsp
 - **Flexible LLM Support**: OpenAI, Anthropic Claude, Google Gemini
-- **Pattern Detection**: Extracts fully qualified class names and location types
+- **Smart Provider Detection**: Automatically uses Java or Builtin provider based on detected language
+- **Pattern Detection**: Extracts fully qualified class names, regex patterns, and file globs
 
 ## Quick Start
 
@@ -34,18 +36,21 @@ python scripts/generate_rules.py \
 ## How It Works
 
 1. **Ingestion**: Fetches migration guide from URL or file
-2. **Extraction**: LLM identifies migration patterns with:
-   - Source and target patterns (e.g., `@Stateless` → `@ApplicationScoped`)
-   - Fully qualified class names for detection
-   - Location types (ANNOTATION, IMPORT, METHOD_CALL, etc.)
+2. **Language Detection**: Analyzes code examples to determine Java vs TypeScript/Go/Python/etc.
+3. **Extraction**: LLM identifies migration patterns with:
+   - Source and target patterns (e.g., `@Stateless` → `@ApplicationScoped`, `isDisabled` → `isAriaDisabled`)
+   - For Java: Fully qualified class names and location types (ANNOTATION, IMPORT, METHOD_CALL, etc.)
+   - For other languages: Regex patterns and file globs (e.g., `*.{tsx,jsx}`, `*.go`)
    - Migration complexity and rationale
-3. **Generation**: Converts patterns to Konveyor analyzer rules with:
-   - `when` conditions for pattern matching
+4. **Generation**: Converts patterns to Konveyor analyzer rules with:
+   - `when` conditions using Java or Builtin provider
    - `message` with migration guidance
    - `effort` scores
    - `links` to documentation
 
 ## Example Output
+
+### Java Provider Rules
 
 ```yaml
 - ruleID: spring-boot-to-quarkus-00001
@@ -65,10 +70,39 @@ python scripts/generate_rules.py \
       title: "Quarkus REST Guide"
 ```
 
+### Builtin Provider Rules (TypeScript/React/Go/Python)
+
+```yaml
+- ruleID: patternfly-v5-to-patternfly-v6-00001
+  description: isDisabled should be replaced with isAriaDisabled
+  effort: 3
+  category: potential
+  labels:
+    - konveyor.io/source=patternfly-v5
+    - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: isDisabled\s*[=:]
+      filePattern: '*.{tsx,jsx,ts,js}'
+  message: "The isDisabled prop has been renamed to isAriaDisabled for better accessibility"
+```
+
+## Rule Viewer
+
+**🌐 [View Rules Online](https://tsanders-rh.github.io/analyzer-rule-generator/rule-viewer.html)** - Interactive web viewer for any Konveyor ruleset
+
+Load and explore rules from:
+- GitHub URLs (paste any rule file URL)
+- Local YAML files (drag & drop)
+- Share with `?url=` parameter
+
+See [Rule Viewers Guide](docs/RULE_VIEWERS.md) for more options.
+
 ## Documentation
 
 - [Quick Start Guide](docs/QUICKSTART.md)
 - [Architecture Overview](docs/ARCHITECTURE.md)
+- [Rule Viewers Guide](docs/RULE_VIEWERS.md)
 - [Contributing](docs/CONTRIBUTING.md)
 
 ## Integration with Konveyor

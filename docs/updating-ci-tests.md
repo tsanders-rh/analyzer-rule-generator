@@ -14,10 +14,12 @@ When you add new rules, you need to update the test expectations to reflect what
 
 ## Prerequisites
 
-1. **Konveyor rulesets fork** - Your rules are ready to submit
+1. **Konveyor rulesets fork** - Your new/updated rules are committed and ready to submit as a PR
 2. **go-konveyor-tests fork** - Fork of the test repository
 3. **Kantra installed** - CLI tool for running analysis
 4. **Test application** - The app your rules analyze
+
+**IMPORTANT:** You must have your konveyor/rulesets fork checked out locally with your new rules in it. When you run Kantra, you'll point `--rules` to this fork.
 
 ## Step-by-Step Guide
 
@@ -64,7 +66,10 @@ cat analysis/tc_daytrader_deps.go
 
 Analyze the test application with your new rules.
 
-**CRITICAL:** Check the test case file to find the exact `--source` and `--target` values used by CI, then use those same values in your Kantra command.
+**CRITICAL:**
+1. Check the test case file to find the exact `--target` labels used by CI
+2. You MUST include your new/updated rules from your rulesets PR
+3. Run with the same targets as the test case expects
 
 ```bash
 # Make sure Kantra is installed
@@ -73,13 +78,21 @@ kantra --version
 # If using Podman on Mac, start machine
 podman machine start
 
-# Run analysis - USE THE SAME --source and --target as the test case expects!
-# Example for a Java to Quarkus migration:
+# Run analysis - IMPORTANT: Include your new rules from your rulesets submission!
+# Use --rules to point to your new/updated ruleset directory or file
 kantra analyze \
     --input /path/to/test/application \
     --output ./analysis-output \
-    --rules /path/to/your/new/rules.yaml \
-    --source java \
+    --rules /path/to/your/konveyor-rulesets/default/generated/your-ruleset/ \
+    --target cloud-readiness \
+    --target quarkus
+
+# Alternative: Point to your entire rulesets fork to include all rules
+kantra analyze \
+    --input /path/to/test/application \
+    --output ./analysis-output \
+    --rules /path/to/your/konveyor-rulesets \
+    --target cloud-readiness \
     --target quarkus
 
 # To find the correct source/target values, check the test case .go file:
@@ -222,10 +235,11 @@ cat ~/go-konveyor-tests/analysis/tc_daytrader_deps.go | grep "konveyor.io/target
 # Output: "konveyor.io/target=cloud-readiness", "konveyor.io/target=quarkus"
 
 # 4. Analyze with your new rules - MATCH the targets from step 3!
+# Point --rules to your konveyor/rulesets fork that contains your new rules
 kantra analyze \
     --input /tmp/daytrader \
     --output /tmp/daytrader-analysis \
-    --rules ~/rulesets/my-new-spring-rules.yaml \
+    --rules ~/konveyor-rulesets \
     --target cloud-readiness \
     --target quarkus
 
@@ -372,8 +386,13 @@ Preview changes before writing files to catch issues early.
 ### Keep test apps handy
 Clone commonly used test applications once and reuse them.
 
-### Run full ruleset
-Include your new rules with the existing rulesets to get complete dependency lists.
+### Run with your complete rulesets fork
+**CRITICAL:** Point `--rules` to your konveyor/rulesets fork that contains your new/updated rules. This ensures:
+- Your new rules are included in the analysis
+- All existing rules are also run (for complete dependency list)
+- CI will see the same dependencies when it runs with your PR
+
+Do NOT point to just a single rule file - use your entire rulesets directory.
 
 ### Test the tests
 After updating, run the test locally if possible to verify it passes.

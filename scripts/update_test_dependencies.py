@@ -249,6 +249,24 @@ def parse_violations(file_path: Path) -> tuple[List[Insight], int, List[Tag]]:
 
     for ruleset in data:
         ruleset_name = ruleset.get('name', '')
+
+        # Handle technology-usage ruleset differently
+        if ruleset_name == 'technology-usage':
+            # Extract tags from technology-usage ruleset
+            tech_tags = ruleset.get('tags', [])
+            for tag_str in tech_tags:
+                # Tags are in format "Category=Name" or just "Name"
+                if '=' in tag_str:
+                    category, name = tag_str.split('=', 1)
+                    # Use "Category=Name" as key to deduplicate
+                    tags_dict[tag_str] = Tag(name, category)
+                else:
+                    # No category, use tag name alone
+                    # Default category could be inferred or left generic
+                    if tag_str not in tags_dict:
+                        tags_dict[tag_str] = Tag(tag_str, "Technology")
+            continue  # Skip processing violations for this ruleset
+
         violations = ruleset.get('violations', {})
 
         for rule_id, violation in violations.items():
@@ -282,14 +300,6 @@ def parse_violations(file_path: Path) -> tuple[List[Insight], int, List[Tag]]:
                 )
                 insights.append(insight)
                 total_effort += effort * len(incidents)  # Multiply effort by incident count
-
-            # Extract tags from labels
-            labels = violation.get('labels', [])
-            for label in labels:
-                # Skip konveyor.io labels, keep technology tags
-                if not label.startswith('konveyor.io/'):
-                    # Use label as tag name, category as "Technology" for now
-                    tags_dict[label] = Tag(label, "Technology")
 
     # Convert tags dict to list
     tags = list(tags_dict.values())

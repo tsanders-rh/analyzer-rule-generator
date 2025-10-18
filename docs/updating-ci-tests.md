@@ -54,13 +54,17 @@ Choose the one that matches what your rules target:
 # List available test cases
 ls analysis/tc_*.go
 
-# View an existing test case
+# View an existing test case to see what source/target it uses
 cat analysis/tc_daytrader_deps.go
 ```
 
+**IMPORTANT:** Each test case has specific `--source` and `--target` values. You MUST use the exact same values when running Kantra, otherwise the dependency results won't match what CI expects.
+
 ### 3. Run Kantra Analysis
 
-Analyze the test application with your new rules:
+Analyze the test application with your new rules.
+
+**CRITICAL:** Check the test case file to find the exact `--source` and `--target` values used by CI, then use those same values in your Kantra command.
 
 ```bash
 # Make sure Kantra is installed
@@ -69,13 +73,19 @@ kantra --version
 # If using Podman on Mac, start machine
 podman machine start
 
-# Run analysis with your new rules
+# Run analysis - USE THE SAME --source and --target as the test case expects!
+# Example for a Java to Quarkus migration:
 kantra analyze \
     --input /path/to/test/application \
     --output ./analysis-output \
     --rules /path/to/your/new/rules.yaml \
     --source java \
     --target quarkus
+
+# To find the correct source/target values:
+# 1. Look at the test case Task definition in the .go file
+# 2. Or check existing CI runs for that test case
+# 3. Common combinations: java→quarkus, java→cloud-readiness, eap7→eap8
 ```
 
 **Where to get test applications:**
@@ -200,7 +210,10 @@ git checkout -b update-daytrader-deps
 # 2. Get test application
 git clone https://github.com/WASdev/sample.daytrader7.git /tmp/daytrader
 
-# 3. Analyze with your new rules
+# 3. Check what source/target the test case uses
+cat ~/go-konveyor-tests/analysis/tc_daytrader_deps.go | grep -A 5 "Task:"
+
+# 4. Analyze with your new rules - MATCH the source/target from step 3!
 kantra analyze \
     --input /tmp/daytrader \
     --output /tmp/daytrader-analysis \
@@ -208,21 +221,21 @@ kantra analyze \
     --source java \
     --target quarkus
 
-# 4. Update test case
+# 5. Update test case
 cd ~/analyzer-rule-generator
 source venv/bin/activate
 python scripts/update_test_dependencies.py \
     --analyzer-output /tmp/daytrader-analysis/output.yaml \
     --test-case ~/go-konveyor-tests/analysis/tc_daytrader_deps.go
 
-# 5. Review and commit
+# 6. Review and commit
 cd ~/go-konveyor-tests
 git diff analysis/tc_daytrader_deps.go
 git add analysis/tc_daytrader_deps.go
 git commit -s -m "Update DayTrader deps for Spring Boot migration rules"
 git push origin update-daytrader-deps
 
-# 6. Create PR on GitHub
+# 7. Create PR on GitHub
 ```
 
 ## Troubleshooting
@@ -294,6 +307,9 @@ This is part of the larger rule submission workflow:
 - [Kantra Documentation](https://github.com/konveyor/kantra) - Analysis tool docs
 
 ## Tips and Best Practices
+
+### Match source/target values exactly
+**CRITICAL:** Always check the test case file to find the exact `--source` and `--target` values, then use those same values when running Kantra. Mismatched values will cause dependency mismatches and CI failures.
 
 ### Always use --print-only first
 Preview changes before writing files to catch issues early.

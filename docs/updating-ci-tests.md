@@ -150,6 +150,9 @@ python scripts/update_test_dependencies.py \
 **Script options:**
 - `--analysis-dir` - Path to Kantra analysis output directory (required)
   - Script automatically finds `dependencies.yaml` and `output.yaml` in this directory
+- `--normalize-path` - Normalize incident file paths to match CI environment (optional)
+  - Use `/shared/source/sample` to match CI test paths
+  - Converts local paths like `/Users/you/Workspace/app/...` to `/shared/source/sample/...`
 - `--output` - Path for new test case file (for creating new)
 - `--test-case` - Path to existing test case file (for updating existing)
 - `--test-name` - Test case name (required when creating new)
@@ -161,15 +164,32 @@ The script automatically parses both files in the analysis directory and generat
 - ✅ **Insights** - All violations found by rules with incidents
 - ✅ **Effort** - Total calculated effort score
 - ✅ **Dependencies** - All technology dependencies
-- ✅ **AnalysisTags** - Tags from violation labels
+- ✅ **AnalysisTags** - Technology tags from technology-usage ruleset (e.g., EJB XML, JSF, CDI)
 
 **Updating existing test cases:**
 ```bash
 # Update all sections of an existing test case
 python scripts/update_test_dependencies.py \
     --analysis-dir /path/to/analysis-output \
+    --normalize-path "/shared/source/sample" \
     --test-case /path/to/go-konveyor-tests/analysis/tc_daytrader_deps.go
 ```
+
+**Important: Path Normalization**
+
+CI tests use standardized paths (e.g., `/shared/source/sample/`) while your local analysis uses absolute paths (e.g., `/Users/you/Workspace/myapp/`).
+
+**Always use `--normalize-path`** when generating test cases for CI:
+```bash
+--normalize-path "/shared/source/sample"
+```
+
+This ensures:
+- Test cases match CI environment paths
+- Tests will pass in CI (paths won't mismatch)
+- Consistent test format across contributors
+
+The script intelligently finds project module directories (like `myapp-web`, `myapp-ejb`) and normalizes paths accordingly.
 
 **Important: Replace vs Merge behavior**
 
@@ -305,6 +325,7 @@ cd ~/analyzer-rule-generator
 source venv/bin/activate
 python scripts/update_test_dependencies.py \
     --analysis-dir /tmp/daytrader-analysis \
+    --normalize-path "/shared/source/sample" \
     --output ~/go-konveyor-tests/analysis/tc_daytrader_new.go \
     --test-name "Daytrader with new rules" \
     --app-name "Daytrader"

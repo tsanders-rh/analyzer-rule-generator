@@ -356,17 +356,63 @@ Coverage:
 "
 ```
 
-### Phase 6: Submit Pull Request
+### Phase 6: Update CI Test Expectations (go-konveyor-tests)
 
+When submitting new rules, you also need to update the CI test expectations in the `go-konveyor-tests` repository.
+
+**Why this is needed:**
+- The `go-konveyor-tests` repository contains integration tests that verify analysis results
+- Your new rules will change the analysis output (new violations, dependencies, tags)
+- CI test expectations need to be updated to reflect these changes
+
+**See:** [Updating CI Tests Guide](updating-ci-tests.md) for complete step-by-step instructions.
+
+**Quick workflow:**
 ```bash
-# Push to your fork
-git push origin add-spring-boot-4.0-mongodb-rules
+# 1. Run Kantra analysis on test application
+kantra analyze \
+    --input /path/to/test/application \
+    --output /tmp/analysis-output \
+    --rules /path/to/your/konveyor-rulesets \
+    --target cloud-readiness \
+    --target quarkus
 
-# Create PR on GitHub
-# https://github.com/konveyor/rulesets/compare
+# 2. Update test case expectations
+python scripts/update_test_dependencies.py \
+    --analysis-dir /tmp/analysis-output \
+    --normalize-path "/shared/source/sample" \
+    --test-case ~/go-konveyor-tests/analysis/tc_daytrader_deps.go
+
+# 3. Review and submit PR to go-konveyor-tests
+cd ~/go-konveyor-tests
+git diff analysis/tc_daytrader_deps.go
+git add analysis/tc_daytrader_deps.go
+git commit -s -m "Update DayTrader test case for new Spring Boot migration rules"
+git push origin update-daytrader-deps
 ```
 
-**PR Description Template:**
+**Reference documentation:**
+- [Updating CI Tests Guide](updating-ci-tests.md) - Complete workflow
+- [CI Test Updater Script Reference](ci-test-updater.md) - Script documentation
+
+### Phase 7: Submit Pull Requests
+
+You will submit **two pull requests** that need to be reviewed together:
+
+```bash
+# PR #1: Rules to konveyor/rulesets
+git push origin add-spring-boot-4.0-mongodb-rules
+# Create PR at https://github.com/konveyor/rulesets/compare
+
+# PR #2: Test expectations to konveyor/go-konveyor-tests
+cd ~/go-konveyor-tests
+git push origin update-daytrader-deps
+# Create PR at https://github.com/konveyor/go-konveyor-tests/compare
+```
+
+**Important:** Link the two PRs together by referencing each in the PR descriptions.
+
+**PR Description Template (konveyor/rulesets):**
 ```markdown
 ## Description
 
@@ -396,6 +442,10 @@ kantra test tests/spring-boot-3.5-to-4.0-mongodb.test.yaml
 # ✓ All 13 tests passed
 ```
 
+## Related PR
+
+- go-konveyor-tests PR: [link to PR updating test expectations]
+
 ## Checklist
 
 - [x] Rules follow naming conventions
@@ -403,8 +453,41 @@ kantra test tests/spring-boot-3.5-to-4.0-mongodb.test.yaml
 - [x] Test file created with matching name
 - [x] Test data application created
 - [x] All tests pass locally with kantra
+- [x] CI test expectations updated in go-konveyor-tests
 - [x] Commit message follows guidelines
 - [x] Branch is up-to-date with main
+```
+
+**PR Description Template (go-konveyor-tests):**
+```markdown
+## Description
+
+Updates CI test expectations for new Spring Boot 3.5 to 4.0 MongoDB migration rules.
+
+## Changes
+
+- Updated `tc_daytrader_deps.go` with new insights, dependencies, and tags
+
+## Analysis Results
+
+- **Insights:** 32 violations found
+- **Effort:** 430 (increased from 318 due to new rules)
+- **Dependencies:** 8 technology dependencies
+- **Tags:** 69 technology tags
+
+## Related PR
+
+- konveyor/rulesets PR: [link to rules PR]
+
+## Testing
+
+Generated from Kantra analysis output using:
+```bash
+python scripts/update_test_dependencies.py \
+    --analysis-dir /tmp/analysis-output \
+    --normalize-path "/shared/source/sample" \
+    --test-case analysis/tc_daytrader_deps.go
+```
 ```
 
 ## Best Practices
@@ -600,6 +683,8 @@ This follows the same pattern and can be used as a reference.
 
 Before submitting to Konveyor:
 
+### Rules Submission (konveyor/rulesets)
+
 - [ ] Rules generated with AI from authoritative migration guide
 - [ ] Rule IDs follow naming convention (5-digit, increments of 10)
 - [ ] Rule file named descriptively with hyphens
@@ -611,5 +696,14 @@ Before submitting to Konveyor:
 - [ ] Feature branch created from latest main
 - [ ] Files added to appropriate technology directory
 - [ ] Commit message is descriptive and references migration guide
-- [ ] PR description includes testing evidence and rule summary
 - [ ] Branch is up-to-date with upstream main
+
+### CI Test Expectations (go-konveyor-tests)
+
+- [ ] Ran Kantra analysis on test application with new rules
+- [ ] Updated test case file using `update_test_dependencies.py`
+- [ ] Used `--normalize-path "/shared/source/sample"` parameter
+- [ ] Reviewed changes to insights, effort, dependencies, and tags
+- [ ] Committed with DCO sign-off (`git commit -s`)
+- [ ] Created PR to go-konveyor-tests
+- [ ] Linked both PRs together in descriptions

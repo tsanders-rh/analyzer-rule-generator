@@ -107,8 +107,22 @@ def parse_analyzer_output(file_path: Path) -> List[Dependency]:
             print(f"Warning: Unrecognized format, attempting to extract dependencies", file=sys.stderr)
             deps_data = []
     elif isinstance(data, list):
-        # Format 4: Direct list of dependencies
-        deps_data = data
+        # Format 4: Kantra dependencies.yaml format - list of file objects
+        # Each object has: {fileURI: ..., provider: ..., dependencies: [...]}
+        # We need to extract all dependencies from all files
+        deps_data = []
+        for file_obj in data:
+            if isinstance(file_obj, dict) and 'dependencies' in file_obj:
+                file_provider = file_obj.get('provider', 'java')
+                for dep in file_obj['dependencies']:
+                    # Add file-level provider if not set on dependency
+                    if isinstance(dep, dict) and 'provider' not in dep:
+                        dep['provider'] = file_provider
+                    deps_data.append(dep)
+
+        # If we didn't find any nested dependencies, treat as direct list
+        if not deps_data:
+            deps_data = data
     else:
         print(f"Error: Unexpected data format", file=sys.stderr)
         sys.exit(1)

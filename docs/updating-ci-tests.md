@@ -115,7 +115,8 @@ kantra analyze \
 
 **Output location:**
 The analysis creates a directory (`./analysis-output/`) containing:
-- `output.yaml` - Main analysis results with dependencies
+- `dependencies.yaml` - **Dependency analysis results (use this for the update script)**
+- `output.yaml` - Rule violations and analysis results
 - `static-report/` - HTML report
 - Other metadata files
 
@@ -130,18 +131,18 @@ source venv/bin/activate
 
 # Preview what will be updated (recommended first step)
 python scripts/update_test_dependencies.py \
-    --analyzer-output /path/to/analysis-output/output.yaml \
+    --analyzer-output /path/to/analysis-output/dependencies.yaml \
     --test-case /path/to/go-konveyor-tests/analysis/tc_daytrader_deps.go \
     --print-only
 
 # If it looks good, update the file
 python scripts/update_test_dependencies.py \
-    --analyzer-output /path/to/analysis-output/output.yaml \
+    --analyzer-output /path/to/analysis-output/dependencies.yaml \
     --test-case /path/to/go-konveyor-tests/analysis/tc_daytrader_deps.go
 ```
 
 **Script options:**
-- `--analyzer-output` - Path to Kantra's `output.yaml` file
+- `--analyzer-output` - Path to Kantra's `dependencies.yaml` file
 - `--test-case` - Path to the test case `.go` file to update
 - `--print-only` - Preview changes without writing (optional)
 
@@ -255,7 +256,7 @@ kantra analyze \
 cd ~/analyzer-rule-generator
 source venv/bin/activate
 python scripts/update_test_dependencies.py \
-    --analyzer-output /tmp/daytrader-analysis/output.yaml \
+    --analyzer-output /tmp/daytrader-analysis/dependencies.yaml \
     --test-case ~/go-konveyor-tests/analysis/tc_daytrader_deps.go
 
 # 6. Review and commit
@@ -316,6 +317,19 @@ cat analysis/tc_daytrader_deps.go | grep "konveyor.io/target"
 **Link to test cases:** Browse [go-konveyor-tests/analysis/](https://github.com/konveyor/go-konveyor-tests/tree/main/analysis) to see all available test cases and their configurations.
 
 ## Troubleshooting
+
+### Script generates empty dependencies list
+
+The script outputs `Dependencies: []api.TechDependency{}` with no dependencies.
+
+**Cause:** You're pointing to the wrong file. Kantra creates multiple YAML files.
+
+**Solution:**
+- Use `dependencies.yaml` NOT `output.yaml`
+- Correct: `--analyzer-output /path/to/analysis-output/dependencies.yaml`
+- Wrong: `--analyzer-output /path/to/analysis-output/output.yaml`
+
+The `output.yaml` file contains rule violations, while `dependencies.yaml` contains the actual dependency list.
 
 ### "Could not find Dependencies section"
 

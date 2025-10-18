@@ -1,21 +1,20 @@
 - ruleID: patternfly-v5-to-patternfly-v6-component-replacement-00000
-  description: import { Chip } from '@patternfly/react-core'; should be replaced with
-    import { Label } from '@patternfly/react-core';
+  description: import { Chip } from '@patternfly/react-core' should be replaced with
+    import { Label } from '@patternfly/react-core'
   effort: 3
   category: potential
   labels:
   - konveyor.io/source=patternfly-v5
   - konveyor.io/target=patternfly-v6
   when:
-    java.referenced:
-      pattern: '@patternfly/react-core.Chip'
-      location: IMPORT
-  message: 'The ''Chip'' component is replaced by the ''Label'' component in PatternFly
-    6.
+    builtin.filecontent:
+      pattern: import\s*\{\s*Chip\s*\}\s*from\s*['"]@patternfly/react-core['"]
+      filePattern: '*.{ts,tsx,js,jsx}'
+  message: 'The Chip component is replaced by the Label component in PatternFly 6.
 
 
-    Replace `import { Chip } from ''@patternfly/react-core'';` with `import { Label
-    } from ''@patternfly/react-core'';`.
+    Replace `import { Chip } from ''@patternfly/react-core''` with `import { Label
+    } from ''@patternfly/react-core''`.
 
 
     Before:
@@ -35,27 +34,26 @@
 
     ```'
   links:
-  - url: https://www.patternfly.org/v6/components/label
+  - url: https://v5-archive.patternfly.org/components/chip
     title: patternfly-v6 Documentation
   customVariables: []
 - ruleID: patternfly-v5-to-patternfly-v6-component-replacement-00010
-  description: import { Tile } from '@patternfly/react-core'; should be replaced with
-    import { Card } from '@patternfly/react-core';
+  description: import { Tile } from '@patternfly/react-core' should be replaced with
+    import { Card } from '@patternfly/react-core'
   effort: 3
   category: potential
   labels:
   - konveyor.io/source=patternfly-v5
   - konveyor.io/target=patternfly-v6
   when:
-    java.referenced:
-      pattern: '@patternfly/react-core.Tile'
-      location: IMPORT
-  message: 'The ''Tile'' component is replaced by the ''Card'' component in PatternFly
-    6.
+    builtin.filecontent:
+      pattern: import\s*\{\s*Tile\s*\}\s*from\s*['"]@patternfly/react-core['"]
+      filePattern: '*.{ts,tsx,js,jsx}'
+  message: 'The Tile component is replaced by the Card component in PatternFly 6.
 
 
-    Replace `import { Tile } from ''@patternfly/react-core'';` with `import { Card
-    } from ''@patternfly/react-core'';`.
+    Replace `import { Tile } from ''@patternfly/react-core''` with `import { Card
+    } from ''@patternfly/react-core''`.
 
 
     Before:
@@ -75,26 +73,26 @@
 
     ```'
   links:
-  - url: https://www.patternfly.org/v6/components/card
+  - url: https://v5-archive.patternfly.org/components/tile
     title: patternfly-v6 Documentation
   customVariables: []
 - ruleID: patternfly-v5-to-patternfly-v6-component-replacement-00020
-  description: import { Text } from '@patternfly/react-core'; should be replaced with
-    import { Content } from '@patternfly/react-core';
+  description: import { Text } from '@patternfly/react-core' should be replaced with
+    import { Content } from '@patternfly/react-core'
   effort: 3
   category: potential
   labels:
   - konveyor.io/source=patternfly-v5
   - konveyor.io/target=patternfly-v6
   when:
-    java.referenced:
-      pattern: '@patternfly/react-core.Text'
-      location: IMPORT
-  message: 'The ''Text'' component is renamed to ''Content'' in PatternFly 6.
+    builtin.filecontent:
+      pattern: import\s*\{\s*Text\s*\}\s*from\s*['"]@patternfly/react-core['"]
+      filePattern: '*.{ts,tsx,js,jsx}'
+  message: 'The Text component is renamed to Content in PatternFly 6.
 
 
-    Replace `import { Text } from ''@patternfly/react-core'';` with `import { Content
-    } from ''@patternfly/react-core'';`.
+    Replace `import { Text } from ''@patternfly/react-core''` with `import { Content
+    } from ''@patternfly/react-core''`.
 
 
     Before:
@@ -114,6 +112,6 @@
 
     ```'
   links:
-  - url: https://www.patternfly.org/v6/components/content
+  - url: https://v5-archive.patternfly.org/components/text
     title: patternfly-v6 Documentation
   customVariables: []

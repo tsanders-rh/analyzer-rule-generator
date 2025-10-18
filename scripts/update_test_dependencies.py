@@ -9,17 +9,37 @@ This script:
 
 Usage:
     python scripts/update_test_dependencies.py \
-        --analyzer-output analysis_output.yaml \
+        --analyzer-output /path/to/output/output.yaml \
         --test-case tc_myapp_deps.go
 
-Example analyzer output format (YAML):
-    dependencies:
-      - name: "org.springframework.boot"
-        version: "2.5.0"
-        provider: "java"
-      - name: "@patternfly/react-core"
-        version: "5.0.0"
-        provider: "nodejs"
+Kantra Output Location:
+    After running: kantra analyze --input myapp --output analysis_output
+
+    The dependencies are typically in one of these files:
+    - analysis_output/output.yaml (main analysis results)
+    - analysis_output/dependencies.yaml (if separate)
+
+    Look for YAML with structure like:
+      dependencies:
+        - name: "org.springframework.boot:spring-boot-starter-web"
+          version: "2.7.0"
+          labels:
+            - "konveyor.io/dep-source=java"
+
+Example analyzer output formats supported:
+
+    Format 1 (Konveyor standard):
+      dependencies:
+        - name: "org.springframework.boot:spring-boot-starter-web"
+          version: "2.7.0"
+          labels:
+            - "konveyor.io/dep-source=java"
+
+    Format 2 (Simple):
+      dependencies:
+        - name: "org.springframework.boot"
+          version: "2.5.0"
+          provider: "java"
 """
 import argparse
 import sys
@@ -98,7 +118,19 @@ def parse_analyzer_output(file_path: Path) -> List[Dependency]:
         if isinstance(dep, dict):
             name = dep.get('name') or dep.get('Name', '')
             version = dep.get('version') or dep.get('Version', '')
-            provider = dep.get('provider') or dep.get('Provider', 'java')
+            provider = dep.get('provider') or dep.get('Provider')
+
+            # If provider not explicitly set, try to extract from labels
+            if not provider:
+                labels = dep.get('labels', [])
+                for label in labels:
+                    if 'dep-source=' in label:
+                        provider = label.split('dep-source=')[1]
+                        break
+
+            # Default to java if still not found
+            if not provider:
+                provider = 'java'
 
             if name:  # Only add if we have a name
                 dependencies.append(Dependency(name, version, provider))

@@ -1,0 +1,24 @@
+# Example kantra analyze output format
+# This would typically be found in: <output-dir>/output.yaml
+# after running: kantra analyze --input myapp --output <output-dir>
+
+dependencies:
+  - name: "org.springframework.boot:spring-boot-starter-web"
+    version: "2.7.14"
+    labels:
+      - "konveyor.io/dep-source=java"
+
+  - name: "org.hibernate:hibernate-core"
+    version: "5.6.15.Final"
+    labels:
+      - "konveyor.io/dep-source=java"
+
+  - name: "jakarta.persistence:jakarta.persistence-api"
+    version: "3.1.0"
+    labels:
+      - "konveyor.io/dep-source=java"
+
+  - name: "javax.servlet:javax.servlet-api"
+    version: "4.0.1"
+    labels:
+      - "konveyor.io/dep-source=java"

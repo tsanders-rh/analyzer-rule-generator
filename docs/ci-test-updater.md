@@ -85,7 +85,52 @@ python scripts/update_test_dependencies.py \
 ### Parameters for New Test Cases
 
 - `--test-name NAME` - Test case name (required when using `--output`)
+  - Used for the TC `Name` field
+  - Can be simple ("Daytrader") or descriptive ("Coolstore Source and Deps analysis")
+  - Examples: "DayTrader Analysis", "Spring Boot to Quarkus Migration"
+
 - `--app-name NAME` - Application name (required when using `--output`)
+  - Used to reference `data.AppName` in the generated code
+  - **Must match an existing application variable in `go-konveyor-tests/data/application.go`**
+  - Use PascalCase matching the data package variable name
+  - Examples: "Daytrader", "Coolstore", "BookServer", "TackleTestappPublic"
+  - If creating a new test app, you'll need to add it to `data/application.go` first
+
+## Naming Conventions
+
+When creating new test cases, follow these naming conventions to match the existing go-konveyor-tests structure:
+
+### File Naming
+
+Test case files should be named: `tc_<appname>_<variant>.go`
+
+**Examples:**
+- `tc_daytrader_deps.go` - DayTrader with dependencies
+- `tc_coolstore_deps_quarkus.go` - Coolstore using Quarkus branch
+- `tc_book-server_verified.go` - Book Server verified test
+
+### Variable Naming
+
+Go variable names should be PascalCase with a descriptive suffix:
+
+**Examples:**
+- `DaytraderWithDeps` - for DayTrader with dependency analysis
+- `CoolstoreWithDepsQuarkus` - for Coolstore Quarkus variant
+- `BookServerVerified` - for verified Book Server test
+
+### Application References
+
+The `--app-name` parameter **must** match an existing application in `go-konveyor-tests/data/application.go`:
+
+**Common applications:**
+- `Daytrader` → data.Daytrader
+- `Coolstore` → data.Coolstore
+- `TackleTestappPublic` → data.TackleTestappPublic
+- `BookServer` → data.BookServer
+
+**If your application doesn't exist:**
+1. First add it to `data/application.go` following the existing pattern
+2. Then run the test case generator with the new app name
 
 ## Kantra Analysis Directory Structure
 

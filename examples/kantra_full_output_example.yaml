@@ -1,0 +1,47 @@
+# Example of full kantra analyze output showing incidents and dependencies
+# This would typically be found in: <output-dir>/output.yaml
+
+# Violations/Incidents found by rules
+violations:
+  spring-boot-upgrade-00010:
+    description: "Deprecated Spring Boot API usage"
+    category: mandatory
+    incidents:
+      - uri: "file:///app/src/main/java/com/example/App.java"
+        message: "Update Spring Boot version"
+        codeSnip: "import org.springframework.boot.*"
+        lineNumber: 15
+
+  hibernate-upgrade-00020:
+    description: "Hibernate API change"
+    category: potential
+    incidents:
+      - uri: "file:///app/src/main/java/com/example/Repository.java"
+        message: "Update Hibernate SessionFactory"
+        lineNumber: 42
+
+# All dependencies found (from all rules + dependency analysis)
+dependencies:
+  - name: "org.springframework.boot:spring-boot-starter-web"
+    version: "2.7.14"
+    labels:
+      - "konveyor.io/dep-source=java"
+    foundBy: "spring-boot-upgrade-00010"  # Which rule found it
+
+  - name: "org.hibernate:hibernate-core"
+    version: "5.6.15.Final"
+    labels:
+      - "konveyor.io/dep-source=java"
+    foundBy: "hibernate-upgrade-00020"
+
+  - name: "jakarta.persistence:jakarta.persistence-api"
+    version: "3.1.0"
+    labels:
+      - "konveyor.io/dep-source=java"
+    foundBy: "builtin-dependency-analyzer"
+
+  - name: "javax.servlet:javax.servlet-api"
+    version: "4.0.1"
+    labels:
+      - "konveyor.io/dep-source=java"
+    foundBy: "builtin-dependency-analyzer"

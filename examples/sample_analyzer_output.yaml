@@ -1,0 +1,16 @@
+# Sample analyzer output for testing dependency updater
+# This would typically come from running: kantra analyze ...
+
+dependencies:
+  - name: "org.springframework.boot"
+    version: "3.0.0"
+    provider: "java"
+  - name: "javax.servlet.servlet-api"
+    version: "4.0.1"
+    provider: "java"
+  - name: "org.hibernate.hibernate-core"
+    version: "6.1.0"
+    provider: "java"
+  - name: "jakarta.persistence.jakarta.persistence-api"
+    version: "3.1.0"
+    provider: "java"

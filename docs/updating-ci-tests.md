@@ -137,8 +137,9 @@ git diff analysis/tc_daytrader_deps.go
 # Stage the changes
 git add analysis/tc_daytrader_deps.go
 
-# Commit with descriptive message
-git commit -m "Update DayTrader dependencies for new Spring Boot migration rules
+# Commit with descriptive message and DCO sign-off
+# Note: The -s flag adds "Signed-off-by" for DCO compliance
+git commit -s -m "Update DayTrader dependencies for new Spring Boot migration rules
 
 Added dependencies detected by new rules:
 - spring-boot-to-quarkus-00010
@@ -148,6 +149,8 @@ Added dependencies detected by new rules:
 # Push to YOUR fork
 git push origin update-deps-for-my-rules
 ```
+
+**Important:** Konveyor requires DCO (Developer Certificate of Origin) sign-off on all commits. Always use `git commit -s` to automatically add the sign-off.
 
 ### 7. Create Pull Request
 
@@ -216,7 +219,7 @@ python scripts/update_test_dependencies.py \
 cd ~/go-konveyor-tests
 git diff analysis/tc_daytrader_deps.go
 git add analysis/tc_daytrader_deps.go
-git commit -m "Update DayTrader deps for Spring Boot migration rules"
+git commit -s -m "Update DayTrader deps for Spring Boot migration rules"
 git push origin update-daytrader-deps
 
 # 6. Create PR on GitHub

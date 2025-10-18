@@ -15,6 +15,8 @@ The Analyzer Rule Generator uses Large Language Models (LLMs) to automatically e
 - **Flexible LLM Support**: OpenAI, Anthropic Claude, Google Gemini
 - **Smart Provider Detection**: Automatically uses Java or Builtin provider based on detected language
 - **Pattern Detection**: Extracts fully qualified class names, regex patterns, and file globs
+- **Test Data Generation**: AI-powered generation of test applications for rule validation
+- **CI Test Updater**: Automated updates to go-konveyor-tests expectations
 
 ## Quick Start
 
@@ -37,39 +39,43 @@ python scripts/generate_rules.py \
 
 ```mermaid
 flowchart TD
-    A[📄 Migration Guide] --> B[🤖 LLM Extraction]
-    B --> C{Language Detection}
+    A[📄 Migration Guide] --> B[🤖 Generate Rules]
+    B --> C[📋 Konveyor Rules]
+    C --> D[🤖 Generate Test Data]
+    D --> E[🧪 Kantra Test]
 
-    C -->|Java| D[Java Provider<br/>✓ Fully Qualified Names<br/>✓ Location Types]
-    C -->|TypeScript/React/Go/Python| E[Builtin Provider<br/>✓ Regex Patterns<br/>✓ File Globs]
+    E -->|Pass| F[📦 Submit to konveyor/rulesets]
+    E -->|Fail| D
 
-    D --> F[📋 Konveyor Rules]
-    E --> F
-    F --> G[🔬 Analyzer]
+    F --> G[🔬 Run Analysis]
+    G --> H[🔄 Update CI Tests]
+    H --> I[📦 Submit to go-konveyor-tests]
+
+    F -.Link PRs.-> I
 
     style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
     style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style C fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    style D fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
-    style E fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
-    style F fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style C fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style D fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style E fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style F fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
     style G fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style I fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
 ```
 
-**Workflow Steps:**
+**Complete Workflow:**
 
-1. **Ingestion**: Fetches migration guide from URL or file
-2. **Language Detection**: Analyzes code examples to determine Java vs TypeScript/Go/Python/etc.
-3. **Extraction**: LLM identifies migration patterns with:
-   - Source and target patterns (e.g., `@Stateless` → `@ApplicationScoped`, `isDisabled` → `isAriaDisabled`)
-   - For Java: Fully qualified class names and location types (ANNOTATION, IMPORT, METHOD_CALL, etc.)
-   - For other languages: Regex patterns and file globs (e.g., `*.{tsx,jsx}`, `*.go`)
-   - Migration complexity and rationale
-4. **Generation**: Converts patterns to Konveyor analyzer rules with:
-   - `when` conditions using Java or Builtin provider
-   - `message` with migration guidance
-   - `effort` scores
-   - `links` to documentation
+1. **Generate Rules**: LLM extracts migration patterns from documentation
+   - Detects language (Java vs TypeScript/React/Go/Python)
+   - For Java: Fully qualified class names and location types
+   - For others: Regex patterns and file globs
+2. **Generate Test Data**: AI creates test applications with violations
+3. **Test Locally**: Validate rules with Kantra
+4. **Submit Rules**: PR to konveyor/rulesets
+5. **Run Analysis**: Test rules on reference applications
+6. **Update CI Tests**: Automated update of go-konveyor-tests expectations
+7. **Submit Tests**: PR to go-konveyor-tests (linked with rules PR)
 
 ## Examples
 
@@ -145,16 +151,24 @@ See [Rule Viewers Guide](docs/RULE_VIEWERS.md) for more options.
 
 ## Documentation
 
-- [Quick Start Guide](docs/QUICKSTART.md)
-- [Rule Viewers Guide](docs/RULE_VIEWERS.md)
-- [Konveyor Submission Guide](docs/konveyor-submission-guide.md)
-- [Java Rule Schema](docs/java-rule-schema.md)
+**Getting Started:**
+- [Quick Start Guide](docs/QUICKSTART.md) - Fast introduction to generating rules
+- [Rule Viewers Guide](docs/RULE_VIEWERS.md) - View and explore generated rules
+
+**Konveyor Submission:**
+- [Konveyor Submission Guide](docs/konveyor-submission-guide.md) - Complete end-to-end submission workflow
+- [Updating CI Tests](docs/updating-ci-tests.md) - Step-by-step guide for go-konveyor-tests
+- [CI Test Updater Reference](docs/ci-test-updater.md) - Script documentation
+
+**Technical Reference:**
+- [Java Rule Schema](docs/java-rule-schema.md) - Rule structure and syntax
 
 ## Integration with Konveyor
 
-Generated rules can be used with:
+Generated rules and tests integrate with:
 - [Konveyor Analyzer](https://github.com/konveyor/analyzer-lsp) - Static analysis engine
 - [Konveyor Rulesets](https://github.com/konveyor/rulesets) - Official rule repository
+- [go-konveyor-tests](https://github.com/konveyor/go-konveyor-tests) - CI test expectations
 
 ## Requirements
 

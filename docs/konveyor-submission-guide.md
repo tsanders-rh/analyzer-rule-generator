@@ -82,6 +82,43 @@ cd rulesets
 git remote add upstream https://github.com/konveyor/rulesets.git
 ```
 
+### 3. Understanding DCO Requirements
+
+**IMPORTANT:** All Konveyor repositories require DCO (Developer Certificate of Origin) sign-off on commits.
+
+**What is DCO?**
+- A lightweight way to certify that you wrote or have the right to submit the code
+- Required by Konveyor for all contributions
+- Added automatically with the `-s` flag when committing
+
+**How to sign commits:**
+```bash
+# Always use -s flag when committing to Konveyor repositories
+git commit -s -m "Your commit message"
+
+# This adds a "Signed-off-by" line to your commit message
+# Signed-off-by: Your Name <your.email@example.com>
+```
+
+**If you forget:**
+```bash
+# Amend the last commit to add sign-off
+git commit --amend -s --no-edit
+
+# For multiple commits, use interactive rebase
+git rebase -i HEAD~3  # for last 3 commits
+# Mark commits as 'edit', then for each:
+git commit --amend -s --no-edit
+git rebase --continue
+```
+
+**Configure git globally:**
+```bash
+# Set your name and email (required for DCO)
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+```
+
 ## Understanding the Repository Structure
 
 ### Directory Layout
@@ -339,8 +376,9 @@ kantra test $TARGET_DIR/tests/*.test.yaml
 # Stage changes
 git add $TARGET_DIR/
 
-# Commit
-git commit -m "Add Spring Boot 3.5 to 4.0 MongoDB migration rules
+# Commit with DCO sign-off
+# Note: Konveyor requires DCO (Developer Certificate of Origin) on all commits
+git commit -s -m "Add Spring Boot 3.5 to 4.0 MongoDB migration rules
 
 Generated rules for MongoDB property migrations in Spring Boot 4.0.
 Includes test cases covering property renames from spring.data.mongodb.*

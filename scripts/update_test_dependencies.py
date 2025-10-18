@@ -219,7 +219,75 @@ def parse_analyzer_output(file_path: Path) -> List[Dependency]:
     return dependencies
 
 
-def parse_violations(file_path: Path) -> tuple[List[Insight], int, List[Tag]]:
+def normalize_incident_path(file_path: str, target_prefix: str) -> str:
+    """
+    Normalize an incident file path by finding the project structure
+    and replacing the local prefix with the target prefix.
+
+    Args:
+        file_path: Original file path from analysis
+        target_prefix: Target prefix (e.g., "/shared/source/sample")
+
+    Returns:
+        Normalized file path
+    """
+    # Try to find a project module directory pattern
+    # Look for directories that match patterns like: projectname-module-name
+    # e.g., daytrader-ee7-web, daytrader-ee7-ejb, myapp-web, myapp-ejb
+    parts = file_path.split('/')
+    project_root_idx = -1
+
+    for i, part in enumerate(parts):
+        # Look for patterns with hyphens that indicate project modules
+        # Must start with a letter and contain hyphens (typical Maven/Gradle project structure)
+        if '-' in part and (
+            part.endswith('-web') or
+            part.endswith('-ejb') or
+            part.endswith('-ear') or
+            part.endswith('-war') or
+            '-ee7-' in part or
+            '-ee8-' in part or
+            '-ee9-' in part
+        ):
+            project_root_idx = i
+            break
+
+    if project_root_idx > 0:
+        # Found project module, rebuild path from this point
+        relative_parts = parts[project_root_idx:]
+        return target_prefix.rstrip('/') + '/' + '/'.join(relative_parts)
+
+    # Fallback: Look for pom.xml or src directory
+    for i, part in enumerate(parts):
+        if part == 'pom.xml':
+            # Check if this is a root pom.xml (no module before it)
+            # Look back to see if there's a module directory
+            has_module = False
+            for j in range(i-1, -1, -1):
+                prev_part = parts[j]
+                if '-' in prev_part and (prev_part.endswith('-web') or prev_part.endswith('-ejb') or
+                                        prev_part.endswith('-ear') or '-ee' in prev_part):
+                    has_module = True
+                    break
+
+            if not has_module and i > 0:
+                # Root pom.xml - just use the filename
+                return target_prefix.rstrip('/') + '/' + part
+            elif i > 0:
+                # Module pom.xml - include the module directory
+                relative_parts = parts[i-1:]
+                return target_prefix.rstrip('/') + '/' + '/'.join(relative_parts)
+
+        if part == 'src' and i > 0:
+            # Go back one level to get the module directory
+            relative_parts = parts[i-1:]
+            return target_prefix.rstrip('/') + '/' + '/'.join(relative_parts)
+
+    # Last resort: just prepend target prefix to basename
+    return target_prefix.rstrip('/') + '/' + file_path.split('/')[-1]
+
+
+def parse_violations(file_path: Path, normalize_path: str = None) -> tuple[List[Insight], int, List[Tag]]:
     """
     Parse output.yaml file and extract violations/insights, effort, and tags.
 
@@ -285,6 +353,10 @@ def parse_violations(file_path: Path) -> tuple[List[Insight], int, List[Tag]]:
                 file_path_str = uri
                 if uri.startswith('file://'):
                     file_path_str = uri[7:]  # Remove file:// prefix
+
+                # Normalize path if requested
+                if normalize_path:
+                    file_path_str = normalize_incident_path(file_path_str, normalize_path)
 
                 incidents.append(Incident(file_path_str, line_number, message))
 
@@ -547,6 +619,11 @@ Examples:
     )
 
     parser.add_argument(
+        '--normalize-path',
+        help='Normalize incident file paths by replacing local prefix with this value (e.g., "/shared/source/sample")'
+    )
+
+    parser.add_argument(
         '--test-case',
         help='Path to existing test case file to update'
     )
@@ -603,9 +680,11 @@ Examples:
 
     # Parse violations
     print(f"Parsing violations: {output_file}")
-    insights, effort, tags = parse_violations(output_file)
+    insights, effort, tags = parse_violations(output_file, args.normalize_path)
     print(f"  ✓ Found {len(insights)} insights (total effort: {effort})")
     print(f"  ✓ Found {len(tags)} tags")
+    if args.normalize_path:
+        print(f"  ✓ Normalized paths to: {args.normalize_path}")
 
     # Generate code
     if args.test_case:

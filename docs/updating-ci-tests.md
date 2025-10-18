@@ -145,6 +145,14 @@ python scripts/update_test_dependencies.py \
 - `--test-case` - Path to the test case `.go` file to update
 - `--print-only` - Preview changes without writing (optional)
 
+**Viewing your changes:**
+After running the script (without `--print-only`), use git to see what changed:
+```bash
+cd /path/to/go-konveyor-tests
+git diff analysis/tc_daytrader_deps.go
+```
+This shows you exactly which dependencies were added, removed, or updated.
+
 ### 5. Review Changes
 
 ```bash

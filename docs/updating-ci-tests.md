@@ -84,17 +84,15 @@ kantra analyze \
 
 # To find the correct source/target values, check the test case .go file:
 # Example from tc_daytrader_deps.go:
-#   Task: Task{{
-#       Data: addon.Data{{
-#           "mode.binary": "false",
-#           "mode.withDeps": "true",
-#           "sources": []string{{"java"}},
-#           "targets": []string{{"quarkus"}},
-#       }},
-#   }}
+#   Analysis: api.Analysis{
+#       Labels: []string{
+#           "konveyor.io/target=cloud-readiness",
+#           "konveyor.io/target=quarkus",
+#       },
+#   }
 #
-# In this example: --source java --target quarkus
-# Common combinations: java→quarkus, java→cloud-readiness, eap7→eap8, jakarta-ee→jakarta-ee9+
+# In this example: --target cloud-readiness --target quarkus
+# Use: grep "konveyor.io/target" to find them quickly
 ```
 
 **Where to get test applications:**
@@ -219,15 +217,16 @@ git checkout -b update-daytrader-deps
 # 2. Get test application
 git clone https://github.com/WASdev/sample.daytrader7.git /tmp/daytrader
 
-# 3. Check what source/target the test case uses
-cat ~/go-konveyor-tests/analysis/tc_daytrader_deps.go | grep -A 5 "Task:"
+# 3. Check what target labels the test case uses
+cat ~/go-konveyor-tests/analysis/tc_daytrader_deps.go | grep "konveyor.io/target"
+# Output: "konveyor.io/target=cloud-readiness", "konveyor.io/target=quarkus"
 
-# 4. Analyze with your new rules - MATCH the source/target from step 3!
+# 4. Analyze with your new rules - MATCH the targets from step 3!
 kantra analyze \
     --input /tmp/daytrader \
     --output /tmp/daytrader-analysis \
     --rules ~/rulesets/my-new-spring-rules.yaml \
-    --source java \
+    --target cloud-readiness \
     --target quarkus
 
 # 5. Update test case
@@ -253,33 +252,36 @@ Each test case file defines what source and target technologies it uses. Here's 
 
 **Example from `tc_daytrader_deps.go`:**
 ```go
-var Daytrader = TC{
-    Name: "DayTrader analysis",
-    Application: data.DayTrader,
-    Task: Task{{
-        Data: addon.Data{{
-            "mode.binary": "false",
-            "mode.withDeps": "true",
-            "sources": []string{{"java"}},        // This is --source
-            "targets": []string{{"quarkus"}},     // This is --target
-        }},
-    }},
+var DaytraderWithDeps = TC{
+    Name:     "Daytrader",
+    Application: data.Daytrader,
+    Task:     Analyze,
+    WithDeps: true,
     Analysis: api.Analysis{
+        Labels: []string{
+            "konveyor.io/target=cloud-readiness",  // These are the --target values
+            "konveyor.io/target=quarkus",
+        },
         Dependencies: []api.TechDependency{
             // ... dependencies here
         },
     },
-}}
+}
 ```
 
-**Quick command to find source/target:**
+In this example, you would run Kantra with:
 ```bash
-# View the Task section of any test case
-cat analysis/tc_daytrader_deps.go | grep -A 10 "Task:"
+kantra analyze --target cloud-readiness --target quarkus
+```
 
-# Output will show:
-#   "sources": []string{"java"},
-#   "targets": []string{"quarkus"},
+**Quick command to find target labels:**
+```bash
+# View the Labels section of any test case
+cat analysis/tc_daytrader_deps.go | grep "konveyor.io/target"
+
+# Output will show something like:
+#   "konveyor.io/target=cloud-readiness",
+#   "konveyor.io/target=quarkus",
 ```
 
 **Common source/target combinations:**

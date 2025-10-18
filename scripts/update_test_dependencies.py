@@ -367,13 +367,17 @@ def generate_go_tags(tags: List[Tag]) -> str:
     return tags_code
 
 
-def update_test_case_file(file_path: Path, dependencies_code: str) -> None:
+def update_test_case_file(file_path: Path, insights: List[Insight], effort: int,
+                          dependencies: List[Dependency], tags: List[Tag]) -> None:
     """
-    Update existing test case file with new dependencies.
+    Update existing test case file with new analysis results.
 
     Args:
         file_path: Path to test case .go file
-        dependencies_code: Generated Go dependencies code
+        insights: List of insights to update
+        effort: Total effort score
+        dependencies: List of dependencies to update
+        tags: List of tags to update
     """
     if not file_path.exists():
         print(f"Error: Test case file not found: {file_path}", file=sys.stderr)
@@ -382,26 +386,71 @@ def update_test_case_file(file_path: Path, dependencies_code: str) -> None:
     with open(file_path, 'r') as f:
         content = f.read()
 
-    # Pattern to match the Dependencies field
-    # This matches from "Dependencies:" to the closing "},"
-    pattern = r'(\s+Dependencies:\s+\[]api\.TechDependency\s*\{)[^}]*(\},)'
+    # Generate all sections
+    insights_code = generate_go_insights(insights).strip()
+    deps_code = generate_go_dependencies(dependencies).strip()
+    tags_code = generate_go_tags(tags).strip()
 
-    # Replace the dependencies section
-    updated_content = re.sub(
-        pattern,
-        r'\n' + dependencies_code.rstrip() + r'\n\t',
-        content,
-        flags=re.DOTALL
-    )
+    # Update Effort field (or add it if missing)
+    effort_pattern = r'\s+Effort:\s+\d+,'
+    if re.search(effort_pattern, content):
+        # Update existing Effort
+        content = re.sub(effort_pattern, f'\n\t\tEffort: {effort},', content)
+    else:
+        # Add Effort before Insights (or after Analysis{ if no Insights)
+        content = re.sub(
+            r'(Analysis:\s+api\.Analysis\{)',
+            rf'\1\n\t\tEffort: {effort},',
+            content
+        )
 
-    if updated_content == content:
-        print(f"Warning: Could not find Dependencies section to update in {file_path}", file=sys.stderr)
-        print("The file may need to be updated manually.", file=sys.stderr)
-        return
+    # Update Insights section
+    insights_pattern = r'(\s+Insights:\s+\[]api\.Insight\s*\{).*?(\n\s+\},)'
+    if re.search(insights_pattern, content, re.DOTALL):
+        content = re.sub(
+            insights_pattern,
+            r'\n' + insights_code + r'\n\t\t},',
+            content,
+            flags=re.DOTALL
+        )
+    else:
+        # Add Insights after Effort
+        content = re.sub(
+            r'(Effort:\s+\d+,)',
+            rf'\1\n{insights_code}',
+            content
+        )
+
+    # Update Dependencies section
+    deps_pattern = r'(\s+Dependencies:\s+\[]api\.TechDependency\s*\{).*?(\n\s+\},)'
+    if re.search(deps_pattern, content, re.DOTALL):
+        content = re.sub(
+            deps_pattern,
+            r'\n' + deps_code + r'\n\t\t},',
+            content,
+            flags=re.DOTALL
+        )
+
+    # Update AnalysisTags section
+    tags_pattern = r'(\s+AnalysisTags:\s+\[]api\.Tag\s*\{).*?(\n\s+\},)'
+    if re.search(tags_pattern, content, re.DOTALL):
+        content = re.sub(
+            tags_pattern,
+            r'\n' + tags_code + r'\n\t},',
+            content,
+            flags=re.DOTALL
+        )
+    else:
+        # Add AnalysisTags after closing Analysis brace
+        content = re.sub(
+            r'(\s+\},\n)(\})',
+            rf'\1{tags_code}\n\2',
+            content
+        )
 
     # Write back
     with open(file_path, 'w') as f:
-        f.write(updated_content)
+        f.write(content)
 
     print(f"✓ Updated {file_path}")
 
@@ -469,27 +518,22 @@ def main():
 Examples:
   # Update existing test case file:
   python scripts/update_test_dependencies.py \\
-      --analyzer-output analysis.yaml \\
+      --analysis-dir /path/to/analysis-output \\
       --test-case tc_myapp_deps.go
 
   # Generate new test case file:
   python scripts/update_test_dependencies.py \\
-      --analyzer-output analysis.yaml \\
+      --analysis-dir /path/to/analysis-output \\
       --output tc_newapp_deps.go \\
-      --test-name "NewApp Dependencies" \\
+      --test-name "NewApp Analysis" \\
       --app-name "NewApp"
         """
     )
 
     parser.add_argument(
-        '--analyzer-output',
+        '--analysis-dir',
         required=True,
-        help='Path to dependencies.yaml file from Kantra analysis'
-    )
-
-    parser.add_argument(
-        '--violations-output',
-        help='Path to output.yaml file from Kantra analysis (for full test case generation)'
+        help='Path to Kantra analysis output directory (contains dependencies.yaml and output.yaml)'
     )
 
     parser.add_argument(
@@ -529,31 +573,41 @@ Examples:
         print("Error: --test-name and --app-name are required when creating new file", file=sys.stderr)
         sys.exit(1)
 
+    # Find analysis files in directory
+    analysis_dir = Path(args.analysis_dir)
+    dependencies_file = analysis_dir / 'dependencies.yaml'
+    output_file = analysis_dir / 'output.yaml'
+
+    if not dependencies_file.exists():
+        print(f"Error: Could not find dependencies.yaml in {analysis_dir}", file=sys.stderr)
+        sys.exit(1)
+
+    if not output_file.exists():
+        print(f"Error: Could not find output.yaml in {analysis_dir}", file=sys.stderr)
+        sys.exit(1)
+
     # Parse dependencies
-    print(f"Parsing dependencies: {args.analyzer_output}")
-    dependencies = parse_analyzer_output(Path(args.analyzer_output))
+    print(f"Parsing dependencies: {dependencies_file}")
+    dependencies = parse_analyzer_output(dependencies_file)
     print(f"  ✓ Found {len(dependencies)} dependencies")
 
-    # Parse violations if provided
-    insights = []
-    effort = 0
-    tags = []
-    if args.violations_output:
-        print(f"Parsing violations: {args.violations_output}")
-        insights, effort, tags = parse_violations(Path(args.violations_output))
-        print(f"  ✓ Found {len(insights)} insights (total effort: {effort})")
-        print(f"  ✓ Found {len(tags)} tags")
+    # Parse violations
+    print(f"Parsing violations: {output_file}")
+    insights, effort, tags = parse_violations(output_file)
+    print(f"  ✓ Found {len(insights)} insights (total effort: {effort})")
+    print(f"  ✓ Found {len(tags)} tags")
 
     # Generate code
     if args.test_case:
-        # Update existing file (only dependencies for now)
-        deps_code = generate_go_dependencies(dependencies)
-
+        # Update existing file with all sections
         if args.print_only:
-            print("\nGenerated dependencies code:")
-            print(deps_code)
+            print("\nWould update test case with:")
+            print(f"  - Effort: {effort}")
+            print(f"  - {len(insights)} insights")
+            print(f"  - {len(dependencies)} dependencies")
+            print(f"  - {len(tags)} tags")
         else:
-            update_test_case_file(Path(args.test_case), deps_code)
+            update_test_case_file(Path(args.test_case), insights, effort, dependencies, tags)
 
     else:
         # Generate new file

@@ -122,7 +122,7 @@ The analysis creates a directory (`./analysis-output/`) containing:
 - `static-report/` - HTML report
 - Other metadata files
 
-### 4. Generate Complete Test Case
+### 4. Generate or Update Test Case
 
 Use the test case generator script to create a complete test case from the analysis results:
 
@@ -131,10 +131,9 @@ Use the test case generator script to create a complete test case from the analy
 cd /path/to/analyzer-rule-generator
 source venv/bin/activate
 
-# Generate complete test case (recommended approach)
+# Generate new test case (preview first with --print-only)
 python scripts/update_test_dependencies.py \
-    --analyzer-output /path/to/analysis-output/dependencies.yaml \
-    --violations-output /path/to/analysis-output/output.yaml \
+    --analysis-dir /path/to/analysis-output \
     --output /path/to/go-konveyor-tests/analysis/tc_myapp_new.go \
     --test-name "MyApp Analysis" \
     --app-name "MyApp" \
@@ -142,33 +141,33 @@ python scripts/update_test_dependencies.py \
 
 # If it looks good, generate the file (remove --print-only)
 python scripts/update_test_dependencies.py \
-    --analyzer-output /path/to/analysis-output/dependencies.yaml \
-    --violations-output /path/to/analysis-output/output.yaml \
+    --analysis-dir /path/to/analysis-output \
     --output /path/to/go-konveyor-tests/analysis/tc_myapp_new.go \
     --test-name "MyApp Analysis" \
     --app-name "MyApp"
 ```
 
 **Script options:**
-- `--analyzer-output` - Path to Kantra's `dependencies.yaml` file (required)
-- `--violations-output` - Path to Kantra's `output.yaml` file (optional, for full test case)
-- `--output` - Path for new test case file
-- `--test-name` - Test case name
-- `--app-name` - Application name
+- `--analysis-dir` - Path to Kantra analysis output directory (required)
+  - Script automatically finds `dependencies.yaml` and `output.yaml` in this directory
+- `--output` - Path for new test case file (for creating new)
+- `--test-case` - Path to existing test case file (for updating existing)
+- `--test-name` - Test case name (required when creating new)
+- `--app-name` - Application name (required when creating new)
 - `--print-only` - Preview generated code without writing (optional)
 
 **What gets generated:**
-When you provide both `dependencies.yaml` and `output.yaml`:
+The script automatically parses both files in the analysis directory and generates:
 - ✅ **Insights** - All violations found by rules with incidents
 - ✅ **Effort** - Total calculated effort score
 - ✅ **Dependencies** - All technology dependencies
 - ✅ **AnalysisTags** - Tags from violation labels
 
-**Updating existing test cases (dependencies only):**
+**Updating existing test cases:**
 ```bash
-# Update just the Dependencies section of an existing test case
+# Update all sections of an existing test case
 python scripts/update_test_dependencies.py \
-    --analyzer-output /path/to/analysis-output/dependencies.yaml \
+    --analysis-dir /path/to/analysis-output \
     --test-case /path/to/go-konveyor-tests/analysis/tc_daytrader_deps.go
 ```
 
@@ -282,8 +281,7 @@ kantra analyze \
 cd ~/analyzer-rule-generator
 source venv/bin/activate
 python scripts/update_test_dependencies.py \
-    --analyzer-output /tmp/daytrader-analysis/dependencies.yaml \
-    --violations-output /tmp/daytrader-analysis/output.yaml \
+    --analysis-dir /tmp/daytrader-analysis \
     --output ~/go-konveyor-tests/analysis/tc_daytrader_new.go \
     --test-name "Daytrader with new rules" \
     --app-name "Daytrader"
@@ -347,27 +345,18 @@ cat analysis/tc_daytrader_deps.go | grep "konveyor.io/target"
 
 ## Troubleshooting
 
-### Script generates empty dependencies or violations
+### Cannot find dependencies.yaml or output.yaml
 
-**Issue 1: Empty dependencies**
-The script outputs `Dependencies: []api.TechDependency{}` with no dependencies.
+**Error:** `Could not find dependencies.yaml in /path/to/analysis-output`
 
-**Cause:** You're pointing to the wrong file for `--analyzer-output`.
-
-**Solution:**
-- Use `dependencies.yaml` for `--analyzer-output`
-- Correct: `--analyzer-output /path/to/analysis-output/dependencies.yaml`
-- Wrong: `--analyzer-output /path/to/analysis-output/output.yaml`
-
-**Issue 2: No insights generated**
-The script doesn't generate any Insights section.
-
-**Cause:** You didn't provide `--violations-output` parameter.
+**Cause:** The `--analysis-dir` doesn't point to a Kantra analysis output directory.
 
 **Solution:**
-- Add `--violations-output /path/to/analysis-output/output.yaml`
-- The `output.yaml` file contains rule violations, while `dependencies.yaml` contains dependencies
-- Both files are needed for a complete test case
+- Verify the directory path: `ls /path/to/analysis-output`
+- Should contain: `dependencies.yaml`, `output.yaml`, `static-report/`
+- Point to the directory, not individual files
+- Correct: `--analysis-dir ~/Workspace/analysis-results`
+- Wrong: `--analysis-dir ~/Workspace/analysis-results/dependencies.yaml`
 
 ### "Could not find Dependencies section"
 

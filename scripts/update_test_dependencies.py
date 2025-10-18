@@ -50,6 +50,73 @@ from typing import List, Dict, Any
 import re
 
 
+class Incident:
+    """Represents an incident (single occurrence of a rule violation)."""
+
+    def __init__(self, file: str, line: int, message: str = ""):
+        self.file = file
+        self.line = line
+        self.message = message
+
+    def to_go_struct(self) -> str:
+        """Convert to Go api.Incident struct."""
+        return f'''{{
+\t\t\t\t\tFile: "{self.file}",
+\t\t\t\t\tLine: {self.line},
+\t\t\t\t}}'''
+
+
+class Insight:
+    """Represents an analysis insight (rule violation with incidents)."""
+
+    def __init__(self, category: str, description: str, effort: int,
+                 ruleset: str, rule: str, incidents: List['Incident']):
+        self.category = category
+        self.description = description
+        self.effort = effort
+        self.ruleset = ruleset
+        self.rule = rule
+        self.incidents = incidents
+
+    def to_go_struct(self) -> str:
+        """Convert to Go api.Insight struct."""
+        incidents_str = ""
+        if self.incidents:
+            incidents_str = "{\n"
+            for inc in self.incidents:
+                incidents_str += "\t\t\t\t" + inc.to_go_struct() + ",\n"
+            incidents_str += "\t\t\t}"
+        else:
+            incidents_str = "{}"
+
+        # Escape double quotes in description
+        desc_escaped = self.description.replace('"', '\\"').replace('\n', ' ')
+
+        return f'''{{
+\t\t\tCategory:    "{self.category}",
+\t\t\tDescription: "{desc_escaped}",
+\t\t\tEffort:      {self.effort},
+\t\t\tRuleSet:     "{self.ruleset}",
+\t\t\tRule:        "{self.rule}",
+\t\t\tIncidents:   []api.Incident{incidents_str},
+\t\t}}'''
+
+
+class Tag:
+    """Represents an analysis tag."""
+
+    def __init__(self, name: str, category: str):
+        self.name = name
+        self.category = category
+
+    def to_go_struct(self) -> str:
+        """Convert to Go api.Tag struct."""
+        return f'''{{
+\t\tName:     "{self.name}",
+\t\tCategory: api.Ref{{Name: "{self.category}"}},
+\t}}'''
+
+
 class Dependency:
     """Represents a technology dependency."""
 
@@ -152,6 +219,84 @@ def parse_analyzer_output(file_path: Path) -> List[Dependency]:
     return dependencies
 
 
+def parse_violations(file_path: Path) -> tuple[List[Insight], int, List[Tag]]:
+    """
+    Parse output.yaml file and extract violations/insights, effort, and tags.
+
+    Args:
+        file_path: Path to output.yaml file
+
+    Returns:
+        Tuple of (insights, total_effort, tags)
+    """
+    with open(file_path, 'r') as f:
+        content = f.read()
+
+    try:
+        data = yaml.safe_load(content)
+    except yaml.YAMLError:
+        print(f"Error: Could not parse {file_path} as YAML", file=sys.stderr)
+        sys.exit(1)
+
+    insights = []
+    total_effort = 0
+    tags_dict = {}  # Use dict to deduplicate tags
+
+    # data is a list of rulesets
+    if not isinstance(data, list):
+        print(f"Error: Expected output.yaml to contain a list of rulesets", file=sys.stderr)
+        sys.exit(1)
+
+    for ruleset in data:
+        ruleset_name = ruleset.get('name', '')
+        violations = ruleset.get('violations', {})
+
+        for rule_id, violation in violations.items():
+            category = violation.get('category', 'potential')
+            description = violation.get('description', '')
+            effort = violation.get('effort', 0)
+
+            # Parse incidents
+            incidents = []
+            for inc_data in violation.get('incidents', []):
+                uri = inc_data.get('uri', '')
+                line_number = inc_data.get('lineNumber', 0)
+                message = inc_data.get('message', '')
+
+                # Extract file path from URI
+                file_path_str = uri
+                if uri.startswith('file://'):
+                    file_path_str = uri[7:]  # Remove file:// prefix
+
+                incidents.append(Incident(file_path_str, line_number, message))
+
+            # Create insight
+            if incidents:  # Only add if there are incidents
+                insight = Insight(
+                    category=category,
+                    description=description,
+                    effort=effort,
+                    ruleset=ruleset_name,
+                    rule=rule_id,
+                    incidents=incidents
+                )
+                insights.append(insight)
+                total_effort += effort * len(incidents)  # Multiply effort by incident count
+
+            # Extract tags from labels
+            labels = violation.get('labels', [])
+            for label in labels:
+                # Skip konveyor.io labels, keep technology tags
+                if not label.startswith('konveyor.io/'):
+                    # Use label as tag name, category as "Technology" for now
+                    tags_dict[label] = Tag(label, "Technology")
+
+    # Convert tags dict to list
+    tags = list(tags_dict.values())
+
+    return insights, total_effort, tags
+
+
 def generate_go_dependencies(dependencies: List[Dependency]) -> str:
     """
     Generate Go code for Dependencies field.
@@ -173,6 +318,53 @@ def generate_go_dependencies(dependencies: List[Dependency]) -> str:
     deps_code += "\t\t},\n"
 
     return deps_code
+
+
+def generate_go_insights(insights: List[Insight]) -> str:
+    """
+    Generate Go code for Insights field.
+
+    Args:
+        insights: List of Insight objects
+
+    Returns:
+        Go code string
+    """
+    if not insights:
+        return "\t\tInsights: []api.Insight{},\n"
+
+    insights_code = "\t\tInsights: []api.Insight{\n"
+
+    # Sort by ruleset then rule for consistency
+    for insight in sorted(insights, key=lambda i: (i.ruleset, i.rule)):
+        insights_code += "\t\t" + insight.to_go_struct() + ",\n"
+
+    insights_code += "\t\t},\n"
+
+    return insights_code
+
+
+def generate_go_tags(tags: List[Tag]) -> str:
+    """
+    Generate Go code for AnalysisTags field.
+
+    Args:
+        tags: List of Tag objects
+
+    Returns:
+        Go code string
+    """
+    if not tags:
+        return "\tAnalysisTags: []api.Tag{},\n"
+
+    tags_code = "\tAnalysisTags: []api.Tag{\n"
+
+    for tag in sorted(tags, key=lambda t: t.name):
+        tags_code += "\t" + tag.to_go_struct() + ",\n"
+
+    tags_code += "\t},\n"
+
+    return tags_code
 
 
 def update_test_case_file(file_path: Path, dependencies_code: str) -> None:
@@ -217,7 +409,10 @@ def update_test_case_file(file_path: Path, dependencies_code: str) -> None:
 def generate_test_case_template(
     test_name: str,
     app_name: str,
-    dependencies: List[Dependency]
+    dependencies: List[Dependency],
+    insights: List[Insight] = None,
+    effort: int = 0,
+    tags: List[Tag] = None
 ) -> str:
     """
     Generate a complete test case file template.
@@ -226,11 +421,18 @@ def generate_test_case_template(
         test_name: Name of the test case
         app_name: Application name
         dependencies: List of dependencies
+        insights: List of insights (violations)
+        effort: Total effort score
+        tags: List of analysis tags
 
     Returns:
         Complete Go file content
     """
-    deps_code = generate_go_dependencies(dependencies).strip()
+    # Generate all sections
+    effort_line = f"\t\tEffort: {effort},\n" if effort > 0 else ""
+    insights_code = generate_go_insights(insights or []).rstrip()
+    deps_code = generate_go_dependencies(dependencies).rstrip()
+    tags_code = generate_go_tags(tags or []).rstrip()
 
     # Sanitize names for Go variable naming
     var_name = re.sub(r'[^a-zA-Z0-9]', '', test_name.title())
@@ -246,10 +448,13 @@ import (
 var {var_name} = TC{{
 \tName: "{test_name}",
 \tApplication: data.{app_name},
-\tTask: Task,
+\tTask: Analyze,
+\tWithDeps: true,
 \tAnalysis: api.Analysis{{
+{effort_line}{insights_code}
 {deps_code}
 \t}},
+{tags_code}
 }}
 '''
 
@@ -279,7 +484,12 @@ Examples:
     parser.add_argument(
         '--analyzer-output',
         required=True,
-        help='Path to analyzer output file (YAML or JSON)'
+        help='Path to dependencies.yaml file from Kantra analysis'
+    )
+
+    parser.add_argument(
+        '--violations-output',
+        help='Path to output.yaml file from Kantra analysis (for full test case generation)'
     )
 
     parser.add_argument(
@@ -319,14 +529,24 @@ Examples:
         print("Error: --test-name and --app-name are required when creating new file", file=sys.stderr)
         sys.exit(1)
 
-    # Parse analyzer output
-    print(f"Parsing analyzer output: {args.analyzer_output}")
+    # Parse dependencies
+    print(f"Parsing dependencies: {args.analyzer_output}")
     dependencies = parse_analyzer_output(Path(args.analyzer_output))
     print(f"  ✓ Found {len(dependencies)} dependencies")
 
+    # Parse violations if provided
+    insights = []
+    effort = 0
+    tags = []
+    if args.violations_output:
+        print(f"Parsing violations: {args.violations_output}")
+        insights, effort, tags = parse_violations(Path(args.violations_output))
+        print(f"  ✓ Found {len(insights)} insights (total effort: {effort})")
+        print(f"  ✓ Found {len(tags)} tags")
+
     # Generate code
     if args.test_case:
-        # Update existing file
+        # Update existing file (only dependencies for now)
         deps_code = generate_go_dependencies(dependencies)
 
         if args.print_only:
@@ -340,7 +560,10 @@ Examples:
         content = generate_test_case_template(
             args.test_name,
             args.app_name,
-            dependencies
+            dependencies,
+            insights,
+            effort,
+            tags
         )
 
         if args.print_only:

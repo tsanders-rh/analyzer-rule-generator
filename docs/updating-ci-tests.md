@@ -8,9 +8,11 @@ The Konveyor project maintains automated tests that verify:
 - Rules still work correctly
 - Analysis results are consistent
 - Dependencies are detected properly
+- Violations and incidents match expectations
+- Effort calculations are accurate
 - No regressions occur
 
-When you add new rules, you need to update the test expectations to reflect what your rules find.
+When you add new rules, you need to update the test expectations to reflect what your rules find. The update script can generate complete test cases including violations, incidents, effort scores, dependencies, and tags.
 
 ## Prerequisites
 
@@ -120,31 +122,55 @@ The analysis creates a directory (`./analysis-output/`) containing:
 - `static-report/` - HTML report
 - Other metadata files
 
-### 4. Update Test Dependencies
+### 4. Generate Complete Test Case
 
-Use the dependency updater script to update the test case:
+Use the test case generator script to create a complete test case from the analysis results:
 
 ```bash
 # Navigate to analyzer-rule-generator repo
 cd /path/to/analyzer-rule-generator
 source venv/bin/activate
 
-# Preview what will be updated (recommended first step)
+# Generate complete test case (recommended approach)
 python scripts/update_test_dependencies.py \
     --analyzer-output /path/to/analysis-output/dependencies.yaml \
-    --test-case /path/to/go-konveyor-tests/analysis/tc_daytrader_deps.go \
+    --violations-output /path/to/analysis-output/output.yaml \
+    --output /path/to/go-konveyor-tests/analysis/tc_myapp_new.go \
+    --test-name "MyApp Analysis" \
+    --app-name "MyApp" \
     --print-only
 
-# If it looks good, update the file
+# If it looks good, generate the file (remove --print-only)
+python scripts/update_test_dependencies.py \
+    --analyzer-output /path/to/analysis-output/dependencies.yaml \
+    --violations-output /path/to/analysis-output/output.yaml \
+    --output /path/to/go-konveyor-tests/analysis/tc_myapp_new.go \
+    --test-name "MyApp Analysis" \
+    --app-name "MyApp"
+```
+
+**Script options:**
+- `--analyzer-output` - Path to Kantra's `dependencies.yaml` file (required)
+- `--violations-output` - Path to Kantra's `output.yaml` file (optional, for full test case)
+- `--output` - Path for new test case file
+- `--test-name` - Test case name
+- `--app-name` - Application name
+- `--print-only` - Preview generated code without writing (optional)
+
+**What gets generated:**
+When you provide both `dependencies.yaml` and `output.yaml`:
+- ✅ **Insights** - All violations found by rules with incidents
+- ✅ **Effort** - Total calculated effort score
+- ✅ **Dependencies** - All technology dependencies
+- ✅ **AnalysisTags** - Tags from violation labels
+
+**Updating existing test cases (dependencies only):**
+```bash
+# Update just the Dependencies section of an existing test case
 python scripts/update_test_dependencies.py \
     --analyzer-output /path/to/analysis-output/dependencies.yaml \
     --test-case /path/to/go-konveyor-tests/analysis/tc_daytrader_deps.go
 ```
-
-**Script options:**
-- `--analyzer-output` - Path to Kantra's `dependencies.yaml` file
-- `--test-case` - Path to the test case `.go` file to update
-- `--print-only` - Preview changes without writing (optional)
 
 **Viewing your changes:**
 After running the script (without `--print-only`), use git to see what changed:
@@ -252,18 +278,21 @@ kantra analyze \
     --target cloud-readiness \
     --target quarkus
 
-# 5. Update test case
+# 5. Generate complete test case
 cd ~/analyzer-rule-generator
 source venv/bin/activate
 python scripts/update_test_dependencies.py \
     --analyzer-output /tmp/daytrader-analysis/dependencies.yaml \
-    --test-case ~/go-konveyor-tests/analysis/tc_daytrader_deps.go
+    --violations-output /tmp/daytrader-analysis/output.yaml \
+    --output ~/go-konveyor-tests/analysis/tc_daytrader_new.go \
+    --test-name "Daytrader with new rules" \
+    --app-name "Daytrader"
 
 # 6. Review and commit
 cd ~/go-konveyor-tests
-git diff analysis/tc_daytrader_deps.go
-git add analysis/tc_daytrader_deps.go
-git commit -s -m "Update DayTrader deps for Spring Boot migration rules"
+cat analysis/tc_daytrader_new.go  # Review the generated file
+git add analysis/tc_daytrader_new.go
+git commit -s -m "Add test case for DayTrader with new Spring Boot migration rules"
 git push origin update-daytrader-deps
 
 # 7. Create PR on GitHub
@@ -318,18 +347,27 @@ cat analysis/tc_daytrader_deps.go | grep "konveyor.io/target"
 
 ## Troubleshooting
 
-### Script generates empty dependencies list
+### Script generates empty dependencies or violations
 
+**Issue 1: Empty dependencies**
 The script outputs `Dependencies: []api.TechDependency{}` with no dependencies.
 
-**Cause:** You're pointing to the wrong file. Kantra creates multiple YAML files.
+**Cause:** You're pointing to the wrong file for `--analyzer-output`.
 
 **Solution:**
-- Use `dependencies.yaml` NOT `output.yaml`
+- Use `dependencies.yaml` for `--analyzer-output`
 - Correct: `--analyzer-output /path/to/analysis-output/dependencies.yaml`
 - Wrong: `--analyzer-output /path/to/analysis-output/output.yaml`
 
-The `output.yaml` file contains rule violations, while `dependencies.yaml` contains the actual dependency list.
+**Issue 2: No insights generated**
+The script doesn't generate any Insights section.
+
+**Cause:** You didn't provide `--violations-output` parameter.
+
+**Solution:**
+- Add `--violations-output /path/to/analysis-output/output.yaml`
+- The `output.yaml` file contains rule violations, while `dependencies.yaml` contains dependencies
+- Both files are needed for a complete test case
 
 ### "Could not find Dependencies section"
 

@@ -82,10 +82,19 @@ kantra analyze \
     --source java \
     --target quarkus
 
-# To find the correct source/target values:
-# 1. Look at the test case Task definition in the .go file
-# 2. Or check existing CI runs for that test case
-# 3. Common combinations: java→quarkus, java→cloud-readiness, eap7→eap8
+# To find the correct source/target values, check the test case .go file:
+# Example from tc_daytrader_deps.go:
+#   Task: Task{{
+#       Data: addon.Data{{
+#           "mode.binary": "false",
+#           "mode.withDeps": "true",
+#           "sources": []string{{"java"}},
+#           "targets": []string{{"quarkus"}},
+#       }},
+#   }}
+#
+# In this example: --source java --target quarkus
+# Common combinations: java→quarkus, java→cloud-readiness, eap7→eap8, jakarta-ee→jakarta-ee9+
 ```
 
 **Where to get test applications:**
@@ -237,6 +246,50 @@ git push origin update-daytrader-deps
 
 # 7. Create PR on GitHub
 ```
+
+## Finding Source/Target Values in Test Cases
+
+Each test case file defines what source and target technologies it uses. Here's how to find them:
+
+**Example from `tc_daytrader_deps.go`:**
+```go
+var Daytrader = TC{
+    Name: "DayTrader analysis",
+    Application: data.DayTrader,
+    Task: Task{{
+        Data: addon.Data{{
+            "mode.binary": "false",
+            "mode.withDeps": "true",
+            "sources": []string{{"java"}},        // This is --source
+            "targets": []string{{"quarkus"}},     // This is --target
+        }},
+    }},
+    Analysis: api.Analysis{
+        Dependencies: []api.TechDependency{
+            // ... dependencies here
+        },
+    },
+}}
+```
+
+**Quick command to find source/target:**
+```bash
+# View the Task section of any test case
+cat analysis/tc_daytrader_deps.go | grep -A 10 "Task:"
+
+# Output will show:
+#   "sources": []string{"java"},
+#   "targets": []string{"quarkus"},
+```
+
+**Common source/target combinations:**
+- `--source java --target quarkus` - Java to Quarkus migration
+- `--source java --target cloud-readiness` - Cloud readiness assessment
+- `--source eap7 --target eap8` - JBoss EAP upgrade
+- `--source jakarta-ee --target jakarta-ee9+` - Jakarta EE upgrade
+- `--source springboot --target quarkus` - Spring Boot to Quarkus
+
+**Link to test cases:** Browse [go-konveyor-tests/analysis/](https://github.com/konveyor/go-konveyor-tests/tree/main/analysis) to see all available test cases and their configurations.
 
 ## Troubleshooting
 

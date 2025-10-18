@@ -171,6 +171,29 @@ python scripts/update_test_dependencies.py \
     --test-case /path/to/go-konveyor-tests/analysis/tc_daytrader_deps.go
 ```
 
+**Important: Replace vs Merge behavior**
+
+The script uses **REPLACE** logic, not MERGE. When updating an existing test case:
+- All Insights are replaced with current analysis results
+- All Dependencies are replaced with current analysis results
+- All Tags are replaced with current analysis results
+- Effort is recalculated from current results
+
+**Why REPLACE makes sense for CI:**
+1. **Test reflects current state** - The test verifies what the analysis produces NOW with your rulesets
+2. **Handles rule changes** - If you removed/modified rules, old insights should disappear
+3. **Detects regressions** - If analysis results change unexpectedly, CI will catch it
+4. **Stays synchronized** - Test expectations always match actual analysis behavior
+5. **Simpler and clearer** - No ambiguity about what the test expects
+
+**When to update:**
+- After adding new rules to your ruleset
+- After modifying existing rules
+- After updating to a new version of Konveyor
+- When CI fails because analysis results changed
+
+The test case is a **snapshot** of what analysis should produce, not a cumulative record.
+
 **Viewing your changes:**
 After running the script (without `--print-only`), use git to see what changed:
 ```bash

@@ -61,42 +61,10 @@ Sleep 25s
 Enter
 Sleep 1s
 
-# Show generated files
-Type "# Generated files:"
+# Show rule statistics in table format
+Type "python scripts/show_rule_stats.py 'spring-boot-3-to-spring-boot-4-*.yaml'"
 Enter
-Sleep 500ms
-
-Type "ls -lh spring-boot-3-to-spring-boot-4-*.yaml"
-Enter
-Sleep 3s
-
-Enter
-Type "# Rule statistics:"
-Enter
-Sleep 500ms
-
-Type "echo '📊 MongoDB rules:' && grep -c '^- ruleID:' spring-boot-3-to-spring-boot-4-mongodb.yaml"
-Enter
-Sleep 2s
-
-Enter
-Type "echo '📊 Testing rules:' && grep -c '^- ruleID:' spring-boot-3-to-spring-boot-4-testing.yaml"
-Enter
-Sleep 2s
-
-Enter
-Type "echo '📊 Total: 18 rules across 2 concerns'"
-Enter
-Sleep 2s
-
-Enter
-Type "# Example rule descriptions:"
-Enter
-Sleep 500ms
-
-Type "grep 'description:' spring-boot-3-to-spring-boot-4-mongodb.yaml | head -3"
-Enter
-Sleep 4s
+Sleep 8s
 
 # Final message
 Enter

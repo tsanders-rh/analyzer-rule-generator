@@ -157,11 +157,32 @@ Example for React component import:
         else:
             lang_instructions = """
 **Java Detection Instructions:**
-For Java patterns, use these fields:
+For Java code patterns (classes, annotations, imports), use these fields:
 - **provider_type**: Set to "java" (or leave null for auto-detection)
 - **source_fqn**: Fully qualified class name (e.g., "javax.ejb.Stateless")
 - **location_type**: One of ANNOTATION, IMPORT, METHOD_CALL, TYPE, INHERITANCE, PACKAGE
 - **file_pattern**: Can be null
+
+**Configuration File Detection Instructions:**
+For property/configuration file patterns (application.properties, application.yaml), use these fields:
+- **provider_type**: Set to "builtin"
+- **source_fqn**: Regex pattern to match the property (e.g., "spring\\.data\\.mongodb\\.host")
+- **file_pattern**: "*.{properties,yaml,yml}"
+- **location_type**: null (not needed for builtin provider)
+- **category**: "configuration"
+
+Example for Spring Boot property migration:
+```json
+{
+  "source_pattern": "spring.data.mongodb.host",
+  "target_pattern": "spring.mongodb.host",
+  "source_fqn": "spring\\\\.data\\\\.mongodb\\\\.host",
+  "provider_type": "builtin",
+  "file_pattern": "*.{properties,yaml,yml}",
+  "location_type": null,
+  "category": "configuration"
+}
+```
 
 """
 

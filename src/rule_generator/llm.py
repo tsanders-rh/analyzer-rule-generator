@@ -48,7 +48,7 @@ class OpenAIProvider(LLMProvider):
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using OpenAI API."""
         temperature = kwargs.get("temperature", 0.0)
-        max_tokens = kwargs.get("max_tokens", 4000)
+        max_tokens = kwargs.get("max_tokens", 8000)
 
         response = self.client.chat.completions.create(
             model=self.model,
@@ -89,7 +89,7 @@ class AnthropicProvider(LLMProvider):
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using Anthropic API."""
         temperature = kwargs.get("temperature", 0.0)
-        max_tokens = kwargs.get("max_tokens", 4000)
+        max_tokens = kwargs.get("max_tokens", 8000)
 
         response = self.client.messages.create(
             model=self.model,
@@ -133,7 +133,7 @@ class GoogleProvider(LLMProvider):
 
         generation_config = {
             "temperature": temperature,
-            "max_output_tokens": kwargs.get("max_tokens", 4000),
+            "max_output_tokens": kwargs.get("max_tokens", 8000),
         }
 
         response = self.model.generate_content(

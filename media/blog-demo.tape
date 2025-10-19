@@ -55,16 +55,22 @@ Sleep 500ms
 Enter
 
 # Wait for generation to complete (AI processing takes time)
-Sleep 25s
+Sleep 35s
 
 # Add spacing
 Enter
 Sleep 1s
 
+# Verify files were created
+Type "ls spring-boot-3-to-spring-boot-4-*.yaml"
+Enter
+Sleep 2s
+
+Enter
 # Show rule statistics in table format
 Type "python scripts/show_rule_stats.py 'spring-boot-3-to-spring-boot-4-*.yaml'"
 Enter
-Sleep 8s
+Sleep 10s
 
 # Final message
 Enter

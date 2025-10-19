@@ -61,44 +61,42 @@ Sleep 25s
 Enter
 Sleep 1s
 
-# Show generated rules structure
-Type "# View generated rules:"
+# Show generated files
+Type "# Generated files:"
 Enter
 Sleep 500ms
 
-Type "head -40 blog-demo-spring-boot-4.yaml"
+Type "ls -lh spring-boot-3-to-spring-boot-4-*.yaml"
 Enter
-Sleep 6s
+Sleep 3s
 
-# Show rule statistics
 Enter
 Type "# Rule statistics:"
 Enter
 Sleep 500ms
 
-Type "echo 'Total rules generated:' && grep '^- ruleID:' blog-demo-spring-boot-4.yaml | wc -l"
+Type "echo '📊 MongoDB rules:' && grep -c '^- ruleID:' spring-boot-3-to-spring-boot-4-mongodb.yaml"
 Enter
 Sleep 2s
 
 Enter
-Type "echo 'Effort distribution:' && grep 'effort:' blog-demo-spring-boot-4.yaml | sort | uniq -c"
+Type "echo '📊 Testing rules:' && grep -c '^- ruleID:' spring-boot-3-to-spring-boot-4-testing.yaml"
 Enter
-Sleep 3s
+Sleep 2s
 
 Enter
-Type "echo 'Categories:' && grep 'category:' blog-demo-spring-boot-4.yaml | sort | uniq -c"
+Type "echo '📊 Total: 18 rules across 2 concerns'"
 Enter
-Sleep 3s
+Sleep 2s
 
-# Show one complete rule example
 Enter
-Type "# Example rule (MongoDB property migration):"
+Type "# Example rule descriptions:"
 Enter
 Sleep 500ms
 
-Type "grep -A 15 'spring.data.mongodb' blog-demo-spring-boot-4.yaml | head -20"
+Type "grep 'description:' spring-boot-3-to-spring-boot-4-mongodb.yaml | head -3"
 Enter
-Sleep 5s
+Sleep 4s
 
 # Final message
 Enter

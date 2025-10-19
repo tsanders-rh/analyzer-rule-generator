@@ -42,7 +42,7 @@ Type "  --target spring-boot-4 \"
 Sleep 300ms
 Enter
 
-Type "  --output blog-demo-spring-boot-4.yaml \"
+Type "  --output spring-boot \"
 Sleep 300ms
 Enter
 
@@ -55,26 +55,18 @@ Sleep 500ms
 Enter
 
 # Wait for generation to complete (AI processing takes time)
-Sleep 35s
+Sleep 50s
 
 # Add spacing
 Enter
 Sleep 1s
-
-# Verify files were created
-Type "ls spring-boot-3-to-spring-boot-4-*.yaml"
-Enter
-Sleep 2s
-
-Enter
-# Show rule statistics in table format
-Type "python scripts/show_rule_stats.py 'spring-boot-3-to-spring-boot-4-*.yaml'"
-Enter
-Sleep 10s
 
 # Final message
 Enter
 Sleep 500ms
 Type "# Rules ready! View in browser: https://tsanders-rh.github.io/analyzer-rule-generator/rule-viewer.html"
 Enter
-Sleep 3s
+Enter
+Enter
+Enter
+Sleep 5s

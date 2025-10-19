@@ -7,7 +7,7 @@ Usage:
         --guide <path_or_url> \\
         --source <framework> \\
         --target <framework> \\
-        --output <output.yaml>
+        --output <output_directory>
 """
 import sys
 import argparse
@@ -59,7 +59,7 @@ def main():
 
     parser.add_argument(
         "--output",
-        help="Output YAML file path (auto-generated from source/target if not specified)"
+        help="Output directory for generated YAML files (auto-generated from source/target if not specified)"
     )
 
     parser.add_argument(
@@ -81,12 +81,11 @@ def main():
 
     args = parser.parse_args()
 
-    # Auto-generate output filename if not specified
+    # Auto-generate output directory if not specified
     if not args.output:
         # Extract technology name from source (remove version info)
         # e.g., "patternfly-v5" -> "patternfly", "spring-boot-3" -> "spring-boot"
         source_parts = args.source.split('-')
-        target_parts = args.target.split('-')
 
         # Find where version info starts (v*, numeric suffix, etc.)
         def extract_base_name(parts):
@@ -100,9 +99,8 @@ def main():
 
         source_base = extract_base_name(source_parts)
 
-        # Generate filename: {source}-to-{target}.yaml
-        output_filename = f"{args.source}-to-{args.target}.yaml"
-        args.output = f"examples/output/{source_base}/{output_filename}"
+        # Generate directory: examples/output/{source_base}
+        args.output = f"examples/output/{source_base}"
 
     print(f"Generating analyzer rules: {args.source} → {args.target}")
     print(f"Guide: {args.guide}")
@@ -161,25 +159,8 @@ def main():
     print(f"  ✓ Generated {total_rules} rules across {len(rules_by_concern)} concern(s)")
 
     # Write output files (one per concern)
-    output_path = Path(args.output)
-    output_dir = output_path.parent
+    output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Extract base name for generating filenames
-    source_parts = args.source.split('-')
-    target_parts = args.target.split('-')
-
-    # Find where version info starts (v*, numeric suffix, etc.)
-    def extract_base_name(parts):
-        base = []
-        for part in parts:
-            # Stop at version indicators
-            if part.startswith('v') or part.replace('.', '').isdigit():
-                break
-            base.append(part)
-        return '-'.join(base) if base else '-'.join(parts)
-
-    source_base = extract_base_name(source_parts)
 
     print(f"\nWriting rules to {output_dir}...")
 
@@ -189,8 +170,8 @@ def main():
     for concern, rules in sorted(rules_by_concern.items()):
         # Generate filename: {source}-to-{target}-{concern}.yaml
         if len(rules_by_concern) == 1:
-            # Single concern - use original filename
-            concern_output = output_path
+            # Single concern - use simple filename
+            concern_output = output_dir / f"{args.source}-to-{args.target}.yaml"
         else:
             # Multiple concerns - add concern suffix
             concern_output = output_dir / f"{args.source}-to-{args.target}-{concern}.yaml"

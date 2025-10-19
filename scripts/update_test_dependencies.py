@@ -468,16 +468,24 @@ def update_test_case_file(file_path: Path, insights: List[Insight], effort: int,
     with open(file_path, 'r') as f:
         content = f.read()
 
-    # Generate all sections
-    insights_code = generate_go_insights(insights).strip()
-    deps_code = generate_go_dependencies(dependencies).strip()
-    tags_code = generate_go_tags(tags).strip()
+    # Generate all sections (without the field names, since we'll preserve them from the original)
+    # We need just the content between { and }, not the full "Insights: []api.Insight{...},"
+    insights_full = generate_go_insights(insights)
+    deps_full = generate_go_dependencies(dependencies)
+    tags_full = generate_go_tags(tags)
 
-    # Update Effort field (or add it if missing)
-    effort_pattern = r'\s+Effort:\s+\d+,'
+    # Extract just the inner content (everything after the opening brace)
+    # For Insights: "\t\tInsights: []api.Insight{\n" ... "\t\t},\n" -> just the middle part
+    insights_code = '\n'.join(insights_full.split('\n')[1:-2])  # Skip first line and last two lines
+    deps_code = '\n'.join(deps_full.split('\n')[1:-2])
+    tags_code = '\n'.join(tags_full.split('\n')[1:-2])
+
+    # Update Analysis-level Effort field (not insight-level Effort)
+    # Must match Effort that comes after "Analysis: api.Analysis{" and before "Insights:"
+    effort_pattern = r'(Analysis:\s+api\.Analysis\{\s*\n\s+)Effort:\s+\d+,'
     if re.search(effort_pattern, content):
-        # Update existing Effort
-        content = re.sub(effort_pattern, f'\n\t\tEffort: {effort},', content)
+        # Update existing Analysis-level Effort
+        content = re.sub(effort_pattern, rf'\1Effort: {effort},', content, count=1)
     else:
         # Add Effort before Insights (or after Analysis{ if no Insights)
         content = re.sub(
@@ -487,39 +495,47 @@ def update_test_case_file(file_path: Path, insights: List[Insight], effort: int,
         )
 
     # Update Insights section
-    insights_pattern = r'(\s+Insights:\s+\[]api\.Insight\s*\{).*?(\n\s+\},)'
+    # Match from "Insights: []api.Insight{" to the closing "}," at the same indentation level
+    # Use non-greedy match and require the closing brace to be followed by Dependencies/AnalysisTags
+    insights_pattern = r'(Insights:\s+\[]api\.Insight\s*\{).*?(\n\t\t\},\n)(?=\t\tDependencies:)'
     if re.search(insights_pattern, content, re.DOTALL):
+        print("  → Updating existing Insights section")
         content = re.sub(
             insights_pattern,
-            r'\n' + insights_code + r'\n\t\t},',
+            r'\1\n' + insights_code + r'\n\t\t},\n',
             content,
+            count=1,  # Only replace the first occurrence
             flags=re.DOTALL
         )
     else:
-        # Add Insights after Effort
+        print("  → Adding new Insights section")
+        # Add Insights after Analysis-level Effort (not Insight-level Effort)
         content = re.sub(
-            r'(Effort:\s+\d+,)',
+            r'(Analysis:\s+api\.Analysis\{\s*\n\s*Effort:\s+\d+,)',
             rf'\1\n{insights_code}',
-            content
+            content,
+            count=1  # Only replace the first occurrence
         )
 
     # Update Dependencies section
-    deps_pattern = r'(\s+Dependencies:\s+\[]api\.TechDependency\s*\{).*?(\n\s+\},)'
+    deps_pattern = r'(Dependencies:\s+\[]api\.TechDependency\s*\{).*?(\n\t\t\},\n)(?=\t\})'
     if re.search(deps_pattern, content, re.DOTALL):
         content = re.sub(
             deps_pattern,
-            r'\n' + deps_code + r'\n\t\t},',
+            r'\1\n' + deps_code + r'\n\t\t},\n',
             content,
+            count=1,  # Only replace the first occurrence
             flags=re.DOTALL
         )
 
     # Update AnalysisTags section
-    tags_pattern = r'(\s+AnalysisTags:\s+\[]api\.Tag\s*\{).*?(\n\s+\},)'
+    tags_pattern = r'(AnalysisTags:\s+\[]api\.Tag\s*\{).*?(\n\t\},\n)(?=\})'
     if re.search(tags_pattern, content, re.DOTALL):
         content = re.sub(
             tags_pattern,
-            r'\n' + tags_code + r'\n\t},',
+            r'\1\n' + tags_code + r'\n\t},\n',
             content,
+            count=1,  # Only replace the first occurrence
             flags=re.DOTALL
         )
     else:
@@ -571,9 +587,9 @@ def generate_test_case_template(
     template = f'''package analysis
 
 import (
-\t"github.com/konveyor-ecosystem/go-konveyor-tests/data"
-\t"github.com/konveyor-ecosystem/go-konveyor-tests/hack/addon"
-\tapi "github.com/konveyor/tackle2-hub/api"
+\t"github.com/konveyor/go-konveyor-tests/data"
+\t"github.com/konveyor/go-konveyor-tests/hack/addon"
+\t"github.com/konveyor/tackle2-hub/api"
 )
 
 var {var_name} = TC{{
@@ -581,6 +597,11 @@ var {var_name} = TC{{
 \tApplication: data.{app_name},
 \tTask: Analyze,
 \tWithDeps: true,
+\tLabels: addon.Labels{{
+\t\tIncluded: []string{{
+\t\t\t"konveyor.io/target=cloud-readiness",
+\t\t}},
+\t}},
 \tAnalysis: api.Analysis{{
 {effort_line}{insights_code}
 {deps_code}

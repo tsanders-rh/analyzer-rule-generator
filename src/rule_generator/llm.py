@@ -48,7 +48,7 @@ class OpenAIProvider(LLMProvider):
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using OpenAI API."""
         temperature = kwargs.get("temperature", 0.0)
-        max_tokens = kwargs.get("max_tokens", 8000)
+        max_tokens = min(kwargs.get("max_tokens", 4096), 4096)
 
         response = self.client.chat.completions.create(
             model=self.model,

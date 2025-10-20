@@ -198,6 +198,18 @@ def main():
         all_rules.extend(rules)
         print(f"  ✓ {concern_output.name}: {len(rules)} rules")
 
+    # Create ruleset.yaml metadata file (required by Konveyor analyzer)
+    ruleset_file = output_dir / "ruleset.yaml"
+    ruleset_data = {
+        "name": f"{args.source}/{args.target}",
+        "description": f"This ruleset provides guidance for migrating from {args.source} to {args.target}"
+    }
+    with open(ruleset_file, 'w') as f:
+        yaml.dump(ruleset_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+
+    written_files.append(str(ruleset_file))
+    print(f"  ✓ {ruleset_file.name}: ruleset metadata")
+
     print(f"\n✓ Successfully generated {len(all_rules)} rules in {len(written_files)} file(s)")
 
     # Show summary

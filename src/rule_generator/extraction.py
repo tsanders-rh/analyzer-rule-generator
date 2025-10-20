@@ -137,8 +137,8 @@ class MigrationPatternExtractor:
 **IMPORTANT - JavaScript/TypeScript Detection Instructions:**
 For JavaScript/TypeScript patterns, use these specific fields:
 - **provider_type**: Set to "builtin"
-- **source_fqn**: Use a regex pattern to match the code (e.g., "import\\s*\\{\\s*Chip\\s*\\}\\s*from\\s*['\"]@patternfly/react-core['\"]")
-- **file_pattern**: Specify file extensions (e.g., "*.{ts,tsx,js,jsx}")
+- **source_fqn**: Use a SIMPLE regex pattern to match the code. Use `.*` for wildcards, avoid complex escapes like \\s, \\{, \\} (e.g., "import.*Chip.*from.*@patternfly/react-core")
+- **file_pattern**: Regex pattern to match file extensions (e.g., ".*\\.(ts|tsx|js|jsx)")
 - **location_type**: Can be null for builtin provider
 
 Example for React component import:
@@ -146,9 +146,9 @@ Example for React component import:
 {
   "source_pattern": "import { Chip } from '@patternfly/react-core'",
   "target_pattern": "import { Label } from '@patternfly/react-core'",
-  "source_fqn": "import\\\\s*\\\\{\\\\s*Chip\\\\s*\\\\}\\\\s*from\\\\s*['\\\"]@patternfly/react-core['\\\"]",
+  "source_fqn": "import.*Chip.*from.*@patternfly/react-core",
   "provider_type": "builtin",
-  "file_pattern": "*.{ts,tsx,js,jsx}",
+  "file_pattern": ".*\\\\.(ts|tsx|js|jsx)",
   "location_type": null
 }
 ```
@@ -166,8 +166,8 @@ For Java code patterns (classes, annotations, imports), use these fields:
 **Configuration File Detection Instructions:**
 For property/configuration file patterns (application.properties, application.yaml), use these fields:
 - **provider_type**: Set to "builtin"
-- **source_fqn**: Regex pattern to match the property (e.g., "spring\\.data\\.mongodb\\.host")
-- **file_pattern**: "*.{properties,yaml,yml}"
+- **source_fqn**: SIMPLE regex pattern to match the property. Use `.*` for wildcards and escape dots with \\\\ (e.g., "spring\\.data\\.mongodb\\.host")
+- **file_pattern**: Regex pattern to match configuration files (e.g., ".*\\.(properties|yaml|yml)")
 - **location_type**: null (not needed for builtin provider)
 - **category**: "configuration"
 
@@ -178,7 +178,7 @@ Example for Spring Boot property migration:
   "target_pattern": "spring.mongodb.host",
   "source_fqn": "spring\\\\.data\\\\.mongodb\\\\.host",
   "provider_type": "builtin",
-  "file_pattern": "*.{properties,yaml,yml}",
+  "file_pattern": ".*\\\\.(properties|yaml|yml)",
   "location_type": null,
   "category": "configuration"
 }
@@ -247,6 +247,11 @@ Return your findings as a JSON array. Each pattern should be an object with thes
 }}
 
 Focus on patterns that can be detected via static analysis. Skip general advice or manual migration steps.
+
+**IMPORTANT REGEX PATTERN RULES:**
+- For builtin provider: Use SIMPLE regex patterns with `.*` wildcards
+- Avoid complex regex escapes like \\s, \\{{, \\}}, \\(, \\)
+- Example: Use "import.*Component.*from.*library" NOT "import\\s*\\{{\\s*Component\\s*\\}}"
 
 Return ONLY the JSON array, no additional commentary."""
 

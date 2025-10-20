@@ -450,6 +450,31 @@ git push origin update-daytrader-deps
 
 **Important:** Link the two PRs together by referencing each in the PR descriptions.
 
+#### Referencing Test Repository PRs
+
+When your rules PR requires corresponding changes in test repositories, you can reference specific test repository pull requests directly in your PR description. This allows the CI system to test your component changes alongside the test changes.
+
+**For API tests (go-konveyor-tests):**
+Add this line to your rulesets PR description:
+```
+API tests PR: <pull_request_number>
+```
+
+**For UI tests (tackle-ui-tests):**
+Add this line to your rulesets PR description:
+```
+UI tests PR: <pull_request_number>
+```
+
+**Example:**
+```markdown
+## Related PRs
+
+API tests PR: 233
+```
+
+This syntax works with the global-ci GitHub workflow and ensures that CI tests your rules with the updated test expectations before merging.
+
 **PR Description Template (konveyor/rulesets):**
 ```markdown
 ## Description
@@ -480,7 +505,9 @@ kantra test tests/spring-boot-3.5-to-4.0-mongodb.test.yaml
 # ✓ All 13 tests passed
 ```
 
-## Related PR
+## Related PRs
+
+API tests PR: 123
 
 - go-konveyor-tests PR: [link to PR updating test expectations]
 

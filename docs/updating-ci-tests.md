@@ -270,6 +270,30 @@ git push origin update-deps-for-my-rules
    - **Description**: Link to your rulesets PR, explain what changed
 6. Submit the PR
 
+#### Linking PRs Together
+
+After creating both PRs (rulesets and go-konveyor-tests), reference them in each other's descriptions:
+
+**In your rulesets PR description:**
+Add a reference to your API tests PR using this syntax:
+```markdown
+## Related PRs
+
+API tests PR: 123
+```
+
+Replace `123` with your go-konveyor-tests PR number. This allows the CI system to test your rules alongside the updated test expectations before merging.
+
+**In your go-konveyor-tests PR description:**
+Add a link to your rulesets PR:
+```markdown
+## Related PRs
+
+- konveyor/rulesets PR: https://github.com/konveyor/rulesets/pull/456
+```
+
+This linkage ensures reviewers can see both changes together and the CI workflow can properly test them.
+
 ## Creating a New Test Case
 
 If your rules target an application that doesn't have a test case yet:

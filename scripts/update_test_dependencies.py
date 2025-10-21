@@ -112,9 +112,9 @@ class Tag:
     def to_go_struct(self) -> str:
         """Convert to Go api.Tag struct."""
         return f'''{{
-\t\tName:     "{self.name}",
-\t\tCategory: api.Ref{{Name: "{self.category}"}},
-\t}}'''
+\t\t\tName:     "{self.name}",
+\t\t\tCategory: api.Ref{{Name: "{self.category}"}},
+\t\t}}'''
 
 
 class Dependency:
@@ -128,10 +128,10 @@ class Dependency:
     def to_go_struct(self) -> str:
         """Convert to Go api.TechDependency struct."""
         return f'''{{
-\t\t\tName:     "{self.name}",
-\t\t\tVersion:  "{self.version}",
-\t\t\tProvider: "{self.provider}",
-\t\t}}'''
+\t\t\t\tName:     "{self.name}",
+\t\t\t\tVersion:  "{self.version}",
+\t\t\t\tProvider: "{self.provider}",
+\t\t\t}}'''
 
 
 def parse_analyzer_output(file_path: Path) -> List[Dependency]:
@@ -395,7 +395,7 @@ def generate_go_dependencies(dependencies: List[Dependency]) -> str:
     deps_code = "\t\tDependencies: []api.TechDependency{\n"
 
     for dep in sorted(dependencies, key=lambda d: d.name):
-        deps_code += "\t\t" + dep.to_go_struct() + ",\n"
+        deps_code += "\t\t\t" + dep.to_go_struct() + ",\n"
 
     deps_code += "\t\t},\n"
 
@@ -442,7 +442,7 @@ def generate_go_tags(tags: List[Tag]) -> str:
     tags_code = "\tAnalysisTags: []api.Tag{\n"
 
     for tag in sorted(tags, key=lambda t: t.name):
-        tags_code += "\t" + tag.to_go_struct() + ",\n"
+        tags_code += "\t\t" + tag.to_go_struct() + ",\n"
 
     tags_code += "\t},\n"
 

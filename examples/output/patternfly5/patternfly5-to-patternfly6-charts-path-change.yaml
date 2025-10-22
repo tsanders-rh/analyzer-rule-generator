@@ -1,0 +1,39 @@
+- ruleID: patternfly5-to-patternfly6-charts-path-change-00000
+  description: import { Area } from '@patternfly/react-charts' should be replaced
+    with import { Area } from '@patternfly/react-charts/victory'
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly5
+  - konveyor.io/target=patternfly6
+  when:
+    builtin.filecontent:
+      pattern: import.*from.*@patternfly/react-charts[^/]
+      filePattern: .*\.(ts|tsx|js|jsx)
+  message: 'Victory-based charts have moved to a ''victory'' directory in @patternfly/react-charts
+
+
+    Replace `import { Area } from ''@patternfly/react-charts''` with `import { Area
+    } from ''@patternfly/react-charts/victory''`.
+
+
+    Before:
+
+    ```
+
+    import { Area } from ''@patternfly/react-charts''
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Area } from ''@patternfly/react-charts/victory''
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade
+    title: patternfly6 Documentation
+  customVariables: []

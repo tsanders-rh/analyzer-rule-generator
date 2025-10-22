@@ -1,0 +1,38 @@
+- ruleID: patternfly5-to-patternfly6-react-tokens-00000
+  description: global_FontSize_lg should be replaced with t_global_font_size_lg
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly5
+  - konveyor.io/target=patternfly6
+  when:
+    builtin.filecontent:
+      pattern: global_.*
+      filePattern: .*\.(js|jsx|ts|tsx)
+  message: 'React token names have changed in PatternFly 6 due to the new design token
+    system
+
+
+    Replace `global_FontSize_lg` with `t_global_font_size_lg`.
+
+
+    Before:
+
+    ```
+
+    import { global_FontSize_lg } from ''@patternfly/react-tokens''
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { t_global_font_size_lg } from ''@patternfly/react-tokens''
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade
+    title: patternfly6 Documentation
+  customVariables: []

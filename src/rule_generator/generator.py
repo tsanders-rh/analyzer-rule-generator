@@ -217,6 +217,25 @@ class AnalyzerRuleGenerator:
 
             return condition
 
+        elif provider == "typescript":
+            # Check if pattern requires semantic analysis
+            if self._requires_semantic_analysis(pattern):
+                # Use typescript.referenced for semantic analysis
+                return {
+                    "typescript.referenced": {
+                        "pattern": pattern.source_fqn or pattern.source_pattern,
+                        "location": self._infer_location_context(pattern)
+                    }
+                }
+            else:
+                # Fall back to file content matching for simple text patterns
+                return {
+                    "builtin.filecontent": {
+                        "pattern": pattern.source_fqn or pattern.source_pattern,
+                        "filePattern": pattern.file_pattern or self._get_file_pattern(pattern)
+                    }
+                }
+
         else:  # Java provider
             # Determine location (default to TYPE if not specified)
             location = pattern.location_type or LocationType.TYPE
@@ -359,6 +378,78 @@ class AnalyzerRuleGenerator:
             message += f"After:\n```\n{pattern.example_after}\n```"
 
         return message
+
+    def _requires_semantic_analysis(self, pattern: MigrationPattern) -> bool:
+        """
+        Determine if pattern needs TypeScript language server semantic analysis.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            True if semantic analysis is required, False for simple text matching
+        """
+        semantic_keywords = [
+            'function component',
+            'class component',
+            'type definition',
+            'interface',
+            'generic type',
+            'implicit return',
+            'method',
+            'class',
+            'inheritance',
+            'extends',
+            'implements'
+        ]
+
+        description = (pattern.rationale or "").lower()
+        return any(keyword in description for keyword in semantic_keywords)
+
+    def _infer_location_context(self, pattern: MigrationPattern) -> str:
+        """
+        Infer AST location context from pattern description for TypeScript provider.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            Location context string (e.g., 'FUNCTION_DECLARATION', 'CLASS_DECLARATION')
+        """
+        description = (pattern.rationale or "").lower()
+
+        context_map = {
+            'function': 'FUNCTION_DECLARATION',
+            'class': 'CLASS_DECLARATION',
+            'method': 'METHOD_DECLARATION',
+            'import': 'IMPORT_DECLARATION',
+            'variable': 'VARIABLE_DECLARATION',
+            'interface': 'INTERFACE_DECLARATION',
+            'type': 'TYPE_ALIAS_DECLARATION'
+        }
+
+        for keyword, location in context_map.items():
+            if keyword in description:
+                return location
+
+        return "ANY"
+
+    def _get_file_pattern(self, pattern: MigrationPattern) -> str:
+        """
+        Get file pattern based on pattern metadata.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            File pattern string (e.g., '*.{ts,tsx,js,jsx}')
+        """
+        # If pattern already has a file_pattern, use it
+        if pattern.file_pattern:
+            return pattern.file_pattern
+
+        # Default TypeScript/JavaScript file pattern
+        return "*.{ts,tsx,js,jsx}"
 
     def _build_links(self, pattern: MigrationPattern) -> Optional[List[Link]]:
         """

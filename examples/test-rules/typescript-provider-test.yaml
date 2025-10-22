@@ -1,0 +1,121 @@
+- ruleID: typescript-provider-test-00000
+  description: Function components should not use propTypes
+  when:
+    typescript.referenced:
+      pattern: "propTypes"
+      location: "FUNCTION_DECLARATION"
+  message: |
+    React 19 deprecates propTypes on function components.
+    Use TypeScript types or PropTypes on class components instead.
+
+    Replace propTypes with TypeScript interface or type definition.
+  effort: 5
+  category: mandatory
+  labels:
+    - konveyor.io/source=react-18
+    - konveyor.io/target=react-19
+
+- ruleID: typescript-provider-test-00010
+  description: Detect usage of React.FC (Function Component) type
+  when:
+    typescript.referenced:
+      pattern: "React.FC"
+      location: "TYPE"
+  message: |
+    React.FC is no longer recommended in modern React TypeScript code.
+
+    Consider using explicit prop types instead:
+
+    Before:
+    ```typescript
+    const MyComponent: React.FC<Props> = (props) => {
+      return <div>{props.name}</div>;
+    }
+    ```
+
+    After:
+    ```typescript
+    const MyComponent = (props: Props) => {
+      return <div>{props.name}</div>;
+    }
+    ```
+  effort: 3
+  category: potential
+  labels:
+    - konveyor.io/source=react-17
+    - konveyor.io/target=react-18
+
+- ruleID: typescript-provider-test-00020
+  description: Detect implicit any types in function parameters
+  when:
+    builtin.filecontent:
+      pattern: "function\\s+\\w+\\s*\\([^:)]*\\)"
+      filePattern: "*.{ts,tsx}"
+  message: |
+    Function parameters should have explicit type annotations.
+
+    Add type annotations to all function parameters to improve type safety.
+  effort: 3
+  category: potential
+  labels:
+    - konveyor.io/target=typescript-strict
+
+- ruleID: typescript-provider-test-00030
+  description: Detect class components with deprecated lifecycle methods
+  when:
+    typescript.referenced:
+      pattern: "componentWillMount"
+      location: "METHOD_DECLARATION"
+  message: |
+    componentWillMount is deprecated in React 17+.
+
+    Use componentDidMount or useEffect hook instead.
+
+    Before:
+    ```typescript
+    class MyComponent extends React.Component {
+      componentWillMount() {
+        // initialization logic
+      }
+    }
+    ```
+
+    After (using hooks):
+    ```typescript
+    function MyComponent() {
+      useEffect(() => {
+        // initialization logic
+      }, []);
+    }
+    ```
+  effort: 7
+  category: mandatory
+  labels:
+    - konveyor.io/source=react-16
+    - konveyor.io/target=react-18
+
+- ruleID: typescript-provider-test-00040
+  description: Detect direct imports from react-router
+  when:
+    typescript.referenced:
+      pattern: "react-router"
+      location: "IMPORT_DECLARATION"
+  message: |
+    Direct imports from 'react-router' are deprecated.
+
+    Use 'react-router-dom' for web applications instead.
+
+    Before:
+    ```typescript
+    import { Route, Router } from 'react-router';
+    ```
+
+    After:
+    ```typescript
+    import { Route, BrowserRouter } from 'react-router-dom';
+    ```
+  effort: 3
+  category: mandatory
+  labels:
+    - konveyor.io/source=react-router-5
+    - konveyor.io/target=react-router-6

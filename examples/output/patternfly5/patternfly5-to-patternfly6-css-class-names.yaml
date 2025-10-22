@@ -1,0 +1,38 @@
+- ruleID: patternfly5-to-patternfly6-css-class-names-00000
+  description: pf-v5- should be replaced with pf-v6-
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly5
+  - konveyor.io/target=patternfly6
+  when:
+    builtin.filecontent:
+      pattern: pf-v5-
+      filePattern: .*\.(css|scss|less|js|jsx|ts|tsx|html)
+  message: 'CSS class name prefixes have changed from pf-v5- to pf-v6- in PatternFly
+    6
+
+
+    Replace `pf-v5-` with `pf-v6-`.
+
+
+    Before:
+
+    ```
+
+    <div className="pf-v5-c-card">
+
+    ```
+
+
+    After:
+
+    ```
+
+    <div className="pf-v6-c-card">
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade
+    title: patternfly6 Documentation
+  customVariables: []

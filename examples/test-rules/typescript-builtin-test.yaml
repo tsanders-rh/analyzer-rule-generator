@@ -1,0 +1,42 @@
+- ruleID: typescript-builtin-test-00000
+  description: Detect propTypes usage in TypeScript/JavaScript files
+  when:
+    builtin.filecontent:
+      pattern: "propTypes"
+      filePattern: "*.{ts,tsx,js,jsx}"
+  message: |
+    PropTypes detected in code.
+    Consider using TypeScript types instead.
+  effort: 3
+  category: potential
+  labels:
+    - konveyor.io/target=typescript
+
+- ruleID: typescript-builtin-test-00010
+  description: Detect React.FC usage
+  when:
+    builtin.filecontent:
+      pattern: "React\\.FC"
+      filePattern: "*.{ts,tsx}"
+  message: |
+    React.FC usage detected.
+    Consider using explicit prop types instead.
+  effort: 3
+  category: potential
+  labels:
+    - konveyor.io/target=react-18
+
+- ruleID: typescript-builtin-test-00020
+  description: Detect componentWillMount lifecycle method
+  when:
+    builtin.filecontent:
+      pattern: "componentWillMount"
+      filePattern: "*.{ts,tsx,js,jsx}"
+  message: |
+    Deprecated lifecycle method componentWillMount detected.
+    Use componentDidMount or useEffect instead.
+  effort: 7
+  category: mandatory
+  labels:
+    - konveyor.io/source=react-16
+    - konveyor.io/target=react-18

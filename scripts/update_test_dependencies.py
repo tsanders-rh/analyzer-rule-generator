@@ -112,9 +112,9 @@ class Tag:
     def to_go_struct(self) -> str:
         """Convert to Go api.Tag struct."""
         return f'''{{
-\t\tName:     "{self.name}",
-\t\tCategory: api.Ref{{Name: "{self.category}"}},
-\t}}'''
+\t\t\tName:     "{self.name}",
+\t\t\tCategory: api.Ref{{Name: "{self.category}"}},
+\t\t}}'''
 
 
 class Dependency:
@@ -128,10 +128,10 @@ class Dependency:
     def to_go_struct(self) -> str:
         """Convert to Go api.TechDependency struct."""
         return f'''{{
-\t\t\tName:     "{self.name}",
-\t\t\tVersion:  "{self.version}",
-\t\t\tProvider: "{self.provider}",
-\t\t}}'''
+\t\t\t\tName:     "{self.name}",
+\t\t\t\tVersion:  "{self.version}",
+\t\t\t\tProvider: "{self.provider}",
+\t\t\t}}'''
 
 
 def parse_analyzer_output(file_path: Path) -> List[Dependency]:
@@ -324,15 +324,11 @@ def parse_violations(file_path: Path, normalize_path: str = None) -> tuple[List[
             tech_tags = ruleset.get('tags', [])
             for tag_str in tech_tags:
                 # Tags are in format "Category=Name" or just "Name"
+                # Only include tags with categories (Hub filters out tags without categories)
                 if '=' in tag_str:
                     category, name = tag_str.split('=', 1)
                     # Use "Category=Name" as key to deduplicate
                     tags_dict[tag_str] = Tag(name, category)
-                else:
-                    # No category, use tag name alone
-                    # Default category could be inferred or left generic
-                    if tag_str not in tags_dict:
-                        tags_dict[tag_str] = Tag(tag_str, "Technology")
             continue  # Skip processing violations for this ruleset
 
         violations = ruleset.get('violations', {})
@@ -395,7 +391,7 @@ def generate_go_dependencies(dependencies: List[Dependency]) -> str:
     deps_code = "\t\tDependencies: []api.TechDependency{\n"
 
     for dep in sorted(dependencies, key=lambda d: d.name):
-        deps_code += "\t\t" + dep.to_go_struct() + ",\n"
+        deps_code += "\t\t\t" + dep.to_go_struct() + ",\n"
 
     deps_code += "\t\t},\n"
 
@@ -441,8 +437,8 @@ def generate_go_tags(tags: List[Tag]) -> str:
 
     tags_code = "\tAnalysisTags: []api.Tag{\n"
 
-    for tag in sorted(tags, key=lambda t: t.name):
-        tags_code += "\t" + tag.to_go_struct() + ",\n"
+    for tag in sorted(tags, key=lambda t: (t.name, t.category)):
+        tags_code += "\t\t" + tag.to_go_struct() + ",\n"
 
     tags_code += "\t},\n"
 

@@ -1,0 +1,20 @@
+{
+  "name": "test-react-app",
+  "version": "1.0.0",
+  "description": "Test React TypeScript app for Konveyor analyzer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router": "^5.0.0",
+    "prop-types": "^15.8.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}

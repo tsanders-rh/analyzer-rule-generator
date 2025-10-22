@@ -1,0 +1,23 @@
+- name: discovery-rules
+  unmatched:
+  - discover-java-files
+  - discover-license
+  - discover-manifest-file
+  - discover-maven-xml
+  - discover-properties-file
+  - hardcoded-ip-address
+  - windup-discover-ejb-configuration
+  - windup-discover-jpa-configuration
+  - windup-discover-spring-configuration
+  - windup-discover-web-configuration
+- name: eap81/eap8
+  description: This ruleset provides analysis of Maven built applications when migrating from EAP 6/7/8 to 8.1. This ruleset also applies to migrations from EAP XP 5.0 to 6.0, since EAP XP 6.0 has EAP 8.1 underlying.
+  unmatched:
+  - eap_channel_manifest_8_0_upgrade-00001
+- name: filemappings
+  description: This rule set configures the organization matching functionality, using known root-package prefixes to identify libraries and other code.
+- name: os/windows
+  description: This is a ruleset for Windows operating system specific rules while migrating to Linux operating system.
+  unmatched:
+  - os-specific-00001
+  - os-specific-00002

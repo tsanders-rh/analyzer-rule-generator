@@ -218,23 +218,21 @@ class AnalyzerRuleGenerator:
             return condition
 
         elif provider == "typescript":
-            # Check if pattern requires semantic analysis
-            if self._requires_semantic_analysis(pattern):
-                # Use typescript.referenced for semantic analysis
-                return {
-                    "typescript.referenced": {
-                        "pattern": pattern.source_fqn or pattern.source_pattern,
-                        "location": self._infer_location_context(pattern)
-                    }
+            # Use typescript.referenced for semantic symbol analysis
+            # Note: typescript.referenced only finds top-level declarations
+            # (functions, classes, variables). For methods, properties, or
+            # type annotations, the LLM should have chosen builtin provider.
+            condition = {
+                "typescript.referenced": {
+                    "pattern": pattern.source_fqn or pattern.source_pattern
                 }
-            else:
-                # Fall back to file content matching for simple text patterns
-                return {
-                    "builtin.filecontent": {
-                        "pattern": pattern.source_fqn or pattern.source_pattern,
-                        "filePattern": pattern.file_pattern or self._get_file_pattern(pattern)
-                    }
-                }
+            }
+
+            # Note: location field is optional and often not needed for typescript provider
+            # The provider uses LSP workspace/symbol which doesn't support location filtering
+            # Keeping the code simple without location inference
+
+            return condition
 
         else:  # Java provider
             # Determine location (default to TYPE if not specified)
@@ -448,7 +446,8 @@ class AnalyzerRuleGenerator:
         if pattern.file_pattern:
             return pattern.file_pattern
 
-        # Default TypeScript/JavaScript file pattern
+        # Default TypeScript/JavaScript file pattern using brace expansion
+        # Brace expansion is supported in Konveyor analyzer
         return "*.{ts,tsx,js,jsx}"
 
     def _build_links(self, pattern: MigrationPattern) -> Optional[List[Link]]:

@@ -1,0 +1,1862 @@
+!SESSION 2025-10-20 20:09:41.787 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=17.0.16
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=aarch64, WS=cocoa, NL=en_US
+Framework arguments:  -Djava.net.useSystemProxies=true
+Command-line arguments:  -Djava.net.useSystemProxies=true -data 
+
+This is a continuation of log file /Users/tsanders/Workspace/analyzer-rule-generator/.metadata/.bak_0.log
+Created Time: 2025-10-20 20:09:45.658
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.658
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.658
+!MESSAGE KONVEYOR_LOG: pattern: PackageDeclarationPattern: <com.sun.mail*>, pattern match, case insensitive, generic full match, fine grain: none | PackageReferencePattern: <com.sun.mail*>, pattern match, case insensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.659
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for com.sun.mail* location 11 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.659
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=11, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.simplejavamail*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.659
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@1bf59b0d
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.659
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.659
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.660
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.660
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.660
+!MESSAGE KONVEYOR_LOG: pattern: PackageDeclarationPattern: <org.simplejavamail*>, pattern match, case insensitive, generic full match, fine grain: none | PackageReferencePattern: <org.simplejavamail*>, pattern match, case insensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.660
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.simplejavamail* location 11 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.660
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=11, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.apache.commons.mail*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.661
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@17fc5250
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.661
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.661
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.661
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.661
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.661
+!MESSAGE KONVEYOR_LOG: pattern: PackageDeclarationPattern: <org.apache.commons.mail*>, pattern match, case insensitive, generic full match, fine grain: none | PackageReferencePattern: <org.apache.commons.mail*>, pattern match, case insensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.662
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.apache.commons.mail* location 11 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.662
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=3, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=com.sun.jna*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.662
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@7c8b5c90
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.662
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.669
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.670
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.670
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.670
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.670
+!MESSAGE KONVEYOR_LOG: pattern: ConstructorCombinedPattern: com.sun.jna*(...), pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.670
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for com.sun.jna* location 3 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.671
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=com.sun.jna*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.671
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@6d663ec3
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.671
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.671
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.671
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.671
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.671
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.672
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<com.sun>, type<jna*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<jna*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<com.sun>, type<jna*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.672
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for com.sun.jna* location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.672
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=1, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=com.sun.jna*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.672
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5afcfd91
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.672
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.672
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.672
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.673
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.673
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.673
+!MESSAGE KONVEYOR_LOG: pattern: SuperInterfaceReferencePattern: <jna*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.673
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for com.sun.jna* location 1 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.673
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=2, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=com.sun.jna}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.673
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@2fe74a4c
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.673
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.674
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.674
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.674
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.674
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.674
+!MESSAGE KONVEYOR_LOG: pattern: MethodReferencePattern: com.sun.jna(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.709
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for com.sun.jna location 2 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.710
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=9, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=com.sun.jna*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.710
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@378685b
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.710
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.710
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.710
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.710
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.710
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.711
+!MESSAGE KONVEYOR_LOG: pattern: TypeReferencePattern: qualification<com.sun>, type<jna*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.711
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for com.sun.jna* location 9 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.711
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=2, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=java.lang.System.load*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.711
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@1e2f3c59
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.712
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.712
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.712
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.712
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.712
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.712
+!MESSAGE KONVEYOR_LOG: pattern: MethodReferencePattern: java.lang.system.load*(...), pattern match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.720
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for java.lang.System.load* location 2 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.721
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=2, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=loadLibrary}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.721
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@3e95d201
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.721
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.721
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.721
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.721
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.721
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.722
+!MESSAGE KONVEYOR_LOG: pattern: MethodReferencePattern: loadlibrary(...), exact match, case insensitive, generic erasure match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.722
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for loadLibrary location 2 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.722
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=2, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=java.lang.System.mapLibraryName*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.722
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@7b7748a9
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.722
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.722
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.723
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.723
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.723
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.723
+!MESSAGE KONVEYOR_LOG: pattern: MethodReferencePattern: java.lang.system.maplibraryname*(...), pattern match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.728
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for java.lang.System.mapLibraryName* location 2 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.728
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=2, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=java.lang.Runtime.load}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.729
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@3b8dcd2c
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.729
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.729
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.729
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.729
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.729
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.729
+!MESSAGE KONVEYOR_LOG: pattern: MethodReferencePattern: java.lang.runtime.load(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.735
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for java.lang.Runtime.load location 2 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.735
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=2, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=java.lang.Runtime.loadLibrary}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.735
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5c27e3f0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.735
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.735
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.736
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.736
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.736
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.736
+!MESSAGE KONVEYOR_LOG: pattern: MethodReferencePattern: java.lang.runtime.loadlibrary(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.740
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for java.lang.Runtime.loadLibrary location 2 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.741
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.ws.rs.Path}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.741
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@4c3227af
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.741
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.741
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.741
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.742
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.742
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.742
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.ws.rs>, type<Path> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Path>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.ws.rs>, type<Path>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.742
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.ws.rs.Path location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.743
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=jakarta.ws.rs.Path}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.743
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@dc10c80
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.743
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.743
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.743
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.743
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.743
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.744
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<jakarta.ws.rs>, type<Path> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Path>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<jakarta.ws.rs>, type<Path>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.744
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for jakarta.ws.rs.Path location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.750
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.persistence.Entity}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.750
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@58f044b9
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.750
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.750
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.750
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.750
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.750
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.750
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.persistence>, type<Entity> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Entity>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.persistence>, type<Entity>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.750
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.persistence.Entity location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.751
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.persistence.Table}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.751
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@3b2b0434
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.751
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.751
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.751
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.751
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.751
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.752
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.persistence>, type<Table> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Table>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.persistence>, type<Table>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.752
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.persistence.Table location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.752
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.persistence.NamedQuery}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.752
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@667953a1
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.752
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.752
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.752
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.753
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.753
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.753
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.persistence>, type<NamedQuery> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<NamedQuery>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.persistence>, type<NamedQuery>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.753
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.persistence.NamedQuery location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.753
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.persistence.NamedQueries}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.753
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@63d9f6e2
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.753
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.753
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.754
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.754
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.754
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.754
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.persistence>, type<NamedQueries> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<NamedQueries>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.persistence>, type<NamedQueries>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.754
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.persistence.NamedQueries location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.754
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.persistence.DiscriminatorValue}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.754
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@3956a3ac
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.754
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.754
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.755
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.755
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.755
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.755
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.persistence>, type<DiscriminatorValue> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<DiscriminatorValue>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.persistence>, type<DiscriminatorValue>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.755
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.persistence.DiscriminatorValue location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.755
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=jakarta.persistence.Entity}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.755
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5a3f0a16
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.755
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.755
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.756
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.756
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.756
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.756
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<jakarta.persistence>, type<Entity> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Entity>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<jakarta.persistence>, type<Entity>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.756
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for jakarta.persistence.Entity location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.756
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=jakarta.persistence.Table}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.756
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@7677beab
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.756
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.756
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.757
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.757
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.757
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.757
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<jakarta.persistence>, type<Table> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Table>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<jakarta.persistence>, type<Table>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.757
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for jakarta.persistence.Table location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.757
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=jakarta.persistence.NamedQuery}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.757
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5ab52861
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.757
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.758
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.758
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.758
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.758
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.758
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<jakarta.persistence>, type<NamedQuery> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<NamedQuery>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<jakarta.persistence>, type<NamedQuery>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.758
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for jakarta.persistence.NamedQuery location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.758
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=jakarta.persistence.NamedQueries}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.759
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5672ab58
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.759
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.759
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.759
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.759
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.759
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.759
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<jakarta.persistence>, type<NamedQueries> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<NamedQueries>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<jakarta.persistence>, type<NamedQueries>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.759
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for jakarta.persistence.NamedQueries location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.759
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=jakarta.persistence.DiscriminatorValue}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.760
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@74bf643a
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.760
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.760
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.760
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.760
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.760
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.760
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<jakarta.persistence>, type<DiscriminatorValue> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<DiscriminatorValue>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<jakarta.persistence>, type<DiscriminatorValue>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.760
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for jakarta.persistence.DiscriminatorValue location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.834
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, annotationQuery={pattern=, elements=[{name=transactional, value=true}]}, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.annotation.sql.DataSourceDefinition}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.834
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@3f760ee0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.834
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.834
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.834
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.835
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.835
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.835
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.annotation.sql>, type<DataSourceDefinition> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<DataSourceDefinition>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.annotation.sql>, type<DataSourceDefinition>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.835
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.annotation.sql.DataSourceDefinition location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.835
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, annotationQuery={pattern=, elements=[{name=transactional, value=false}]}, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.annotation.sql.DataSourceDefinition}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.836
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@4c73df4f
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.836
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.836
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.836
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.836
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.836
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.836
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.annotation.sql>, type<DataSourceDefinition> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<DataSourceDefinition>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.annotation.sql>, type<DataSourceDefinition>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.836
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.annotation.sql.DataSourceDefinition location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.923
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=1, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=java.applet.Applet}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.923
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@f1885f2
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.923
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.923
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.923
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.924
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.924
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.924
+!MESSAGE KONVEYOR_LOG: pattern: SuperInterfaceReferencePattern: <Applet>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.924
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for java.applet.Applet location 1 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.931
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.websocket.server.ServerEndpoint}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.931
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@9be9f
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.931
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.931
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.931
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.931
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.931
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.932
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.websocket.server>, type<ServerEndpoint> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<ServerEndpoint>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.websocket.server>, type<ServerEndpoint>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:45.932
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.websocket.server.ServerEndpoint location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.120
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.annotation.security*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.120
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@f87b170
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.120
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.120
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.120
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.120
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.120
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.121
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.annotation>, type<security*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<security*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.annotation>, type<security*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.121
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.annotation.security* location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.347
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.springframework.jmx*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.348
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5d5c8e68
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.348
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.348
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.348
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.348
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.348
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.348
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<org.springframework>, type<jmx*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<jmx*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<org.springframework>, type<jmx*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.349
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.springframework.jmx* location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.626
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.springframework.web.servlet.mvc.Controller}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.626
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@1620b724
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.626
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.626
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.626
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.627
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.627
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.627
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<org.springframework.web.servlet.mvc>, type<Controller> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Controller>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<org.springframework.web.servlet.mvc>, type<Controller>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:46.627
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.springframework.web.servlet.mvc.Controller location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.597
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=0, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=java.util.concurrent.(ExecutorService|Executors|Executor|ScheduledExecutorService)}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.597
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5b901e39
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.597
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.597
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.598
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.598
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.598
+!MESSAGE default query passed java.util.concurrent.ExecutorService, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.598
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.598
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.598
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.598
+!MESSAGE list of p: ConstructorCombinedPattern: java.util.concurrent.ExecutorService(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.599
+!MESSAGE default query passed java.util.concurrent.Executors, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.600
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.600
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.600
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.600
+!MESSAGE list of p: ConstructorCombinedPattern: java.util.concurrent.Executors(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.600
+!MESSAGE default query passed java.util.concurrent.Executor, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.600
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.600
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.600
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.600
+!MESSAGE list of p: ConstructorCombinedPattern: java.util.concurrent.Executor(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.601
+!MESSAGE default query passed java.util.concurrent.ScheduledExecutorService, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.601
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.601
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.601
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.601
+!MESSAGE list of p: ConstructorCombinedPattern: java.util.concurrent.ScheduledExecutorService(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.601
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<java.util.concurrent>, type<ExecutorService> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<ExecutorService>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<java.util.concurrent>, type<ExecutorService>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: java.util.concurrent.executorservice(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: java.util.concurrent.ExecutorService(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<java.util.concurrent>, type<Executors> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Executors>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<java.util.concurrent>, type<Executors>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: java.util.concurrent.executors(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: java.util.concurrent.Executors(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<java.util.concurrent>, type<Executor> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Executor>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<java.util.concurrent>, type<Executor>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: java.util.concurrent.executor(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: java.util.concurrent.Executor(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<java.util.concurrent>, type<ScheduledExecutorService> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<ScheduledExecutorService>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<java.util.concurrent>, type<ScheduledExecutorService>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: java.util.concurrent.scheduledexecutorservice(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: java.util.concurrent.ScheduledExecutorService(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.612
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for java.util.concurrent.(ExecutorService|Executors|Executor|ScheduledExecutorService) location 0 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.613
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=0, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=java.lang.(Thread|ThreadDeath|ThreadGroup|ThreadLocal)}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.613
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@16f4fadd
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.613
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.613
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.613
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE default query passed java.lang.Thread, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE list of p: ConstructorCombinedPattern: java.lang.Thread(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE default query passed java.lang.ThreadDeath, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.614
+!MESSAGE list of p: ConstructorCombinedPattern: java.lang.ThreadDeath(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE default query passed java.lang.ThreadGroup, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE list of p: ConstructorCombinedPattern: java.lang.ThreadGroup(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE default query passed java.lang.ThreadLocal, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE list of p: ConstructorCombinedPattern: java.lang.ThreadLocal(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.615
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<java.lang>, type<Thread> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Thread>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<java.lang>, type<Thread>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: java.lang.thread(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: java.lang.Thread(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<java.lang>, type<ThreadDeath> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<ThreadDeath>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<java.lang>, type<ThreadDeath>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: java.lang.threaddeath(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: java.lang.ThreadDeath(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<java.lang>, type<ThreadGroup> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<ThreadGroup>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<java.lang>, type<ThreadGroup>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: java.lang.threadgroup(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: java.lang.ThreadGroup(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<java.lang>, type<ThreadLocal> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<ThreadLocal>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<java.lang>, type<ThreadLocal>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: java.lang.threadlocal(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: java.lang.ThreadLocal(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.626
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for java.lang.(Thread|ThreadDeath|ThreadGroup|ThreadLocal) location 0 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.634
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.springframework.integration.dsl.IntegrationFlow}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.634
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@43127306
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.634
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.634
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.634
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.634
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.634
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.635
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<org.springframework.integration.dsl>, type<IntegrationFlow> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<IntegrationFlow>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<org.springframework.integration.dsl>, type<IntegrationFlow>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.635
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.springframework.integration.dsl.IntegrationFlow location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.678
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=11, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.enterprise.inject*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.678
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@183c510f
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.678
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.679
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.679
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.679
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.679
+!MESSAGE KONVEYOR_LOG: pattern: PackageDeclarationPattern: <javax.enterprise.inject*>, pattern match, case insensitive, generic full match, fine grain: none | PackageReferencePattern: <javax.enterprise.inject*>, pattern match, case insensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.679
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.enterprise.inject* location 11 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.680
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=11, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.inject*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.680
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@6fe3b88d
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.680
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.680
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.680
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.680
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.680
+!MESSAGE KONVEYOR_LOG: pattern: PackageDeclarationPattern: <javax.inject*>, pattern match, case insensitive, generic full match, fine grain: none | PackageReferencePattern: <javax.inject*>, pattern match, case insensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.680
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.inject* location 11 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.681
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=11, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=jakarta.enterprise.inject*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.681
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5e7095be
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.681
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.681
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.681
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.682
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.682
+!MESSAGE KONVEYOR_LOG: pattern: PackageDeclarationPattern: <jakarta.enterprise.inject*>, pattern match, case insensitive, generic full match, fine grain: none | PackageReferencePattern: <jakarta.enterprise.inject*>, pattern match, case insensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.682
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for jakarta.enterprise.inject* location 11 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.682
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=11, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=jakarta.inject*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.683
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@e2a5735
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.683
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.683
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.683
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.683
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.683
+!MESSAGE KONVEYOR_LOG: pattern: PackageDeclarationPattern: <jakarta.inject*>, pattern match, case insensitive, generic full match, fine grain: none | PackageReferencePattern: <jakarta.inject*>, pattern match, case insensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.683
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for jakarta.inject* location 11 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.690
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=11, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.json*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.691
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@74e4dbd6
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.691
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.691
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.691
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.691
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.691
+!MESSAGE KONVEYOR_LOG: pattern: PackageDeclarationPattern: <javax.json*>, pattern match, case insensitive, generic full match, fine grain: none | PackageReferencePattern: <javax.json*>, pattern match, case insensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.691
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.json* location 11 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.698
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.security.jacc*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.698
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@6313217
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.698
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.698
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.698
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.698
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.698
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.698
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.security>, type<jacc*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<jacc*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.security>, type<jacc*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.698
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.security.jacc* location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.699
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.management.j2ee*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.699
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5c368a0a
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.699
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.699
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.699
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.699
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.699
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.699
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.management>, type<j2ee*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<j2ee*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.management>, type<j2ee*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.699
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.management.j2ee* location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.706
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.jws*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.706
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@79fd46
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.706
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.706
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.706
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.706
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.706
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.706
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax>, type<jws*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<jws*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax>, type<jws*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.706
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.jws* location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.annotation.(PreDestroy|PostConstruct|Resource|Resources)}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5291acf4
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.annotation>, type<PreDestroy> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<PreDestroy>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.annotation>, type<PreDestroy>, exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.annotation>, type<PostConstruct> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<PostConstruct>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.annotation>, type<PostConstruct>, exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.annotation>, type<Resource> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Resource>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.annotation>, type<Resource>, exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.annotation>, type<Resources> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Resources>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.annotation>, type<Resources>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.707
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.annotation.(PreDestroy|PostConstruct|Resource|Resources) location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.708
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=java|javax.xml.bind*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.708
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@5dbf9d3b
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.708
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.708
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.708
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.708
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.708
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.708
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<java|javax.xml>, type<bind*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<bind*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<java|javax.xml>, type<bind*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.708
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for java|javax.xml.bind* location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.709
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.xml.registry*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.709
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@35b12a5c
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.709
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.709
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.709
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.709
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.709
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.709
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.xml>, type<registry*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<registry*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.xml>, type<registry*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.709
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.xml.registry* location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.710
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.validation.constraints*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.710
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@7aed7261
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.710
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.710
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.710
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.710
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.710
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.710
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.validation>, type<constraints*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<constraints*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.validation>, type<constraints*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.710
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.validation.constraints* location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.710
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.servlet*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@254497c4
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax>, type<servlet*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<servlet*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax>, type<servlet*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.servlet* location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.json.bind*}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@4b39012
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.711
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.712
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.712
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.712
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.712
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.712
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.json>, type<bind*> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<bind*>, pattern match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.json>, type<bind*>, pattern match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.712
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.json.bind* location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.865
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.springframework.scheduling.annotation.Scheduled}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.865
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@38ecb912
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.865
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.865
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.865
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.865
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.866
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.866
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<org.springframework.scheduling.annotation>, type<Scheduled> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Scheduled>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<org.springframework.scheduling.annotation>, type<Scheduled>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.866
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.springframework.scheduling.annotation.Scheduled location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.872
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.springframework.boot.autoconfigure.SpringBootApplication}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.872
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@2903aa14
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.872
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.872
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.872
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.872
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.872
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.872
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<org.springframework.boot.autoconfigure>, type<SpringBootApplication> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<SpringBootApplication>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<org.springframework.boot.autoconfigure>, type<SpringBootApplication>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.872
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.springframework.boot.autoconfigure.SpringBootApplication location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.873
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=1, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.springframework.boot.web.servlet.support.SpringBootServletInitializer}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.873
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@2878e247
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.873
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.873
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.873
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.873
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.873
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.873
+!MESSAGE KONVEYOR_LOG: pattern: SuperInterfaceReferencePattern: <SpringBootServletInitializer>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:47.873
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.springframework.boot.web.servlet.support.SpringBootServletInitializer location 1 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.015
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.jboss.ejb3.annotation.Clustered}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.016
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@30d3c45a
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.016
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.016
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.016
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.016
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.016
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.016
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<org.jboss.ejb3.annotation>, type<Clustered> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Clustered>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<org.jboss.ejb3.annotation>, type<Clustered>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.016
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.jboss.ejb3.annotation.Clustered location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.017
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=8, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.jboss.ejb3.annotation.Clustered}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.017
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@6d2acf7b
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.017
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.017
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.017
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.017
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.017
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.017
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<org.jboss.ejb3.annotation>, type<Clustered> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Clustered>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<org.jboss.ejb3.annotation>, type<Clustered>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.017
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.jboss.ejb3.annotation.Clustered location 8 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.043
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=4, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=org.springframework.boot.context.properties.ConfigurationProperties}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.043
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@594d8bc0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.043
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.043
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.043
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.043
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.044
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.044
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<org.springframework.boot.context.properties>, type<ConfigurationProperties> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<ConfigurationProperties>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<org.springframework.boot.context.properties>, type<ConfigurationProperties>, exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.044
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for org.springframework.boot.context.properties.ConfigurationProperties location 4 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.428
+!MESSAGE Here we get the arguments for rule entry: [{analysisMode=full, includeOpenSourceLibraries=false, location=0, mavenIndexPath=/Users/tsanders/.kantra/maven.default.index, mavenLocalRepo=/Users/tsanders/.m2/repository, project=java, query=javax.ejb.(Schedule|ScheduleExpression|Schedules|TimedObject|Timeout|Timer|TimerConfig|TimerHandle|TimerService)}]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE Searching in target project: [Lorg.eclipse.jdt.core.IJavaProject;@36482074
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE KONVEYOR_LOG: waiting for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE KONVEYOR_LOG: waited for source downloads
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE KONVEYOR_LOG: found errors: [] warnings: [Marker [on: /tackle2-ui, id: 6, type: org.eclipse.core.resources.noExplicitEncoding, attributes: [location: /tackle2-ui, message: Project 'tackle2-ui' has no explicit encoding set, severity: 1], created: 10/20/25, 8:09 PM]]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE scope: JavaSearchScope on [
+	/tackle2-ui
+]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE default query passed javax.ejb.Schedule, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE list of p: ConstructorCombinedPattern: javax.ejb.Schedule(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE default query passed javax.ejb.ScheduleExpression, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.429
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE list of p: ConstructorCombinedPattern: javax.ejb.ScheduleExpression(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE default query passed javax.ejb.Schedules, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE list of p: ConstructorCombinedPattern: javax.ejb.Schedules(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE default query passed javax.ejb.TimedObject, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE list of p: ConstructorCombinedPattern: javax.ejb.TimedObject(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE default query passed javax.ejb.Timeout, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.430
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE list of p: ConstructorCombinedPattern: javax.ejb.Timeout(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE default query passed javax.ejb.Timer, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE list of p: ConstructorCombinedPattern: javax.ejb.Timer(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE default query passed javax.ejb.TimerConfig, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE list of p: ConstructorCombinedPattern: javax.ejb.TimerConfig(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE default query passed javax.ejb.TimerHandle, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE list of p: ConstructorCombinedPattern: javax.ejb.TimerHandle(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.431
+!MESSAGE default query passed javax.ejb.TimerService, searching everything
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.432
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.432
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.432
+!MESSAGE Using full match
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.432
+!MESSAGE list of p: ConstructorCombinedPattern: javax.ejb.TimerService(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.432
+!MESSAGE KONVEYOR_LOG: pattern: TypeDeclarationPattern: qualification<javax.ejb>, type<Schedule> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Schedule>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.ejb>, type<Schedule>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: javax.ejb.schedule(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: javax.ejb.Schedule(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.ejb>, type<ScheduleExpression> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<ScheduleExpression>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.ejb>, type<ScheduleExpression>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: javax.ejb.scheduleexpression(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: javax.ejb.ScheduleExpression(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.ejb>, type<Schedules> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Schedules>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.ejb>, type<Schedules>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: javax.ejb.schedules(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: javax.ejb.Schedules(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.ejb>, type<TimedObject> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<TimedObject>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.ejb>, type<TimedObject>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: javax.ejb.timedobject(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: javax.ejb.TimedObject(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.ejb>, type<Timeout> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Timeout>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.ejb>, type<Timeout>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: javax.ejb.timeout(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: javax.ejb.Timeout(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.ejb>, type<Timer> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<Timer>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.ejb>, type<Timer>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: javax.ejb.timer(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: javax.ejb.Timer(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.ejb>, type<TimerConfig> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<TimerConfig>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.ejb>, type<TimerConfig>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: javax.ejb.timerconfig(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: javax.ejb.TimerConfig(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.ejb>, type<TimerHandle> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<TimerHandle>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.ejb>, type<TimerHandle>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: javax.ejb.timerhandle(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: javax.ejb.TimerHandle(...), exact match, case sensitive, generic full match, fine grain: none | TypeDeclarationPattern: qualification<javax.ejb>, type<TimerService> TypeDeclarationPattern: pkg<*>, enclosing<*>, type<TimerService>, exact match, case sensitive, generic full match, fine grain: none | TypeReferencePattern: qualification<javax.ejb>, type<TimerService>, exact match, case sensitive, generic full match, fine grain: none | MethodReferencePattern: javax.ejb.timerservice(...), exact match, case insensitive, generic erasure match, fine grain: QUALIFIED_REFERENCE | ConstructorCombinedPattern: javax.ejb.TimerService(...), exact match, case sensitive, generic full match, fine grain: none
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:48.455
+!MESSAGE KONVEYOR_LOG: got: 0 search matches for javax.ejb.(Schedule|ScheduleExpression|Schedules|TimedObject|Timeout|Timer|TimerConfig|TimerHandle|TimerService) location 0 matches0
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:49.234
+!MESSAGE >> shutdown
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:49.235
+!MESSAGE >> exit
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:49.242
+!MESSAGE Shutdown received... waking up main thread
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2025-10-20 20:09:49.244
+!MESSAGE class org.eclipse.jdt.ls.core.internal.JavaLanguageServerPlugin is stopping:

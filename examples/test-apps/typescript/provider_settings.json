@@ -1,17 +1,17 @@
 [
   {
-    "name": "generic",
+    "name": "typescript",
     "binaryPath": "/usr/local/bin/generic-external-provider",
     "initConfig": [
       {
         "location": "/Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app",
         "analysisMode": "full",
         "providerSpecificConfig": {
-          "name": "typescript",
-          "lspServerName": "typescript-language-server",
+          "lspServerName": "nodejs",
           "lspServerPath": "/opt/homebrew/bin/typescript-language-server",
           "lspServerArgs": ["--stdio"],
-          "workspaceFolder": "/Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app"
+          "workspaceFolders": ["file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app"],
+          "dependencyFolders": []
         }
       }
     ]

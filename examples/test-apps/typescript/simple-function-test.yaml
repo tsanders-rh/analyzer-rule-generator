@@ -1,0 +1,9 @@
+- ruleID: simple-function-test-00000
+  description: Find any function declaration
+  when:
+    builtin.filecontent:
+      pattern: "function"
+      filePattern: "*.tsx"
+  message: Found function keyword
+  effort: 1
+  category: potential

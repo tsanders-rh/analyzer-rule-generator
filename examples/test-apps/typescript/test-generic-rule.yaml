@@ -1,0 +1,11 @@
+- ruleID: test-generic-00000
+  description: Test generic provider with TypeScript
+  when:
+    generic.referenced:
+      pattern: "propTypes"
+  message: |
+    Found reference to propTypes
+  effort: 1
+  category: potential
+  labels:
+    - test

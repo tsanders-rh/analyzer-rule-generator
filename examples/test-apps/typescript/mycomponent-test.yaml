@@ -1,0 +1,8 @@
+- ruleID: mycomponent-test-00000
+  description: Find MyComponent function
+  when:
+    typescript.referenced:
+      pattern: "MyComponent"
+  message: Found MyComponent reference
+  effort: 1
+  category: potential

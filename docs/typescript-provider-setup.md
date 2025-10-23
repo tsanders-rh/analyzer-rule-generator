@@ -6,11 +6,21 @@ This guide explains how to configure a TypeScript/JavaScript language server pro
 
 Konveyor's analyzer-lsp supports a generic provider that can interface with any Language Server Protocol (LSP) compliant language server. Instead of building a custom provider from scratch, we can leverage the existing generic provider to add TypeScript/JavaScript analysis capabilities.
 
+## ⚠️ Important: Required Fixes
+
+**As of October 2025**, the generic provider's nodejs client has bugs that prevent TypeScript analysis from working properly. You must apply fixes before using it:
+
+1. **Missing .tsx/.jsx support** - The provider only scans `.ts` and `.js` files, missing React components
+2. **Scans node_modules** - Without the fix, it tries to scan all dependency files causing extreme slowness
+
+See [Applying Required Fixes](#applying-required-fixes) below for instructions.
+
 ## Prerequisites
 
 - Konveyor analyzer-lsp installed
 - TypeScript language server (`typescript-language-server`)
 - Node.js and npm installed
+- Go 1.21+ (to build the fixed generic provider)
 
 ## Step 1: Install TypeScript Language Server
 
@@ -28,93 +38,113 @@ typescript-language-server --version
 which typescript-language-server
 ```
 
-## Step 2: Obtain Generic Provider Binary
+## Step 2: Apply Required Fixes to Generic Provider
 
-The generic provider binary is required to run custom language server providers with Konveyor. There are two ways to obtain it:
-
-### Option 1: Extract from Kantra Container
-
-**⚠️ Important:** This method only works on **Linux**. The kantra container contains Linux binaries that won't run natively on macOS or Windows. If you're on macOS, use **Option 2: Build from Source** instead.
-
-For Linux users:
+### Clone and Apply Fixes
 
 ```bash
-# Check if kantra is installed
-which kantra
-
-# Check available kantra container images
-podman images | grep konveyor
-
-# Extract the generic provider binary from the kantra container
-podman run --rm --entrypoint sh \
-  -v ~/Downloads:/output:Z \
-  quay.io/konveyor/kantra:latest \
-  -c "cp /usr/local/bin/generic-external-provider /output/"
-
-# Install to your PATH
-sudo cp ~/Downloads/generic-external-provider /usr/local/bin/
-chmod +x /usr/local/bin/generic-external-provider
-
-# Verify installation
-generic-external-provider --help
-```
-
-**Note:** Replace `latest` with your specific kantra version tag if needed (e.g., `v0.8.1-alpha.1`).
-
-### Option 2: Build from Source (Required for macOS)
-
-**For macOS users:** This is the recommended method since the container binaries are Linux-only.
-
-```bash
-# Prerequisites: Go 1.21+ must be installed
-# Install Go on macOS:
-brew install go
-
 # Clone the analyzer-lsp repository
 git clone https://github.com/konveyor/analyzer-lsp.git
 cd analyzer-lsp
 
-# Build the generic provider (creates a native binary for your OS)
+# Create a branch for the fixes
+git checkout -b fix/nodejs-tsx-support
+
+# Apply Fix 1: Add .tsx and .jsx file support
+# Edit: external-providers/generic-external-provider/pkg/server_configurations/nodejs/service_client.go
+# Lines 151-162, change from:
+#   if filepath.Ext(path) == ".ts" {
+#     langID = "typescript"
+# To:
+#   ext := filepath.Ext(path)
+#   if ext == ".ts" || ext == ".tsx" {
+#     langID = "typescriptreact"
+
+# Apply Fix 2: Skip node_modules directory
+# Same file, lines 147-150, uncomment:
+#   if info.IsDir() && info.Name() == "node_modules" {
+#     return filepath.SkipDir
+#   }
+```
+
+### Detailed Fix Instructions
+
+Edit `external-providers/generic-external-provider/pkg/server_configurations/nodejs/service_client.go`:
+
+**Fix 1: Add .tsx/.jsx support (lines 151-162)**
+
+Before:
+```go
+if !info.IsDir() {
+    if filepath.Ext(path) == ".ts" {
+        langID = "typescript"
+        path = "file://" + path
+        nodeFiles = append(nodeFiles, path)
+    }
+    if filepath.Ext(path) == ".js" {
+        langID = "javascript"
+        path = "file://" + path
+        nodeFiles = append(nodeFiles, path)
+    }
+}
+```
+
+After:
+```go
+if !info.IsDir() {
+    ext := filepath.Ext(path)
+    if ext == ".ts" || ext == ".tsx" {
+        langID = "typescriptreact"
+        path = "file://" + path
+        nodeFiles = append(nodeFiles, path)
+    }
+    if ext == ".js" || ext == ".jsx" {
+        langID = "javascriptreact"
+        path = "file://" + path
+        nodeFiles = append(nodeFiles, path)
+    }
+}
+```
+
+**Fix 2: Skip node_modules (lines 147-150)**
+
+Before:
+```go
+// TODO source-only mode
+// if info.IsDir() && info.Name() == "node_modules" {
+//     return filepath.SkipDir
+// }
+```
+
+After:
+```go
+// TODO source-only mode
+if info.IsDir() && info.Name() == "node_modules" {
+    return filepath.SkipDir
+}
+```
+
+### Build the Fixed Binary
+
+```bash
+# Build the generic provider with fixes
 make external-generic
-
-# The binary will be located at:
-# external-providers/generic-external-provider/generic-external-provider
-
-# Verify it's a native binary
-file external-providers/generic-external-provider/generic-external-provider
-# macOS: Should show "Mach-O 64-bit executable"
-# Linux: Should show "ELF 64-bit executable"
 
 # Install to your PATH
 sudo cp external-providers/generic-external-provider/generic-external-provider \
         /usr/local/bin/
-chmod +x /usr/local/bin/generic-external-provider
 
 # Verify installation
 generic-external-provider --help
 ```
 
-### Verify Installation
-
-After installation, verify the binary is accessible:
-
-```bash
-which generic-external-provider
-# Should output: /usr/local/bin/generic-external-provider
-```
-
 ## Step 3: Build Konveyor Analyzer from Source
 
-**Important:** The generic TypeScript provider requires running `konveyor-analyzer` directly on your host system, not through kantra's container. This is because the analyzer needs access to:
-- The generic-external-provider binary on your host
-- The TypeScript language server on your host
-- Your project files with proper paths
+**Important:** The generic TypeScript provider requires running `konveyor-analyzer` directly on your host system, not through kantra's container.
 
 ```bash
-# Clone the analyzer-lsp repository
-cd ~/Workspace  # or your preferred directory
-git clone https://github.com/konveyor/analyzer-lsp.git
-cd analyzer-lsp
+# Clone the analyzer-lsp repository (if not already done)
+cd ~/Workspace/analyzer-lsp
 
 # Build the analyzer (creates konveyor-analyzer binary)
 make build
@@ -133,18 +163,18 @@ Create a `provider_settings.json` file with the TypeScript provider configuratio
 ```json
 [
   {
-    "name": "generic",
+    "name": "typescript",
     "binaryPath": "/usr/local/bin/generic-external-provider",
     "initConfig": [
       {
         "location": "/absolute/path/to/your/typescript/project",
         "analysisMode": "full",
         "providerSpecificConfig": {
-          "name": "typescript",
-          "lspServerName": "typescript-language-server",
-          "lspServerPath": "/usr/local/bin/typescript-language-server",
+          "lspServerName": "nodejs",
+          "lspServerPath": "/opt/homebrew/bin/typescript-language-server",
           "lspServerArgs": ["--stdio"],
-          "workspaceFolder": "/absolute/path/to/your/typescript/project"
+          "workspaceFolders": ["file:///absolute/path/to/your/typescript/project"],
+          "dependencyFolders": []
         }
       }
     ]
@@ -154,18 +184,18 @@ Create a `provider_settings.json` file with the TypeScript provider configuratio
 
 ### Configuration Fields Explained
 
-- **`name`**: Must be `"generic"` for the generic external provider
+- **`name`**: Provider name used in rules (e.g., `"typescript"`)
 - **`binaryPath`**: Absolute path to the generic-external-provider binary
 - **`location`**: Absolute path to the TypeScript/JavaScript project to analyze
 - **`analysisMode`**:
   - `"full"`: Analyze source code and dependencies
   - `"source-only"`: Only analyze source code
 - **`providerSpecificConfig`**:
-  - **`name`**: Identifier for this language server (e.g., `"typescript"`)
-  - **`lspServerName`**: Name of the language server
-  - **`lspServerPath`**: Absolute path to the language server executable (use `which typescript-language-server`)
+  - **`lspServerName`**: Must be `"nodejs"` (uses the nodejs service client for TypeScript)
+  - **`lspServerPath`**: Absolute path to typescript-language-server (use `which typescript-language-server`)
   - **`lspServerArgs`**: Arguments to pass to the language server (usually `["--stdio"]`)
-  - **`workspaceFolder`**: Absolute path to project root for the language server context
+  - **`workspaceFolders`**: Array of workspace folders as `file://` URIs
+  - **`dependencyFolders`**: Folders to exclude from analysis (optional)
 
 **Note:** All paths must be absolute paths, not relative paths.
 
@@ -173,136 +203,112 @@ Create a `provider_settings.json` file with the TypeScript provider configuratio
 
 Once configured, you can write analyzer rules that leverage TypeScript semantic analysis.
 
-### Example Rule: Detect Function Components with propTypes
+### Example Rule: Find Components
 
 ```yaml
-- ruleID: react-18-to-react-19-proptypes
-  description: Function components should not use propTypes
+- ruleID: find-mycomponent
+  description: Find references to MyComponent
   when:
     typescript.referenced:
-      pattern: "propTypes"
-      location: "FUNCTION_DECLARATION"
-  message: |
-    React 19 deprecates propTypes on function components.
-    Use TypeScript types or PropTypes on class components instead.
-  effort: 5
-  category: mandatory
-  labels:
-    - konveyor.io/source=react-18
-    - konveyor.io/target=react-19
+      pattern: "MyComponent"
+  message: Found MyComponent usage
+  effort: 1
+  category: potential
 ```
 
-### Available Query Capabilities
+### TypeScript Provider Capabilities and Limitations
 
-With TypeScript language server, you can query:
+#### What `typescript.referenced` CAN find:
 
-- **Symbol references**: Find where types, functions, classes are used
-- **Type information**: Get type definitions and inheritance
-- **Call hierarchies**: Understand function call chains
-- **Code structure**: Distinguish between functions, classes, methods
-- **Import/export analysis**: Track module dependencies
+✅ **Top-level symbol declarations:**
+- Functions: `function MyComponent() {}`
+- Classes: `class MyComponent extends React.Component {}`
+- Variables/Constants: `const MyComponent = () => {}`
+- Exported symbols
 
-## Step 6: Update Rule Generator
+✅ **References to those symbols:**
+- Where they're imported
+- Where they're called/used
+- Where they're exported
 
-To make the rule generator automatically create TypeScript-aware rules, update the pattern detection logic:
+#### What `typescript.referenced` CANNOT find:
 
-### File: `src/rule_generator/rule_builder.py`
-
-```python
-def _build_when_condition(self, pattern: MigrationPattern) -> Optional[Dict]:
-    """Build when condition based on pattern type."""
-
-    # Existing logic for builtin.filecontent, builtin.xml, etc.
-
-    # Add TypeScript provider support
-    if pattern.file_type in ['.ts', '.tsx', '.js', '.jsx']:
-        # Check if pattern requires semantic analysis
-        if self._requires_semantic_analysis(pattern):
-            return {
-                "typescript.referenced": {
-                    "pattern": pattern.search_pattern,
-                    "location": self._infer_location_context(pattern)
-                }
-            }
-
-    # Fall back to file content matching
-    return {
-        "builtin.filecontent": {
-            "pattern": pattern.search_pattern,
-            "filePattern": self._get_file_pattern(pattern.file_type)
-        }
-    }
-
-def _requires_semantic_analysis(self, pattern: MigrationPattern) -> bool:
-    """Determine if pattern needs TypeScript language server."""
-    semantic_keywords = [
-        'function component',
-        'class component',
-        'type definition',
-        'interface',
-        'generic type',
-        'implicit return'
-    ]
-
-    return any(keyword in pattern.description.lower()
-               for keyword in semantic_keywords)
-
-def _infer_location_context(self, pattern: MigrationPattern) -> str:
-    """Infer AST location context from pattern description."""
-    context_map = {
-        'function': 'FUNCTION_DECLARATION',
-        'class': 'CLASS_DECLARATION',
-        'method': 'METHOD_DECLARATION',
-        'import': 'IMPORT_DECLARATION',
-        'variable': 'VARIABLE_DECLARATION'
-    }
-
-    for keyword, location in context_map.items():
-        if keyword in pattern.description.lower():
-            return location
-
-    return "ANY"
-```
-
-## Step 7: Testing the Setup
-
-### 7.1 Create a Test TypeScript Project
-
+❌ **Methods inside classes:**
 ```typescript
-// test-project/src/component.tsx
-import React from 'react';
-import PropTypes from 'prop-types';
-
-// This should trigger the rule
-function MyComponent(props: any) {
-  return <div>{props.name}</div>;
-}
-
-MyComponent.propTypes = {
-  name: PropTypes.string
-};
-```
-
-Don't forget to create a `tsconfig.json` in your test project root:
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "jsx": "react",
-    "lib": ["ES2020", "DOM"],
-    "strict": false,
-    "esModuleInterop": true,
-    "skipLibCheck": true
-  },
-  "include": ["src/**/*"]
+class MyClass {
+  componentWillMount() {} // Cannot search for "componentWillMount"
 }
 ```
+→ **Workaround:** Use `builtin.filecontent` with pattern `"componentWillMount"`
 
-### 7.2 Run Analysis with Konveyor Analyzer
+❌ **Types/interfaces from imported libraries:**
+```typescript
+const MyComponent: React.FC = () => {} // Cannot search for "React.FC"
+```
+→ **Workaround:** Use `builtin.filecontent` with pattern `"React\\.FC"`
 
-**Important:** Use `konveyor-analyzer` directly, not `kantra`:
+❌ **Properties assigned to objects:**
+```typescript
+MyComponent.propTypes = {} // Cannot search for "propTypes" directly
+```
+→ **Workaround:** Search for the component name or use `builtin.filecontent`
+
+❌ **Type annotations, generics, nested symbols**
+
+#### Best Practices for Writing Rules
+
+1. **For top-level symbols** → Use `typescript.referenced`:
+   ```yaml
+   typescript.referenced:
+     pattern: "MyComponent"
+   ```
+
+2. **For methods, properties, type references** → Use `builtin.filecontent`:
+   ```yaml
+   builtin.filecontent:
+     pattern: "componentWillMount|componentWillReceiveProps"
+     filePattern: "*.tsx"
+   ```
+
+3. **For complex patterns** → Combine both or use `builtin.filecontent` with regex
+
+4. **File patterns:**
+   - ✅ Use: `"*.tsx"` or `"*.ts"`
+   - ❌ Don't use: `"*.{ts,tsx}"` (brace expansion not supported)
+
+### Example: React Migration Rules
+
+```yaml
+# Find deprecated lifecycle methods (use builtin.filecontent)
+- ruleID: react-deprecated-lifecycle
+  when:
+    builtin.filecontent:
+      pattern: "componentWillMount|componentWillReceiveProps|componentWillUpdate"
+      filePattern: "*.tsx"
+  message: Deprecated lifecycle method found
+  category: mandatory
+
+# Find specific component usage (use typescript.referenced)
+- ruleID: find-legacy-component
+  when:
+    typescript.referenced:
+      pattern: "LegacyComponent"
+  message: Legacy component still in use
+  category: potential
+
+# Find React.FC usage (use builtin.filecontent)
+- ruleID: react-fc-usage
+  when:
+    builtin.filecontent:
+      pattern: "React\\.FC"
+      filePattern: "*.tsx"
+  message: React.FC is no longer recommended
+  category: potential
+```
+
+## Step 6: Run Analysis
+
+Use `konveyor-analyzer` directly (not kantra):
 
 ```bash
 # From the analyzer-lsp directory
@@ -321,144 +327,101 @@ cd ~/Workspace/analyzer-lsp
 - Kantra cannot access your host's typescript-language-server binary
 - The generic provider needs to spawn the language server process on the host system
 
-### 7.3 Verify Results
-
-Check `output.yaml` for violations detected by the TypeScript provider.
-
-Example expected output:
-
-```yaml
-- name: custom-rules
-  violations:
-    typescript-provider-test-00000:
-      - uri: file:///path/to/test-project/src/component.tsx
-        message: |
-          React 19 deprecates propTypes on function components.
-          Use TypeScript types or PropTypes on class components instead.
-```
-
 ## Troubleshooting
 
-### "unable to init the providers" error with kantra
+### Analysis Takes Forever / Hangs
+
+**Problem:** Provider is scanning `node_modules` directory
+
+**Solution:** Ensure you applied Fix 2 (skip node_modules). Without this fix, the provider tries to scan all dependency files (can be 500+ files) with a 2-second delay per file.
+
+### No .tsx Files Found
+
+**Problem:** Provider only finds `.ts` files, missing React components
+
+**Solution:** Ensure you applied Fix 1 (.tsx/.jsx support). The original code only looks for `.ts` and `.js` extensions.
+
+### "unable to init the providers" error
 
 **Error:**
 ```
-time="..." level=error msg="unable to init the providers" error="generic client name not found" provider=typescript
-```
-
-**Solution:** You cannot use kantra (containerized analyzer) with the TypeScript generic provider. You must use `konveyor-analyzer` directly on your host system. See Step 7.2 for details.
-
-### "unable to find provider for: typescript" error
-
-**Error:**
-```
-level=error msg="failed parsing conditions for provider" capability=referenced error="unable to find provider for: typescript"
-```
-
-**Cause:** The provider configuration is incorrect or the generic provider binary cannot be found.
-
-**Solution:**
-1. Verify provider_settings.json is an array format (starts with `[`)
-2. Verify `name` is set to `"generic"` not `"typescript"`
-3. Add `"name": "typescript"` inside `providerSpecificConfig`
-4. Ensure absolute paths are used for all paths
-
-### "connection refused" error
-
-**Error:**
-```
-error="rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp [::1]:43945: connect: connection refused\""
+level=error msg="unable to init the providers" error="generic client name not found"
 ```
 
 **Solution:**
-- Ensure the generic-external-provider binary path is correct and executable
-- Verify you're running konveyor-analyzer directly, not through kantra
-- Check that the binary has execute permissions: `chmod +x /usr/local/bin/generic-external-provider`
+1. Verify provider_settings.json uses `"lspServerName": "nodejs"` (not "typescript" or "generic")
+2. Ensure the configuration is an array format `[{...}]`
 
-### Language Server Not Found
+### Symbols Not Found
 
-```bash
-# Check if typescript-language-server is in PATH
-which typescript-language-server
+**Problem:** `typescript.referenced` returns "unmatched" for patterns
 
-# Update provider_settings.json with the full absolute path
-"lspServerPath": "/opt/homebrew/bin/typescript-language-server"  # macOS with Homebrew
-# or
-"lspServerPath": "/usr/local/bin/typescript-language-server"      # Linux or macOS
+**Possible Causes:**
+1. **Searching for methods/properties** → Use `builtin.filecontent` instead
+2. **Searching for imported types** → Use `builtin.filecontent` instead
+3. **Wrong file extension** → Ensure `.tsx` files are included
+4. **Symbol not declared in analyzed code** → TypeScript LSP only finds symbols declared in your code, not in dependencies
+
+### File Pattern Not Working
+
+**Problem:** Rules with `filePattern: "*.{ts,tsx}"` don't match
+
+**Solution:** Brace expansion not supported. Use separate rules or omit filePattern:
+```yaml
+# Instead of: "*.{ts,tsx}"
+# Use:
+filePattern: "*.tsx"
 ```
 
-### No Violations Detected
+## Performance Considerations
 
-1. Verify provider is loaded:
-   ```bash
-   # Run analyzer with --verbose=4 and check logs
-   grep -i "typescript\|generic" output.yaml
-   ```
+1. **First Analysis is Slow**: The TypeScript language server needs to:
+   - Parse `tsconfig.json`
+   - Load type definitions
+   - Index the workspace
+   - First run can take 5-10 seconds
 
-2. Test language server directly:
-   ```bash
-   typescript-language-server --stdio
-   # Should start and wait for input (Ctrl+C to exit)
-   ```
+2. **Subsequent Analyses**: Much faster (2-3 seconds) as files are cached
 
-3. Ensure `tsconfig.json` exists in project root:
-   ```json
-   {
-     "compilerOptions": {
-       "target": "ES2020",
-       "module": "commonjs",
-       "jsx": "react",
-       "lib": ["ES2020", "DOM"]
-     },
-     "include": ["src/**/*"]
-   }
-   ```
+3. **Large Workspaces**: For projects with 100+ files, consider:
+   - Using `"analysisMode": "source-only"`
+   - Analyzing subdirectories separately
+   - Using `builtin.filecontent` when semantic analysis isn't needed
 
-4. Verify all paths in provider_settings.json are absolute paths
+## Contributing Fixes Upstream
 
-### Provider Configuration Format Error
+The fixes described in this guide should be contributed back to analyzer-lsp:
 
-**Error:**
+1. Fork https://github.com/konveyor/analyzer-lsp
+2. Create a branch: `git checkout -b fix/nodejs-tsx-support`
+3. Apply the fixes described above
+4. Commit with descriptive messages
+5. Push and create a Pull Request
+
+### Suggested PR Description
+
 ```
-error="yaml: unmarshal errors:\n  line 1: cannot unmarshal !!map into []provider.Config"
+Fix TypeScript/JavaScript analysis in nodejs service client
+
+This PR fixes two critical issues preventing TypeScript/React analysis:
+
+1. **Add .tsx/.jsx file support**: The nodejs client only scanned .ts and .js files,
+   missing React components in .tsx files. Updated to recognize .tsx/.jsx extensions
+   and use proper language IDs (typescriptreact/javascriptreact).
+
+2. **Skip node_modules directory**: Uncommented the node_modules skip logic to prevent
+   scanning dependency files. Without this, analysis could take 15+ minutes scanning
+   hundreds of dependency files with 2-second delays.
+
+Fixes enable successful TypeScript/React codebase analysis with the generic provider.
 ```
-
-**Solution:** The provider_settings.json must be an array. Ensure your configuration starts with `[` and ends with `]`:
-
-```json
-[
-  {
-    "name": "generic",
-    ...
-  }
-]
-```
-
-## Limitations
-
-Current limitations when using generic provider with TypeScript:
-
-1. **Cannot use kantra**: The TypeScript generic provider requires running `konveyor-analyzer` directly on the host system. It cannot be used with kantra's containerized analyzer because:
-   - The container cannot access the host's generic-external-provider binary
-   - The container cannot access the host's typescript-language-server binary
-   - The generic provider needs to spawn the language server process on the host
-
-2. **Provider Queries**: The exact query capabilities exposed by the generic provider for TypeScript are still being documented. Current known capabilities include:
-   - `typescript.referenced`: Find references to symbols with location context
-   - Location contexts: `FUNCTION_DECLARATION`, `CLASS_DECLARATION`, `METHOD_DECLARATION`, `IMPORT_DECLARATION`, `TYPE_ALIAS_DECLARATION`, `INTERFACE_DECLARATION`, `VARIABLE_DECLARATION`
-
-3. **AST Context**: May not support all TypeScript AST node types. The generic provider wraps the TypeScript language server's LSP capabilities.
-
-4. **Performance**: Full workspace analysis can be slow for large TypeScript projects, especially with semantic analysis enabled.
-
-5. **Absolute Paths Required**: All paths in provider_settings.json must be absolute paths. Relative paths will not work.
 
 ## Next Steps
 
-1. **Test with Real Migration Guides**: Try React 19, Angular, or TypeScript upgrade guides
+1. **Test with Real Migration Guides**: Try React 19, Next.js, or TypeScript upgrade guides
 2. **Document Query Patterns**: Build a library of TypeScript provider query examples
-3. **Contribute to Konveyor**: Share TypeScript provider configuration upstream
-4. **Enhance Rule Generator**: Add more sophisticated TypeScript pattern detection
+3. **Contribute Fixes**: Share these fixes upstream to help the community
+4. **Enhance Rule Generator**: Add TypeScript pattern detection to your rule generator
 
 ## References
 

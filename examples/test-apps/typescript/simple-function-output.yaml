@@ -1,0 +1,19 @@
+- name: konveyor-analysis
+  violations:
+    simple-function-test-00000:
+      description: Find any function declaration
+      category: potential
+      incidents:
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: Found function keyword
+        codeSnip: " 1  import React from 'react';\n 2  import PropTypes from 'prop-types';\n 3  import { Route } from 'react-router';\n 4  \n 5  // This should trigger typescript-provider-test-00000 (propTypes on function component)\n 6  function MyComponent(props: any) {\n 7    return <div>{props.name}</div>;\n 8  }\n 9  \n10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };\n13  \n14  // This should trigger typescript-provider-test-00010 (React.FC usage)\n15  const AnotherComponent: React.FC<{ title: string }> = ({ title }) => {\n16    return <h1>{title}</h1>;"
+        lineNumber: 5
+        variables:
+          matchingText: ""
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: Found function keyword
+        codeSnip: " 1  import React from 'react';\n 2  import PropTypes from 'prop-types';\n 3  import { Route } from 'react-router';\n 4  \n 5  // This should trigger typescript-provider-test-00000 (propTypes on function component)\n 6  function MyComponent(props: any) {\n 7    return <div>{props.name}</div>;\n 8  }\n 9  \n10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };\n13  \n14  // This should trigger typescript-provider-test-00010 (React.FC usage)\n15  const AnotherComponent: React.FC<{ title: string }> = ({ title }) => {\n16    return <h1>{title}</h1>;\n17  };"
+        lineNumber: 6
+        variables:
+          matchingText: ""
+      effort: 1

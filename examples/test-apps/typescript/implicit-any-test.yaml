@@ -1,0 +1,9 @@
+- ruleID: implicit-any-test-00000
+  description: Detect implicit any types in function parameters
+  when:
+    builtin.filecontent:
+      pattern: "function\\s+\\w+\\s*\\([^:)]*\\)"
+      filePattern: "*.tsx"
+  message: Found function without type annotations
+  effort: 1
+  category: potential

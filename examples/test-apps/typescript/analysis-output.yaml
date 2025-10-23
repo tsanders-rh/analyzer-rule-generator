@@ -1,0 +1,7 @@
+- name: konveyor-analysis
+  unmatched:
+  - typescript-provider-test-00000
+  - typescript-provider-test-00010
+  - typescript-provider-test-00020
+  - typescript-provider-test-00030
+  - typescript-provider-test-00040

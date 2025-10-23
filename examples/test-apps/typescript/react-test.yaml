@@ -1,0 +1,8 @@
+- ruleID: react-test-00000
+  description: Find React references
+  when:
+    typescript.referenced:
+      pattern: "React"
+  message: Found React reference
+  effort: 1
+  category: potential

@@ -1,0 +1,8 @@
+- ruleID: componentwillmount-test-00000
+  description: Find componentWillMount
+  when:
+    typescript.referenced:
+      pattern: "componentWillMount"
+  message: Found componentWillMount
+  effort: 1
+  category: potential

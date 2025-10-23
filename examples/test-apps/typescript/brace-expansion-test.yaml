@@ -1,0 +1,19 @@
+- ruleID: brace-expansion-test-00000
+  description: Test brace expansion with *.{tsx,jsx}
+  when:
+    builtin.filecontent:
+      pattern: "function"
+      filePattern: "*.{tsx,jsx}"
+  message: Found function keyword in .tsx or .jsx file
+  effort: 1
+  category: potential
+
+- ruleID: brace-expansion-test-00010
+  description: Test brace expansion with *.{ts,tsx,js,jsx}
+  when:
+    builtin.filecontent:
+      pattern: "import"
+      filePattern: "*.{ts,tsx,js,jsx}"
+  message: Found import statement in TypeScript/JavaScript file
+  effort: 1
+  category: potential

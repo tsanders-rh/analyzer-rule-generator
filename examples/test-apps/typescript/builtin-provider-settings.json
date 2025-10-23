@@ -1,0 +1,12 @@
+[
+  {
+    "name": "builtin",
+    "binaryPath": "",
+    "initConfig": [
+      {
+        "location": "/Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app",
+        "analysisMode": "full"
+      }
+    ]
+  }
+]

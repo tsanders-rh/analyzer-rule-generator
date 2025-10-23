@@ -1,0 +1,100 @@
+- name: konveyor-analysis
+  violations:
+    typescript-provider-test-00000:
+      description: Function components should not use propTypes
+      category: mandatory
+      labels:
+      - konveyor.io/source=react-18
+      - konveyor.io/target=react-19
+      incidents:
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: |
+          React 19 deprecates propTypes on function components.
+          Use TypeScript types or PropTypes on class components instead.
+
+          Replace propTypes with TypeScript interface or type definition.
+        codeSnip: " 1  import React from 'react';\n 2  import PropTypes from 'prop-types';\n 3  import { Route } from 'react-router';\n 4  \n 5  // This should trigger typescript-provider-test-00000 (propTypes on function component)\n 6  function MyComponent(props: any) {\n 7    return <div>{props.name}</div>;\n 8  }\n 9  \n10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };\n13  \n14  // This should trigger typescript-provider-test-00010 (React.FC usage)\n15  const AnotherComponent: React.FC<{ title: string }> = ({ title }) => {\n16    return <h1>{title}</h1>;"
+        lineNumber: 5
+        variables:
+          file: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: |
+          React 19 deprecates propTypes on function components.
+          Use TypeScript types or PropTypes on class components instead.
+
+          Replace propTypes with TypeScript interface or type definition.
+        codeSnip: " 1  import React from 'react';\n 2  import PropTypes from 'prop-types';\n 3  import { Route } from 'react-router';\n 4  \n 5  // This should trigger typescript-provider-test-00000 (propTypes on function component)\n 6  function MyComponent(props: any) {\n 7    return <div>{props.name}</div>;\n 8  }\n 9  \n10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };\n13  \n14  // This should trigger typescript-provider-test-00010 (React.FC usage)\n15  const AnotherComponent: React.FC<{ title: string }> = ({ title }) => {\n16    return <h1>{title}</h1>;\n17  };\n18  \n19  // This should trigger typescript-provider-test-00030 (deprecated lifecycle method)\n20  class LegacyComponent extends React.Component {"
+        lineNumber: 9
+        variables:
+          file: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: |
+          React 19 deprecates propTypes on function components.
+          Use TypeScript types or PropTypes on class components instead.
+
+          Replace propTypes with TypeScript interface or type definition.
+        codeSnip: " 1  import React from 'react';\n 2  import PropTypes from 'prop-types';\n 3  import { Route } from 'react-router';\n 4  \n 5  // This should trigger typescript-provider-test-00000 (propTypes on function component)\n 6  function MyComponent(props: any) {\n 7    return <div>{props.name}</div>;\n 8  }\n 9  \n10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };\n13  \n14  // This should trigger typescript-provider-test-00010 (React.FC usage)\n15  const AnotherComponent: React.FC<{ title: string }> = ({ title }) => {\n16    return <h1>{title}</h1>;\n17  };\n18  \n19  // This should trigger typescript-provider-test-00030 (deprecated lifecycle method)\n20  class LegacyComponent extends React.Component {\n21    componentWillMount() {"
+        lineNumber: 10
+        variables:
+          file: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: |
+          React 19 deprecates propTypes on function components.
+          Use TypeScript types or PropTypes on class components instead.
+
+          Replace propTypes with TypeScript interface or type definition.
+        codeSnip: "21    componentWillMount() {\n22      console.log('Component will mount');\n23    }\n24  \n25    render() {\n26      return <div>Legacy Component</div>;\n27    }\n28  }\n29  \n30  // This file imports from react-router, should trigger typescript-provider-test-00040\n31  export { MyComponent, AnotherComponent, LegacyComponent };\n"
+        lineNumber: 30
+        variables:
+          file: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+      effort: 5
+    typescript-provider-test-00040:
+      description: Detect direct imports from react-router
+      category: mandatory
+      labels:
+      - konveyor.io/source=react-router-5
+      - konveyor.io/target=react-router-6
+      incidents:
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: |
+          Direct imports from 'react-router' are deprecated.
+
+          Use 'react-router-dom' for web applications instead.
+
+          Before:
+          ```typescript
+          import { Route, Router } from 'react-router';
+          ```
+
+          After:
+          ```typescript
+          import { Route, BrowserRouter } from 'react-router-dom';
+          ```
+        codeSnip: " 5  // This should trigger typescript-provider-test-00000 (propTypes on function component)\n 6  function MyComponent(props: any) {\n 7    return <div>{props.name}</div>;\n 8  }\n 9  \n10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };\n13  \n14  // This should trigger typescript-provider-test-00010 (React.FC usage)\n15  const AnotherComponent: React.FC<{ title: string }> = ({ title }) => {\n16    return <h1>{title}</h1>;\n17  };\n18  \n19  // This should trigger typescript-provider-test-00030 (deprecated lifecycle method)\n20  class LegacyComponent extends React.Component {\n21    componentWillMount() {\n22      console.log('Component will mount');\n23    }\n24  \n25    render() {"
+        lineNumber: 14
+        variables:
+          file: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: |
+          Direct imports from 'react-router' are deprecated.
+
+          Use 'react-router-dom' for web applications instead.
+
+          Before:
+          ```typescript
+          import { Route, Router } from 'react-router';
+          ```
+
+          After:
+          ```typescript
+          import { Route, BrowserRouter } from 'react-router-dom';
+          ```
+        codeSnip: "10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };\n13  \n14  // This should trigger typescript-provider-test-00010 (React.FC usage)\n15  const AnotherComponent: React.FC<{ title: string }> = ({ title }) => {\n16    return <h1>{title}</h1>;\n17  };\n18  \n19  // This should trigger typescript-provider-test-00030 (deprecated lifecycle method)\n20  class LegacyComponent extends React.Component {\n21    componentWillMount() {\n22      console.log('Component will mount');\n23    }\n24  \n25    render() {\n26      return <div>Legacy Component</div>;\n27    }\n28  }\n29  \n30  // This file imports from react-router, should trigger typescript-provider-test-00040"
+        lineNumber: 19
+        variables:
+          file: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+      effort: 3
+  unmatched:
+  - typescript-provider-test-00010
+  - typescript-provider-test-00020
+  - typescript-provider-test-00030

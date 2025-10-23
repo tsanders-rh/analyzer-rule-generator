@@ -1,0 +1,5 @@
+- name: konveyor-analysis
+  unmatched:
+  - typescript-builtin-test-00000
+  - typescript-builtin-test-00010
+  - typescript-builtin-test-00020

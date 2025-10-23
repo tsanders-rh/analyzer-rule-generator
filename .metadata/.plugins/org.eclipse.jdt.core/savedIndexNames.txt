@@ -1,4 +1,0 @@
-INDEX VERSION 1.134+/Users/tsanders/Workspace/analyzer-rule-generator/.metadata/.plugins/org.eclipse.jdt.core
-1353990472.index
-1073300341.index
-1865797976.index

@@ -1,0 +1,13 @@
+- name: konveyor-analysis
+  violations:
+    tsx-test-00000:
+      description: Find React import in tsx files
+      category: potential
+      incidents:
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: Found React import in tsx file
+        codeSnip: " 1  import React from 'react';\n 2  import PropTypes from 'prop-types';\n 3  import { Route } from 'react-router';\n 4  \n 5  // This should trigger typescript-provider-test-00000 (propTypes on function component)\n 6  function MyComponent(props: any) {\n 7    return <div>{props.name}</div>;\n 8  }\n 9  \n10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };"
+        lineNumber: 1
+        variables:
+          matchingText: ""
+      effort: 1

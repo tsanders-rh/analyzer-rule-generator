@@ -70,12 +70,12 @@ class OpenAIProvider(LLMProvider):
 class AnthropicProvider(LLMProvider):
     """Anthropic Claude API provider."""
 
-    def __init__(self, model: str = "claude-3-7-sonnet-20250219", api_key: Optional[str] = None):
+    def __init__(self, model: str = "claude-3-7-sonnet-latest", api_key: Optional[str] = None):
         """
         Initialize Anthropic provider.
 
         Args:
-            model: Model name (default: claude-3-7-sonnet-20250219)
+            model: Model name (default: claude-3-7-sonnet-latest)
             api_key: API key (defaults to ANTHROPIC_API_KEY env var)
         """
         try:
@@ -171,7 +171,7 @@ def get_llm_provider(provider: str = "openai", model: Optional[str] = None, api_
     if provider == "openai":
         return OpenAIProvider(model=model or "gpt-4-turbo", api_key=api_key)
     elif provider == "anthropic":
-        return AnthropicProvider(model=model or "claude-3-5-sonnet-20241022", api_key=api_key)
+        return AnthropicProvider(model=model or "claude-3-7-sonnet-latest", api_key=api_key)
     elif provider == "google":
         return GoogleProvider(model=model or "gemini-1.5-pro", api_key=api_key)
     else:

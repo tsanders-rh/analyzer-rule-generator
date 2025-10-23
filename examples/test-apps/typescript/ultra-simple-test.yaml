@@ -1,0 +1,8 @@
+- ruleID: ultra-simple-test-00000
+  description: Find any file with the word React
+  when:
+    builtin.filecontent:
+      pattern: "React"
+  message: Found React
+  effort: 1
+  category: potential

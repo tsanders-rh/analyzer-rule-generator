@@ -1,0 +1,8 @@
+- ruleID: anothercomponent-test-00000
+  description: Find AnotherComponent (the one using React.FC)
+  when:
+    typescript.referenced:
+      pattern: "AnotherComponent"
+  message: Found AnotherComponent
+  effort: 1
+  category: potential

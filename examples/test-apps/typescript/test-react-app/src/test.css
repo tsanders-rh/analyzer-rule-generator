@@ -1,0 +1,4 @@
+.my-component {
+  font-size: var(--pf-v5-global--FontSize--lg);
+  color: var(--pf-v5-global--Color--100);
+}

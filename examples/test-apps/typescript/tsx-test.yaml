@@ -1,0 +1,9 @@
+- ruleID: tsx-test-00000
+  description: Find React import in tsx files
+  when:
+    builtin.filecontent:
+      pattern: "import React"
+      filePattern: "*.tsx"
+  message: Found React import in tsx file
+  effort: 1
+  category: potential

@@ -1,0 +1,52 @@
+- name: konveyor-analysis
+  violations:
+    ultra-simple-test-00000:
+      description: Find any file with the word React
+      category: potential
+      incidents:
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/package.json
+        message: Found React
+        codeSnip: |2-
+           1  {
+           2    "name": "test-react-app",
+           3    "version": "1.0.0",
+           4    "description": "Test React TypeScript app for Konveyor analyzer",
+           5    "main": "index.js",
+           6    "scripts": {
+           7      "test": "echo \"Error: no test specified\" && exit 1"
+           8    },
+           9    "dependencies": {
+          10      "react": "^18.0.0",
+          11      "react-dom": "^18.0.0",
+          12      "react-router": "^5.0.0",
+          13      "prop-types": "^15.8.0"
+          14    },
+          15    "devDependencies": {
+        lineNumber: 4
+        variables:
+          matchingText: ""
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: Found React
+        codeSnip: " 1  import React from 'react';\n 2  import PropTypes from 'prop-types';\n 3  import { Route } from 'react-router';\n 4  \n 5  // This should trigger typescript-provider-test-00000 (propTypes on function component)\n 6  function MyComponent(props: any) {\n 7    return <div>{props.name}</div>;\n 8  }\n 9  \n10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };"
+        lineNumber: 1
+        variables:
+          matchingText: ""
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: Found React
+        codeSnip: " 5  // This should trigger typescript-provider-test-00000 (propTypes on function component)\n 6  function MyComponent(props: any) {\n 7    return <div>{props.name}</div>;\n 8  }\n 9  \n10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };\n13  \n14  // This should trigger typescript-provider-test-00010 (React.FC usage)\n15  const AnotherComponent: React.FC<{ title: string }> = ({ title }) => {\n16    return <h1>{title}</h1>;\n17  };\n18  \n19  // This should trigger typescript-provider-test-00030 (deprecated lifecycle method)\n20  class LegacyComponent extends React.Component {\n21    componentWillMount() {\n22      console.log('Component will mount');\n23    }\n24  \n25    render() {"
+        lineNumber: 14
+        variables:
+          matchingText: ""
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: Found React
+        codeSnip: " 6  function MyComponent(props: any) {\n 7    return <div>{props.name}</div>;\n 8  }\n 9  \n10  MyComponent.propTypes = {\n11    name: PropTypes.string\n12  };\n13  \n14  // This should trigger typescript-provider-test-00010 (React.FC usage)\n15  const AnotherComponent: React.FC<{ title: string }> = ({ title }) => {\n16    return <h1>{title}</h1>;\n17  };\n18  \n19  // This should trigger typescript-provider-test-00030 (deprecated lifecycle method)\n20  class LegacyComponent extends React.Component {\n21    componentWillMount() {\n22      console.log('Component will mount');\n23    }\n24  \n25    render() {\n26      return <div>Legacy Component</div>;"
+        lineNumber: 15
+        variables:
+          matchingText: ""
+      - uri: file:///Users/tsanders/Workspace/analyzer-rule-generator/examples/test-apps/typescript/test-react-app/src/Component.tsx
+        message: Found React
+        codeSnip: "11    name: PropTypes.string\n12  };\n13  \n14  // This should trigger typescript-provider-test-00010 (React.FC usage)\n15  const AnotherComponent: React.FC<{ title: string }> = ({ title }) => {\n16    return <h1>{title}</h1>;\n17  };\n18  \n19  // This should trigger typescript-provider-test-00030 (deprecated lifecycle method)\n20  class LegacyComponent extends React.Component {\n21    componentWillMount() {\n22      console.log('Component will mount');\n23    }\n24  \n25    render() {\n26      return <div>Legacy Component</div>;\n27    }\n28  }\n29  \n30  // This file imports from react-router, should trigger typescript-provider-test-00040\n31  export { MyComponent, AnotherComponent, LegacyComponent };"
+        lineNumber: 20
+        variables:
+          matchingText: ""
+      effort: 1

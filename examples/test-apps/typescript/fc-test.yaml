@@ -1,0 +1,8 @@
+- ruleID: fc-test-00000
+  description: Find React.FC without location filter
+  when:
+    typescript.referenced:
+      pattern: "FC"
+  message: Found FC reference
+  effort: 1
+  category: potential

@@ -1,0 +1,3 @@
+- name: konveyor-analysis
+  unmatched:
+  - mycomponent-test-00000

@@ -135,23 +135,80 @@ class MigrationPatternExtractor:
         if language in ["javascript", "typescript"]:
             lang_instructions = """
 **IMPORTANT - JavaScript/TypeScript Detection Instructions:**
-For JavaScript/TypeScript patterns, use these specific fields:
-- **provider_type**: Set to "builtin"
-- **source_fqn**: Use a SIMPLE regex pattern to match the code. Use `.*` for wildcards, avoid complex escapes like \\s, \\{, \\} (e.g., "import.*Chip.*from.*@patternfly/react-core")
-- **file_pattern**: Regex pattern to match file extensions (e.g., ".*\\.(ts|tsx|js|jsx)")
-- **location_type**: Can be null for builtin provider
 
-Example for React component import:
+For JavaScript/TypeScript patterns, choose the appropriate provider:
+
+**Option 1: TypeScript Provider (for semantic analysis)**
+Use when you need to find top-level symbol declarations and their references:
+- Functions: `function MyComponent() {}`
+- Classes: `class MyComponent {}`
+- Variables/Constants: `const MyComponent = () => {}`
+- Exported symbols
+
+Fields:
+- **provider_type**: Set to "typescript"
+- **source_fqn**: Symbol name to find (e.g., "MyComponent", "useEffect", "useState")
+- **file_pattern**: File extension pattern (e.g., "*.tsx", "*.ts", or "*.{tsx,jsx}" for brace expansion)
+- **location_type**: Can be null
+
+Example for React component usage:
 ```json
 {
-  "source_pattern": "import { Chip } from '@patternfly/react-core'",
-  "target_pattern": "import { Label } from '@patternfly/react-core'",
-  "source_fqn": "import.*Chip.*from.*@patternfly/react-core",
-  "provider_type": "builtin",
-  "file_pattern": ".*\\\\.(ts|tsx|js|jsx)",
+  "source_pattern": "MyComponent",
+  "target_pattern": "NewComponent",
+  "source_fqn": "MyComponent",
+  "provider_type": "typescript",
+  "file_pattern": "*.tsx",
   "location_type": null
 }
 ```
+
+**Option 2: Builtin Provider (for text/regex matching)**
+Use for patterns that TypeScript provider CANNOT find:
+- Methods inside classes (e.g., `componentWillMount`)
+- Properties (e.g., `propTypes`, `defaultProps`)
+- Type annotations (e.g., `React.FC`, `React.Component`)
+- Imported types from libraries
+- Any complex code patterns
+
+Fields:
+- **provider_type**: Set to "builtin"
+- **source_fqn**: SIMPLE regex pattern. Use `.*` for wildcards, avoid complex escapes like \\s, \\{, \\} (e.g., "componentWillMount")
+- **file_pattern**: File extension pattern (e.g., "*.tsx" or "*.{tsx,jsx}" for multiple extensions)
+- **location_type**: null
+
+Example for deprecated lifecycle method:
+```json
+{
+  "source_pattern": "componentWillMount",
+  "target_pattern": "componentDidMount",
+  "source_fqn": "componentWillMount",
+  "provider_type": "builtin",
+  "file_pattern": "*.tsx",
+  "location_type": null
+}
+```
+
+Example for React.FC type usage:
+```json
+{
+  "source_pattern": "React.FC",
+  "target_pattern": "function component with explicit props",
+  "source_fqn": "React\\\\.FC",
+  "provider_type": "builtin",
+  "file_pattern": "*.tsx",
+  "location_type": null
+}
+```
+
+**IMPORTANT: TypeScript Provider Limitations**
+- ✅ CAN find: Top-level functions, classes, variables, exports
+- ❌ CANNOT find: Methods, properties, type annotations, imported types
+- When in doubt, use builtin provider with simple regex
+
+**File Pattern Support:**
+- Brace expansion is supported: "*.{ts,tsx,js,jsx}"
+- Multiple extensions: "*.{css,scss}" or "*.{html,js,jsx,ts,tsx}"
 
 """
         else:
@@ -238,7 +295,7 @@ Return your findings as a JSON array. Each pattern should be an object with thes
   "complexity": "TRIVIAL|LOW|MEDIUM|HIGH|EXPERT",
   "category": "string",
   "concern": "string",
-  "provider_type": "java|builtin or null",
+  "provider_type": "java|typescript|builtin or null",
   "file_pattern": "string or null",
   "rationale": "string",
   "example_before": "string or null",
@@ -250,8 +307,13 @@ Focus on patterns that can be detected via static analysis. Skip general advice 
 
 **IMPORTANT REGEX PATTERN RULES:**
 - For builtin provider: Use SIMPLE regex patterns with `.*` wildcards
-- Avoid complex regex escapes like \\s, \\{{, \\}}, \\(, \\)
+- Avoid complex regex escapes like \\s, \\(, \\) (but \\{{ and \\}} are OK in non-file-pattern contexts)
 - Example: Use "import.*Component.*from.*library" NOT "import\\s*\\{{\\s*Component\\s*\\}}"
+
+**FILE PATTERN RULES:**
+- Brace expansion IS supported: Use "*.{ts,tsx}" for multiple extensions
+- Prefer brace expansion over separate rules when patterns match multiple file types
+- Examples: "*.{js,jsx,ts,tsx}", "*.{css,scss}", "*.{html,htm}"
 
 Return ONLY the JSON array, no additional commentary."""
 

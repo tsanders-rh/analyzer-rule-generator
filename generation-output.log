@@ -1,0 +1,41 @@
+Generating analyzer rules: patternfly-v5 → patternfly-v6
+Guide: https://www.patternfly.org/get-started/upgrade/
+Output: examples/output/patternfly-test
+LLM: anthropic (default)
+
+[1/3] Ingesting guide...
+  ✓ Ingested 13776 characters
+[2/3] Extracting patterns with LLM...
+  ✓ Extracted 9 patterns
+[3/3] Generating analyzer rules...
+  ✓ Generated 9 rules across 5 concern(s)
+
+Writing rules to examples/output/patternfly-test...
+  ✓ patternfly-v5-to-patternfly-v6-charts.yaml: 1 rules
+  ✓ patternfly-v5-to-patternfly-v6-components.yaml: 5 rules
+  ✓ patternfly-v5-to-patternfly-v6-css-classes.yaml: 1 rules
+  ✓ patternfly-v5-to-patternfly-v6-css-variables.yaml: 1 rules
+  ✓ patternfly-v5-to-patternfly-v6-react-tokens.yaml: 1 rules
+  ✓ ruleset.yaml: ruleset metadata
+
+✓ Successfully generated 9 rules in 6 file(s)
+
+Rule Summary:
+  Total rules: 9
+  Files generated: 6
+  mandatory: 3
+  potential: 6
+
+Effort Distribution:
+  1: ▓
+  3: ▓▓▓▓
+  5: ▓▓▓
+  7: ▓
+
+Files created:
+  examples/output/patternfly-test/patternfly-v5-to-patternfly-v6-charts.yaml
+  examples/output/patternfly-test/patternfly-v5-to-patternfly-v6-components.yaml
+  examples/output/patternfly-test/patternfly-v5-to-patternfly-v6-css-classes.yaml
+  examples/output/patternfly-test/patternfly-v5-to-patternfly-v6-css-variables.yaml
+  examples/output/patternfly-test/patternfly-v5-to-patternfly-v6-react-tokens.yaml
+  examples/output/patternfly-test/ruleset.yaml

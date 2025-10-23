@@ -1,0 +1,9 @@
+- ruleID: simple-test-00000
+  description: Find any file with React import
+  when:
+    builtin.filecontent:
+      pattern: "import React"
+      filePattern: "*.{ts,tsx}"
+  message: Found React import
+  effort: 1
+  category: potential

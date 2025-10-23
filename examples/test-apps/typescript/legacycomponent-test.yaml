@@ -1,0 +1,8 @@
+- ruleID: legacycomponent-test-00000
+  description: Find LegacyComponent
+  when:
+    typescript.referenced:
+      pattern: "LegacyComponent"
+  message: Found LegacyComponent
+  effort: 1
+  category: potential

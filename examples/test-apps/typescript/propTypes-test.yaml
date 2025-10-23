@@ -1,0 +1,8 @@
+- ruleID: propTypes-test-00000
+  description: Find propTypes usage
+  when:
+    typescript.referenced:
+      pattern: "propTypes"
+  message: Found propTypes reference
+  effort: 1
+  category: potential

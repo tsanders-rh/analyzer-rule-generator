@@ -488,7 +488,7 @@ This is part of the larger rule submission workflow:
 ## Related Documentation
 
 - [Konveyor Submission Guide](konveyor-submission-guide.md) - Complete submission process
-- [CI Test Updater](ci-test-updater.md) - Script reference documentation
+- [CI Test Updater](../reference/ci-test-updater.md) - Script reference documentation
 - [go-konveyor-tests README](https://github.com/konveyor/go-konveyor-tests) - Test repository docs
 - [Kantra Documentation](https://github.com/konveyor/kantra) - Analysis tool docs
 

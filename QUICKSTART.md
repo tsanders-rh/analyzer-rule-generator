@@ -292,7 +292,7 @@ kantra test submission/spring-boot-4.0/tests/*.test.yaml
 # See detailed guide for complete instructions
 ```
 
-See [Konveyor Submission Guide](konveyor-submission-guide.md) for complete details on:
+See [Konveyor Submission Guide](docs/guides/konveyor-submission-guide.md) for complete details on:
 - Creating test applications
 - Running tests with Kantra
 - Submitting pull requests
@@ -300,9 +300,9 @@ See [Konveyor Submission Guide](konveyor-submission-guide.md) for complete detai
 
 ## Next Steps
 
-- **Submit to Konveyor**: See [Konveyor Submission Guide](konveyor-submission-guide.md)
+- **Submit to Konveyor**: See [Konveyor Submission Guide](docs/guides/konveyor-submission-guide.md)
 - **Test your rules**: Use the generated rules with [Konveyor analyzer](https://github.com/konveyor/analyzer-lsp)
-- **View your rules**: See [Rule Viewers Guide](RULE_VIEWERS.md)
+- **View your rules**: See [Rule Viewers Guide](docs/reference/rule-viewers.md)
 
 ## Real-World Example
 

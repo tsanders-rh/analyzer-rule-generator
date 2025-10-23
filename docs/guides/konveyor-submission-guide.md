@@ -468,7 +468,7 @@ git push origin update-daytrader-deps
 
 **Reference documentation:**
 - [Updating CI Tests Guide](updating-ci-tests.md) - Complete workflow
-- [CI Test Updater Script Reference](ci-test-updater.md) - Script documentation
+- [CI Test Updater Script Reference](../reference/ci-test-updater.md) - Script documentation
 - [go-konveyor-tests Applications](https://github.com/konveyor/go-konveyor-tests/blob/main/data/application.go) - Complete list of test applications
 
 ### Phase 7: Submit Pull Requests

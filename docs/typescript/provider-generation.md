@@ -167,5 +167,5 @@ To verify TypeScript provider rules work correctly:
 
 ## See Also
 
-- [TypeScript Provider Setup Guide](typescript-provider-setup.md) - How to configure and run the TypeScript provider
-- [TypeScript Provider PR Plan](../TYPESCRIPT-PROVIDER-PR-PLAN.md) - Upstream contribution plan for provider fixes
+- [TypeScript Provider Setup Guide](provider-setup.md) - How to configure and run the TypeScript provider
+- [TypeScript Provider PR Plan](../planning/typescript-provider-pr-plan.md) - Upstream contribution plan for provider fixes

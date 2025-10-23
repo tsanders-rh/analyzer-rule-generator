@@ -392,7 +392,7 @@ This tool integrates with the rule submission workflow:
 
 ## See Also
 
-- [Updating CI Tests Guide](updating-ci-tests.md) - Step-by-step user guide
-- [Konveyor Submission Guide](konveyor-submission-guide.md) - Complete submission process
+- [Updating CI Tests Guide](../guides/updating-ci-tests.md) - Step-by-step user guide
+- [Konveyor Submission Guide](../guides/konveyor-submission-guide.md) - Complete submission process
 - [go-konveyor-tests repository](https://github.com/konveyor/go-konveyor-tests)
 - [Konveyor rulesets repository](https://github.com/konveyor/rulesets)

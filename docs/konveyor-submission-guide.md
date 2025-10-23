@@ -403,6 +403,43 @@ When submitting new rules, you also need to update the CI test expectations in t
 - Your new rules will change the analysis output (new violations, dependencies, tags)
 - CI test expectations need to be updated to reflect these changes
 
+#### Understanding CI Test Applications
+
+The CI system runs your rules against specific test applications defined in the [go-konveyor-tests application configuration](https://github.com/konveyor/go-konveyor-tests/blob/main/data/application.go). It's important to choose the right test application and branch based on what your rules target.
+
+**Key Test Applications:**
+
+| Application | Repository | Branch | Use For |
+|-------------|------------|--------|---------|
+| **DayTrader** | [sample.daytrader7](https://github.com/konveyor-ecosystem/sample.daytrader7) | `ci-oct2025` | WebSphere, Spring, Jakarta EE migrations |
+| **Coolstore** | [coolstore](https://github.com/konveyor-ecosystem/coolstore) | `konveyor-tests` | Microservices, Spring Boot, REST APIs |
+| **Coolstore Quarkus** | [coolstore](https://github.com/konveyor-ecosystem/coolstore) | `quarkus` | Quarkus migrations, reactive patterns |
+| **Pathfinder** | [tackle-pathfinder](https://github.com/konveyor/tackle-pathfinder) | `1.2.0` | Assessment migrations |
+| **Tackle Testapp** | [tackle-testapp-public](https://github.com/konveyor/tackle-testapp-public) | `main` | General Java/Spring applications |
+| **Petclinic Hazelcast** | [spring-framework-petclinic](https://github.com/savitharaghunathan/spring-framework-petclinic) | `legacy` | Legacy Spring Framework migrations |
+
+**How to choose:**
+1. **Check the application code** - Clone the repository and branch to see what technologies it uses
+2. **Match your rules' target** - If your rules detect Spring Boot issues, use an app that uses Spring Boot
+3. **Verify violations exist** - Run analysis locally to confirm your rules fire on the application
+
+**Example: Checking DayTrader**
+```bash
+# Clone and check what DayTrader uses
+git clone https://github.com/konveyor-ecosystem/sample.daytrader7.git
+cd sample.daytrader7
+git checkout ci-oct2025
+
+# Look for technologies
+cat pom.xml | grep -A 5 "<dependencies>"
+# Will show: Spring Boot, Jakarta EE, IBM WebSphere dependencies
+
+# This makes DayTrader ideal for:
+# - Spring Boot migration rules
+# - Jakarta EE migration rules
+# - WebSphere to Liberty/OpenLiberty rules
+```
+
 **See:** [Updating CI Tests Guide](updating-ci-tests.md) for complete step-by-step instructions.
 
 **Quick workflow:**
@@ -432,6 +469,7 @@ git push origin update-daytrader-deps
 **Reference documentation:**
 - [Updating CI Tests Guide](updating-ci-tests.md) - Complete workflow
 - [CI Test Updater Script Reference](ci-test-updater.md) - Script documentation
+- [go-konveyor-tests Applications](https://github.com/konveyor/go-konveyor-tests/blob/main/data/application.go) - Complete list of test applications
 
 ### Phase 7: Submit Pull Requests
 

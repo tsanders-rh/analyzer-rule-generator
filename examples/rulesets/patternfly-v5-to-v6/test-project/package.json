@@ -1,0 +1,11 @@
+{
+  "name": "patternfly-v5-test-app",
+  "version": "1.0.0",
+  "description": "Test project with PatternFly v5 patterns for ruleset validation",
+  "dependencies": {
+    "react": "^18.2.0",
+    "@patternfly/react-core": "^5.0.0",
+    "@patternfly/react-charts": "^7.0.0",
+    "@patternfly/react-tokens": "^5.0.0"
+  }
+}

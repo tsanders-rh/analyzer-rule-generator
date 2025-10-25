@@ -1,0 +1,19 @@
+/* PatternFly v5 CSS patterns that should trigger migration rules */
+
+.my-component {
+  /* Rule: CSS variable prefix change */
+  color: var(--pf-v5-global--Color--100);
+  font-size: var(--pf-v5-global--FontSize--md);
+
+  /* Rule: Breakpoint variable prefix change */
+  width: var(--pf-v5-global--breakpoint--sm);
+}
+
+/* Rule: CSS class prefix change */
+.pf-v5-c-button {
+  padding: 10px;
+}
+
+.pf-v5-c-card {
+  margin: 20px;
+}

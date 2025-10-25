@@ -1,92 +1,134 @@
-# TypeScript Provider Rule Generation
+# Node.js Provider Rule Generation (TypeScript/JavaScript)
 
-This document describes the TypeScript provider support in the analyzer rule generator.
+This document describes the Node.js provider support in the analyzer rule generator for TypeScript and JavaScript code analysis.
 
 ## Overview
 
 The rule generator now supports creating rules for three different providers:
 1. **Java Provider** - For Java code analysis using `java.referenced`
-2. **TypeScript Provider** - For TypeScript/JavaScript semantic analysis using `typescript.referenced`
+2. **Node.js Provider** - For TypeScript/JavaScript semantic analysis using `nodejs.referenced`
 3. **Builtin Provider** - For text/regex pattern matching using `builtin.filecontent`
 
-## When to Use TypeScript Provider
+## When to Use Node.js Provider
 
-The TypeScript provider uses the TypeScript Language Server to perform semantic analysis. It's ideal for finding **top-level symbol declarations** and their references.
+The Node.js provider (`nodejs.referenced`) uses the TypeScript Language Server to perform semantic analysis. It's ideal for finding **symbol declarations and references** in TypeScript and JavaScript code.
 
-### What TypeScript Provider CAN Find ✅
+### What Node.js Provider CAN Find ✅
+
+The `nodejs.referenced` provider finds symbol references in TypeScript/JavaScript code:
 
 - **Functions**: `function MyComponent() {}`
 - **Classes**: `class MyComponent extends React.Component {}`
 - **Variables/Constants**: `const MyComponent = () => {}`
+- **Types**: `type Props = {...}`, `interface ComponentProps {...}`
 - **Exported symbols**: `export const helper = () => {}`
+- **Imported symbols**: References to imported functions, classes, types
 
-### What TypeScript Provider CANNOT Find ❌
+### What Node.js Provider CANNOT Find ❌
 
-- **Methods inside classes**: `componentWillMount()`, `render()`
-- **Properties**: `propTypes`, `defaultProps`, `contextType`
-- **Type annotations**: `React.FC`, `React.Component<Props>`
-- **Imported types**: Types from libraries (React, etc.)
-- **Nested symbols**: Anything not at the top level
+The Node.js provider cannot filter by file extension using the `location` field. Common misconceptions:
 
-### When to Fall Back to Builtin Provider
+- ❌ **WRONG**: `nodejs.referenced` with `location: ".tsx"` (location is NOT for file filtering!)
+- ❌ **WRONG**: `nodejs.referenced` with `location: "CLASS"` (location types are Java-specific)
 
-For patterns the TypeScript provider cannot find, use `builtin.filecontent` with simple regex:
+**IMPORTANT**: The `location` field in `nodejs.referenced` is for code reference types (like Java's TYPE, FIELD, METHOD_CALL), NOT for file extension filtering.
 
-- Lifecycle methods: `componentWillMount`, `componentWillReceiveProps`
-- Object properties: `propTypes`, `defaultProps`
-- Type annotations: `React.FC`, `React.Component`
-- Complex code patterns: Multi-line patterns, specific syntax
+### When to Use Builtin Provider Instead
+
+Use `builtin.filecontent` with `filePattern` for file-specific matching:
+
+✅ **Correct way to filter by file extension**:
+```yaml
+when:
+  builtin.filecontent:
+    pattern: "React"
+    filePattern: "\\.tsx$"  # Regex: matches .tsx files only
+```
+
+✅ **Match multiple file types with regex**:
+```yaml
+when:
+  builtin.filecontent:
+    pattern: "import.*React"
+    filePattern: "\\.(j|t)sx?$"  # Regex: .js, .jsx, .ts, .tsx
+```
+
+Also use `builtin.filecontent` for:
+- Complex regex patterns across multiple lines
+- Text matching that doesn't need semantic understanding
+- CSS, SCSS, HTML, JSON, and other non-JS/TS files
 
 ## Rule Generation Updates
 
 ### 1. Schema Changes (`src/rule_generator/schema.py`)
 
-Updated `provider_type` field to include `"typescript"`:
+Updated `provider_type` field to include `"nodejs"`:
 
 ```python
 provider_type: Optional[str] = Field(
     default=None,
-    description="Provider type: 'java', 'typescript', or 'builtin' (auto-detected if not specified)"
+    description="Provider type: 'java', 'nodejs', or 'builtin' (auto-detected if not specified)"
 )
+```
+
+Added `NodejsReferenced` model:
+
+```python
+class NodejsReferenced(BaseModel):
+    """Nodejs provider condition for referenced code in JavaScript/TypeScript."""
+    pattern: str = Field(..., description="Pattern to match (supports wildcards)")
+    # Note: The location field should NOT be used for file filtering.
+    # It's for code reference types (like Java's TYPE, FIELD, METHOD_CALL).
+    # For file filtering, use builtin.filecontent with filePattern instead.
 ```
 
 ### 2. LLM Prompt Updates (`src/rule_generator/extraction.py`)
 
-Added comprehensive TypeScript provider instructions to the LLM prompt:
+Updated LLM prompt with Node.js provider instructions:
 
-**Option 1: TypeScript Provider (for semantic analysis)**
+**Option 1: Node.js Provider (for semantic symbol analysis)**
 ```json
 {
   "source_pattern": "MyComponent",
   "target_pattern": "NewComponent",
   "source_fqn": "MyComponent",
-  "provider_type": "typescript",
-  "file_pattern": "*.tsx",
+  "provider_type": "nodejs",
+  "file_pattern": null,
   "location_type": null
 }
 ```
 
-**Option 2: Builtin Provider (for text matching)**
+**Option 2: Builtin Provider (for file-specific text matching)**
 ```json
 {
-  "source_pattern": "componentWillMount",
-  "target_pattern": "componentDidMount",
-  "source_fqn": "componentWillMount",
+  "source_pattern": "import.*React",
+  "target_pattern": null,
+  "source_fqn": "import.*React",
   "provider_type": "builtin",
-  "file_pattern": "*.tsx",
+  "file_pattern": "\\.(j|t)sx?$",
   "location_type": null
 }
 ```
+
+**IMPORTANT**: Never use `file_pattern` with `nodejs.referenced`. Use `builtin.filecontent` with `filePattern` for file filtering.
 
 ### 3. Generator Logic Updates (`src/rule_generator/generator.py`)
 
-Simplified TypeScript provider rule generation:
+Updated Node.js provider rule generation:
 
 ```python
-elif provider == "typescript":
-    # Use typescript.referenced for semantic symbol analysis
+elif provider == "nodejs":
+    # Use nodejs.referenced for semantic symbol analysis in JavaScript/TypeScript
+    # Note: nodejs.referenced finds symbol references in TypeScript/JavaScript code
+    # (functions, classes, variables, types, interfaces, etc.)
+    #
+    # IMPORTANT: Do NOT use location field for file filtering.
+    # The location field is for code reference types (like Java's TYPE, FIELD, METHOD_CALL),
+    # not for filtering by file extension.
+    #
+    # For file-specific matching, use builtin.filecontent with filePattern instead.
     condition = {
-        "typescript.referenced": {
+        "nodejs.referenced": {
             "pattern": pattern.source_fqn or pattern.source_pattern
         }
     }
@@ -94,9 +136,10 @@ elif provider == "typescript":
 ```
 
 Key changes:
-- Removed automatic fallback to `builtin.filecontent` (LLM chooses the right provider)
-- Removed location inference (not supported by TypeScript LSP workspace/symbol)
-- Simplified to just use the pattern directly
+- Changed from `typescript.referenced` to `nodejs.referenced` (correct provider name)
+- Added clear warnings about NOT using location field for file filtering
+- LLM chooses between `nodejs` (semantic) vs `builtin` (text/file-specific) provider
+- For file filtering, use `builtin.filecontent` with `filePattern` (regex)
 
 ## Usage Example
 
@@ -113,50 +156,54 @@ python scripts/generate_rules.py \
 
 The LLM will automatically:
 1. Detect the language as TypeScript/JavaScript
-2. Choose `typescript` provider for component names, function names
-3. Choose `builtin` provider for lifecycle methods, type annotations
-4. Generate appropriate file patterns (`*.tsx`, `*.ts`, `*.jsx`, `*.js`)
+2. Choose `nodejs` provider for symbol references (components, functions, types)
+3. Choose `builtin` provider for file-specific text matching
+4. Generate regex patterns for `filePattern` when using `builtin.filecontent`
 
 ## Important Notes
 
-### File Patterns
+### File Patterns (builtin.filecontent only)
 
-**Brace expansion IS supported** (with analyzer-lsp brace expansion fix):
+**Use regex syntax for `filePattern` field:**
 
-✅ Recommended - Use brace expansion for multiple extensions:
-- `"*.{ts,tsx}"` - TypeScript and React TypeScript files
-- `"*.{js,jsx}"` - JavaScript and React JavaScript files
-- `"*.{ts,tsx,js,jsx}"` - All TypeScript/JavaScript files
-- `"*.{css,scss}"` - CSS and SCSS files
+✅ **Correct** - Regex patterns (for builtin.filecontent):
+- `"\\.tsx$"` - React TypeScript files only (.tsx extension)
+- `"\\.ts$"` - TypeScript files only (.ts extension)
+- `"\\.(j|t)sx?$"` - All JS/JSX/TS/TSX files (.js, .jsx, .ts, .tsx)
+- `"\\.(css|scss)$"` - CSS and SCSS files (.css, .scss)
 
-✅ Also valid - Single extension patterns:
-- `"*.tsx"` - React TypeScript files only
-- `"*.ts"` - TypeScript files only
-- `"*.jsx"` - React JavaScript files only
-- `"*.js"` - JavaScript files only
+❌ **Wrong** - Glob patterns (don't work with filePattern):
+- `"*.tsx"` - ❌ Wrong! This is glob syntax, not regex
+- `"*.{ts,tsx}"` - ❌ Wrong! Brace expansion doesn't work in filePattern
+- Use regex `"\\.tsx?$"` instead
 
 ### Provider Selection Logic
 
 The LLM will choose the provider based on:
 
-1. **TypeScript Provider**: For finding symbol declarations
+1. **Node.js Provider** (`nodejs.referenced`): For semantic symbol finding
    - React components: `MyComponent`, `useCustomHook`
    - Utility functions: `formatDate`, `calculateTotal`
    - Class names: `AuthService`, `DataStore`
+   - Types and interfaces: `Props`, `ComponentState`
+   - **No file filtering** - matches across all JS/TS files
 
-2. **Builtin Provider**: For everything else
-   - Methods: `componentWillMount`, `UNSAFE_componentWillUpdate`
-   - Properties: `propTypes`, `defaultProps`, `contextType`
-   - Types: `React.FC`, `React.Component`, `ComponentType`
-   - Imports: `import { ... } from 'react'`
+2. **Builtin Provider** (`builtin.filecontent`): For file-specific or complex patterns
+   - Imports: `import { ... } from 'react'` in `.tsx` files only
+   - Code patterns in specific file types: `React.FC` in `.tsx` files
+   - CSS variables: `--pf-` in `.css` or `.scss` files
+   - Any pattern that needs `filePattern` for file type filtering
 
 ## Testing
 
-To verify TypeScript provider rules work correctly:
+To verify Node.js provider rules work correctly:
 
 1. **Generate rules** using the script
-2. **Review generated YAML** to ensure correct provider types
-3. **Test with analyzer** using fixed generic-external-provider:
+2. **Review generated YAML** to ensure:
+   - `nodejs.referenced` is used for symbol matching (no `filePattern`)
+   - `builtin.filecontent` is used for file-specific patterns (with regex `filePattern`)
+   - NO `location` field in `nodejs.referenced` rules
+3. **Test with analyzer**:
    ```bash
    cd ~/Workspace/analyzer-lsp
    ./konveyor-analyzer \
@@ -165,7 +212,46 @@ To verify TypeScript provider rules work correctly:
        --output-file=/path/to/output.yaml
    ```
 
+## Common Mistakes to Avoid
+
+❌ **Don't do this:**
+```yaml
+# WRONG: Using location field for file filtering
+when:
+  nodejs.referenced:
+    pattern: "React"
+    location: ".tsx"  # ❌ Wrong! location is NOT for file extensions
+```
+
+✅ **Do this instead:**
+```yaml
+# CORRECT: Use builtin.filecontent with filePattern for file filtering
+when:
+  builtin.filecontent:
+    pattern: "React"
+    filePattern: "\\.tsx$"  # ✅ Correct! Regex pattern for .tsx files
+```
+
+---
+
+❌ **Don't do this:**
+```yaml
+# WRONG: Using file_pattern with nodejs provider
+when:
+  nodejs.referenced:
+    pattern: "MyComponent"
+    filePattern: "*.tsx"  # ❌ Wrong! nodejs.referenced doesn't support filePattern
+```
+
+✅ **Do this instead:**
+```yaml
+# CORRECT: nodejs.referenced without file filtering (matches all JS/TS files)
+when:
+  nodejs.referenced:
+    pattern: "MyComponent"  # ✅ Correct! Finds MyComponent in all JS/TS files
+```
+
 ## See Also
 
-- [TypeScript Provider Setup Guide](provider-setup.md) - How to configure and run the TypeScript provider
-- [TypeScript Provider PR Plan](../planning/typescript-provider-pr-plan.md) - Upstream contribution plan for provider fixes
+- [TypeScript Provider Setup Guide](provider-setup.md) - How to configure and run the Node.js/TypeScript provider
+- [TypeScript Provider PR #930](https://github.com/konveyor/analyzer-lsp/pull/930) - Upstream PR for TypeScript/React support

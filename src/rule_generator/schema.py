@@ -40,10 +40,18 @@ class JavaDependency(BaseModel):
     lowerbound: Optional[str] = Field(None, description="Lower version bound")
 
 
+class NodejsReferenced(BaseModel):
+    """Nodejs provider condition for referenced code in JavaScript/TypeScript."""
+    pattern: str = Field(..., description="Pattern to match (supports wildcards)")
+    # Note: The location field should NOT be used for file filtering.
+    # It's for code reference types (like Java's TYPE, FIELD, METHOD_CALL).
+    # For file filtering, use builtin.filecontent with filePattern instead.
+
+
 class BuiltinFileContent(BaseModel):
     """Builtin provider for file content search."""
     pattern: str = Field(..., description="Regex pattern to search for")
-    filePattern: Optional[str] = Field(None, description="File pattern (e.g., '*.properties')")
+    filePattern: Optional[str] = Field(None, description="File pattern regex (e.g., '\\.tsx$', '\\.(css|scss)$')")
 
 
 class BuiltinFile(BaseModel):
@@ -59,7 +67,7 @@ class BuiltinXML(BaseModel):
 
 # When condition can be a provider condition or logical operator
 WhenCondition = Union[
-    Dict[str, Union['JavaReferenced', 'JavaDependency', 'BuiltinFileContent', 'BuiltinFile', 'BuiltinXML', List['WhenCondition']]],
+    Dict[str, Union['JavaReferenced', 'JavaDependency', 'NodejsReferenced', 'BuiltinFileContent', 'BuiltinFile', 'BuiltinXML', List['WhenCondition']]],
     List['WhenCondition']
 ]
 
@@ -114,8 +122,8 @@ class MigrationPattern(BaseModel):
     concern: str = Field(default="general", description="Migration concern/topic for grouping (e.g., 'mongodb', 'security', 'web')")
 
     # Provider configuration
-    provider_type: Optional[str] = Field(default=None, description="Provider type: 'java', 'typescript', or 'builtin' (auto-detected if not specified)")
-    file_pattern: Optional[str] = Field(default=None, description="File pattern for builtin.filecontent or typescript provider (e.g., '*.tsx')")
+    provider_type: Optional[str] = Field(default=None, description="Provider type: 'java', 'nodejs', or 'builtin' (auto-detected if not specified)")
+    file_pattern: Optional[str] = Field(default=None, description="File pattern for builtin.filecontent provider (regex, e.g., '\\.tsx$' or '\\.(j|t)sx?$')")
 
     # Optional context
     example_before: Optional[str] = Field(None, description="Example code before migration")

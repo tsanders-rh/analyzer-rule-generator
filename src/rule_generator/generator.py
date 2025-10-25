@@ -217,20 +217,21 @@ class AnalyzerRuleGenerator:
 
             return condition
 
-        elif provider == "typescript":
-            # Use typescript.referenced for semantic symbol analysis
-            # Note: typescript.referenced only finds top-level declarations
-            # (functions, classes, variables). For methods, properties, or
-            # type annotations, the LLM should have chosen builtin provider.
+        elif provider == "nodejs":
+            # Use nodejs.referenced for semantic symbol analysis in JavaScript/TypeScript
+            # Note: nodejs.referenced finds symbol references in TypeScript/JavaScript code
+            # (functions, classes, variables, types, interfaces, etc.)
+            #
+            # IMPORTANT: Do NOT use location field for file filtering.
+            # The location field is for code reference types (like Java's TYPE, FIELD, METHOD_CALL),
+            # not for filtering by file extension.
+            #
+            # For file-specific matching, use builtin.filecontent with filePattern instead.
             condition = {
-                "typescript.referenced": {
+                "nodejs.referenced": {
                     "pattern": pattern.source_fqn or pattern.source_pattern
                 }
             }
-
-            # Note: location field is optional and often not needed for typescript provider
-            # The provider uses LSP workspace/symbol which doesn't support location filtering
-            # Keeping the code simple without location inference
 
             return condition
 
@@ -379,23 +380,29 @@ class AnalyzerRuleGenerator:
 
     def _requires_semantic_analysis(self, pattern: MigrationPattern) -> bool:
         """
-        Determine if pattern needs TypeScript language server semantic analysis.
+        Determine if pattern needs Node.js (TypeScript/JavaScript) language server semantic analysis.
+
+        Use nodejs.referenced when you need to find actual symbol references (functions, classes,
+        variables, types, interfaces) in the code. Use builtin.filecontent for simple text/regex matching.
 
         Args:
             pattern: Migration pattern
 
         Returns:
-            True if semantic analysis is required, False for simple text matching
+            True if semantic analysis is required (nodejs.referenced), False for text matching (builtin.filecontent)
         """
         semantic_keywords = [
-            'function component',
-            'class component',
-            'type definition',
-            'interface',
-            'generic type',
-            'implicit return',
-            'method',
+            'function',
             'class',
+            'type',
+            'interface',
+            'variable',
+            'const',
+            'import',
+            'export',
+            'component',
+            'hook',
+            'generic',
             'inheritance',
             'extends',
             'implements'
@@ -404,51 +411,24 @@ class AnalyzerRuleGenerator:
         description = (pattern.rationale or "").lower()
         return any(keyword in description for keyword in semantic_keywords)
 
-    def _infer_location_context(self, pattern: MigrationPattern) -> str:
-        """
-        Infer AST location context from pattern description for TypeScript provider.
-
-        Args:
-            pattern: Migration pattern
-
-        Returns:
-            Location context string (e.g., 'FUNCTION_DECLARATION', 'CLASS_DECLARATION')
-        """
-        description = (pattern.rationale or "").lower()
-
-        context_map = {
-            'function': 'FUNCTION_DECLARATION',
-            'class': 'CLASS_DECLARATION',
-            'method': 'METHOD_DECLARATION',
-            'import': 'IMPORT_DECLARATION',
-            'variable': 'VARIABLE_DECLARATION',
-            'interface': 'INTERFACE_DECLARATION',
-            'type': 'TYPE_ALIAS_DECLARATION'
-        }
-
-        for keyword, location in context_map.items():
-            if keyword in description:
-                return location
-
-        return "ANY"
-
     def _get_file_pattern(self, pattern: MigrationPattern) -> str:
         """
-        Get file pattern based on pattern metadata.
+        Get file pattern regex for builtin.filecontent filePattern field.
 
         Args:
             pattern: Migration pattern
 
         Returns:
-            File pattern string (e.g., '*.{ts,tsx,js,jsx}')
+            File pattern regex string (e.g., '\\.(j|t)sx?$' for .js/.jsx/.ts/.tsx files)
         """
         # If pattern already has a file_pattern, use it
         if pattern.file_pattern:
             return pattern.file_pattern
 
-        # Default TypeScript/JavaScript file pattern using brace expansion
-        # Brace expansion is supported in Konveyor analyzer
-        return "*.{ts,tsx,js,jsx}"
+        # Default TypeScript/JavaScript file pattern using regex
+        # This matches .js, .jsx, .ts, .tsx files
+        # Note: Use regex syntax, not glob patterns, for filePattern
+        return "\\.(j|t)sx?$"
 
     def _build_links(self, pattern: MigrationPattern) -> Optional[List[Link]]:
         """

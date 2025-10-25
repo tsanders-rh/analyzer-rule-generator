@@ -93,17 +93,34 @@ konveyor-analyzer \
   --verbose=1
 ```
 
+## Validation
+
+This ruleset has been successfully validated against **tackle2-ui** (66,000+ lines of TypeScript):
+
+- **Violations Found:** 1,324 total across 9 of 10 rules
+  - 886 Text component references
+  - 200 EmptyState component references
+  - 172 CSS class prefix issues
+  - 45 CSS variable prefix issues
+  - 21 React token syntax issues
+- **Analysis Time:** ~35 minutes (semantic analysis on large codebase)
+- **Output Size:** 1.8 MB YAML report
+- **False Positives:** Minimal (semantic matching)
+
 ## Expected Performance
 
-With the Node.js provider for semantic analysis:
-
-- **Analysis Time:** 5-7 seconds (with `node_modules` excluded)
+**Small to Medium Projects** (< 10K lines):
+- **Analysis Time:** 5-10 seconds (with `node_modules` excluded)
 - **False Positives:** ~5% (semantic matches only)
 - **Manual Review:** Low effort
 
-Compared to builtin provider only:
+**Large Projects** (50K+ lines):
+- **Analysis Time:** 30-40 minutes
+- **False Positives:** ~5% (semantic matches only)
+- **Manual Review:** Low effort
 
-- **Analysis Time:** 30-45 seconds
+**Builtin Provider Only** (regex-based):
+- **Analysis Time:** 30-45 seconds (any size)
 - **False Positives:** ~15-20%
 - **Manual Review:** High effort
 

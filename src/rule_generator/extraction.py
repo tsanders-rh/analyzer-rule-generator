@@ -138,77 +138,75 @@ class MigrationPatternExtractor:
 
 For JavaScript/TypeScript patterns, choose the appropriate provider:
 
-**Option 1: TypeScript Provider (for semantic analysis)**
-Use when you need to find top-level symbol declarations and their references:
+**Option 1: Node.js Provider (for semantic analysis)**
+Use when you need to find symbol references in JavaScript/TypeScript:
 - Functions: `function MyComponent() {}`
 - Classes: `class MyComponent {}`
 - Variables/Constants: `const MyComponent = () => {}`
+- Types and interfaces
 - Exported symbols
 
 Fields:
-- **provider_type**: Set to "typescript"
+- **provider_type**: Set to "nodejs"
 - **source_fqn**: Symbol name to find (e.g., "MyComponent", "useEffect", "useState")
-- **file_pattern**: File extension pattern (e.g., "*.tsx", "*.ts", or "*.{tsx,jsx}" for brace expansion)
-- **location_type**: Can be null
+- **file_pattern**: Must be null (nodejs provider doesn't support file filtering)
+- **location_type**: Must be null
 
 Example for React component usage:
 ```json
-{
+{{
   "source_pattern": "MyComponent",
   "target_pattern": "NewComponent",
   "source_fqn": "MyComponent",
-  "provider_type": "typescript",
-  "file_pattern": "*.tsx",
+  "provider_type": "nodejs",
+  "file_pattern": null,
   "location_type": null
-}
+}}
 ```
 
-**Option 2: Builtin Provider (for text/regex matching)**
-Use for patterns that TypeScript provider CANNOT find:
-- Methods inside classes (e.g., `componentWillMount`)
-- Properties (e.g., `propTypes`, `defaultProps`)
-- Type annotations (e.g., `React.FC`, `React.Component`)
-- Imported types from libraries
-- Any complex code patterns
+**Option 2: Builtin Provider (for file-specific text/regex matching)**
+Use for patterns that require file filtering or that nodejs provider cannot find:
+- File-specific imports (e.g., `import React` in .tsx files only)
+- Type annotations in specific file types (e.g., `React.FC` in .tsx files)
+- CSS patterns in style files (e.g., `--pf-` in .css/.scss files)
+- Any complex code patterns requiring file type filtering
 
 Fields:
 - **provider_type**: Set to "builtin"
-- **source_fqn**: SIMPLE regex pattern. Use `.*` for wildcards, avoid complex escapes like \\s, \\{, \\} (e.g., "componentWillMount")
-- **file_pattern**: File extension pattern (e.g., "*.tsx" or "*.{tsx,jsx}" for multiple extensions)
+- **source_fqn**: SIMPLE regex pattern. Use `.*` for wildcards, avoid complex escapes like \\s, \\{{, \\}} (e.g., "componentWillMount")
+- **file_pattern**: REGEX pattern for file matching (e.g., "\\.tsx$" for .tsx files, "\\.(j|t)sx?$" for .js/.jsx/.ts/.tsx)
 - **location_type**: null
 
-Example for deprecated lifecycle method:
+Example for pattern in .tsx files only:
 ```json
-{
-  "source_pattern": "componentWillMount",
-  "target_pattern": "componentDidMount",
-  "source_fqn": "componentWillMount",
-  "provider_type": "builtin",
-  "file_pattern": "*.tsx",
-  "location_type": null
-}
-```
-
-Example for React.FC type usage:
-```json
-{
+{{
   "source_pattern": "React.FC",
   "target_pattern": "function component with explicit props",
-  "source_fqn": "React\\\\.FC",
+  "source_fqn": "React.FC",
   "provider_type": "builtin",
-  "file_pattern": "*.tsx",
+  "file_pattern": "\\\\.tsx$",
   "location_type": null
-}
+}}
 ```
 
-**IMPORTANT: TypeScript Provider Limitations**
-- ✅ CAN find: Top-level functions, classes, variables, exports
-- ❌ CANNOT find: Methods, properties, type annotations, imported types
-- When in doubt, use builtin provider with simple regex
+Example for CSS pattern in .css or .scss files:
+```json
+{{
+  "source_pattern": "--pf-v5-global",
+  "target_pattern": "--pf-v6-global",
+  "source_fqn": "--pf-v5-global",
+  "provider_type": "builtin",
+  "file_pattern": "\\\\.(css|scss)$",
+  "location_type": null
+}}
+```
 
-**File Pattern Support:**
-- Brace expansion is supported: "*.{ts,tsx,js,jsx}"
-- Multiple extensions: "*.{css,scss}" or "*.{html,js,jsx,ts,tsx}"
+IMPORTANT: In JSON, backslashes must be escaped. Use \\\\ for regex backslashes.
+
+**IMPORTANT: Node.js Provider vs Builtin Provider**
+- ✅ Use nodejs provider: Symbol references across ALL JS/TS files (no file filtering)
+- ✅ Use builtin provider: Patterns that need file type filtering using regex filePattern
+- When in doubt about file filtering, use builtin provider with filePattern
 
 """
         else:
@@ -295,7 +293,7 @@ Return your findings as a JSON array. Each pattern should be an object with thes
   "complexity": "TRIVIAL|LOW|MEDIUM|HIGH|EXPERT",
   "category": "string",
   "concern": "string",
-  "provider_type": "java|typescript|builtin or null",
+  "provider_type": "java|nodejs|builtin or null",
   "file_pattern": "string or null",
   "rationale": "string",
   "example_before": "string or null",
@@ -311,9 +309,10 @@ Focus on patterns that can be detected via static analysis. Skip general advice 
 - Example: Use "import.*Component.*from.*library" NOT "import\\s*\\{{\\s*Component\\s*\\}}"
 
 **FILE PATTERN RULES:**
-- Brace expansion IS supported: Use "*.{ts,tsx}" for multiple extensions
-- Prefer brace expansion over separate rules when patterns match multiple file types
-- Examples: "*.{js,jsx,ts,tsx}", "*.{css,scss}", "*.{html,htm}"
+- For builtin.filecontent provider: Use REGEX patterns for filePattern field
+- Examples: "\\\\.tsx$" for .tsx files, "\\\\.(j|t)sx?$" for .js/.jsx/.ts/.tsx files
+- Remember: In JSON, backslashes must be escaped with \\\\
+- For nodejs provider: Do NOT use filePattern (matches all JS/TS files)
 
 Return ONLY the JSON array, no additional commentary."""
 

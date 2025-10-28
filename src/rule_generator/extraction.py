@@ -61,14 +61,16 @@ def detect_language_from_frameworks(source: str, target: str) -> str:
 class MigrationPatternExtractor:
     """Extract migration patterns from guide content using LLM."""
 
-    def __init__(self, model: LLMProvider):
+    def __init__(self, model: LLMProvider, from_openrewrite: bool = False):
         """
         Initialize pattern extractor with LLM model.
 
         Args:
             model: LLM provider instance
+            from_openrewrite: If True, use OpenRewrite-specific prompting
         """
         self.model = model
+        self.from_openrewrite = from_openrewrite
 
     def extract_patterns(
         self,
@@ -87,12 +89,19 @@ class MigrationPatternExtractor:
         Returns:
             List of extracted migration patterns
         """
-        # Build prompt
-        prompt = self._build_extraction_prompt(
-            guide_content,
-            source_framework,
-            target_framework
-        )
+        # Build prompt (use OpenRewrite-specific prompt if needed)
+        if self.from_openrewrite:
+            prompt = self._build_openrewrite_prompt(
+                guide_content,
+                source_framework,
+                target_framework
+            )
+        else:
+            prompt = self._build_extraction_prompt(
+                guide_content,
+                source_framework,
+                target_framework
+            )
 
         # Generate with LLM
         try:
@@ -313,6 +322,148 @@ Focus on patterns that can be detected via static analysis. Skip general advice 
 - Examples: "\\\\.tsx$" for .tsx files, "\\\\.(j|t)sx?$" for .js/.jsx/.ts/.tsx files
 - Remember: In JSON, backslashes must be escaped with \\\\
 - For nodejs provider: Do NOT use filePattern (matches all JS/TS files)
+
+Return ONLY the JSON array, no additional commentary."""
+
+        return prompt
+
+    def _build_openrewrite_prompt(
+        self,
+        recipe_content: str,
+        source_framework: Optional[str],
+        target_framework: Optional[str]
+    ) -> str:
+        """Build LLM prompt for OpenRewrite recipe conversion."""
+
+        # Detect language for language-specific instructions
+        language = "java"  # OpenRewrite is primarily Java
+        if source_framework and target_framework:
+            language = detect_language_from_frameworks(source_framework, target_framework)
+
+        frameworks = ""
+        if source_framework and target_framework:
+            frameworks = f"Migration: {source_framework} → {target_framework}\n"
+            frameworks += f"Detected Language: {language}\n\n"
+
+        # Language-specific instructions (reuse from regular prompt)
+        lang_instructions = ""
+        if language == "java":
+            lang_instructions = """
+**Java Detection Instructions:**
+For Java code patterns (classes, annotations, imports), use these fields:
+- **provider_type**: Set to "java" (or leave null for auto-detection)
+- **source_fqn**: Fully qualified class name (e.g., "javax.ejb.Stateless")
+- **location_type**: One of ANNOTATION, IMPORT, METHOD_CALL, TYPE, INHERITANCE, PACKAGE
+- **file_pattern**: Can be null
+
+**Configuration File Detection Instructions:**
+For property/configuration file patterns (application.properties, application.yaml), use these fields:
+- **provider_type**: Set to "builtin"
+- **source_fqn**: SIMPLE regex pattern to match the property. Use `.*` for wildcards and escape dots with \\\\ (e.g., "spring\\.data\\.mongodb\\.host")
+- **file_pattern**: Regex pattern to match configuration files (e.g., ".*\\.(properties|yaml|yml)")
+- **location_type**: null (not needed for builtin provider)
+- **category**: "configuration"
+
+"""
+
+        prompt = f"""You are converting OpenRewrite recipes into Konveyor analyzer detection patterns.
+
+{frameworks}**IMPORTANT: OpenRewrite vs Konveyor**
+
+OpenRewrite recipes contain TRANSFORMATION logic (how to automatically rewrite code).
+Konveyor rules contain DETECTION patterns (how to find code that needs review).
+
+Your task: For each OpenRewrite transformation, extract the DETECTION pattern.
+
+**Example Conversion:**
+
+OpenRewrite Recipe:
+```
+- org.openrewrite.java.ChangePackage:
+    oldPackageName: javax.security.cert
+    newPackageName: java.security.cert
+```
+
+Konveyor Detection Pattern:
+```json
+{{
+  "source_pattern": "javax.security.cert",
+  "target_pattern": "java.security.cert",
+  "source_fqn": "javax.security.cert.*",
+  "location_type": "PACKAGE",
+  "provider_type": "java",
+  "complexity": "TRIVIAL",
+  "category": "api",
+  "concern": "security",
+  "rationale": "javax.security.cert package is deprecated for removal",
+  "example_before": "import javax.security.cert.Certificate;",
+  "example_after": "import java.security.cert.Certificate;",
+  "documentation_url": null
+}}
+```
+
+**Common OpenRewrite Transformation Types:**
+
+1. **ChangePackage** - Package renames
+   - Extract: oldPackageName as source_pattern, newPackageName as target_pattern
+   - location_type: PACKAGE
+
+2. **ChangeType** - Class renames
+   - Extract: oldFullyQualifiedTypeName as source_fqn, newFullyQualifiedTypeName as target
+   - location_type: TYPE
+
+3. **ChangeMethodName** - Method renames
+   - Extract: methodPattern and newMethodName
+   - location_type: METHOD_CALL
+
+4. **AddDependency** / **ChangeDependency** - Dependency updates
+   - Extract: groupId/artifactId changes
+   - category: dependency
+
+5. **Composite Recipes** - Multiple sub-recipes
+   - Create separate patterns for each meaningful sub-recipe
+
+{lang_instructions}
+---
+OPENREWRITE RECIPE CONTENT:
+
+{recipe_content}
+
+---
+
+**Instructions:**
+
+1. Analyze each transformation in the recipe
+2. For simple transformations (ChangePackage, ChangeType), directly map to detection patterns
+3. For complex transformations, infer what code patterns are being changed
+4. Skip recipe references that are too generic (e.g., "UpgradeToJava17" without parameters)
+5. For composite recipes with sub-recipes, expand and extract patterns from each meaningful transformation
+
+Return your findings as a JSON array with these fields:
+
+{{
+  "source_pattern": "string",
+  "target_pattern": "string",
+  "source_fqn": "string or null",
+  "location_type": "ANNOTATION|IMPORT|METHOD_CALL|TYPE|INHERITANCE|PACKAGE or null",
+  "alternative_fqns": ["string"] or [],
+  "complexity": "TRIVIAL|LOW|MEDIUM|HIGH|EXPERT",
+  "category": "dependency|annotation|api|configuration|other",
+  "concern": "string",
+  "provider_type": "java|builtin or null",
+  "file_pattern": "string or null",
+  "rationale": "string",
+  "example_before": "string or null",
+  "example_after": "string or null",
+  "documentation_url": "string or null"
+}}
+
+**Complexity Guidelines:**
+- TRIVIAL: Package renames, removing unused imports
+- LOW: Simple 1:1 class/method renames
+- MEDIUM: API changes with similar alternatives
+- HIGH: Deprecated APIs requiring refactoring
+- EXPERT: Architectural changes
 
 Return ONLY the JSON array, no additional commentary."""
 

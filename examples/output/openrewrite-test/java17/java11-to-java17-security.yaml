@@ -1,0 +1,115 @@
+- ruleID: java11-to-java17-security-00000
+  description: javax.security.cert should be replaced with java.security.cert
+  effort: 1
+  category: mandatory
+  labels:
+  - konveyor.io/source=java11
+  - konveyor.io/target=java17
+  when:
+    java.referenced:
+      pattern: javax.security.cert.*
+      location: PACKAGE
+  message: 'The javax.security.cert package has been deprecated for removal in Java
+    17.
+
+
+    Replace `javax.security.cert` with `java.security.cert`.
+
+
+    Before:
+
+    ```
+
+    import javax.security.cert.Certificate;
+
+    ```
+
+
+    After:
+
+    ```
+
+    import java.security.cert.Certificate;
+
+    ```'
+  links:
+  - url: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/security/cert/package-summary.html
+    title: java17 Documentation
+  customVariables: []
+- ruleID: java11-to-java17-security-00020
+  description: javax.net.ssl.SSLSession.getPeerCertificateChain() should be replaced
+    with javax.net.ssl.SSLSession.getPeerCertificates()
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=java11
+  - konveyor.io/target=java17
+  when:
+    java.referenced:
+      pattern: javax.net.ssl.SSLSession.getPeerCertificateChain
+      location: METHOD_CALL
+  message: 'The getPeerCertificateChain() method implementation was removed from the
+    SunJSSE provider in Java 17 and should be replaced with getPeerCertificates().
+
+
+    Replace `javax.net.ssl.SSLSession.getPeerCertificateChain()` with `javax.net.ssl.SSLSession.getPeerCertificates()`.
+
+
+    Before:
+
+    ```
+
+    javax.security.cert.X509Certificate[] certs = sslSession.getPeerCertificateChain();
+
+    ```
+
+
+    After:
+
+    ```
+
+    java.security.cert.Certificate[] certs = sslSession.getPeerCertificates();
+
+    ```'
+  links:
+  - url: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/javax/net/ssl/SSLSession.html
+    title: java17 Documentation
+  customVariables: []
+- ruleID: java11-to-java17-security-00030
+  description: com.sun.net.ssl should be replaced with javax.net.ssl
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=java11
+  - konveyor.io/target=java17
+  when:
+    java.referenced:
+      pattern: com.sun.net.ssl.*
+      location: PACKAGE
+  message: 'The internal API com.sun.net.ssl is removed in Java 17. Use javax.net.ssl
+    instead.
+
+
+    Replace `com.sun.net.ssl` with `javax.net.ssl`.
+
+
+    Before:
+
+    ```
+
+    import com.sun.net.ssl.SSLContext;
+
+    ```
+
+
+    After:
+
+    ```
+
+    import javax.net.ssl.SSLContext;
+
+    ```'
+  links:
+  - url: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/javax/net/ssl/package-summary.html
+    title: java17 Documentation
+  customVariables: []

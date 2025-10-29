@@ -388,3 +388,168 @@ class TestPatternCategories:
 
         assert len(patterns) == 1
         assert patterns[0].category == category
+
+
+class TestErrorHandling:
+    """Test error handling in pattern extraction."""
+
+    @pytest.fixture
+    def extractor(self):
+        """Create extractor instance."""
+        mock_llm = Mock()
+        return MigrationPatternExtractor(mock_llm)
+
+    def test_handle_pydantic_validation_error(self, extractor):
+        """Should skip patterns with Pydantic validation errors"""
+        response = '''[
+            {
+                "source_pattern": "valid",
+                "complexity": "MEDIUM",
+                "category": "api",
+                "rationale": "This is valid"
+            },
+            {
+                "source_pattern": "invalid",
+                "complexity": "INVALID_COMPLEXITY"
+            }
+        ]'''
+
+        patterns = extractor._parse_extraction_response(response)
+
+        # Should skip the invalid pattern
+        assert len(patterns) == 1
+        assert patterns[0].source_pattern == "valid"
+
+    def test_handle_missing_required_field_in_json(self, extractor):
+        """Should skip patterns missing required fields"""
+        response = '''[
+            {
+                "source_pattern": "test1",
+                "complexity": "MEDIUM",
+                "category": "api",
+                "rationale": "Valid"
+            },
+            {
+                "source_pattern": "test2",
+                "category": "api"
+            }
+        ]'''
+
+        patterns = extractor._parse_extraction_response(response)
+
+        # Should only parse the valid pattern
+        assert len(patterns) == 1
+        assert patterns[0].source_pattern == "test1"
+
+    def test_handle_malformed_json_in_response(self, extractor):
+        """Should return empty list for completely malformed JSON"""
+        response = "This is not JSON at all, just plain text"
+
+        patterns = extractor._parse_extraction_response(response)
+
+        assert patterns == []
+
+    def test_handle_partial_json(self, extractor):
+        """Should return empty list for incomplete JSON"""
+        response = '''[{"source_pattern": "test", "complexity":'''
+
+        patterns = extractor._parse_extraction_response(response)
+
+        assert patterns == []
+
+    def test_handle_empty_json_array(self, extractor):
+        """Should handle empty JSON array"""
+        response = "[]"
+
+        patterns = extractor._parse_extraction_response(response)
+
+        assert patterns == []
+
+    def test_handle_non_array_json(self, extractor):
+        """Should return empty list when JSON is not an array"""
+        response = '''{"source_pattern": "test"}'''
+
+        patterns = extractor._parse_extraction_response(response)
+
+        # Should return empty since it's looking for an array
+        assert patterns == []
+
+    def test_extract_patterns_with_llm_error(self):
+        """Should return empty list when LLM raises exception"""
+        mock_llm = Mock()
+        mock_llm.generate.side_effect = Exception("LLM API error")
+
+        extractor = MigrationPatternExtractor(mock_llm)
+        patterns = extractor.extract_patterns("test guide")
+
+        assert patterns == []
+
+    def test_extract_patterns_with_llm_returning_invalid_json(self):
+        """Should handle LLM returning non-JSON response"""
+        mock_llm = Mock()
+        mock_llm.generate.return_value = {
+            "response": "I cannot extract patterns from this guide.",
+            "usage": {"prompt_tokens": 10, "completion_tokens": 5}
+        }
+
+        extractor = MigrationPatternExtractor(mock_llm)
+        patterns = extractor.extract_patterns("invalid guide")
+
+        assert patterns == []
+
+    def test_handle_json_with_extra_fields(self, extractor):
+        """Should ignore extra fields in JSON"""
+        response = '''[{
+            "source_pattern": "test",
+            "target_pattern": "new",
+            "complexity": "MEDIUM",
+            "category": "api",
+            "rationale": "Test",
+            "extra_field": "should be ignored",
+            "another_unknown": 123
+        }]'''
+
+        patterns = extractor._parse_extraction_response(response)
+
+        assert len(patterns) == 1
+        assert patterns[0].source_pattern == "test"
+
+    def test_handle_null_values_in_optional_fields(self, extractor):
+        """Should handle explicit null values in optional fields"""
+        response = '''[{
+            "source_pattern": "test",
+            "target_pattern": null,
+            "source_fqn": null,
+            "complexity": "MEDIUM",
+            "category": "api",
+            "rationale": "Test"
+        }]'''
+
+        patterns = extractor._parse_extraction_response(response)
+
+        assert len(patterns) == 1
+        assert patterns[0].target_pattern is None
+        assert patterns[0].source_fqn is None
+
+    def test_handle_type_mismatch_errors(self, extractor):
+        """Should skip patterns with type mismatches"""
+        response = '''[
+            {
+                "source_pattern": "test",
+                "complexity": "MEDIUM",
+                "category": "api",
+                "rationale": "Valid"
+            },
+            {
+                "source_pattern": 123,
+                "complexity": "MEDIUM",
+                "category": "api",
+                "rationale": "Invalid - source_pattern should be string"
+            }
+        ]'''
+
+        patterns = extractor._parse_extraction_response(response)
+
+        # Should only get the valid pattern
+        assert len(patterns) == 1
+        assert patterns[0].source_pattern == "test"

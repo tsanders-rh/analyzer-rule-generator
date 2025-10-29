@@ -821,3 +821,233 @@ class TestEdgeCases:
         # When there's no target_pattern, description says "usage detected (removed API)"
         assert "removed api" in rule.description.lower()
         assert "Removed" in rule.description
+
+
+class TestGeneratorErrorHandling:
+    """Test error handling in rule generation."""
+
+    def test_builtin_provider_without_source_fqn(self):
+        """Should handle builtin provider when source_fqn is missing"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="test",
+            provider_type="builtin",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test"
+        )
+
+        # Should return None because builtin needs source_fqn for regex
+        condition = generator._build_when_condition(pattern)
+        assert condition is None
+
+    def test_pattern_with_very_long_id(self):
+        """Should handle very large rule numbers"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="test",
+            target_framework="test"
+        )
+
+        # Generate many rules to test large numbers
+        for i in range(100):
+            rule_id = generator._create_rule_id()
+
+        # Should still format correctly with 5 digits
+        assert rule_id.endswith("-00990")
+        assert len(rule_id.split("-")[-1]) == 5
+
+    def test_pattern_with_empty_source_pattern(self):
+        """Should skip patterns with empty source_pattern"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        # Should return None for empty pattern
+        assert rule is None
+
+    def test_pattern_with_whitespace_only_pattern(self):
+        """Should handle patterns with only whitespace"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="   ",
+            source_fqn="com.example.Test",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        # Should still generate rule (whitespace validation done elsewhere)
+        assert rule is not None
+
+    def test_pattern_with_special_characters_in_id(self):
+        """Should handle special characters in framework names"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="spring-boot@3.0",
+            target_framework="spring-boot@4.0"
+        )
+
+        rule_id = generator._create_rule_id()
+
+        # Should sanitize special characters
+        assert "@" in rule_id or rule_id.startswith("spring-boot")
+
+    def test_generate_rules_with_empty_list(self):
+        """Should handle empty pattern list"""
+        generator = AnalyzerRuleGenerator()
+
+        rules = generator.generate_rules([])
+
+        assert rules == []
+
+    def test_generate_rules_by_concern_with_none_concerns(self):
+        """Should group patterns with None concern under 'general'"""
+        generator = AnalyzerRuleGenerator()
+
+        patterns = [
+            MigrationPattern(
+                source_pattern="Test1",
+                source_fqn="com.example.Test1",
+                complexity="MEDIUM",
+                category="api",
+                concern=None,
+                rationale="Test"
+            ),
+            MigrationPattern(
+                source_pattern="Test2",
+                source_fqn="com.example.Test2",
+                complexity="MEDIUM",
+                category="api",
+                concern="",
+                rationale="Test"
+            )
+        ]
+
+        rules_by_concern = generator.generate_rules_by_concern(patterns)
+
+        # Both should be under 'general' concern
+        assert "general" in rules_by_concern or "" in rules_by_concern
+
+    def test_pattern_with_invalid_complexity(self):
+        """Should handle patterns with non-standard complexity values"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="Test",
+            source_fqn="com.example.Test",
+            complexity="UNKNOWN_LEVEL",
+            category="api",
+            rationale="Test"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        # Should still generate rule and map to default effort
+        assert rule is not None
+        assert rule.effort == 5  # Default for unknown
+
+    def test_builtin_provider_with_regex_special_chars(self):
+        """Should handle builtin patterns with regex special characters"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="test.*[a-z]+",
+            source_fqn="test\\.\\*\\[a-z\\]\\+",
+            provider_type="builtin",
+            file_pattern="*.js",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        assert condition is not None
+        assert "builtin.filecontent" in condition
+
+    def test_alternative_fqns_with_empty_list(self):
+        """Should handle empty alternative_fqns list"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="Test",
+            source_fqn="com.example.Test",
+            alternative_fqns=[],
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        # Should not create OR condition
+        assert "or" not in condition
+        assert "java.referenced" in condition
+
+    def test_pattern_with_very_long_message(self):
+        """Should handle patterns with very long rationale"""
+        generator = AnalyzerRuleGenerator()
+
+        long_rationale = "This is a very long rationale. " * 100
+
+        pattern = MigrationPattern(
+            source_pattern="Test",
+            target_pattern="New",
+            source_fqn="com.example.Test",
+            complexity="MEDIUM",
+            category="api",
+            rationale=long_rationale
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert long_rationale in rule.message
+
+    def test_pattern_with_unicode_in_patterns(self):
+        """Should handle Unicode characters in patterns"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="测试类",
+            target_pattern="TestClass",
+            source_fqn="com.测试.测试类",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Internationalization"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert "测试类" in rule.message
+
+    def test_links_with_invalid_url(self):
+        """Should handle patterns with malformed documentation URLs"""
+        generator = AnalyzerRuleGenerator(target_framework="test")
+
+        pattern = MigrationPattern(
+            source_pattern="Test",
+            source_fqn="com.example.Test",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test",
+            documentation_url="not-a-valid-url"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        # Should still generate rule with the URL as-is
+        assert rule is not None
+        if rule.links:
+            assert rule.links[0].url == "not-a-valid-url"

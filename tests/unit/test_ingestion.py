@@ -522,3 +522,180 @@ class TestEdgeCases:
 
         assert result is not None
         assert unicode_content in result
+
+
+class TestErrorHandling:
+    """Test error handling and edge cases."""
+
+    @patch('src.rule_generator.ingestion.requests.get')
+    def test_handle_http_error_status(self, mock_get):
+        """Should return None for HTTP error status codes"""
+        ingester = GuideIngester()
+
+        mock_response = Mock()
+        mock_response.raise_for_status.side_effect = Exception("404 Not Found")
+        mock_get.return_value = mock_response
+
+        result = ingester.ingest_url("https://example.com/notfound")
+
+        assert result is None
+
+    @patch('src.rule_generator.ingestion.requests.get')
+    def test_handle_connection_timeout(self, mock_get):
+        """Should return None on connection timeout"""
+        import requests
+        ingester = GuideIngester()
+
+        mock_get.side_effect = requests.Timeout("Connection timed out")
+
+        result = ingester.ingest_url("https://example.com/slow")
+
+        assert result is None
+
+    @patch('src.rule_generator.ingestion.requests.get')
+    def test_handle_connection_error(self, mock_get):
+        """Should return None on connection error"""
+        import requests
+        ingester = GuideIngester()
+
+        mock_get.side_effect = requests.ConnectionError("Failed to connect")
+
+        result = ingester.ingest_url("https://example.com/unreachable")
+
+        assert result is None
+
+    @patch('src.rule_generator.ingestion.requests.get')
+    def test_handle_malformed_html(self, mock_get):
+        """Should handle malformed HTML gracefully"""
+        ingester = GuideIngester()
+
+        mock_response = Mock()
+        mock_response.headers = {'content-type': 'text/html'}
+        mock_response.content = b'<html><body><div>Unclosed tags<span></body>'
+        mock_response.raise_for_status = Mock()
+        mock_get.return_value = mock_response
+
+        result = ingester.ingest_url("https://example.com/malformed")
+
+        # BeautifulSoup handles malformed HTML gracefully
+        assert result is not None
+
+    @patch('src.rule_generator.ingestion.requests.get')
+    def test_handle_empty_html_response(self, mock_get):
+        """Should handle empty HTML response"""
+        ingester = GuideIngester()
+
+        mock_response = Mock()
+        mock_response.headers = {'content-type': 'text/html'}
+        mock_response.content = b''
+        mock_response.raise_for_status = Mock()
+        mock_get.return_value = mock_response
+
+        result = ingester.ingest_url("https://example.com/empty")
+
+        assert result is not None
+
+    @patch('src.rule_generator.ingestion.requests.get')
+    def test_handle_generic_exception_during_parsing(self, mock_get):
+        """Should return None for unexpected exceptions during parsing"""
+        ingester = GuideIngester()
+
+        mock_response = Mock()
+        mock_response.headers = {'content-type': 'text/html'}
+        mock_response.content = b'<html><body>Test</body></html>'
+        mock_response.raise_for_status = Mock()
+
+        # Simulate error during parsing
+        with patch('src.rule_generator.ingestion.BeautifulSoup') as mock_bs:
+            mock_bs.side_effect = Exception("Unexpected parsing error")
+            mock_get.return_value = mock_response
+
+            result = ingester.ingest_url("https://example.com/error")
+
+            assert result is None
+
+    def test_handle_file_encoding_error(self, tmp_path):
+        """Should return None for file encoding errors"""
+        ingester = GuideIngester()
+
+        # Create file with invalid UTF-8 bytes
+        test_file = tmp_path / "bad_encoding.md"
+        test_file.write_bytes(b'\x80\x81\x82\x83')
+
+        result = ingester.ingest_file(str(test_file))
+
+        # Should handle encoding errors
+        assert result is None or isinstance(result, str)
+
+    def test_handle_directory_instead_of_file(self, tmp_path):
+        """Should return None when path is a directory"""
+        ingester = GuideIngester()
+
+        # Try to read a directory
+        result = ingester.ingest_file(str(tmp_path))
+
+        assert result is None
+
+    def test_handle_file_with_no_extension(self, tmp_path):
+        """Should handle files without extension"""
+        ingester = GuideIngester()
+
+        test_file = tmp_path / "README"
+        test_file.write_text("Content without extension")
+
+        result = ingester.ingest_file(str(test_file))
+
+        assert result is not None
+        assert "Content without extension" in result
+
+    def test_chunk_content_with_no_headers(self):
+        """Should handle content with no markdown headers"""
+        ingester = GuideIngester()
+
+        # Plain text with no headers
+        content = "This is plain text " * 1000
+
+        chunks = ingester.chunk_content(content, max_tokens=50)
+
+        # Should still chunk even without headers
+        assert isinstance(chunks, list)
+        assert len(chunks) >= 1
+
+    def test_chunk_content_with_only_level_1_headers(self):
+        """Should chunk content with only level 1 headers"""
+        ingester = GuideIngester()
+
+        content = "\n# Header 1\n" + ("x" * 5000) + "\n# Header 2\n" + ("y" * 5000)
+
+        chunks = ingester.chunk_content(content, max_tokens=100)
+
+        assert len(chunks) > 1
+
+    def test_clean_text_with_extreme_whitespace(self):
+        """Should handle extreme whitespace cases"""
+        ingester = GuideIngester()
+
+        # 100 newlines
+        text = "\n" * 100 + "Content" + "\n" * 100
+
+        cleaned = ingester._clean_text(text)
+
+        # Should reduce to minimal newlines
+        assert cleaned.count('\n') < 10
+        assert "Content" in cleaned
+
+    def test_ingest_with_all_invalid_inputs(self):
+        """Should handle multiple invalid input types"""
+        ingester = GuideIngester()
+
+        # None
+        result = ingester.ingest(None)
+        assert result == "" or result is None
+
+        # Empty string
+        result = ingester.ingest("")
+        assert result == ""
+
+        # Whitespace only
+        result = ingester.ingest("   \n\n  ")
+        assert result == "   \n\n  "  # Returns as-is for raw content

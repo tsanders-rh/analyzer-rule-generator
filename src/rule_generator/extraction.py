@@ -353,7 +353,13 @@ Return ONLY the JSON array, no additional commentary."""
 For Java code patterns (classes, annotations, imports), use these fields:
 - **provider_type**: Set to "java" (or leave null for auto-detection)
 - **source_fqn**: Fully qualified class name (e.g., "javax.ejb.Stateless")
-- **location_type**: One of ANNOTATION, IMPORT, METHOD_CALL, TYPE, INHERITANCE, PACKAGE
+- **location_type**: Choose based on what you're detecting:
+  - **TYPE**: For package changes with wildcards (e.g., "com.sun.net.ssl.*") - PREFERRED for ChangePackage
+  - **IMPORT**: For specific class imports only (no wildcards, exact FQN required)
+  - **METHOD_CALL**: For method invocations
+  - **ANNOTATION**: For annotation usage
+  - **INHERITANCE**: For class inheritance
+  - **PACKAGE**: Do not use - TYPE is preferred
 - **file_pattern**: Can be null
 
 **Configuration File Detection Instructions:**
@@ -390,7 +396,7 @@ Konveyor Detection Pattern:
   "source_pattern": "javax.security.cert",
   "target_pattern": "java.security.cert",
   "source_fqn": "javax.security.cert.*",
-  "location_type": "PACKAGE",
+  "location_type": "TYPE",
   "provider_type": "java",
   "complexity": "TRIVIAL",
   "category": "api",
@@ -406,11 +412,14 @@ Konveyor Detection Pattern:
 
 1. **ChangePackage** - Package renames
    - Extract: oldPackageName as source_pattern, newPackageName as target_pattern
-   - location_type: PACKAGE
+   - **IMPORTANT**: Use location_type: TYPE for package-level detection with wildcards
+   - Pattern format: "oldPackage.*" to match all classes in the package
+   - Note: TYPE works with wildcards, IMPORT requires specific class names
 
 2. **ChangeType** - Class renames
    - Extract: oldFullyQualifiedTypeName as source_fqn, newFullyQualifiedTypeName as target
-   - location_type: TYPE
+   - location_type: TYPE (catches usage in any context)
+   - Note: Use exact FQN, not wildcards (e.g., "com.example.OldClass")
 
 3. **ChangeMethodName** - Method renames
    - Extract: methodPattern and newMethodName
@@ -422,6 +431,14 @@ Konveyor Detection Pattern:
 
 5. **Composite Recipes** - Multiple sub-recipes
    - Create separate patterns for each meaningful sub-recipe
+
+**Location Type Selection:**
+- **TYPE**: For package-level changes with wildcards (e.g., "javax.security.cert.*") - USE THIS FOR ChangePackage
+- **IMPORT**: For specific class imports (requires exact FQN, no wildcards)
+- **METHOD_CALL**: For detecting method invocations
+- **ANNOTATION**: For detecting annotation usage
+- **INHERITANCE**: For detecting class inheritance relationships
+- **PACKAGE**: Do not use - TYPE is preferred for package-level detection
 
 {lang_instructions}
 ---

@@ -25,32 +25,32 @@ component_management:
     - component_id: ingestion
       name: "Guide Ingestion"
       paths:
-        - "**/ingestion.py"
+        - src/rule_generator/ingestion.py
 
     - component_id: extraction
       name: "Pattern Extraction"
       paths:
-        - "**/extraction.py"
+        - src/rule_generator/extraction.py
 
     - component_id: generator
       name: "Rule Generation"
       paths:
-        - "**/generator.py"
+        - src/rule_generator/generator.py
 
     - component_id: openrewrite
       name: "OpenRewrite Support"
       paths:
-        - "**/openrewrite.py"
+        - src/rule_generator/openrewrite.py
 
     - component_id: llm
       name: "LLM Integration"
       paths:
-        - "**/llm.py"
+        - src/rule_generator/llm.py
 
     - component_id: schema
       name: "Data Models"
       paths:
-        - "**/schema.py"
+        - src/rule_generator/schema.py
 
 comment:
   layout: "reach,diff,flags,tree,components"

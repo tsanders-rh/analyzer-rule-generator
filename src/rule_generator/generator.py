@@ -196,12 +196,14 @@ class AnalyzerRuleGenerator:
         Returns:
             When condition dict or None if cannot be built
         """
-        if not pattern.source_fqn:
+        # Check provider type first
+        provider = pattern.provider_type or "java"  # Default to java for backward compatibility
+
+        # Nodejs provider can use source_pattern as fallback
+        # Other providers require source_fqn
+        if provider != "nodejs" and not pattern.source_fqn:
             # If no FQN, we can't create a proper when condition for static analysis
             return None
-
-        # Check provider type
-        provider = pattern.provider_type or "java"  # Default to java for backward compatibility
 
         if provider == "builtin":
             # Build builtin.filecontent condition

@@ -1,0 +1,80 @@
+codecov:
+  require_ci_to_pass: yes
+  notify:
+    wait_for_ci: yes
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        informational: false
+    patch:
+      default:
+        target: 80%
+        threshold: 5%
+        informational: false
+
+component_management:
+  individual_components:
+    # Core pipeline modules
+    - component_id: ingestion
+      name: "Guide Ingestion"
+      paths:
+        - src/rule_generator/ingestion.py
+
+    - component_id: extraction
+      name: "Pattern Extraction"
+      paths:
+        - src/rule_generator/extraction.py
+
+    - component_id: generator
+      name: "Rule Generation"
+      paths:
+        - src/rule_generator/generator.py
+
+    - component_id: openrewrite
+      name: "OpenRewrite Support"
+      paths:
+        - src/rule_generator/openrewrite.py
+
+    - component_id: llm
+      name: "LLM Integration"
+      paths:
+        - src/rule_generator/llm.py
+
+    - component_id: schema
+      name: "Data Models"
+      paths:
+        - src/rule_generator/schema.py
+
+    # Test organization
+    - component_id: unit_tests
+      name: "Unit Tests"
+      paths:
+        - tests/unit/**
+
+    - component_id: integration_tests
+      name: "Integration Tests"
+      paths:
+        - tests/integration/**
+
+comment:
+  layout: "reach,diff,flags,tree,components"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+  branches:
+    - main
+
+ignore:
+  - "tests/**"
+  - "examples/**"
+  - "**/__pycache__/**"
+  - "**/*.pyc"

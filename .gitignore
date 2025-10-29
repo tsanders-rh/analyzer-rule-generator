@@ -46,6 +46,26 @@ htmlcov/
 examples/output/*.yaml
 !examples/output/.gitkeep
 
+# Test output directories (generated during testing)
+examples/output/angular-test/
+examples/output/angular-test-main/
+examples/output/openrewrite-demo/
+examples/output/openrewrite-final/
+examples/output/openrewrite-test/
+examples/output/openrewrite-test-fixed/
+examples/output/patternfly-escaping-test/
+
+# Test data and analysis artifacts
+examples/rulesets/**/nodejs-provider-settings.json
+examples/rulesets/**/tackle2-ui-*.yaml
+examples/rulesets/**/tackle2-ui-*.log
+examples/rulesets/**/*-provider-settings.json
+examples/rulesets/**/test-output.yaml
+
+# Media files (demos and recordings)
+media/*.mp4
+media/*.gif
+
 # OS
 .DS_Store
 Thumbs.db

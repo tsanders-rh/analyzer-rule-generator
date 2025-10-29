@@ -124,6 +124,7 @@ class TestCategoryDetermination:
         pattern = MigrationPattern(
             source_pattern="test",
             complexity="HIGH",
+            category="api",
             rationale="Test change"
         )
 
@@ -136,6 +137,7 @@ class TestCategoryDetermination:
         pattern = MigrationPattern(
             source_pattern="test",
             complexity="EXPERT",
+            category="api",
             rationale="Complex migration"
         )
 
@@ -148,6 +150,7 @@ class TestCategoryDetermination:
         pattern = MigrationPattern(
             source_pattern="test",
             complexity="TRIVIAL",
+            category="api",
             rationale="Simple rename"
         )
 
@@ -160,6 +163,7 @@ class TestCategoryDetermination:
         pattern = MigrationPattern(
             source_pattern="test",
             complexity="MEDIUM",
+            category="api",
             rationale="API has been removed in version 2"
         )
 
@@ -172,6 +176,7 @@ class TestCategoryDetermination:
         pattern = MigrationPattern(
             source_pattern="test",
             complexity="MEDIUM",
+            category="api",
             rationale="Deprecated for removal in next release"
         )
 
@@ -185,6 +190,7 @@ class TestCategoryDetermination:
             source_pattern="app.config.oldProperty",
             target_pattern="app.config.newProperty",
             complexity="MEDIUM",
+            category="configuration",
             rationale="Property has been renamed"
         )
 
@@ -197,6 +203,7 @@ class TestCategoryDetermination:
         pattern = MigrationPattern(
             source_pattern="test",
             complexity="MEDIUM",
+            category="api",
             rationale="General change"
         )
 
@@ -209,6 +216,7 @@ class TestCategoryDetermination:
         pattern = MigrationPattern(
             source_pattern="test",
             complexity="LOW",
+            category="api",
             rationale="Optional improvement"
         )
 
@@ -223,9 +231,11 @@ class TestWhenConditionBuilding:
         """Should build java.referenced condition"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
+            source_pattern="OldClass",
             source_fqn="com.example.OldClass",
             location_type=LocationType.TYPE,
             complexity="MEDIUM",
+            category="api",
             rationale="Test"
         )
 
@@ -239,8 +249,10 @@ class TestWhenConditionBuilding:
         """Should default to TYPE location if not specified"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
+            source_pattern="OldClass",
             source_fqn="com.example.OldClass",
             complexity="MEDIUM",
+            category="api",
             rationale="Test"
         )
 
@@ -252,10 +264,12 @@ class TestWhenConditionBuilding:
         """Should build OR condition with alternative FQNs"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
+            source_pattern="javax.security.cert.*",
             source_fqn="javax.security.cert.*",
             alternative_fqns=["java.security.cert.*"],
             location_type=LocationType.TYPE,
             complexity="MEDIUM",
+            category="api",
             rationale="Package migration"
         )
 
@@ -270,10 +284,12 @@ class TestWhenConditionBuilding:
         """Should build builtin.filecontent condition"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
+            source_pattern="isDisabled",
             source_fqn="isDisabled\\s*=",  # regex pattern
             file_pattern="*.{tsx,jsx}",
             provider_type="builtin",
             complexity="MEDIUM",
+            category="api",
             rationale="Property rename"
         )
 
@@ -287,9 +303,11 @@ class TestWhenConditionBuilding:
         """Should build builtin condition without filePattern if not specified"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
+            source_pattern="oldPattern",
             source_fqn="oldPattern",
             provider_type="builtin",
             complexity="MEDIUM",
+            category="api",
             rationale="Test"
         )
 
@@ -302,9 +320,11 @@ class TestWhenConditionBuilding:
         """Should build nodejs.referenced condition"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
+            source_pattern="OldComponent",
             source_fqn="OldComponent",
             provider_type="nodejs",
             complexity="MEDIUM",
+            category="api",
             rationale="Component renamed"
         )
 
@@ -320,6 +340,7 @@ class TestWhenConditionBuilding:
             source_pattern="oldFunction",
             provider_type="nodejs",
             complexity="MEDIUM",
+            category="api",
             rationale="Function renamed"
         )
 
@@ -331,12 +352,16 @@ class TestWhenConditionBuilding:
         """Should return None if no source_fqn or pattern"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
+            source_pattern="test",
             complexity="MEDIUM",
-            rationale="No pattern specified"
+            category="api",
+            rationale="No FQN specified"
         )
 
         condition = generator._build_when_condition(pattern)
 
+        # For java provider (default), it needs source_fqn
+        # Since we only have source_pattern, it should return None
         assert condition is None
 
 
@@ -392,6 +417,7 @@ class TestMessageBuilding:
             source_pattern="OldClass",
             target_pattern="NewClass",
             complexity="MEDIUM",
+            category="api",
             rationale="Class has been renamed for clarity"
         )
 
@@ -406,6 +432,7 @@ class TestMessageBuilding:
         pattern = MigrationPattern(
             source_pattern="RemovedAPI",
             complexity="HIGH",
+            category="api",
             rationale="API has been removed"
         )
 
@@ -422,6 +449,7 @@ class TestMessageBuilding:
             source_pattern="oldMethod()",
             target_pattern="newMethod()",
             complexity="MEDIUM",
+            category="api",
             rationale="Method renamed",
             example_before="obj.oldMethod();",
             example_after="obj.newMethod();"
@@ -441,6 +469,7 @@ class TestMessageBuilding:
             source_pattern="OldClass",
             target_pattern="NewClass",
             complexity="MEDIUM",
+            category="api",
             rationale="Class renamed"
         )
 
@@ -459,6 +488,7 @@ class TestLinksBuilding:
         pattern = MigrationPattern(
             source_pattern="test",
             complexity="MEDIUM",
+            category="api",
             rationale="Test",
             documentation_url="https://docs.spring.io/migration"
         )
@@ -476,6 +506,7 @@ class TestLinksBuilding:
         pattern = MigrationPattern(
             source_pattern="test",
             complexity="MEDIUM",
+            category="api",
             rationale="Test"
         )
 
@@ -523,8 +554,12 @@ class TestPatternToRule:
         """Should return None for pattern without FQN or source_pattern"""
         generator = AnalyzerRuleGenerator()
 
+        # This pattern is missing both source_fqn and source_pattern
+        # which are needed for rule generation
         pattern = MigrationPattern(
+            source_pattern="",  # Empty pattern should be skipped
             complexity="MEDIUM",
+            category="api",
             rationale="Missing pattern info"
         )
 
@@ -540,6 +575,7 @@ class TestPatternToRule:
         pattern = MigrationPattern(
             source_pattern="test",
             complexity="MEDIUM",
+            category="api",
             rationale="Test"
         )
 
@@ -561,13 +597,17 @@ class TestGenerateRules:
 
         patterns = [
             MigrationPattern(
+                source_pattern="Class1",
                 source_fqn="com.example.Class1",
                 complexity="MEDIUM",
+                category="api",
                 rationale="Test 1"
             ),
             MigrationPattern(
+                source_pattern="Class2",
                 source_fqn="com.example.Class2",
                 complexity="HIGH",
+                category="api",
                 rationale="Test 2"
             )
         ]
@@ -584,12 +624,16 @@ class TestGenerateRules:
 
         patterns = [
             MigrationPattern(
+                source_pattern="Valid",
                 source_fqn="com.example.Valid",
                 complexity="MEDIUM",
+                category="api",
                 rationale="Valid"
             ),
             MigrationPattern(
+                source_pattern="",  # Empty pattern will be skipped
                 complexity="MEDIUM",
+                category="api",
                 rationale="Invalid - no FQN"
             )
         ]
@@ -609,20 +653,26 @@ class TestGenerateRulesByConcern:
 
         patterns = [
             MigrationPattern(
+                source_pattern="Security1",
                 source_fqn="com.example.Security1",
                 complexity="MEDIUM",
+                category="api",
                 concern="security",
                 rationale="Security change 1"
             ),
             MigrationPattern(
+                source_pattern="Security2",
                 source_fqn="com.example.Security2",
                 complexity="MEDIUM",
+                category="api",
                 concern="security",
                 rationale="Security change 2"
             ),
             MigrationPattern(
+                source_pattern="Config1",
                 source_fqn="com.example.Config1",
                 complexity="MEDIUM",
+                category="configuration",
                 concern="configuration",
                 rationale="Config change"
             )
@@ -641,8 +691,10 @@ class TestGenerateRulesByConcern:
 
         patterns = [
             MigrationPattern(
+                source_pattern="Test",
                 source_fqn="com.example.Test",
                 complexity="MEDIUM",
+                category="api",
                 rationale="No concern specified"
             )
         ]
@@ -661,20 +713,26 @@ class TestGenerateRulesByConcern:
 
         patterns = [
             MigrationPattern(
+                source_pattern="Test1",
                 source_fqn="com.example.Test1",
                 complexity="MEDIUM",
+                category="api",
                 concern="concern-a",
                 rationale="Test"
             ),
             MigrationPattern(
+                source_pattern="Test2",
                 source_fqn="com.example.Test2",
                 complexity="MEDIUM",
+                category="api",
                 concern="concern-a",
                 rationale="Test"
             ),
             MigrationPattern(
+                source_pattern="Test3",
                 source_fqn="com.example.Test3",
                 complexity="MEDIUM",
+                category="api",
                 concern="concern-b",
                 rationale="Test"
             )
@@ -708,8 +766,18 @@ class TestEdgeCases:
         generator = AnalyzerRuleGenerator()
 
         patterns = [
-            MigrationPattern(complexity="MEDIUM", rationale="No FQN"),
-            MigrationPattern(complexity="HIGH", rationale="Also no FQN")
+            MigrationPattern(
+                source_pattern="",  # Empty pattern will be skipped
+                complexity="MEDIUM",
+                category="api",
+                rationale="No FQN"
+            ),
+            MigrationPattern(
+                source_pattern="",  # Empty pattern will be skipped
+                complexity="HIGH",
+                category="api",
+                rationale="Also no FQN"
+            )
         ]
 
         rules = generator.generate_rules(patterns)
@@ -725,6 +793,7 @@ class TestEdgeCases:
             target_pattern="New",
             source_fqn="com.example.Old",
             complexity="MEDIUM",
+            category="api",
             rationale="Test"
         )
 
@@ -740,6 +809,7 @@ class TestEdgeCases:
             source_pattern="Removed",
             source_fqn="com.example.Removed",
             complexity="MEDIUM",
+            category="api",
             rationale="Test"
         )
 

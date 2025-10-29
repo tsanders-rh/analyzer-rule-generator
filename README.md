@@ -1,5 +1,10 @@
 # Analyzer Rule Generator
 
+[![Tests](https://github.com/tsanders-rh/analyzer-rule-generator/workflows/Tests/badge.svg)](https://github.com/tsanders-rh/analyzer-rule-generator/actions)
+[![codecov](https://codecov.io/gh/tsanders-rh/analyzer-rule-generator/branch/main/graph/badge.svg)](https://codecov.io/gh/tsanders-rh/analyzer-rule-generator)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/github/license/tsanders-rh/analyzer-rule-generator)](LICENSE)
+
 AI-powered tool for generating [Konveyor analyzer](https://github.com/konveyor/analyzer-lsp) rules from migration guides and documentation.
 
 ## Overview

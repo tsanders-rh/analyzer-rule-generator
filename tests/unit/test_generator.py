@@ -910,8 +910,8 @@ class TestGeneratorErrorHandling:
 
         assert rules == []
 
-    def test_generate_rules_by_concern_with_none_concerns(self):
-        """Should group patterns with None concern under 'general'"""
+    def test_generate_rules_by_concern_with_empty_concerns(self):
+        """Should group patterns with empty concern under 'general' or empty string"""
         generator = AnalyzerRuleGenerator()
 
         patterns = [
@@ -920,7 +920,7 @@ class TestGeneratorErrorHandling:
                 source_fqn="com.example.Test1",
                 complexity="MEDIUM",
                 category="api",
-                concern=None,
+                # concern not specified, will use default "general"
                 rationale="Test"
             ),
             MigrationPattern(
@@ -928,15 +928,17 @@ class TestGeneratorErrorHandling:
                 source_fqn="com.example.Test2",
                 complexity="MEDIUM",
                 category="api",
-                concern="",
+                concern="",  # Empty string
                 rationale="Test"
             )
         ]
 
         rules_by_concern = generator.generate_rules_by_concern(patterns)
 
-        # Both should be under 'general' concern
+        # First should be under 'general' (default), second under '' (empty)
         assert "general" in rules_by_concern or "" in rules_by_concern
+        # At least one rule should be generated
+        assert len(rules_by_concern) > 0
 
     def test_pattern_with_invalid_complexity(self):
         """Should handle patterns with non-standard complexity values"""

@@ -404,19 +404,21 @@ class TestErrorHandling:
         response = '''[
             {
                 "source_pattern": "valid",
+                "target_pattern": "new",
                 "complexity": "MEDIUM",
                 "category": "api",
                 "rationale": "This is valid"
             },
             {
                 "source_pattern": "invalid",
+                "target_pattern": "new",
                 "complexity": "INVALID_COMPLEXITY"
             }
         ]'''
 
         patterns = extractor._parse_extraction_response(response)
 
-        # Should skip the invalid pattern
+        # Should skip the invalid pattern (missing required fields)
         assert len(patterns) == 1
         assert patterns[0].source_pattern == "valid"
 
@@ -425,19 +427,21 @@ class TestErrorHandling:
         response = '''[
             {
                 "source_pattern": "test1",
+                "target_pattern": "new1",
                 "complexity": "MEDIUM",
                 "category": "api",
                 "rationale": "Valid"
             },
             {
                 "source_pattern": "test2",
+                "target_pattern": "new2",
                 "category": "api"
             }
         ]'''
 
         patterns = extractor._parse_extraction_response(response)
 
-        # Should only parse the valid pattern
+        # Should only parse the valid pattern (second is missing complexity and rationale)
         assert len(patterns) == 1
         assert patterns[0].source_pattern == "test1"
 
@@ -536,12 +540,14 @@ class TestErrorHandling:
         response = '''[
             {
                 "source_pattern": "test",
+                "target_pattern": "new",
                 "complexity": "MEDIUM",
                 "category": "api",
                 "rationale": "Valid"
             },
             {
                 "source_pattern": 123,
+                "target_pattern": "new",
                 "complexity": "MEDIUM",
                 "category": "api",
                 "rationale": "Invalid - source_pattern should be string"

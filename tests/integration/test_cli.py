@@ -85,7 +85,7 @@ def run_cli_main(args, mock_llm):
     test_args = ["generate_rules.py"] + args
 
     with patch.object(sys, 'argv', test_args):
-        with patch('rule_generator.llm.get_llm_provider', return_value=mock_llm):
+        with patch('generate_rules.get_llm_provider', return_value=mock_llm):
             generate_rules.main()
 
 
@@ -175,7 +175,7 @@ class TestCLIBasicUsage:
             "--output", str(test_output_dir),
             "--provider", "openai"
         ]):
-            with patch('rule_generator.llm.get_llm_provider', return_value=mock_llm):
+            with patch('generate_rules.get_llm_provider', return_value=mock_llm):
                 generate_rules.main()
 
         captured = capsys.readouterr()
@@ -269,7 +269,7 @@ class TestCLIOutputGeneration:
             "--target", "new",
             "--output", str(test_output_dir)
         ]):
-            with patch('rule_generator.llm.get_llm_provider', return_value=mock):
+            with patch('generate_rules.get_llm_provider', return_value=mock):
                 generate_rules.main()
 
         captured = capsys.readouterr()
@@ -325,7 +325,7 @@ class TestCLIErrorHandling:
                 "--target", "jakarta",
                 "--output", str(test_output_dir)
             ]):
-                with patch('rule_generator.llm.get_llm_provider', return_value=mock_llm):
+                with patch('generate_rules.get_llm_provider', return_value=mock_llm):
                     generate_rules.main()
 
         assert exc_info.value.code == 1
@@ -363,7 +363,7 @@ class TestCLIErrorHandling:
                 "--target", "jakarta",
                 "--output", str(test_output_dir)
             ]):
-                with patch('rule_generator.llm.get_llm_provider', return_value=mock):
+                with patch('generate_rules.get_llm_provider', return_value=mock):
                     generate_rules.main()
 
         assert exc_info.value.code == 1
@@ -389,7 +389,7 @@ class TestCLIModelOptions:
             "--provider", "openai",
             "--model", "gpt-4"
         ]):
-            with patch('rule_generator.llm.get_llm_provider', return_value=mock_llm) as mock_get_provider:
+            with patch('generate_rules.get_llm_provider', return_value=mock_llm) as mock_get_provider:
                 generate_rules.main()
 
                 # Verify get_llm_provider was called with model parameter
@@ -413,7 +413,7 @@ class TestCLIModelOptions:
             "--output", str(test_output_dir),
             "--api-key", "test-key-123"
         ]):
-            with patch('rule_generator.llm.get_llm_provider', return_value=mock_llm) as mock_get_provider:
+            with patch('generate_rules.get_llm_provider', return_value=mock_llm) as mock_get_provider:
                 generate_rules.main()
 
                 # Verify get_llm_provider was called with api_key

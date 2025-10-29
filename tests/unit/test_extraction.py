@@ -536,7 +536,7 @@ class TestErrorHandling:
         assert patterns[0].source_fqn is None
 
     def test_handle_type_mismatch_errors(self, extractor):
-        """Should skip patterns with type mismatches"""
+        """Should skip patterns with type mismatches (Pydantic validation)"""
         response = '''[
             {
                 "source_pattern": "test",
@@ -556,6 +556,8 @@ class TestErrorHandling:
 
         patterns = extractor._parse_extraction_response(response)
 
-        # Should only get the valid pattern
+        # Pydantic catches type errors during model instantiation
+        # Both patterns fail due to ValueError/ValidationError being caught
+        # Only the first (valid) pattern succeeds
         assert len(patterns) == 1
         assert patterns[0].source_pattern == "test"

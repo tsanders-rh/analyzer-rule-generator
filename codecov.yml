@@ -22,36 +22,35 @@ coverage:
 
 component_management:
   individual_components:
-    # Core pipeline modules
     - component_id: ingestion
       name: "Guide Ingestion"
       paths:
-        - src/rule_generator/ingestion.py
+        - "**/ingestion.py"
 
     - component_id: extraction
       name: "Pattern Extraction"
       paths:
-        - src/rule_generator/extraction.py
+        - "**/extraction.py"
 
     - component_id: generator
       name: "Rule Generation"
       paths:
-        - src/rule_generator/generator.py
+        - "**/generator.py"
 
     - component_id: openrewrite
       name: "OpenRewrite Support"
       paths:
-        - src/rule_generator/openrewrite.py
+        - "**/openrewrite.py"
 
     - component_id: llm
       name: "LLM Integration"
       paths:
-        - src/rule_generator/llm.py
+        - "**/llm.py"
 
     - component_id: schema
       name: "Data Models"
       paths:
-        - src/rule_generator/schema.py
+        - "**/schema.py"
 
 comment:
   layout: "reach,diff,flags,tree,components"

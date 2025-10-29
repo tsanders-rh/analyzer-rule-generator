@@ -36,13 +36,20 @@ yaml.add_representer(LocationType, enum_representer)
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate Konveyor analyzer rules from migration guides"
+        description="Generate Konveyor analyzer rules from migration guides or OpenRewrite recipes"
     )
 
-    parser.add_argument(
+    # Create mutually exclusive group for input source
+    input_group = parser.add_mutually_exclusive_group(required=True)
+
+    input_group.add_argument(
         "--guide",
-        required=True,
         help="Path to migration guide (file or URL)"
+    )
+
+    input_group.add_argument(
+        "--from-openrewrite",
+        help="Path or URL to OpenRewrite recipe YAML file"
     )
 
     parser.add_argument(
@@ -102,19 +109,29 @@ def main():
         # Generate directory: examples/output/{source_base}
         args.output = f"examples/output/{source_base}"
 
+    # Determine input source
+    input_source = args.guide or args.from_openrewrite
+    from_openrewrite = args.from_openrewrite is not None
+
     print(f"Generating analyzer rules: {args.source} → {args.target}")
-    print(f"Guide: {args.guide}")
+    print(f"{'OpenRewrite Recipe' if from_openrewrite else 'Guide'}: {input_source}")
     print(f"Output: {args.output}")
     print(f"LLM: {args.provider} {args.model or '(default)'}")
     print()
 
-    # Step 1: Ingest guide
-    print("[1/3] Ingesting guide...")
-    ingester = GuideIngester()
-    guide_content = ingester.ingest(args.guide)
+    # Step 1: Ingest content
+    if from_openrewrite:
+        print("[1/3] Ingesting OpenRewrite recipe...")
+        from rule_generator.openrewrite import OpenRewriteRecipeIngester
+        ingester = OpenRewriteRecipeIngester()
+        guide_content = ingester.ingest(args.from_openrewrite)
+    else:
+        print("[1/3] Ingesting guide...")
+        ingester = GuideIngester()
+        guide_content = ingester.ingest(args.guide)
 
     if not guide_content:
-        print("Error: Failed to ingest guide")
+        print(f"Error: Failed to ingest {'recipe' if from_openrewrite else 'guide'}")
         sys.exit(1)
 
     print(f"  ✓ Ingested {len(guide_content)} characters")
@@ -127,7 +144,7 @@ def main():
         api_key=args.api_key
     )
 
-    extractor = MigrationPatternExtractor(llm)
+    extractor = MigrationPatternExtractor(llm, from_openrewrite=from_openrewrite)
     patterns = extractor.extract_patterns(
         guide_content,
         source_framework=args.source,

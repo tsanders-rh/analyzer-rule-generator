@@ -147,21 +147,23 @@ Load and explore rules from:
 - Local YAML files (drag & drop)
 - Share with `?url=` parameter
 
-See [Rule Viewers Guide](docs/RULE_VIEWERS.md) for more options.
+See [Rule Viewers Guide](docs/reference/rule-viewers.md) for more options.
 
 ## Documentation
 
 **Getting Started:**
-- [Quick Start Guide](docs/QUICKSTART.md) - Fast introduction to generating rules
-- [Rule Viewers Guide](docs/RULE_VIEWERS.md) - View and explore generated rules
+- [Rule Viewers Guide](docs/reference/rule-viewers.md) - View and explore generated rules
 
-**Konveyor Submission:**
-- [Konveyor Submission Guide](docs/konveyor-submission-guide.md) - Complete end-to-end submission workflow
-- [Updating CI Tests](docs/updating-ci-tests.md) - Step-by-step guide for go-konveyor-tests
-- [CI Test Updater Reference](docs/ci-test-updater.md) - Script documentation
+**Guides:**
+- [Konveyor Submission Guide](docs/guides/konveyor-submission-guide.md) - Complete end-to-end submission workflow
+- [Updating CI Tests](docs/guides/updating-ci-tests.md) - Step-by-step guide for go-konveyor-tests
+- [Testing Guide](docs/guides/testing.md) - Testing generated rules
+- [Complete Automation Guide](docs/guides/complete-automation.md) - Full automation workflow
 
 **Technical Reference:**
-- [Java Rule Schema](docs/java-rule-schema.md) - Rule structure and syntax
+- [Generate Rules Script Reference](docs/reference/generate-rules.md) - Complete script documentation
+- [CI Test Updater Reference](docs/reference/ci-test-updater.md) - Script documentation
+- [Java Rule Schema](docs/reference/java-rule-schema.md) - Rule structure and syntax
 
 ## Integration with Konveyor
 

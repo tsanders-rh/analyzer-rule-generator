@@ -28,6 +28,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run all tests with coverage
+        env:
+          OPENAI_API_KEY: "sk-dummy-key-for-testing"
         run: |
           pytest --cov-report=xml
 

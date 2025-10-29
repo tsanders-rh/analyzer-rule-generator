@@ -189,6 +189,9 @@ class GuideIngester:
 
     def _is_file_path(self, source: str) -> bool:
         """Check if source is a file path."""
+        # If source contains newlines, it's raw content, not a file path
+        if '\n' in source:
+            return False
         return Path(source).exists() or source.startswith('/') or source.startswith('.')
 
     def _clean_text(self, text: str) -> str:

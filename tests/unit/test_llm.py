@@ -25,7 +25,7 @@ from src.rule_generator.llm import (
 class TestOpenAIProvider:
     """Test OpenAI provider."""
 
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_init_with_default_model(self, mock_openai_class):
         """Should initialize with default model"""
         provider = OpenAIProvider()
@@ -33,14 +33,14 @@ class TestOpenAIProvider:
         assert provider.model == "gpt-4-turbo"
         mock_openai_class.assert_called_once()
 
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_init_with_custom_model(self, mock_openai_class):
         """Should initialize with custom model"""
         provider = OpenAIProvider(model="gpt-4")
 
         assert provider.model == "gpt-4"
 
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_init_with_api_key_parameter(self, mock_openai_class):
         """Should use API key from parameter"""
         provider = OpenAIProvider(api_key="test-key-123")
@@ -48,14 +48,14 @@ class TestOpenAIProvider:
         mock_openai_class.assert_called_once_with(api_key="test-key-123")
 
     @patch.dict(os.environ, {'OPENAI_API_KEY': 'env-key-456'})
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_init_with_env_api_key(self, mock_openai_class):
         """Should use API key from environment variable"""
         provider = OpenAIProvider()
 
         mock_openai_class.assert_called_once_with(api_key="env-key-456")
 
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_generate_basic_response(self, mock_openai_class):
         """Should generate response with default parameters"""
         mock_client = Mock()
@@ -85,7 +85,7 @@ class TestOpenAIProvider:
         assert call_args.kwargs["messages"] == [{"role": "user", "content": "Test prompt"}]
         assert call_args.kwargs["temperature"] == 0.0
 
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_generate_with_custom_temperature(self, mock_openai_class):
         """Should use custom temperature"""
         mock_client = Mock()
@@ -106,7 +106,7 @@ class TestOpenAIProvider:
         call_args = mock_client.chat.completions.create.call_args
         assert call_args.kwargs["temperature"] == 0.7
 
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_generate_with_custom_max_tokens(self, mock_openai_class):
         """Should use custom max_tokens"""
         mock_client = Mock()
@@ -127,7 +127,7 @@ class TestOpenAIProvider:
         call_args = mock_client.chat.completions.create.call_args
         assert call_args.kwargs["max_tokens"] == 1000
 
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_generate_caps_max_tokens_at_4096(self, mock_openai_class):
         """Should cap max_tokens at 4096"""
         mock_client = Mock()
@@ -152,7 +152,7 @@ class TestOpenAIProvider:
 class TestAnthropicProvider:
     """Test Anthropic Claude provider."""
 
-    @patch('src.rule_generator.llm.Anthropic')
+    @patch('anthropic.Anthropic')
     def test_init_with_default_model(self, mock_anthropic_class):
         """Should initialize with default model"""
         provider = AnthropicProvider()
@@ -160,14 +160,14 @@ class TestAnthropicProvider:
         assert provider.model == "claude-3-7-sonnet-latest"
         mock_anthropic_class.assert_called_once()
 
-    @patch('src.rule_generator.llm.Anthropic')
+    @patch('anthropic.Anthropic')
     def test_init_with_custom_model(self, mock_anthropic_class):
         """Should initialize with custom model"""
         provider = AnthropicProvider(model="claude-3-opus-latest")
 
         assert provider.model == "claude-3-opus-latest"
 
-    @patch('src.rule_generator.llm.Anthropic')
+    @patch('anthropic.Anthropic')
     def test_init_with_api_key_parameter(self, mock_anthropic_class):
         """Should use API key from parameter"""
         provider = AnthropicProvider(api_key="test-key-123")
@@ -175,14 +175,14 @@ class TestAnthropicProvider:
         mock_anthropic_class.assert_called_once_with(api_key="test-key-123")
 
     @patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'env-key-789'})
-    @patch('src.rule_generator.llm.Anthropic')
+    @patch('anthropic.Anthropic')
     def test_init_with_env_api_key(self, mock_anthropic_class):
         """Should use API key from environment variable"""
         provider = AnthropicProvider()
 
         mock_anthropic_class.assert_called_once_with(api_key="env-key-789")
 
-    @patch('src.rule_generator.llm.Anthropic')
+    @patch('anthropic.Anthropic')
     def test_generate_basic_response(self, mock_anthropic_class):
         """Should generate response with default parameters"""
         mock_client = Mock()
@@ -211,7 +211,7 @@ class TestAnthropicProvider:
         assert call_args.kwargs["temperature"] == 0.0
         assert call_args.kwargs["max_tokens"] == 8000
 
-    @patch('src.rule_generator.llm.Anthropic')
+    @patch('anthropic.Anthropic')
     def test_generate_with_custom_parameters(self, mock_anthropic_class):
         """Should use custom temperature and max_tokens"""
         mock_client = Mock()
@@ -236,7 +236,7 @@ class TestAnthropicProvider:
 class TestGoogleProvider:
     """Test Google Gemini provider."""
 
-    @patch('src.rule_generator.llm.genai')
+    @patch('google.generativeai', autospec=True)
     def test_init_with_default_model(self, mock_genai):
         """Should initialize with default model"""
         mock_genai.GenerativeModel.return_value = Mock()
@@ -246,7 +246,7 @@ class TestGoogleProvider:
         assert provider.model_name == "gemini-1.5-pro"
         mock_genai.GenerativeModel.assert_called_once_with("gemini-1.5-pro")
 
-    @patch('src.rule_generator.llm.genai')
+    @patch('google.generativeai', autospec=True)
     def test_init_with_custom_model(self, mock_genai):
         """Should initialize with custom model"""
         mock_genai.GenerativeModel.return_value = Mock()
@@ -256,7 +256,7 @@ class TestGoogleProvider:
         assert provider.model_name == "gemini-1.5-flash"
         mock_genai.GenerativeModel.assert_called_once_with("gemini-1.5-flash")
 
-    @patch('src.rule_generator.llm.genai')
+    @patch('google.generativeai', autospec=True)
     def test_init_with_api_key_parameter(self, mock_genai):
         """Should configure with API key from parameter"""
         mock_genai.GenerativeModel.return_value = Mock()
@@ -266,7 +266,7 @@ class TestGoogleProvider:
         mock_genai.configure.assert_called_once_with(api_key="test-key-999")
 
     @patch.dict(os.environ, {'GOOGLE_API_KEY': 'env-key-000'})
-    @patch('src.rule_generator.llm.genai')
+    @patch('google.generativeai', autospec=True)
     def test_init_with_env_api_key(self, mock_genai):
         """Should configure with API key from environment variable"""
         mock_genai.GenerativeModel.return_value = Mock()
@@ -275,7 +275,7 @@ class TestGoogleProvider:
 
         mock_genai.configure.assert_called_once_with(api_key="env-key-000")
 
-    @patch('src.rule_generator.llm.genai')
+    @patch('google.generativeai', autospec=True)
     def test_generate_basic_response(self, mock_genai):
         """Should generate response with default parameters"""
         mock_model = Mock()
@@ -304,7 +304,7 @@ class TestGoogleProvider:
         assert call_args.kwargs["generation_config"]["temperature"] == 0.0
         assert call_args.kwargs["generation_config"]["max_output_tokens"] == 8000
 
-    @patch('src.rule_generator.llm.genai')
+    @patch('google.generativeai', autospec=True)
     def test_generate_with_custom_parameters(self, mock_genai):
         """Should use custom temperature and max_tokens"""
         mock_model = Mock()
@@ -329,7 +329,7 @@ class TestGoogleProvider:
 class TestFactoryFunction:
     """Test get_llm_provider() factory function."""
 
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_get_openai_provider(self, mock_openai):
         """Should create OpenAI provider"""
         provider = get_llm_provider("openai")
@@ -337,7 +337,7 @@ class TestFactoryFunction:
         assert isinstance(provider, OpenAIProvider)
         assert provider.model == "gpt-4-turbo"
 
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_get_openai_with_custom_model(self, mock_openai):
         """Should create OpenAI provider with custom model"""
         provider = get_llm_provider("openai", model="gpt-4")
@@ -345,7 +345,7 @@ class TestFactoryFunction:
         assert isinstance(provider, OpenAIProvider)
         assert provider.model == "gpt-4"
 
-    @patch('src.rule_generator.llm.Anthropic')
+    @patch('anthropic.Anthropic')
     def test_get_anthropic_provider(self, mock_anthropic):
         """Should create Anthropic provider"""
         provider = get_llm_provider("anthropic")
@@ -353,7 +353,7 @@ class TestFactoryFunction:
         assert isinstance(provider, AnthropicProvider)
         assert provider.model == "claude-3-7-sonnet-latest"
 
-    @patch('src.rule_generator.llm.Anthropic')
+    @patch('anthropic.Anthropic')
     def test_get_anthropic_with_custom_model(self, mock_anthropic):
         """Should create Anthropic provider with custom model"""
         provider = get_llm_provider("anthropic", model="claude-3-opus-latest")
@@ -361,7 +361,7 @@ class TestFactoryFunction:
         assert isinstance(provider, AnthropicProvider)
         assert provider.model == "claude-3-opus-latest"
 
-    @patch('src.rule_generator.llm.genai')
+    @patch('google.generativeai', autospec=True)
     def test_get_google_provider(self, mock_genai):
         """Should create Google provider"""
         mock_genai.GenerativeModel.return_value = Mock()
@@ -371,7 +371,7 @@ class TestFactoryFunction:
         assert isinstance(provider, GoogleProvider)
         assert provider.model_name == "gemini-1.5-pro"
 
-    @patch('src.rule_generator.llm.genai')
+    @patch('google.generativeai', autospec=True)
     def test_get_google_with_custom_model(self, mock_genai):
         """Should create Google provider with custom model"""
         mock_genai.GenerativeModel.return_value = Mock()
@@ -397,7 +397,7 @@ class TestFactoryFunction:
         with pytest.raises(ValueError, match="Unknown provider: unknown"):
             get_llm_provider("unknown")
 
-    @patch('src.rule_generator.llm.OpenAI')
+    @patch('openai.OpenAI')
     def test_get_provider_with_api_key(self, mock_openai):
         """Should pass API key to provider"""
         provider = get_llm_provider("openai", api_key="custom-key")

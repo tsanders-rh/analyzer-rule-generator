@@ -12,6 +12,7 @@ Tests cover:
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 import os
+import sys
 
 from src.rule_generator.llm import (
     LLMProvider,
@@ -236,48 +237,52 @@ class TestAnthropicProvider:
 class TestGoogleProvider:
     """Test Google Gemini provider."""
 
-    @patch('google.generativeai')
-    def test_init_with_default_model(self, mock_genai):
+    def test_init_with_default_model(self):
         """Should initialize with default model"""
+        mock_genai = Mock()
         mock_genai.GenerativeModel.return_value = Mock()
 
-        provider = GoogleProvider()
+        with patch.dict('sys.modules', {'google.generativeai': mock_genai}):
+            provider = GoogleProvider()
 
-        assert provider.model_name == "gemini-1.5-pro"
-        mock_genai.GenerativeModel.assert_called_once_with("gemini-1.5-pro")
+            assert provider.model_name == "gemini-1.5-pro"
+            mock_genai.GenerativeModel.assert_called_once_with("gemini-1.5-pro")
 
-    @patch('google.generativeai')
-    def test_init_with_custom_model(self, mock_genai):
+    def test_init_with_custom_model(self):
         """Should initialize with custom model"""
+        mock_genai = Mock()
         mock_genai.GenerativeModel.return_value = Mock()
 
-        provider = GoogleProvider(model="gemini-1.5-flash")
+        with patch.dict('sys.modules', {'google.generativeai': mock_genai}):
+            provider = GoogleProvider(model="gemini-1.5-flash")
 
-        assert provider.model_name == "gemini-1.5-flash"
-        mock_genai.GenerativeModel.assert_called_once_with("gemini-1.5-flash")
+            assert provider.model_name == "gemini-1.5-flash"
+            mock_genai.GenerativeModel.assert_called_once_with("gemini-1.5-flash")
 
-    @patch('google.generativeai')
-    def test_init_with_api_key_parameter(self, mock_genai):
+    def test_init_with_api_key_parameter(self):
         """Should configure with API key from parameter"""
+        mock_genai = Mock()
         mock_genai.GenerativeModel.return_value = Mock()
 
-        provider = GoogleProvider(api_key="test-key-999")
+        with patch.dict('sys.modules', {'google.generativeai': mock_genai}):
+            provider = GoogleProvider(api_key="test-key-999")
 
-        mock_genai.configure.assert_called_once_with(api_key="test-key-999")
+            mock_genai.configure.assert_called_once_with(api_key="test-key-999")
 
     @patch.dict(os.environ, {'GOOGLE_API_KEY': 'env-key-000'})
-    @patch('google.generativeai')
-    def test_init_with_env_api_key(self, mock_genai):
+    def test_init_with_env_api_key(self):
         """Should configure with API key from environment variable"""
+        mock_genai = Mock()
         mock_genai.GenerativeModel.return_value = Mock()
 
-        provider = GoogleProvider()
+        with patch.dict('sys.modules', {'google.generativeai': mock_genai}):
+            provider = GoogleProvider()
 
-        mock_genai.configure.assert_called_once_with(api_key="env-key-000")
+            mock_genai.configure.assert_called_once_with(api_key="env-key-000")
 
-    @patch('google.generativeai')
-    def test_generate_basic_response(self, mock_genai):
+    def test_generate_basic_response(self):
         """Should generate response with default parameters"""
+        mock_genai = Mock()
         mock_model = Mock()
         mock_genai.GenerativeModel.return_value = mock_model
 
@@ -290,23 +295,24 @@ class TestGoogleProvider:
 
         mock_model.generate_content.return_value = mock_response
 
-        provider = GoogleProvider()
-        result = provider.generate("Test prompt")
+        with patch.dict('sys.modules', {'google.generativeai': mock_genai}):
+            provider = GoogleProvider()
+            result = provider.generate("Test prompt")
 
-        assert result["response"] == "Gemini response"
-        assert result["usage"]["prompt_tokens"] == 12
-        assert result["usage"]["completion_tokens"] == 18
-        assert result["usage"]["total_tokens"] == 30
+            assert result["response"] == "Gemini response"
+            assert result["usage"]["prompt_tokens"] == 12
+            assert result["usage"]["completion_tokens"] == 18
+            assert result["usage"]["total_tokens"] == 30
 
-        mock_model.generate_content.assert_called_once()
-        call_args = mock_model.generate_content.call_args
-        assert call_args[0][0] == "Test prompt"
-        assert call_args.kwargs["generation_config"]["temperature"] == 0.0
-        assert call_args.kwargs["generation_config"]["max_output_tokens"] == 8000
+            mock_model.generate_content.assert_called_once()
+            call_args = mock_model.generate_content.call_args
+            assert call_args[0][0] == "Test prompt"
+            assert call_args.kwargs["generation_config"]["temperature"] == 0.0
+            assert call_args.kwargs["generation_config"]["max_output_tokens"] == 8000
 
-    @patch('google.generativeai')
-    def test_generate_with_custom_parameters(self, mock_genai):
+    def test_generate_with_custom_parameters(self):
         """Should use custom temperature and max_tokens"""
+        mock_genai = Mock()
         mock_model = Mock()
         mock_genai.GenerativeModel.return_value = mock_model
 
@@ -318,12 +324,13 @@ class TestGoogleProvider:
 
         mock_model.generate_content.return_value = mock_response
 
-        provider = GoogleProvider()
-        result = provider.generate("Prompt", temperature=0.8, max_tokens=2000)
+        with patch.dict('sys.modules', {'google.generativeai': mock_genai}):
+            provider = GoogleProvider()
+            result = provider.generate("Prompt", temperature=0.8, max_tokens=2000)
 
-        call_args = mock_model.generate_content.call_args
-        assert call_args.kwargs["generation_config"]["temperature"] == 0.8
-        assert call_args.kwargs["generation_config"]["max_output_tokens"] == 2000
+            call_args = mock_model.generate_content.call_args
+            assert call_args.kwargs["generation_config"]["temperature"] == 0.8
+            assert call_args.kwargs["generation_config"]["max_output_tokens"] == 2000
 
 
 class TestFactoryFunction:
@@ -361,25 +368,27 @@ class TestFactoryFunction:
         assert isinstance(provider, AnthropicProvider)
         assert provider.model == "claude-3-opus-latest"
 
-    @patch('src.rule_generator.llm.genai')
-    def test_get_google_provider(self, mock_genai):
+    def test_get_google_provider(self):
         """Should create Google provider"""
+        mock_genai = Mock()
         mock_genai.GenerativeModel.return_value = Mock()
 
-        provider = get_llm_provider("google")
+        with patch.dict('sys.modules', {'google.generativeai': mock_genai}):
+            provider = get_llm_provider("google")
 
-        assert isinstance(provider, GoogleProvider)
-        assert provider.model_name == "gemini-1.5-pro"
+            assert isinstance(provider, GoogleProvider)
+            assert provider.model_name == "gemini-1.5-pro"
 
-    @patch('src.rule_generator.llm.genai')
-    def test_get_google_with_custom_model(self, mock_genai):
+    def test_get_google_with_custom_model(self):
         """Should create Google provider with custom model"""
+        mock_genai = Mock()
         mock_genai.GenerativeModel.return_value = Mock()
 
-        provider = get_llm_provider("google", model="gemini-1.5-flash")
+        with patch.dict('sys.modules', {'google.generativeai': mock_genai}):
+            provider = get_llm_provider("google", model="gemini-1.5-flash")
 
-        assert isinstance(provider, GoogleProvider)
-        assert provider.model_name == "gemini-1.5-flash"
+            assert isinstance(provider, GoogleProvider)
+            assert provider.model_name == "gemini-1.5-flash"
 
     def test_get_provider_case_insensitive(self):
         """Should handle provider name case-insensitively"""

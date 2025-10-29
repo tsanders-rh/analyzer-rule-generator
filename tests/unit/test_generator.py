@@ -346,6 +346,9 @@ class TestWhenConditionBuilding:
 
         condition = generator._build_when_condition(pattern)
 
+        # When source_fqn is None, it uses source_pattern as fallback
+        assert condition is not None
+        assert "nodejs.referenced" in condition
         assert condition["nodejs.referenced"]["pattern"] == "oldFunction"
 
     def test_build_condition_returns_none_without_fqn(self):
@@ -815,4 +818,6 @@ class TestEdgeCases:
 
         rule = generator._pattern_to_rule(pattern)
 
-        assert "removed API" in rule.description.lower()
+        # When there's no target_pattern, description says "usage detected (removed API)"
+        assert "removed api" in rule.description.lower()
+        assert "Removed" in rule.description

@@ -40,6 +40,33 @@ python scripts/generate_rules.py \
   --output examples/output/spring-boot-4.0/migration-rules.yaml
 ```
 
+## Claude Code Skill
+
+**Interactive AI Assistant for Rule Generation**
+
+This project includes a [Claude Code](https://claude.com/claude-code) skill that provides an interactive AI assistant for generating migration rules. Instead of running command-line scripts manually, you can have a natural conversation with Claude to generate rules.
+
+### Using the Skill
+
+```
+konveyor-rules
+```
+
+The skill will guide you through:
+1. Providing the migration guide (URL or file)
+2. Specifying source and target frameworks
+3. Choosing LLM provider and options
+4. Reviewing generated rules and next steps
+
+### Benefits
+
+- **Natural language interface** - Describe what you need in plain English
+- **Interactive guidance** - Claude asks clarifying questions and provides suggestions
+- **Automatic validation** - Checks inputs and provides helpful error messages
+- **Context-aware** - Understands the project structure and suggests best practices
+
+See [.claude/skills/konveyor-rules/README.md](.claude/skills/konveyor-rules/README.md) for complete documentation.
+
 ## How It Works
 
 ```mermaid

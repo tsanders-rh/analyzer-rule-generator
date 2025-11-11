@@ -205,6 +205,20 @@ Once rules are generated, the skill will guide you on:
 3. **Customization** - Adjusting patterns, effort levels, or messages
 4. **Validation** - Ensuring rules catch real migration issues
 
+## Demo and Examples
+
+Want to see the skill in action or learn from examples?
+
+- **[Quick Demo (2 min)](QUICK-DEMO.md)** - Fast demo script perfect for presentations
+- **[Full Demo Script](DEMO.md)** - Comprehensive demo scenarios with 7 different use cases
+- **[Example Conversations](examples.md)** - Real-world conversation examples showing different usage patterns
+
+These resources are great for:
+- Learning how to use the skill effectively
+- Preparing presentations or demos
+- Understanding best practices
+- Troubleshooting common scenarios
+
 ## Contributing
 
 To improve this skill:

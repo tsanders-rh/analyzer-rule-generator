@@ -89,6 +89,31 @@ class MigrationPatternExtractor:
         Returns:
             List of extracted migration patterns
         """
+        # Check if content needs chunking (>40KB)
+        max_content_size = 40000  # ~10K tokens
+
+        if len(guide_content) > max_content_size:
+            print(f"  → Content is large ({len(guide_content):,} chars), using chunked extraction")
+            return self._extract_patterns_chunked(
+                guide_content,
+                source_framework,
+                target_framework
+            )
+
+        # Single extraction for smaller content
+        return self._extract_patterns_single(
+            guide_content,
+            source_framework,
+            target_framework
+        )
+
+    def _extract_patterns_single(
+        self,
+        guide_content: str,
+        source_framework: Optional[str] = None,
+        target_framework: Optional[str] = None
+    ) -> List[MigrationPattern]:
+        """Extract patterns from a single piece of content."""
         # Build prompt (use OpenRewrite-specific prompt if needed)
         if self.from_openrewrite:
             prompt = self._build_openrewrite_prompt(
@@ -120,6 +145,58 @@ class MigrationPatternExtractor:
             import traceback
             traceback.print_exc()
             return []
+
+    def _extract_patterns_chunked(
+        self,
+        guide_content: str,
+        source_framework: Optional[str] = None,
+        target_framework: Optional[str] = None
+    ) -> List[MigrationPattern]:
+        """Extract patterns from large content by chunking."""
+        from .ingestion import GuideIngester
+
+        # Chunk the content
+        ingester = GuideIngester()
+        chunks = ingester.chunk_content(guide_content, max_tokens=8000)
+
+        print(f"  → Split into {len(chunks)} chunks")
+
+        all_patterns = []
+        for i, chunk in enumerate(chunks, 1):
+            print(f"  → Processing chunk {i}/{len(chunks)} ({len(chunk):,} chars)")
+
+            # Extract from this chunk
+            patterns = self._extract_patterns_single(
+                chunk,
+                source_framework,
+                target_framework
+            )
+
+            if patterns:
+                print(f"    ✓ Extracted {len(patterns)} patterns from chunk {i}")
+                all_patterns.extend(patterns)
+
+        # Deduplicate patterns based on source_fqn
+        deduplicated = self._deduplicate_patterns(all_patterns)
+
+        print(f"  ✓ Total: {len(all_patterns)} patterns extracted, {len(deduplicated)} unique")
+
+        return deduplicated
+
+    def _deduplicate_patterns(self, patterns: List[MigrationPattern]) -> List[MigrationPattern]:
+        """Remove duplicate patterns based on source_fqn."""
+        seen = set()
+        unique = []
+
+        for pattern in patterns:
+            # Create a key from source_fqn and concern
+            key = (pattern.source_fqn, pattern.concern)
+
+            if key not in seen:
+                seen.add(key)
+                unique.append(pattern)
+
+        return unique
 
     def _build_extraction_prompt(
         self,

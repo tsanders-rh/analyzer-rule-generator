@@ -459,22 +459,41 @@ class AnalyzerRuleGenerator:
         if pattern.provider_type != "nodejs":
             return False
 
-        # Check if rationale mentions component-related keywords
-        rationale_lower = (pattern.rationale or "").lower()
+        # Get source pattern/FQN for analysis
+        source = pattern.source_pattern or pattern.source_fqn or ""
+        if not source:
+            return False
+
+        # Component names typically start with uppercase (PascalCase) and are alphanumeric
+        # Examples: Chip, Tile, EmptyState, ToolbarChipGroupContent
+        if not (source and source[0].isupper() and source.replace('_', '').isalnum()):
+            return False
+
+        # Check if rationale or examples mention component-related keywords
+        text_to_check = f"{pattern.rationale or ''} {pattern.source_pattern or ''} {pattern.example_before or ''}".lower()
+
         component_keywords = [
             'component has been',
             'component should be',
+            'component has',
             'the component',
             'react component',
-            'patternfly component'
+            'patternfly component',
+            'import {',  # Import statements suggest this is a component
+            '@patternfly/react-core',  # PatternFly components
+            '<' + source.lower()  # JSX usage like <Chip>
         ]
 
-        # Check for component keywords in rationale
-        if any(keyword in rationale_lower for keyword in component_keywords):
-            # Verify source pattern looks like a component name (PascalCase)
-            source = pattern.source_pattern or pattern.source_fqn or ""
-            # Component names typically start with uppercase and don't contain special chars
-            if source and source[0].isupper() and source.isalnum():
+        # Check for component keywords
+        if any(keyword in text_to_check for keyword in component_keywords):
+            return True
+
+        # Additional heuristic: If source_pattern looks like an import path or JSX component
+        # and we're in a PatternFly context
+        if self.source_framework and "patternfly" in self.source_framework.lower():
+            # PatternFly components are typically PascalCase single words or compound words
+            # Examples: Chip, Label, EmptyState, DataList, ToolbarItem
+            if source[0].isupper() and len(source) >= 3:
                 return True
 
         return False

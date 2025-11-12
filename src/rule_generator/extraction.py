@@ -92,7 +92,7 @@ class MigrationPatternExtractor:
         # Check if content needs chunking (>40KB)
         max_content_size = 40000  # ~10K tokens
 
-        if len(guide_content) > max_content_size:
+        if guide_content and len(guide_content) > max_content_size:
             print(f"  → Content is large ({len(guide_content):,} chars), using chunked extraction")
             return self._extract_patterns_chunked(
                 guide_content,

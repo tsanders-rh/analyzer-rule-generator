@@ -1286,3 +1286,121 @@ class TestReactComponentHybridRules:
             assert len(rule.when["and"]) == 2
             assert "nodejs.referenced" in rule.when["and"][0]
             assert "builtin.filecontent" in rule.when["and"][1]
+
+    def test_requires_semantic_analysis_detects_keywords(self):
+        """Should detect semantic analysis keywords in rationale"""
+        generator = AnalyzerRuleGenerator()
+
+        # Test with function keyword
+        pattern = MigrationPattern(
+            source_pattern="foo",
+            source_fqn="foo",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="This function has been removed"
+        )
+        assert generator._requires_semantic_analysis(pattern) is True
+
+        # Test with class keyword
+        pattern = MigrationPattern(
+            source_pattern="Foo",
+            source_fqn="Foo",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="This class has been renamed"
+        )
+        assert generator._requires_semantic_analysis(pattern) is True
+
+        # Test with component keyword
+        pattern = MigrationPattern(
+            source_pattern="Button",
+            source_fqn="Button",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="This component has been updated"
+        )
+        assert generator._requires_semantic_analysis(pattern) is True
+
+    def test_requires_semantic_analysis_returns_false_for_text_patterns(self):
+        """Should return False for patterns without semantic keywords"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="deprecated-value",
+            source_fqn="deprecated-value",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="This value has been deprecated"
+        )
+        assert generator._requires_semantic_analysis(pattern) is False
+
+    def test_is_react_component_detects_migration_keywords(self):
+        """Should detect components based on migration keywords in rationale"""
+        generator = AnalyzerRuleGenerator(source_framework="patternfly-5")
+
+        # Test with "replaced with" keyword
+        pattern = MigrationPattern(
+            source_pattern="OldComponent",
+            source_fqn="OldComponent",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="OldComponent has been replaced with NewComponent"
+        )
+        assert generator._is_react_component_pattern(pattern) is True
+
+        # Test with "renamed to" keyword
+        pattern = MigrationPattern(
+            source_pattern="Button",
+            source_fqn="Button",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Button has been renamed to ActionButton"
+        )
+        assert generator._is_react_component_pattern(pattern) is True
+
+        # Test with "removed" keyword
+        pattern = MigrationPattern(
+            source_pattern="Tile",
+            source_fqn="Tile",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="The Tile component has been removed"
+        )
+        assert generator._is_react_component_pattern(pattern) is True
+
+    def test_is_react_component_requires_pascal_case_with_migration_keywords(self):
+        """Should require PascalCase even when migration keywords present"""
+        generator = AnalyzerRuleGenerator(source_framework="patternfly-5")
+
+        # lowercase with migration keyword should not be treated as component
+        pattern = MigrationPattern(
+            source_pattern="button-group",
+            source_fqn="button-group",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="button-group has been replaced with action-group"
+        )
+        assert generator._is_react_component_pattern(pattern) is False
+
+    def test_is_react_component_requires_minimum_length(self):
+        """Should require minimum length of 3 characters for component names"""
+        generator = AnalyzerRuleGenerator(source_framework="patternfly-5")
+
+        # Too short even with PascalCase and migration keywords
+        pattern = MigrationPattern(
+            source_pattern="Ab",
+            source_fqn="Ab",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Ab has been replaced with Something"
+        )
+        assert generator._is_react_component_pattern(pattern) is False

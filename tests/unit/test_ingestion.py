@@ -707,3 +707,140 @@ class TestErrorHandling:
         except (TypeError, AttributeError):
             # Expected - code doesn't handle None
             pass
+
+
+class TestLinkDiscovery:
+    """Test link discovery functionality."""
+
+    @patch('requests.get')
+    def test_extract_related_links_finds_migration_links(self, mock_get):
+        """Should discover links with migration keywords"""
+        html = '''
+        <html>
+            <body>
+                <a href="/release-notes">Release Notes</a>
+                <a href="/migration-guide">Migration Guide</a>
+                <a href="/unrelated-page">Other Page</a>
+            </body>
+        </html>
+        '''
+        mock_response = Mock()
+        mock_response.text = html
+        mock_response.status_code = 200
+        mock_get.return_value = mock_response
+
+        ingester = GuideIngester()
+
+        # Need BeautifulSoup for this function
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, 'html.parser')
+            links = ingester._extract_related_links(soup, "https://example.com/main")
+
+            # Should find migration-related links
+            assert any('release-notes' in link for link in links)
+            assert any('migration-guide' in link for link in links)
+            # Should not include unrelated links
+            assert not any('unrelated-page' in link for link in links)
+        except ImportError:
+            # Skip if BeautifulSoup not installed
+            pytest.skip("BeautifulSoup not installed")
+
+    @patch('requests.get')
+    def test_extract_related_links_skips_visited_urls(self, mock_get):
+        """Should skip already visited URLs"""
+        html = '''
+        <html>
+            <body>
+                <a href="/release-notes">Release Notes</a>
+            </body>
+        </html>
+        '''
+        mock_response = Mock()
+        mock_response.text = html
+        mock_response.status_code = 200
+        mock_get.return_value = mock_response
+
+        ingester = GuideIngester()
+        ingester._visited_urls.add("https://example.com/release-notes")
+
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, 'html.parser')
+            links = ingester._extract_related_links(soup, "https://example.com/main")
+
+            # Should not include visited URL
+            assert len(links) == 0
+        except ImportError:
+            pytest.skip("BeautifulSoup not installed")
+
+    @patch('requests.get')
+    def test_extract_related_links_same_domain_only(self, mock_get):
+        """Should only follow links from the same domain"""
+        html = '''
+        <html>
+            <body>
+                <a href="/release-notes">Internal Release Notes</a>
+                <a href="https://different.com/release-notes">External Release Notes</a>
+            </body>
+        </html>
+        '''
+        mock_response = Mock()
+        mock_response.text = html
+        mock_response.status_code = 200
+        mock_get.return_value = mock_response
+
+        ingester = GuideIngester()
+
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, 'html.parser')
+            links = ingester._extract_related_links(soup, "https://example.com/main")
+
+            # Should only include same-domain links
+            assert all('example.com' in link for link in links)
+            assert not any('different.com' in link for link in links)
+        except ImportError:
+            pytest.skip("BeautifulSoup not installed")
+
+    @patch('requests.get')
+    def test_extract_related_links_handles_relative_urls(self, mock_get):
+        """Should convert relative URLs to absolute"""
+        html = '''
+        <html>
+            <body>
+                <a href="breaking-changes">Breaking Changes</a>
+                <a href="/docs/migration">Migration</a>
+            </body>
+        </html>
+        '''
+        mock_response = Mock()
+        mock_response.text = html
+        mock_response.status_code = 200
+        mock_get.return_value = mock_response
+
+        ingester = GuideIngester()
+
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, 'html.parser')
+            links = ingester._extract_related_links(soup, "https://example.com/main/")
+
+            # Should convert to absolute URLs
+            assert all(link.startswith('http') for link in links)
+            assert any('breaking-changes' in link for link in links)
+            assert any('migration' in link for link in links)
+        except ImportError:
+            pytest.skip("BeautifulSoup not installed")
+
+    def test_extract_related_links_returns_empty_without_beautifulsoup(self):
+        """Should return empty list if BeautifulSoup not available"""
+        ingester = GuideIngester()
+
+        # Mock BeautifulSoup import to fail
+        with patch('builtins.__import__', side_effect=ImportError):
+            # Create a fake soup object (won't be used due to ImportError)
+            result = ingester._extract_related_links(None, "https://example.com")
+
+        # Should return empty list when BeautifulSoup is not available
+        assert result == []

@@ -1,0 +1,17 @@
+{
+  "name": "patternfly-test-app",
+  "version": "1.0.0",
+  "description": "Test application for PatternFly v5 to v6 migration rules",
+  "main": "src/App.tsx",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@patternfly/react-core": "^5.0.0",
+    "@patternfly/react-charts": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  }
+}

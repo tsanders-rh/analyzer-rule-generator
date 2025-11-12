@@ -1,0 +1,27 @@
+.app-container {
+  padding: var(--pf-v5-global--spacer--md);
+  font-size: var(--pf-v5-global--FontSize--lg);
+  background-color: var(--pf-v5-global--BackgroundColor--100);
+}
+
+.custom-card {
+  margin-bottom: var(--pf-v5-global--spacer--lg);
+}
+
+@media (min-width: var(--pf-v5-global--breakpoint--md)) {
+  .app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: var(--pf-v5-global--breakpoint--lg)) {
+  .custom-card {
+    padding: var(--pf-v5-global--spacer--xl);
+  }
+}
+
+.header-text {
+  color: var(--pf-v5-global--Color--100);
+  font-weight: var(--pf-v5-global--FontWeight--bold);
+}

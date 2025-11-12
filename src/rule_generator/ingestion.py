@@ -203,7 +203,29 @@ class GuideIngester:
         current_chunk = ""
 
         for section in sections:
-            if len(current_chunk) + len(section) <= max_chars:
+            # If section itself is too large, split it into smaller pieces
+            if len(section) > max_chars:
+                # Save current chunk if it has content
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                    current_chunk = ""
+
+                # Split large section by paragraphs (double newlines)
+                paragraphs = section.split('\n\n')
+                temp_chunk = ""
+
+                for para in paragraphs:
+                    if len(temp_chunk) + len(para) + 2 <= max_chars:
+                        temp_chunk += "\n\n" + para if temp_chunk else para
+                    else:
+                        if temp_chunk:
+                            chunks.append(temp_chunk.strip())
+                        temp_chunk = para
+
+                # Add remaining temp_chunk to current_chunk
+                if temp_chunk:
+                    current_chunk = temp_chunk
+            elif len(current_chunk) + len(section) <= max_chars:
                 current_chunk += "\n\n" + section
             else:
                 if current_chunk:

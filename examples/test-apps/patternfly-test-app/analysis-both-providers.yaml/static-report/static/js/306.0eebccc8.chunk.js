@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkkonveyor_static_report=self.webpackChunkkonveyor_static_report||[]).push([[306],{1306:(s,e,t)=>{t.r(e),t.d(e,{default:()=>l});t(5043);var i=t(6971),r=t(8437),n=t(2073),o=t(9394),d=t(579);const l=()=>{const s=(0,i.KC)();return(0,d.jsxs)(r.d8,{children:[(0,d.jsx)(n.h,{headingLevel:"h1",size:"lg",className:"pf-v5-u-mb-md",children:"Insights (Zero Effort Issues)"}),(0,d.jsx)(o.lX,{applicationId:null===s||void 0===s?void 0:s.id,insightsMode:!0})]})}}}]);
+//# sourceMappingURL=306.0eebccc8.chunk.js.map

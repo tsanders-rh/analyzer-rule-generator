@@ -1,0 +1,30 @@
+time="2025-11-12T00:28:16Z" level=info msg="inject span info" carrier="{}"
+time="2025-11-12T00:28:16Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-12T00:28:16Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly5-to-patternfly6-breakpoints-00000 worker=3
+time="2025-11-12T00:28:16Z" level=info msg="Adding Carrier span info to context" worker=4
+time="2025-11-12T00:28:16Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly5-to-patternfly6-component-replacement-00010 worker=4
+time="2025-11-12T00:28:16Z" level=info msg="Adding Carrier span info to context" worker=5
+time="2025-11-12T00:28:16Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly5-to-patternfly6-css-variables-00000 worker=5
+time="2025-11-12T00:28:16Z" level=info msg="Adding Carrier span info to context" worker=0
+time="2025-11-12T00:28:16Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly5-to-patternfly6-charts-path-change-00000 worker=0
+time="2025-11-12T00:28:16Z" level=info msg="Adding Carrier span info to context" worker=8
+time="2025-11-12T00:28:16Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly5-to-patternfly6-prop-removal-00000 worker=8
+time="2025-11-12T00:28:16Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-12T00:28:16Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly5-to-patternfly6-css-class-names-00000 worker=7
+time="2025-11-12T00:28:16Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-12T00:28:16Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly5-to-patternfly6-component-rename-00000 worker=1
+time="2025-11-12T00:28:16Z" level=info msg="Adding Carrier span info to context" worker=2
+time="2025-11-12T00:28:16Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly5-to-patternfly6-component-replacement-00000 worker=2
+time="2025-11-12T00:28:16Z" level=info msg="Adding Carrier span info to context" worker=9
+time="2025-11-12T00:28:16Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly5-to-patternfly6-react-tokens-00000 worker=9
+time="2025-11-12T00:28:16Z" level=info msg="rule returned" ruleID=patternfly5-to-patternfly6-breakpoints-00000
+time="2025-11-12T00:28:16Z" level=error msg="failed to evaluate rule" error="failed to perform file content search - could not run grep with provided pattern exit status 2" ruleID=patternfly5-to-patternfly6-breakpoints-00000
+time="2025-11-12T00:28:16Z" level=info msg="rule returned" ruleID=patternfly5-to-patternfly6-css-variables-00000
+time="2025-11-12T00:28:16Z" level=error msg="failed to evaluate rule" error="failed to perform file content search - could not run grep with provided pattern exit status 2" ruleID=patternfly5-to-patternfly6-css-variables-00000
+time="2025-11-12T00:28:16Z" level=info msg="rule returned" ruleID=patternfly5-to-patternfly6-prop-removal-00000
+time="2025-11-12T00:28:16Z" level=info msg="rule returned" ruleID=patternfly5-to-patternfly6-charts-path-change-00000
+time="2025-11-12T00:28:16Z" level=info msg="rule returned" ruleID=patternfly5-to-patternfly6-component-replacement-00010
+time="2025-11-12T00:28:16Z" level=info msg="rule returned" ruleID=patternfly5-to-patternfly6-component-replacement-00000
+time="2025-11-12T00:28:16Z" level=info msg="rule returned" ruleID=patternfly5-to-patternfly6-component-rename-00000
+time="2025-11-12T00:28:16Z" level=info msg="rule returned" ruleID=patternfly5-to-patternfly6-css-class-names-00000
+time="2025-11-12T00:28:16Z" level=info msg="rule returned" ruleID=patternfly5-to-patternfly6-react-tokens-00000

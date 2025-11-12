@@ -229,6 +229,35 @@ class AnalyzerRuleGenerator:
             # not for filtering by file extension.
             #
             # For file-specific matching, use builtin.filecontent with filePattern instead.
+
+            # Check if this is a React component pattern that needs hybrid detection
+            if self._is_react_component_pattern(pattern):
+                # Build hybrid condition: nodejs.referenced AND builtin.filecontent
+                # This eliminates false positives from substring matching while
+                # maintaining semantic analysis benefits
+
+                import_pattern = self._build_import_verification_pattern(pattern)
+
+                if import_pattern:
+                    # Build hybrid condition with both nodejs.referenced and import verification
+                    condition = {
+                        "and": [
+                            {
+                                "nodejs.referenced": {
+                                    "pattern": pattern.source_fqn or pattern.source_pattern
+                                }
+                            },
+                            {
+                                "builtin.filecontent": {
+                                    "pattern": import_pattern,
+                                    "filePattern": self._get_file_pattern(pattern)
+                                }
+                            }
+                        ]
+                    }
+                    return condition
+
+            # Default nodejs.referenced condition (non-component patterns)
             condition = {
                 "nodejs.referenced": {
                     "pattern": pattern.source_fqn or pattern.source_pattern
@@ -412,6 +441,97 @@ class AnalyzerRuleGenerator:
 
         description = (pattern.rationale or "").lower()
         return any(keyword in description for keyword in semantic_keywords)
+
+    def _is_react_component_pattern(self, pattern: MigrationPattern) -> bool:
+        """
+        Determine if pattern is for a React component that should use hybrid detection.
+
+        React components benefit from hybrid approach (nodejs.referenced + builtin.filecontent)
+        to eliminate false positives from substring matching while maintaining semantic analysis.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            True if pattern is a React component requiring hybrid detection
+        """
+        # Only apply to nodejs provider patterns
+        if pattern.provider_type != "nodejs":
+            return False
+
+        # Check if rationale mentions component-related keywords
+        rationale_lower = (pattern.rationale or "").lower()
+        component_keywords = [
+            'component has been',
+            'component should be',
+            'the component',
+            'react component',
+            'patternfly component'
+        ]
+
+        # Check for component keywords in rationale
+        if any(keyword in rationale_lower for keyword in component_keywords):
+            # Verify source pattern looks like a component name (PascalCase)
+            source = pattern.source_pattern or pattern.source_fqn or ""
+            # Component names typically start with uppercase and don't contain special chars
+            if source and source[0].isupper() and source.isalnum():
+                return True
+
+        return False
+
+    def _build_import_verification_pattern(self, pattern: MigrationPattern) -> Optional[str]:
+        """
+        Build regex pattern to verify component is imported from the expected package.
+
+        For React components, this creates a pattern that matches:
+        import { ComponentName } from '@package/name';
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            Regex pattern string for import verification, or None if not applicable
+        """
+        component_name = pattern.source_fqn or pattern.source_pattern
+        if not component_name:
+            return None
+
+        # Check if pattern has import source info (e.g., @patternfly/react-core)
+        # For now, we'll infer from the pattern context
+        # PatternFly patterns should look for @patternfly/react-core imports
+
+        # Determine import source based on framework
+        import_source = None
+        if self.source_framework and "patternfly" in self.source_framework.lower():
+            import_source = "@patternfly/react-core"
+
+        # If we don't have import source info, skip import verification
+        if not import_source:
+            return None
+
+        # Build regex pattern that matches:
+        # import.*\{[^}]*\bComponentName\b[^}]*\}.*from ['\"]@patternfly/react-core['\"]
+        #
+        # Explanation:
+        # - import.* : matches "import" and any whitespace/newlines
+        # - \{[^}]*  : matches opening brace and any characters except closing brace
+        # - \bComponentName\b : matches component name as whole word (word boundaries)
+        # - [^}]*\} : matches any characters until closing brace
+        # - .*from ['\"] : matches "from" with single or double quote
+        # - @patternfly/react-core : the package name
+        # - ['\"] : closing quote (single or double)
+
+        # Escape special regex characters in component name
+        import re
+        escaped_component = re.escape(component_name)
+
+        # Build pattern
+        pattern_str = (
+            f"import.*\\{{[^}}]*\\b{escaped_component}\\b[^}}]*\\}}.*"
+            f"from ['\\\"]@patternfly/react-core['\\\"]"
+        )
+
+        return pattern_str
 
     def _get_file_pattern(self, pattern: MigrationPattern) -> str:
         """

@@ -215,7 +215,18 @@ class GuideIngester:
                 temp_chunk = ""
 
                 for para in paragraphs:
-                    if len(temp_chunk) + len(para) + 2 <= max_chars:
+                    # If a single paragraph is too large, split it by character count
+                    if len(para) > max_chars:
+                        # Save current temp_chunk if it has content
+                        if temp_chunk:
+                            chunks.append(temp_chunk.strip())
+                            temp_chunk = ""
+
+                        # Split oversized paragraph into max_chars pieces
+                        for i in range(0, len(para), max_chars):
+                            para_piece = para[i:i + max_chars]
+                            chunks.append(para_piece.strip())
+                    elif len(temp_chunk) + len(para) + 2 <= max_chars:
                         temp_chunk += "\n\n" + para if temp_chunk else para
                     else:
                         if temp_chunk:

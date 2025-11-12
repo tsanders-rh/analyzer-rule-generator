@@ -231,7 +231,9 @@ class AnalyzerRuleGenerator:
             # For file-specific matching, use builtin.filecontent with filePattern instead.
 
             # Check if this is a React component pattern that needs hybrid detection
-            if self._is_react_component_pattern(pattern):
+            is_component = self._is_react_component_pattern(pattern)
+
+            if is_component:
                 # Build hybrid condition: nodejs.referenced AND builtin.filecontent
                 # This eliminates false positives from substring matching while
                 # maintaining semantic analysis benefits
@@ -488,13 +490,33 @@ class AnalyzerRuleGenerator:
         if any(keyword in text_to_check for keyword in component_keywords):
             return True
 
-        # Additional heuristic: If source_pattern looks like an import path or JSX component
-        # and we're in a PatternFly context
+        # Additional robust heuristic: For PatternFly migrations, if we have:
+        # 1. nodejs provider (already checked above)
+        # 2. PascalCase name (already checked above)
+        # 3. PatternFly framework context
+        # 4. Rationale mentions common component migration patterns
+        # Then it's very likely a React component that needs hybrid detection
         if self.source_framework and "patternfly" in self.source_framework.lower():
-            # PatternFly components are typically PascalCase single words or compound words
-            # Examples: Chip, Label, EmptyState, DataList, ToolbarItem
-            if source[0].isupper() and len(source) >= 3:
-                return True
+            # Look for common migration language patterns that indicate component changes
+            migration_keywords = [
+                'replaced with',
+                'renamed to',
+                'removed',
+                'refactored',
+                'updated',
+                'changed to',
+                'should use',
+                'now use',
+                'instead of'
+            ]
+
+            # If source is PascalCase (component-like) and rationale describes a migration
+            # then treat it as a component
+            if any(keyword in text_to_check for keyword in migration_keywords):
+                # Additional check: make sure it's not a prop/variant value (lowercase strings)
+                # Component names are PascalCase, prop values are usually lowercase or kebab-case
+                if source[0].isupper() and len(source) >= 3:
+                    return True
 
         return False
 

@@ -148,6 +148,18 @@ python scripts/generate_rules.py \
 - Environment variables: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`
 - Example: `--api-key sk-...`
 
+**`--follow-links`**
+- Follow related links from migration guides (optional)
+- Automatically discovers and processes linked content (release notes, breaking changes, etc.)
+- Useful for comprehensive migration guides with multiple pages
+- Example: `--follow-links`
+
+**`--max-depth <number>`**
+- Maximum depth for recursive link following (optional)
+- Only used when `--follow-links` is enabled
+- Default: 2
+- Example: `--max-depth 1` (follow only direct links, not nested)
+
 ## Input Sources
 
 ### Migration Guides
@@ -437,10 +449,13 @@ python scripts/generate_rules.py \
   --guide https://www.patternfly.org/get-started/upgrade/ \
   --source patternfly-v5 \
   --target patternfly-v6 \
+  --follow-links \
+  --max-depth 1 \
   --provider anthropic
 ```
 
 **Output:** Builtin provider rules with regex patterns and file globs
+**Note:** Using `--follow-links` extracts patterns from multiple related pages (41 rules vs 10 rules without)
 
 ### Go
 

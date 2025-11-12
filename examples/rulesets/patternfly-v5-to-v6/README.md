@@ -4,27 +4,51 @@ A comprehensive set of Konveyor Analyzer rules to automate detection of breaking
 
 ## Overview
 
-This ruleset contains **10 AI-generated rules** covering the major breaking changes documented in the [PatternFly v6 Upgrade Guide](https://www.patternfly.org/get-started/upgrade/). The rules use both the **Node.js provider** (for semantic code analysis) and the **builtin provider** (for CSS and text pattern matching) to detect deprecated patterns in your codebase.
+This ruleset contains **41 AI-generated rules** covering the major breaking changes documented in the [PatternFly v6 Upgrade Guide](https://www.patternfly.org/get-started/upgrade/). The rules use **hybrid detection** combining the **nodejs provider** (for semantic code analysis) and the **builtin provider** (for import verification and CSS pattern matching) to eliminate false positives while detecting deprecated patterns in your codebase.
+
+**Auto-generated ruleset location:** [`examples/output/patternfly-improved-detection`](https://github.com/tsanders-rh/analyzer-rule-generator/tree/main/examples/output/patternfly-improved-detection)
 
 ## What's Covered
 
-### Component Migrations (5 rules)
+### Component Migrations (5 rules with hybrid detection)
 - ✅ `Chip` → `Label` component replacement
 - ✅ `Tile` → `Card` component replacement
 - ✅ `Text` → `Content` component rename
 - ✅ `ExpandableSection` `isActive` prop removal
 - ✅ `EmptyState` refactoring detection
 
+### Toolbar Components (9 rules)
+- ✅ Alignment props: `alignLeft`/`alignRight` → `alignStart`/`alignEnd`
+- ✅ `ToolbarChipGroupContent` → `ToolbarLabelGroupContent`
+- ✅ Variant prop updates: `button-group`, `icon-button-group`, `chip-group`
+- ✅ Removed variants: `bulk-select`, `overflow-menu`, `search-filter`
+
+### Breakpoints (5 rules)
+- ✅ `576px` → `36rem`
+- ✅ `768px` → `48rem`
+- ✅ `992px` → `62rem`
+- ✅ `1200px` → `75rem`
+- ✅ `1450px` → `90.625rem`
+
 ### CSS & Styling (3 rules)
-- ✅ CSS variable prefix: `--pf-v5-global--` → `--pf-t--global--`
-- ✅ CSS class prefix: `pf-v5-` → `pf-v6-`
-- ✅ React token syntax: `global_FontSize_lg` → `t_global_font_size_lg`
+- ✅ CSS variable prefixes
+- ✅ CSS class prefixes
+- ✅ React token syntax updates
 
-### Import Path Changes (1 rule)
-- ✅ Chart imports: `@patternfly/react-charts` → `@patternfly/react-charts/victory`
+### Package & Import Changes (9 rules)
+- ✅ Package.json version updates
+- ✅ Import path restructuring
+- ✅ Icon import changes
+- ✅ Chart component paths
 
-### Other Changes (1 rule)
-- ✅ Breakpoint variable prefix updates
+### Component Definitions & Props (7 rules)
+- ✅ React.FC pattern updates
+- ✅ Component prop changes
+- ✅ Wizard component updates
+
+### Charts (3 rules)
+- ✅ Chart component migrations
+- ✅ Import path updates
 
 ## Coverage
 
@@ -42,7 +66,38 @@ This ruleset contains **10 AI-generated rules** covering the major breaking chan
 - Runtime behavior changes
 - Complex refactorings requiring human judgment
 
-**Estimated Coverage:** ~80-85% of automatable migration patterns
+**Estimated Coverage:** ~85-90% of automatable migration patterns
+
+## Validation
+
+This ruleset has been successfully validated against **[tackle2-ui](https://github.com/konveyor/tackle2-ui)** (React/TypeScript codebase with 66,000+ lines):
+
+**Test Results:**
+- **Analysis completed**: Successfully (exit code 0)
+- **Output generated**: 25,498 lines of YAML violations
+- **Rules that fired**: 24 out of 41 rules
+- **Key findings**:
+  - Text component violations: Detected correctly (legitimate usage found)
+  - Chip component: No false positives (only ToolbarChip imported, not Chip)
+  - Tile component: No false positives (not used in codebase)
+  - Toolbar rules: Multiple violations detected (alignLeft/Right, variants, etc.)
+  - Breakpoint rules: Detected pixel-based breakpoints
+  - React.FC patterns: Detected across multiple components
+
+**Hybrid Detection Success:**
+- ✅ No false positives for component names (Chip, Tile verified)
+- ✅ Semantic analysis (nodejs.referenced) correctly identifies symbol usage
+- ✅ Import verification (builtin.filecontent) confirms PatternFly imports
+- ✅ Combined approach eliminates matches on similarly-named local components
+
+**Command used:**
+```bash
+kantra analyze \
+  --input ~/Workspace/tackle2-ui \
+  --rules /path/to/patternfly-improved-detection \
+  --output analysis-results.yaml \
+  --overwrite
+```
 
 ## Quick Start
 
@@ -135,26 +190,39 @@ Effort scale: 1 (trivial) to 10 (complex refactoring)
 
 ## Example Output
 
+Example of hybrid detection rule for Chip component (combines semantic + import verification):
+
 ```yaml
 - ruleID: patternfly-5-to-patternfly-6-components-00000
   description: Chip should be replaced with Label
   when:
-    nodejs.referenced:
-      pattern: Chip
+    and:
+    - nodejs.referenced:
+        pattern: Chip
+    - builtin.filecontent:
+        pattern: import.*\{[^}]*\bChip\b[^}]*\}.*from ['\"]@patternfly/react-core['\"]
+        filePattern: \.(j|t)sx?$
   message: |
     The Chip component has been replaced with Label in PatternFly 6
 
     Before:
-    import { Chip } from '@patternfly/react-core'
+    import { Chip } from '@patternfly/react-core';
+    <Chip>Example</Chip>
 
     After:
-    import { Label } from '@patternfly/react-core'
+    import { Label } from '@patternfly/react-core';
+    <Label>Example</Label>
   effort: 5
   category: potential
   labels:
     - konveyor.io/source=patternfly-5
     - konveyor.io/target=patternfly-6
 ```
+
+This hybrid approach ensures that:
+1. `nodejs.referenced` finds all usages of the `Chip` symbol
+2. `builtin.filecontent` verifies it's imported from `@patternfly/react-core`
+3. No false positives from local components named "Chip"
 
 ## Integration with Konveyor AI
 
@@ -169,7 +237,7 @@ The semantic analysis from the Node.js provider gives Konveyor AI better context
 
 ## Generating Your Own Rules
 
-This ruleset was created using the [analyzer-rule-generator](https://github.com/tsanders-rh/analyzer-rule-generator). To generate rules for other migrations:
+This ruleset was created using the [analyzer-rule-generator](https://github.com/tsanders-rh/analyzer-rule-generator). To generate similar comprehensive rules for other migrations:
 
 ```bash
 # Clone the generator
@@ -177,12 +245,20 @@ git clone https://github.com/tsanders-rh/analyzer-rule-generator.git
 cd analyzer-rule-generator
 
 # Generate rules from a migration guide
-python src/rule_generator/main.py \
-  --guide-url "https://example.com/upgrade-guide" \
-  --source-version "v1" \
-  --target-version "v2" \
-  --output-dir examples/output/
+python scripts/generate_rules.py \
+  --guide "https://example.com/upgrade-guide" \
+  --source "v1" \
+  --target "v2" \
+  --follow-links \
+  --max-depth 1 \
+  --provider anthropic \
+  --output examples/output/my-migration
 ```
+
+**Key options:**
+- `--follow-links`: Discovers and processes linked documentation pages
+- `--max-depth 1`: Limits recursion to direct links (prevents exponential growth)
+- Result: More comprehensive rulesets (41 rules vs 10 without link following for PatternFly)
 
 See the [analyzer-rule-generator README](https://github.com/tsanders-rh/analyzer-rule-generator#readme) for details.
 

@@ -128,8 +128,12 @@ python scripts/generate_rules.py \
   --guide https://www.patternfly.org/get-started/upgrade/ \
   --source patternfly-v5 \
   --target patternfly-v6 \
+  --follow-links \
+  --max-depth 1 \
   --output examples/output/patternfly-v6/migration-rules.yaml
 ```
+
+Generates **41 comprehensive rules** with hybrid detection (nodejs + builtin providers) for eliminating false positives.
 
 ## Example Output
 

@@ -47,21 +47,24 @@ python scripts/generate_rules.py \
 
 ## Example 2: TypeScript/React Migration (PatternFly)
 
-The tool automatically detects non-Java migrations and uses the builtin provider:
+The tool automatically detects non-Java migrations and uses hybrid detection (nodejs + builtin providers):
 
 ```bash
 python scripts/generate_rules.py \
-  --guide examples/guides/patternfly-v5-to-v6.md \
+  --guide https://www.patternfly.org/get-started/upgrade \
   --source patternfly-v5 \
   --target patternfly-v6 \
+  --follow-links \
+  --max-depth 1 \
   --output examples/output/patternfly-v6/migration-rules.yaml \
   --provider anthropic
 ```
 
 **What this generates:**
-- Builtin provider rules with regex patterns
+- **41 comprehensive rules** (vs 10 without `--follow-links`)
+- Hybrid detection: nodejs.referenced + builtin.filecontent to eliminate false positives
 - File patterns for TypeScript/React files (`*.{tsx,jsx}`)
-- Detection of prop changes, import updates, CSS variable renames
+- Detection of prop changes, import updates, CSS variable renames, component migrations
 - Works for TypeScript, JavaScript, Go, Python, and more
 
 ## Example 3: Generate from Local File

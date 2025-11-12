@@ -1053,3 +1053,236 @@ class TestGeneratorErrorHandling:
         assert rule is not None
         if rule.links:
             assert rule.links[0].url == "not-a-valid-url"
+
+
+class TestReactComponentHybridRules:
+    """Test hybrid rule generation for React components."""
+
+    def test_is_react_component_pattern_detects_component(self):
+        """Should detect React component patterns"""
+        generator = AnalyzerRuleGenerator(source_framework="patternfly-5")
+
+        pattern = MigrationPattern(
+            source_pattern="Chip",
+            source_fqn="Chip",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="The Chip component has been replaced with Label"
+        )
+
+        is_component = generator._is_react_component_pattern(pattern)
+        assert is_component is True
+
+    def test_is_react_component_pattern_requires_nodejs_provider(self):
+        """Should not detect component for non-nodejs providers"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="Component",
+            source_fqn="com.example.Component",
+            provider_type="java",
+            complexity="MEDIUM",
+            category="api",
+            rationale="The Component has been renamed"
+        )
+
+        is_component = generator._is_react_component_pattern(pattern)
+        assert is_component is False
+
+    def test_is_react_component_pattern_requires_pascal_case(self):
+        """Should require PascalCase for component detection"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="lowercase",
+            source_fqn="lowercase",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="The component has been renamed"
+        )
+
+        is_component = generator._is_react_component_pattern(pattern)
+        assert is_component is False
+
+    def test_is_react_component_pattern_checks_rationale(self):
+        """Should check for component keywords in rationale"""
+        generator = AnalyzerRuleGenerator()
+
+        # Without component keywords in rationale
+        pattern = MigrationPattern(
+            source_pattern="Button",
+            source_fqn="Button",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="This is a button helper function"
+        )
+
+        is_component = generator._is_react_component_pattern(pattern)
+        assert is_component is False
+
+    def test_build_import_verification_pattern_for_patternfly(self):
+        """Should build import verification pattern for PatternFly components"""
+        generator = AnalyzerRuleGenerator(source_framework="patternfly-5")
+
+        pattern = MigrationPattern(
+            source_pattern="Chip",
+            source_fqn="Chip",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test"
+        )
+
+        import_pattern = generator._build_import_verification_pattern(pattern)
+
+        assert import_pattern is not None
+        assert "import.*\\{" in import_pattern
+        assert "\\bChip\\b" in import_pattern
+        assert "@patternfly/react-core" in import_pattern
+
+    def test_build_import_verification_pattern_for_non_patternfly(self):
+        """Should return None for non-PatternFly frameworks"""
+        generator = AnalyzerRuleGenerator(source_framework="react")
+
+        pattern = MigrationPattern(
+            source_pattern="Component",
+            source_fqn="Component",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test"
+        )
+
+        import_pattern = generator._build_import_verification_pattern(pattern)
+
+        # Should return None when framework is not PatternFly
+        assert import_pattern is None
+
+    def test_build_hybrid_condition_for_react_component(self):
+        """Should build hybrid condition (nodejs.referenced + builtin.filecontent) for React components"""
+        generator = AnalyzerRuleGenerator(source_framework="patternfly-5")
+
+        pattern = MigrationPattern(
+            source_pattern="Chip",
+            source_fqn="Chip",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="The Chip component has been replaced with Label"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        assert condition is not None
+        assert "and" in condition
+        assert len(condition["and"]) == 2
+
+        # First condition should be nodejs.referenced
+        assert "nodejs.referenced" in condition["and"][0]
+        assert condition["and"][0]["nodejs.referenced"]["pattern"] == "Chip"
+
+        # Second condition should be builtin.filecontent
+        assert "builtin.filecontent" in condition["and"][1]
+        assert "import.*\\{" in condition["and"][1]["builtin.filecontent"]["pattern"]
+        assert "\\bChip\\b" in condition["and"][1]["builtin.filecontent"]["pattern"]
+        assert "@patternfly/react-core" in condition["and"][1]["builtin.filecontent"]["pattern"]
+        assert condition["and"][1]["builtin.filecontent"]["filePattern"] == "\\.(j|t)sx?$"
+
+    def test_build_nodejs_condition_for_non_component(self):
+        """Should build simple nodejs.referenced condition for non-component patterns"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="useHook",
+            source_fqn="useHook",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            rationale="The hook has been renamed"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        assert condition is not None
+        # Should be simple nodejs.referenced, not hybrid
+        assert "nodejs.referenced" in condition
+        assert "and" not in condition
+
+    def test_generate_hybrid_rule_for_patternfly_component(self):
+        """Should generate complete hybrid rule for PatternFly component"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="patternfly-5",
+            target_framework="patternfly-6",
+            rule_file_name="patternfly-5-to-patternfly-6-components"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="Chip",
+            target_pattern="Label",
+            source_fqn="Chip",
+            provider_type="nodejs",
+            complexity="MEDIUM",
+            category="api",
+            concern="components",
+            rationale="The Chip component has been replaced with Label in PatternFly 6",
+            documentation_url="https://www.patternfly.org/get-started/upgrade"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert rule.ruleID == "patternfly-5-to-patternfly-6-components-00000"
+        assert "and" in rule.when
+        assert len(rule.when["and"]) == 2
+        assert "nodejs.referenced" in rule.when["and"][0]
+        assert "builtin.filecontent" in rule.when["and"][1]
+        assert "Chip component" in rule.message
+        assert "konveyor.io/source=patternfly-5" in rule.labels
+        assert "konveyor.io/target=patternfly-6" in rule.labels
+
+    def test_hybrid_rules_for_multiple_components(self):
+        """Should generate hybrid rules for multiple component patterns"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="patternfly-5",
+            target_framework="patternfly-6"
+        )
+
+        patterns = [
+            MigrationPattern(
+                source_pattern="Chip",
+                source_fqn="Chip",
+                provider_type="nodejs",
+                complexity="MEDIUM",
+                category="api",
+                rationale="The Chip component has been replaced"
+            ),
+            MigrationPattern(
+                source_pattern="Text",
+                source_fqn="Text",
+                provider_type="nodejs",
+                complexity="MEDIUM",
+                category="api",
+                rationale="The Text component has been renamed"
+            ),
+            MigrationPattern(
+                source_pattern="Tile",
+                source_fqn="Tile",
+                provider_type="nodejs",
+                complexity="MEDIUM",
+                category="api",
+                rationale="The Tile component has been replaced"
+            )
+        ]
+
+        rules = generator.generate_rules(patterns)
+
+        assert len(rules) == 3
+        # All should have hybrid conditions
+        for rule in rules:
+            assert "and" in rule.when
+            assert len(rule.when["and"]) == 2
+            assert "nodejs.referenced" in rule.when["and"][0]
+            assert "builtin.filecontent" in rule.when["and"][1]

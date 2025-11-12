@@ -86,6 +86,20 @@ def main():
         help="API key (uses environment variable if not specified)"
     )
 
+    parser.add_argument(
+        "--follow-links",
+        action="store_true",
+        default=False,
+        help="Follow related links from migration guides (release notes, breaking changes, etc.)"
+    )
+
+    parser.add_argument(
+        "--max-depth",
+        type=int,
+        default=2,
+        help="Maximum depth for recursive link following (default: 2)"
+    )
+
     args = parser.parse_args()
 
     # Auto-generate output directory if not specified
@@ -127,7 +141,12 @@ def main():
         guide_content = ingester.ingest(args.from_openrewrite)
     else:
         print("[1/3] Ingesting guide...")
-        ingester = GuideIngester()
+        if args.follow_links:
+            print(f"  → Following related links (max depth: {args.max_depth})")
+        ingester = GuideIngester(
+            follow_links=args.follow_links,
+            max_depth=args.max_depth
+        )
         guide_content = ingester.ingest(args.guide)
 
     if not guide_content:

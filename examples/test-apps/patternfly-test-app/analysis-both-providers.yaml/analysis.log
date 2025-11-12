@@ -1,0 +1,94 @@
+time="2025-11-12T00:32:38Z" level=info msg="inject span info" carrier="{}"
+time="2025-11-12T00:32:38Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-12T00:32:38Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-breakpoints-00000 worker=3
+time="2025-11-12T00:32:38Z" level=info msg="Adding Carrier span info to context" worker=4
+time="2025-11-12T00:32:38Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-12T00:32:38Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-components-00000 worker=1
+time="2025-11-12T00:32:38Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-components-00030 worker=4
+time="2025-11-12T00:32:38Z" level=info msg="Adding Carrier span info to context" worker=2
+time="2025-11-12T00:32:38Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-components-00010 worker=2
+time="2025-11-12T00:32:38Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-12T00:32:38Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-components-00020 worker=7
+time="2025-11-12T00:32:38Z" level=info msg="Adding Carrier span info to context" worker=0
+time="2025-11-12T00:32:38Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-charts-00000 worker=0
+time="2025-11-12T00:32:38Z" level=info msg="Adding Carrier span info to context" worker=5
+time="2025-11-12T00:32:38Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-css-classes-00000 worker=5
+time="2025-11-12T00:32:38Z" level=info msg="Adding Carrier span info to context" worker=6
+time="2025-11-12T00:32:38Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-components-00040 worker=6
+time="2025-11-12T00:32:38Z" level=info msg="Adding Carrier span info to context" worker=8
+time="2025-11-12T00:32:38Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-css-variables-00000 worker=8
+time="2025-11-12T00:32:38Z" level=info msg="Adding Carrier span info to context" worker=9
+time="2025-11-12T00:32:38Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-react-tokens-00000 worker=9
+time="2025-11-12T00:32:38Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-breakpoints-00000
+time="2025-11-12T00:32:38Z" level=error msg="failed to evaluate rule" error="failed to perform file content search - could not run grep with provided pattern exit status 2" ruleID=patternfly-5-to-patternfly-6-breakpoints-00000
+time="2025-11-12T00:32:38Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-css-variables-00000
+time="2025-11-12T00:32:38Z" level=error msg="failed to evaluate rule" error="failed to perform file content search - could not run grep with provided pattern exit status 2" ruleID=patternfly-5-to-patternfly-6-css-variables-00000
+time="2025-11-12T00:32:38Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-react-tokens-00000
+time="2025-11-12T00:32:38Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-charts-00000
+time="2025-11-12T00:32:38Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-components-00030
+time="2025-11-12T00:32:38Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-css-classes-00000
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:32:38Z" level=error msg="unable to get code location" error="<nil>"
+time="2025-11-12T00:33:20Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-components-00010
+time="2025-11-12T00:33:20Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-components-00040
+time="2025-11-12T00:33:20Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-components-00000
+time="2025-11-12T00:33:22Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-components-00020
+time="2025-11-12T00:33:22Z" level=error msg="unable to get code location" error="<nil>"

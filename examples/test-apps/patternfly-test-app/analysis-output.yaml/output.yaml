@@ -1,0 +1,301 @@
+- name: patternfly5/patternfly6
+  description: This ruleset provides guidance for upgrading from PatternFly 5 to PatternFly 6
+  violations:
+    patternfly5-to-patternfly6-charts-path-change-00000:
+      description: import { Area } from '@patternfly/react-charts' should be replaced with import { Area } from '@patternfly/react-charts/victory'
+      category: potential
+      labels:
+      - konveyor.io/source=patternfly5
+      - konveyor.io/target=patternfly6
+      incidents:
+      - uri: file:///opt/input/source/src/App.tsx
+        message: |-
+          Victory-based charts have moved to a 'victory' directory in @patternfly/react-charts
+
+          Replace `import { Area } from '@patternfly/react-charts'` with `import { Area } from '@patternfly/react-charts/victory'`.
+
+          Before:
+          ```
+          import { Area } from '@patternfly/react-charts'
+          ```
+
+          After:
+          ```
+          import { Area } from '@patternfly/react-charts/victory'
+          ```
+        codeSnip: "  1  import React from 'react';\n  2  import { Text } from '@patternfly/react-core';\n  3  import { Chip } from '@patternfly/react-core';\n  4  import { Button, Card, CardBody, ExpandableSection } from '@patternfly/react-core';\n  5  import { Chart, ChartAxis } from '@patternfly/react-charts';\n  6  import './styles.css';\n  7  \n  8  // This component uses PatternFly v5 patterns that need migration to v6\n  9  const App: React.FC = () => {\n 10    const [isExpanded, setIsExpanded] = React.useState(false);\n 11  \n 12    return (\n 13      <div className=\"app-container\">\n 14        <Card>\n 15          <CardBody>\n 16            {/* Text component should be renamed to Content in v6 */}\n 17            <Text component=\"h1\">PatternFly v5 Test Application</Text>\n 18  \n 19            {/* Chip component should be replaced with Label in v6 */}\n 20            <Chip>Tag 1</Chip>\n 21            <Chip>Tag 2</Chip>\n 22  \n 23            {/* ExpandableSection with isActive prop (removed in v6) */}\n 24            <ExpandableSection\n 25              isActive={isExpanded}\n 26              toggleText=\"Show more\"\n 27              onToggle={() => setIsExpanded(!isExpanded)}\n 28            >\n 29              <p>This is expandable content</p>\n 30            </ExpandableSection>\n 31  \n 32            <Button variant=\"primary\">Click me</Button>\n 33  \n 34            {/* Chart imports from @patternfly/react-charts */}\n 35            <Chart height={200} width={400}>\n 36              <ChartAxis />\n 37            </Chart>\n 38          </CardBody>\n 39        </Card>\n 40      </div>\n 41    );\n 42  };\n 43  \n 44  export default App;\n"
+        lineNumber: 5
+        variables:
+          matchingText: import { Chart, ChartAxis } from '@patternfly/react-charts'
+      - uri: file:///opt/input/source/src/App.tsx
+        message: |-
+          Victory-based charts have moved to a 'victory' directory in @patternfly/react-charts
+
+          Replace `import { Area } from '@patternfly/react-charts'` with `import { Area } from '@patternfly/react-charts/victory'`.
+
+          Before:
+          ```
+          import { Area } from '@patternfly/react-charts'
+          ```
+
+          After:
+          ```
+          import { Area } from '@patternfly/react-charts/victory'
+          ```
+        codeSnip: "  1  import React from 'react';\n  2  import { Text } from '@patternfly/react-core';\n  3  import { Chip } from '@patternfly/react-core';\n  4  import { Button, Card, CardBody, ExpandableSection } from '@patternfly/react-core';\n  5  import { Chart, ChartAxis } from '@patternfly/react-charts';\n  6  import './styles.css';\n  7  \n  8  // This component uses PatternFly v5 patterns that need migration to v6\n  9  const App: React.FC = () => {\n 10    const [isExpanded, setIsExpanded] = React.useState(false);\n 11  \n 12    return (\n 13      <div className=\"app-container\">\n 14        <Card>\n 15          <CardBody>\n 16            {/* Text component should be renamed to Content in v6 */}\n 17            <Text component=\"h1\">PatternFly v5 Test Application</Text>\n 18  \n 19            {/* Chip component should be replaced with Label in v6 */}\n 20            <Chip>Tag 1</Chip>\n 21            <Chip>Tag 2</Chip>\n 22  \n 23            {/* ExpandableSection with isActive prop (removed in v6) */}\n 24            <ExpandableSection\n 25              isActive={isExpanded}\n 26              toggleText=\"Show more\"\n 27              onToggle={() => setIsExpanded(!isExpanded)}\n 28            >\n 29              <p>This is expandable content</p>\n 30            </ExpandableSection>\n 31  \n 32            <Button variant=\"primary\">Click me</Button>\n 33  \n 34            {/* Chart imports from @patternfly/react-charts */}\n 35            <Chart height={200} width={400}>\n 36              <ChartAxis />\n 37            </Chart>\n 38          </CardBody>\n 39        </Card>\n 40      </div>\n 41    );\n 42  };\n 43  \n 44  export default App;\n"
+        lineNumber: 34
+        variables:
+          matchingText: imports from @patternfly/react-charts
+      links:
+      - url: https://www.patternfly.org/get-started/upgrade
+        title: patternfly6 Documentation
+      effort: 3
+    patternfly5-to-patternfly6-component-rename-00000:
+      description: import { Text } from '@patternfly/react-core' should be replaced with import { Content } from '@patternfly/react-core'
+      category: potential
+      labels:
+      - konveyor.io/source=patternfly5
+      - konveyor.io/target=patternfly6
+      incidents:
+      - uri: file:///opt/input/source/src/App.tsx
+        message: |-
+          The Text component has been renamed to Content in PatternFly 6
+
+          Replace `import { Text } from '@patternfly/react-core'` with `import { Content } from '@patternfly/react-core'`.
+
+          Before:
+          ```
+          import { Text } from '@patternfly/react-core'
+          ```
+
+          After:
+          ```
+          import { Content } from '@patternfly/react-core'
+          ```
+        codeSnip: "  1  import React from 'react';\n  2  import { Text } from '@patternfly/react-core';\n  3  import { Chip } from '@patternfly/react-core';\n  4  import { Button, Card, CardBody, ExpandableSection } from '@patternfly/react-core';\n  5  import { Chart, ChartAxis } from '@patternfly/react-charts';\n  6  import './styles.css';\n  7  \n  8  // This component uses PatternFly v5 patterns that need migration to v6\n  9  const App: React.FC = () => {\n 10    const [isExpanded, setIsExpanded] = React.useState(false);\n 11  \n 12    return (\n 13      <div className=\"app-container\">\n 14        <Card>\n 15          <CardBody>\n 16            {/* Text component should be renamed to Content in v6 */}\n 17            <Text component=\"h1\">PatternFly v5 Test Application</Text>\n 18  \n 19            {/* Chip component should be replaced with Label in v6 */}\n 20            <Chip>Tag 1</Chip>\n 21            <Chip>Tag 2</Chip>\n 22  \n 23            {/* ExpandableSection with isActive prop (removed in v6) */}\n 24            <ExpandableSection\n 25              isActive={isExpanded}\n 26              toggleText=\"Show more\"\n 27              onToggle={() => setIsExpanded(!isExpanded)}\n 28            >\n 29              <p>This is expandable content</p>\n 30            </ExpandableSection>\n 31  \n 32            <Button variant=\"primary\">Click me</Button>\n 33  \n 34            {/* Chart imports from @patternfly/react-charts */}\n 35            <Chart height={200} width={400}>\n 36              <ChartAxis />\n 37            </Chart>\n 38          </CardBody>\n 39        </Card>\n 40      </div>\n 41    );\n 42  };\n 43  \n 44  export default App;\n"
+        lineNumber: 2
+        variables:
+          matchingText: import { Text } from '@patternfly/react-core
+      links:
+      - url: https://www.patternfly.org/get-started/upgrade
+        title: patternfly6 Documentation
+      effort: 3
+    patternfly5-to-patternfly6-component-replacement-00000:
+      description: import { Chip } from '@patternfly/react-core' should be replaced with import { Label } from '@patternfly/react-core'
+      category: potential
+      labels:
+      - konveyor.io/source=patternfly5
+      - konveyor.io/target=patternfly6
+      incidents:
+      - uri: file:///opt/input/source/src/App.tsx
+        message: |-
+          The Chip component has been replaced with Label in PatternFly 6
+
+          Replace `import { Chip } from '@patternfly/react-core'` with `import { Label } from '@patternfly/react-core'`.
+
+          Before:
+          ```
+          import { Chip } from '@patternfly/react-core'
+          ```
+
+          After:
+          ```
+          import { Label } from '@patternfly/react-core'
+          ```
+        codeSnip: "  1  import React from 'react';\n  2  import { Text } from '@patternfly/react-core';\n  3  import { Chip } from '@patternfly/react-core';\n  4  import { Button, Card, CardBody, ExpandableSection } from '@patternfly/react-core';\n  5  import { Chart, ChartAxis } from '@patternfly/react-charts';\n  6  import './styles.css';\n  7  \n  8  // This component uses PatternFly v5 patterns that need migration to v6\n  9  const App: React.FC = () => {\n 10    const [isExpanded, setIsExpanded] = React.useState(false);\n 11  \n 12    return (\n 13      <div className=\"app-container\">\n 14        <Card>\n 15          <CardBody>\n 16            {/* Text component should be renamed to Content in v6 */}\n 17            <Text component=\"h1\">PatternFly v5 Test Application</Text>\n 18  \n 19            {/* Chip component should be replaced with Label in v6 */}\n 20            <Chip>Tag 1</Chip>\n 21            <Chip>Tag 2</Chip>\n 22  \n 23            {/* ExpandableSection with isActive prop (removed in v6) */}\n 24            <ExpandableSection\n 25              isActive={isExpanded}\n 26              toggleText=\"Show more\"\n 27              onToggle={() => setIsExpanded(!isExpanded)}\n 28            >\n 29              <p>This is expandable content</p>\n 30            </ExpandableSection>\n 31  \n 32            <Button variant=\"primary\">Click me</Button>\n 33  \n 34            {/* Chart imports from @patternfly/react-charts */}\n 35            <Chart height={200} width={400}>\n 36              <ChartAxis />\n 37            </Chart>\n 38          </CardBody>\n 39        </Card>\n 40      </div>\n 41    );\n 42  };\n 43  \n 44  export default App;\n"
+        lineNumber: 3
+        variables:
+          matchingText: import { Chip } from '@patternfly/react-core
+      links:
+      - url: https://www.patternfly.org/get-started/upgrade
+        title: patternfly6 Documentation
+      effort: 3
+    patternfly5-to-patternfly6-css-class-names-00000:
+      description: pf-v5- should be replaced with pf-v6-
+      category: potential
+      labels:
+      - konveyor.io/source=patternfly5
+      - konveyor.io/target=patternfly6
+      incidents:
+      - uri: file:///opt/input/source/src/styles.css
+        message: |-
+          CSS class name prefixes have changed from pf-v5- to pf-v6- in PatternFly 6
+
+          Replace `pf-v5-` with `pf-v6-`.
+
+          Before:
+          ```
+          <div className="pf-v5-c-card">
+          ```
+
+          After:
+          ```
+          <div className="pf-v6-c-card">
+          ```
+        codeSnip: "  1  .app-container {\n  2    padding: var(--pf-v5-global--spacer--md);\n  3    font-size: var(--pf-v5-global--FontSize--lg);\n  4    background-color: var(--pf-v5-global--BackgroundColor--100);\n  5  }\n  6  \n  7  .custom-card {\n  8    margin-bottom: var(--pf-v5-global--spacer--lg);\n  9  }\n 10  \n 11  @media (min-width: var(--pf-v5-global--breakpoint--md)) {\n 12    .app-container {\n 13      max-width: 1200px;\n 14      margin: 0 auto;\n 15    }\n 16  }\n 17  \n 18  @media (min-width: var(--pf-v5-global--breakpoint--lg)) {\n 19    .custom-card {\n 20      padding: var(--pf-v5-global--spacer--xl);\n 21    }\n 22  }\n 23  \n 24  .header-text {\n 25    color: var(--pf-v5-global--Color--100);\n 26    font-weight: var(--pf-v5-global--FontWeight--bold);\n 27  }\n"
+        lineNumber: 2
+        variables:
+          matchingText: pf-v5-
+      - uri: file:///opt/input/source/src/styles.css
+        message: |-
+          CSS class name prefixes have changed from pf-v5- to pf-v6- in PatternFly 6
+
+          Replace `pf-v5-` with `pf-v6-`.
+
+          Before:
+          ```
+          <div className="pf-v5-c-card">
+          ```
+
+          After:
+          ```
+          <div className="pf-v6-c-card">
+          ```
+        codeSnip: "  1  .app-container {\n  2    padding: var(--pf-v5-global--spacer--md);\n  3    font-size: var(--pf-v5-global--FontSize--lg);\n  4    background-color: var(--pf-v5-global--BackgroundColor--100);\n  5  }\n  6  \n  7  .custom-card {\n  8    margin-bottom: var(--pf-v5-global--spacer--lg);\n  9  }\n 10  \n 11  @media (min-width: var(--pf-v5-global--breakpoint--md)) {\n 12    .app-container {\n 13      max-width: 1200px;\n 14      margin: 0 auto;\n 15    }\n 16  }\n 17  \n 18  @media (min-width: var(--pf-v5-global--breakpoint--lg)) {\n 19    .custom-card {\n 20      padding: var(--pf-v5-global--spacer--xl);\n 21    }\n 22  }\n 23  \n 24  .header-text {\n 25    color: var(--pf-v5-global--Color--100);\n 26    font-weight: var(--pf-v5-global--FontWeight--bold);\n 27  }\n"
+        lineNumber: 3
+        variables:
+          matchingText: pf-v5-
+      - uri: file:///opt/input/source/src/styles.css
+        message: |-
+          CSS class name prefixes have changed from pf-v5- to pf-v6- in PatternFly 6
+
+          Replace `pf-v5-` with `pf-v6-`.
+
+          Before:
+          ```
+          <div className="pf-v5-c-card">
+          ```
+
+          After:
+          ```
+          <div className="pf-v6-c-card">
+          ```
+        codeSnip: "  1  .app-container {\n  2    padding: var(--pf-v5-global--spacer--md);\n  3    font-size: var(--pf-v5-global--FontSize--lg);\n  4    background-color: var(--pf-v5-global--BackgroundColor--100);\n  5  }\n  6  \n  7  .custom-card {\n  8    margin-bottom: var(--pf-v5-global--spacer--lg);\n  9  }\n 10  \n 11  @media (min-width: var(--pf-v5-global--breakpoint--md)) {\n 12    .app-container {\n 13      max-width: 1200px;\n 14      margin: 0 auto;\n 15    }\n 16  }\n 17  \n 18  @media (min-width: var(--pf-v5-global--breakpoint--lg)) {\n 19    .custom-card {\n 20      padding: var(--pf-v5-global--spacer--xl);\n 21    }\n 22  }\n 23  \n 24  .header-text {\n 25    color: var(--pf-v5-global--Color--100);\n 26    font-weight: var(--pf-v5-global--FontWeight--bold);\n 27  }\n"
+        lineNumber: 4
+        variables:
+          matchingText: pf-v5-
+      - uri: file:///opt/input/source/src/styles.css
+        message: |-
+          CSS class name prefixes have changed from pf-v5- to pf-v6- in PatternFly 6
+
+          Replace `pf-v5-` with `pf-v6-`.
+
+          Before:
+          ```
+          <div className="pf-v5-c-card">
+          ```
+
+          After:
+          ```
+          <div className="pf-v6-c-card">
+          ```
+        codeSnip: "  1  .app-container {\n  2    padding: var(--pf-v5-global--spacer--md);\n  3    font-size: var(--pf-v5-global--FontSize--lg);\n  4    background-color: var(--pf-v5-global--BackgroundColor--100);\n  5  }\n  6  \n  7  .custom-card {\n  8    margin-bottom: var(--pf-v5-global--spacer--lg);\n  9  }\n 10  \n 11  @media (min-width: var(--pf-v5-global--breakpoint--md)) {\n 12    .app-container {\n 13      max-width: 1200px;\n 14      margin: 0 auto;\n 15    }\n 16  }\n 17  \n 18  @media (min-width: var(--pf-v5-global--breakpoint--lg)) {\n 19    .custom-card {\n 20      padding: var(--pf-v5-global--spacer--xl);\n 21    }\n 22  }\n 23  \n 24  .header-text {\n 25    color: var(--pf-v5-global--Color--100);\n 26    font-weight: var(--pf-v5-global--FontWeight--bold);\n 27  }\n"
+        lineNumber: 8
+        variables:
+          matchingText: pf-v5-
+      - uri: file:///opt/input/source/src/styles.css
+        message: |-
+          CSS class name prefixes have changed from pf-v5- to pf-v6- in PatternFly 6
+
+          Replace `pf-v5-` with `pf-v6-`.
+
+          Before:
+          ```
+          <div className="pf-v5-c-card">
+          ```
+
+          After:
+          ```
+          <div className="pf-v6-c-card">
+          ```
+        codeSnip: "  1  .app-container {\n  2    padding: var(--pf-v5-global--spacer--md);\n  3    font-size: var(--pf-v5-global--FontSize--lg);\n  4    background-color: var(--pf-v5-global--BackgroundColor--100);\n  5  }\n  6  \n  7  .custom-card {\n  8    margin-bottom: var(--pf-v5-global--spacer--lg);\n  9  }\n 10  \n 11  @media (min-width: var(--pf-v5-global--breakpoint--md)) {\n 12    .app-container {\n 13      max-width: 1200px;\n 14      margin: 0 auto;\n 15    }\n 16  }\n 17  \n 18  @media (min-width: var(--pf-v5-global--breakpoint--lg)) {\n 19    .custom-card {\n 20      padding: var(--pf-v5-global--spacer--xl);\n 21    }\n 22  }\n 23  \n 24  .header-text {\n 25    color: var(--pf-v5-global--Color--100);\n 26    font-weight: var(--pf-v5-global--FontWeight--bold);\n 27  }\n"
+        lineNumber: 11
+        variables:
+          matchingText: pf-v5-
+      - uri: file:///opt/input/source/src/styles.css
+        message: |-
+          CSS class name prefixes have changed from pf-v5- to pf-v6- in PatternFly 6
+
+          Replace `pf-v5-` with `pf-v6-`.
+
+          Before:
+          ```
+          <div className="pf-v5-c-card">
+          ```
+
+          After:
+          ```
+          <div className="pf-v6-c-card">
+          ```
+        codeSnip: "  1  .app-container {\n  2    padding: var(--pf-v5-global--spacer--md);\n  3    font-size: var(--pf-v5-global--FontSize--lg);\n  4    background-color: var(--pf-v5-global--BackgroundColor--100);\n  5  }\n  6  \n  7  .custom-card {\n  8    margin-bottom: var(--pf-v5-global--spacer--lg);\n  9  }\n 10  \n 11  @media (min-width: var(--pf-v5-global--breakpoint--md)) {\n 12    .app-container {\n 13      max-width: 1200px;\n 14      margin: 0 auto;\n 15    }\n 16  }\n 17  \n 18  @media (min-width: var(--pf-v5-global--breakpoint--lg)) {\n 19    .custom-card {\n 20      padding: var(--pf-v5-global--spacer--xl);\n 21    }\n 22  }\n 23  \n 24  .header-text {\n 25    color: var(--pf-v5-global--Color--100);\n 26    font-weight: var(--pf-v5-global--FontWeight--bold);\n 27  }\n"
+        lineNumber: 18
+        variables:
+          matchingText: pf-v5-
+      - uri: file:///opt/input/source/src/styles.css
+        message: |-
+          CSS class name prefixes have changed from pf-v5- to pf-v6- in PatternFly 6
+
+          Replace `pf-v5-` with `pf-v6-`.
+
+          Before:
+          ```
+          <div className="pf-v5-c-card">
+          ```
+
+          After:
+          ```
+          <div className="pf-v6-c-card">
+          ```
+        codeSnip: "  1  .app-container {\n  2    padding: var(--pf-v5-global--spacer--md);\n  3    font-size: var(--pf-v5-global--FontSize--lg);\n  4    background-color: var(--pf-v5-global--BackgroundColor--100);\n  5  }\n  6  \n  7  .custom-card {\n  8    margin-bottom: var(--pf-v5-global--spacer--lg);\n  9  }\n 10  \n 11  @media (min-width: var(--pf-v5-global--breakpoint--md)) {\n 12    .app-container {\n 13      max-width: 1200px;\n 14      margin: 0 auto;\n 15    }\n 16  }\n 17  \n 18  @media (min-width: var(--pf-v5-global--breakpoint--lg)) {\n 19    .custom-card {\n 20      padding: var(--pf-v5-global--spacer--xl);\n 21    }\n 22  }\n 23  \n 24  .header-text {\n 25    color: var(--pf-v5-global--Color--100);\n 26    font-weight: var(--pf-v5-global--FontWeight--bold);\n 27  }\n"
+        lineNumber: 20
+        variables:
+          matchingText: pf-v5-
+      - uri: file:///opt/input/source/src/styles.css
+        message: |-
+          CSS class name prefixes have changed from pf-v5- to pf-v6- in PatternFly 6
+
+          Replace `pf-v5-` with `pf-v6-`.
+
+          Before:
+          ```
+          <div className="pf-v5-c-card">
+          ```
+
+          After:
+          ```
+          <div className="pf-v6-c-card">
+          ```
+        codeSnip: "  1  .app-container {\n  2    padding: var(--pf-v5-global--spacer--md);\n  3    font-size: var(--pf-v5-global--FontSize--lg);\n  4    background-color: var(--pf-v5-global--BackgroundColor--100);\n  5  }\n  6  \n  7  .custom-card {\n  8    margin-bottom: var(--pf-v5-global--spacer--lg);\n  9  }\n 10  \n 11  @media (min-width: var(--pf-v5-global--breakpoint--md)) {\n 12    .app-container {\n 13      max-width: 1200px;\n 14      margin: 0 auto;\n 15    }\n 16  }\n 17  \n 18  @media (min-width: var(--pf-v5-global--breakpoint--lg)) {\n 19    .custom-card {\n 20      padding: var(--pf-v5-global--spacer--xl);\n 21    }\n 22  }\n 23  \n 24  .header-text {\n 25    color: var(--pf-v5-global--Color--100);\n 26    font-weight: var(--pf-v5-global--FontWeight--bold);\n 27  }\n"
+        lineNumber: 25
+        variables:
+          matchingText: pf-v5-
+      - uri: file:///opt/input/source/src/styles.css
+        message: |-
+          CSS class name prefixes have changed from pf-v5- to pf-v6- in PatternFly 6
+
+          Replace `pf-v5-` with `pf-v6-`.
+
+          Before:
+          ```
+          <div className="pf-v5-c-card">
+          ```
+
+          After:
+          ```
+          <div className="pf-v6-c-card">
+          ```
+        codeSnip: "  1  .app-container {\n  2    padding: var(--pf-v5-global--spacer--md);\n  3    font-size: var(--pf-v5-global--FontSize--lg);\n  4    background-color: var(--pf-v5-global--BackgroundColor--100);\n  5  }\n  6  \n  7  .custom-card {\n  8    margin-bottom: var(--pf-v5-global--spacer--lg);\n  9  }\n 10  \n 11  @media (min-width: var(--pf-v5-global--breakpoint--md)) {\n 12    .app-container {\n 13      max-width: 1200px;\n 14      margin: 0 auto;\n 15    }\n 16  }\n 17  \n 18  @media (min-width: var(--pf-v5-global--breakpoint--lg)) {\n 19    .custom-card {\n 20      padding: var(--pf-v5-global--spacer--xl);\n 21    }\n 22  }\n 23  \n 24  .header-text {\n 25    color: var(--pf-v5-global--Color--100);\n 26    font-weight: var(--pf-v5-global--FontWeight--bold);\n 27  }\n"
+        lineNumber: 26
+        variables:
+          matchingText: pf-v5-
+      links:
+      - url: https://www.patternfly.org/get-started/upgrade
+        title: patternfly6 Documentation
+      effort: 3
+  errors:
+    patternfly5-to-patternfly6-breakpoints-00000: failed to perform file content search - could not run grep with provided pattern exit status 2
+    patternfly5-to-patternfly6-css-variables-00000: failed to perform file content search - could not run grep with provided pattern exit status 2
+  unmatched:
+  - patternfly5-to-patternfly6-component-replacement-00010
+  - patternfly5-to-patternfly6-prop-removal-00000
+  - patternfly5-to-patternfly6-react-tokens-00000

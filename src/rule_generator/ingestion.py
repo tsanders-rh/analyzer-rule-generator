@@ -6,20 +6,30 @@ Supports:
 - Local Markdown files
 - Local text files
 - PDF files (future enhancement)
+- Recursive link following for related documentation
 """
 import re
 import requests
-from typing import Optional, List
+from typing import Optional, List, Set
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin, urlunparse
 
 
 class GuideIngester:
     """Fetch and parse migration guides from various sources."""
 
-    def __init__(self):
-        """Initialize the guide ingester with a cache."""
+    def __init__(self, follow_links: bool = False, max_depth: int = 2):
+        """
+        Initialize the guide ingester with a cache.
+
+        Args:
+            follow_links: If True, follow related documentation links
+            max_depth: Maximum depth for recursive link following (default: 2)
+        """
         self._cache = {}
+        self._visited_urls: Set[str] = set()
+        self.follow_links = follow_links
+        self.max_depth = max_depth
 
     def ingest(self, source: str) -> Optional[str]:
         """
@@ -50,16 +60,27 @@ class GuideIngester:
 
         return content
 
-    def ingest_url(self, url: str) -> Optional[str]:
+    def ingest_url(self, url: str, depth: int = 0) -> Optional[str]:
         """
         Fetch and convert HTML/PDF from URL to clean text.
 
         Args:
             url: URL to migration guide
+            depth: Current recursion depth for link following
 
         Returns:
             Clean markdown text or None if fetch fails
         """
+        # Normalize URL
+        url = self._normalize_url(url)
+
+        # Check if already visited
+        if url in self._visited_urls:
+            return None
+
+        # Mark as visited
+        self._visited_urls.add(url)
+
         try:
             # Check if beautifulsoup4 is available
             try:
@@ -71,6 +92,7 @@ class GuideIngester:
                 return None
 
             # Fetch content
+            print(f"{'  ' * depth}Fetching: {url}")
             response = requests.get(url, timeout=30)
             response.raise_for_status()
 
@@ -85,6 +107,11 @@ class GuideIngester:
                 # Assume HTML
                 soup = BeautifulSoup(response.content, 'html.parser')
 
+                # Extract related links before removing elements
+                related_links = []
+                if self.follow_links and depth < self.max_depth:
+                    related_links = self._extract_related_links(soup, url)
+
                 # Remove script and style elements
                 for script in soup(['script', 'style', 'nav', 'footer', 'header']):
                     script.decompose()
@@ -94,6 +121,15 @@ class GuideIngester:
 
                 # Clean up excessive whitespace
                 markdown = self._clean_text(markdown)
+
+                # Follow related links if enabled
+                if related_links:
+                    print(f"{'  ' * depth}Found {len(related_links)} related links")
+                    for link in related_links:
+                        linked_content = self.ingest_url(link, depth + 1)
+                        if linked_content:
+                            # Append linked content with a separator
+                            markdown += f"\n\n---\n# Content from: {link}\n\n{linked_content}"
 
                 return markdown
 
@@ -167,7 +203,40 @@ class GuideIngester:
         current_chunk = ""
 
         for section in sections:
-            if len(current_chunk) + len(section) <= max_chars:
+            # If section itself is too large, split it into smaller pieces
+            if len(section) > max_chars:
+                # Save current chunk if it has content
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                    current_chunk = ""
+
+                # Split large section by paragraphs (double newlines)
+                paragraphs = section.split('\n\n')
+                temp_chunk = ""
+
+                for para in paragraphs:
+                    # If a single paragraph is too large, split it by character count
+                    if len(para) > max_chars:
+                        # Save current temp_chunk if it has content
+                        if temp_chunk:
+                            chunks.append(temp_chunk.strip())
+                            temp_chunk = ""
+
+                        # Split oversized paragraph into max_chars pieces
+                        for i in range(0, len(para), max_chars):
+                            para_piece = para[i:i + max_chars]
+                            chunks.append(para_piece.strip())
+                    elif len(temp_chunk) + len(para) + 2 <= max_chars:
+                        temp_chunk += "\n\n" + para if temp_chunk else para
+                    else:
+                        if temp_chunk:
+                            chunks.append(temp_chunk.strip())
+                        temp_chunk = para
+
+                # Add remaining temp_chunk to current_chunk
+                if temp_chunk:
+                    current_chunk = temp_chunk
+            elif len(current_chunk) + len(section) <= max_chars:
                 current_chunk += "\n\n" + section
             else:
                 if current_chunk:
@@ -213,3 +282,94 @@ class GuideIngester:
         text = re.sub(r'Table of Contents?', '', text, flags=re.IGNORECASE)
 
         return text.strip()
+
+    def _normalize_url(self, url: str) -> str:
+        """
+        Normalize URL by removing fragments and trailing slashes.
+
+        Args:
+            url: URL to normalize
+
+        Returns:
+            Normalized URL
+        """
+        parsed = urlparse(url)
+        # Remove fragment (# anchor)
+        normalized = urlunparse((
+            parsed.scheme,
+            parsed.netloc,
+            parsed.path.rstrip('/'),
+            parsed.params,
+            parsed.query,
+            ''  # Remove fragment
+        ))
+        return normalized
+
+    def _extract_related_links(self, soup, base_url: str) -> List[str]:
+        """
+        Extract migration-related links from HTML.
+
+        Args:
+            soup: BeautifulSoup object
+            base_url: Base URL for resolving relative links
+
+        Returns:
+            List of related URLs to follow
+        """
+        try:
+            from bs4 import BeautifulSoup
+        except ImportError:
+            return []
+
+        base_domain = urlparse(base_url).netloc
+        related_links = []
+
+        # Keywords that indicate migration-related documentation
+        migration_keywords = [
+            'release-notes', 'release_notes', 'releasenotes',
+            'breaking-changes', 'breaking_changes', 'breakingchanges',
+            'migration', 'migrate', 'upgrade', 'changelog',
+            'whats-new', 'whats_new', 'whatsnew',
+            'v6', 'version-6', 'version_6'
+        ]
+
+        # Find all links
+        for link in soup.find_all('a', href=True):
+            href = link['href']
+
+            # Convert relative URLs to absolute
+            absolute_url = urljoin(base_url, href)
+
+            # Normalize the URL
+            normalized_url = self._normalize_url(absolute_url)
+
+            # Skip if already visited
+            if normalized_url in self._visited_urls:
+                continue
+
+            # Only follow links from the same domain
+            link_domain = urlparse(absolute_url).netloc
+            if link_domain != base_domain:
+                continue
+
+            # Check if URL path or link text contains migration keywords
+            url_path = urlparse(absolute_url).path.lower()
+            link_text = link.get_text().lower()
+
+            is_migration_related = any(
+                keyword in url_path or keyword in link_text
+                for keyword in migration_keywords
+            )
+
+            if is_migration_related:
+                related_links.append(normalized_url)
+
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_links = []
+        for link in related_links:
+            if link not in seen:
+                seen.add(link)
+                unique_links.append(link)
+
+        return unique_links

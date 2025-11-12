@@ -122,17 +122,17 @@ class AnalyzerRuleGenerator:
         # Build labels
         labels = self._build_labels()
 
+        # Build custom variables (for import capture, etc.)
+        custom_variables = self._build_custom_variables(pattern)
+
         # Build message
-        message = self._build_message(pattern)
+        message = self._build_message(pattern, has_custom_variables=len(custom_variables) > 0)
 
         # Build links
         links = self._build_links(pattern)
 
         # Create description
-        if pattern.target_pattern:
-            description = f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}"
-        else:
-            description = f"{pattern.source_pattern} usage detected (removed API)"
+        description = self._build_description(pattern, has_custom_variables=len(custom_variables) > 0)
 
         # Create rule
         rule = AnalyzerRule(
@@ -144,7 +144,7 @@ class AnalyzerRuleGenerator:
             when=when_condition,
             message=message,
             links=links if links else None,
-            customVariables=[],
+            customVariables=custom_variables if custom_variables else [],
             tag=None
         )
 
@@ -207,9 +207,17 @@ class AnalyzerRuleGenerator:
 
         if provider == "builtin":
             # Build builtin.filecontent condition
+            regex_pattern = pattern.source_fqn  # For builtin, source_fqn contains regex
+
+            # For import patterns, ensure pattern ends with $ anchor for precise matching
+            if self._is_import_pattern(pattern) and not regex_pattern.endswith('$'):
+                # Add $ anchor to match end of import statement
+                # This prevents false positives from partial matches
+                regex_pattern = regex_pattern + '$'
+
             condition = {
                 "builtin.filecontent": {
-                    "pattern": pattern.source_fqn  # For builtin, source_fqn contains regex
+                    "pattern": regex_pattern
                 }
             }
 
@@ -388,28 +396,180 @@ class AnalyzerRuleGenerator:
 
         return labels
 
-    def _build_message(self, pattern: MigrationPattern) -> str:
+    def _is_import_pattern(self, pattern: MigrationPattern) -> bool:
+        """
+        Determine if pattern is for import statement migration.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            True if pattern is for import statements
+        """
+        # Check if this is a builtin provider pattern (likely imports)
+        if pattern.provider_type != "builtin":
+            return False
+
+        # Check if source_fqn or source_pattern contains import keywords
+        source = pattern.source_fqn or pattern.source_pattern or ""
+
+        # Look for import statement patterns
+        if "import" in source.lower():
+            return True
+
+        # Check rationale for import-related keywords
+        rationale = (pattern.rationale or "").lower()
+        if any(keyword in rationale for keyword in ["import", "import statement", "imported from"]):
+            return True
+
+        # Check examples for import statements
+        if pattern.example_before and "import" in pattern.example_before.lower():
+            return True
+
+        return False
+
+    def _build_custom_variables(self, pattern: MigrationPattern) -> List[Dict[str, str]]:
+        """
+        Build custom variables for pattern matching.
+
+        Currently supports import capture for import statement migrations.
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            List of custom variable definitions
+        """
+        custom_vars = []
+
+        # Check if this is an import pattern
+        if self._is_import_pattern(pattern):
+            # Add variable to capture imported components
+            custom_vars.append({
+                "pattern": "import {(?P<imports>[A-z,\\s]+)}",
+                "name": "component",
+                "nameOfCaptureGroup": "imports",
+                "defaultValue": "Component"
+            })
+
+        return custom_vars
+
+    def _build_description(self, pattern: MigrationPattern, has_custom_variables: bool = False) -> str:
+        """
+        Build rule description.
+
+        Args:
+            pattern: Migration pattern
+            has_custom_variables: Whether the rule uses custom variables
+
+        Returns:
+            Description text
+        """
+        # For import patterns with custom variables, use generic description
+        if has_custom_variables and self._is_import_pattern(pattern):
+            if pattern.target_pattern:
+                # Extract package name from patterns
+                # e.g., "import { Area } from '@patternfly/react-charts'" -> "@patternfly/react-charts"
+                source_pkg = self._extract_package_name(pattern.source_pattern)
+                target_pkg = self._extract_package_name(pattern.target_pattern)
+
+                if source_pkg and target_pkg:
+                    return f"imports  from '{source_pkg}'; should be replaced with imports from '{target_pkg}';"
+                else:
+                    return f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}"
+            else:
+                return f"{pattern.source_pattern} usage detected (removed API)"
+
+        # Default description
+        if pattern.target_pattern:
+            description = f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}"
+        else:
+            description = f"{pattern.source_pattern} usage detected (removed API)"
+
+        return description
+
+    def _extract_package_name(self, import_statement: Optional[str]) -> Optional[str]:
+        """
+        Extract package name from import statement.
+
+        Args:
+            import_statement: Import statement string
+
+        Returns:
+            Package name or None
+        """
+        if not import_statement:
+            return None
+
+        import re
+        # Match pattern: from 'package' or from "package"
+        match = re.search(r"from\s+['\"]([^'\"]+)['\"]", import_statement)
+        if match:
+            return match.group(1)
+
+        return None
+
+    def _build_message(self, pattern: MigrationPattern, has_custom_variables: bool = False) -> str:
         """
         Build migration guidance message.
 
         Args:
             pattern: Migration pattern
+            has_custom_variables: Whether the rule uses custom variables
 
         Returns:
             Message text
         """
         message = f"{pattern.rationale}\n\n"
 
-        if pattern.target_pattern:
-            message += f"Replace `{pattern.source_pattern}` with `{pattern.target_pattern}`."
-        else:
-            message += f"Remove usage of `{pattern.source_pattern}` (API has been removed)."
+        # Use custom variables in message if available
+        if has_custom_variables and self._is_import_pattern(pattern):
+            if pattern.target_pattern:
+                message += f"Replace `{pattern.source_pattern.replace(pattern.source_pattern.split('{')[1].split('}')[0], '{{ component }}')}` with `{pattern.target_pattern.replace(pattern.target_pattern.split('{')[1].split('}')[0], '{{ component }}')}`."\
+                    if '{' in pattern.source_pattern and '}' in pattern.source_pattern else \
+                    f"Replace `import {{ {{{{ component }}}} }}; from {self._extract_package_name(pattern.source_pattern) or pattern.source_pattern}` with `import {{ {{{{ component }}}} }} from {self._extract_package_name(pattern.target_pattern) or pattern.target_pattern}`."
+            else:
+                message += f"Remove usage of `{pattern.source_pattern}` (API has been removed)."
 
-        if pattern.example_before and pattern.example_after:
-            message += f"\n\nBefore:\n```\n{pattern.example_before}\n```\n\n"
-            message += f"After:\n```\n{pattern.example_after}\n```"
+            # Update examples to use variables
+            if pattern.example_before and pattern.example_after:
+                # Replace specific component names with {{ component }} in examples
+                example_before = self._replace_component_with_variable(pattern.example_before)
+                example_after = self._replace_component_with_variable(pattern.example_after)
+
+                message += f"\n\nBefore:\n```\n{example_before}\n```\n\n"
+                message += f"After:\n```\n{example_after}\n```"
+        else:
+            # Default message without variables
+            if pattern.target_pattern:
+                message += f"Replace `{pattern.source_pattern}` with `{pattern.target_pattern}`."
+            else:
+                message += f"Remove usage of `{pattern.source_pattern}` (API has been removed)."
+
+            if pattern.example_before and pattern.example_after:
+                message += f"\n\nBefore:\n```\n{pattern.example_before}\n```\n\n"
+                message += f"After:\n```\n{pattern.example_after}\n```"
 
         return message
+
+    def _replace_component_with_variable(self, code: str) -> str:
+        """
+        Replace specific component names with {{ component }} variable in code examples.
+
+        Args:
+            code: Code string
+
+        Returns:
+            Code with component names replaced by variable
+        """
+        import re
+
+        # Match import statements and replace component names with {{ component }}
+        # Pattern: import { ComponentName } from 'package'
+        pattern = r"import\s*\{\s*([A-Z][A-Za-z0-9_]*)\s*\}\s*from"
+        replacement = r"import { {{ component }} } from"
+
+        return re.sub(pattern, replacement, code)
 
     def _requires_semantic_analysis(self, pattern: MigrationPattern) -> bool:
         """

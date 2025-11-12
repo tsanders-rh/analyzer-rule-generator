@@ -1404,3 +1404,200 @@ class TestReactComponentHybridRules:
             rationale="Ab has been replaced with Something"
         )
         assert generator._is_react_component_pattern(pattern) is False
+
+
+class TestImportPatternRules:
+    """Test import pattern detection and custom variables."""
+
+    def test_is_import_pattern_detects_import_in_source_fqn(self):
+        """Should detect import patterns from source_fqn"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="patternfly-5",
+            target_framework="patternfly-6"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="import { Area } from '@patternfly/react-charts'",
+            source_fqn="import.*from '@patternfly/react-charts'",
+            provider_type="builtin",
+            file_pattern="\\.(j|t)sx?$",
+            complexity="LOW",
+            category="api",
+            rationale="Victory-based charts have moved to a 'victory' directory"
+        )
+
+        is_import = generator._is_import_pattern(pattern)
+        assert is_import is True
+
+    def test_is_import_pattern_detects_import_in_rationale(self):
+        """Should detect import patterns from rationale"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="@patternfly/react-charts",
+            source_fqn="@patternfly/react-charts",
+            provider_type="builtin",
+            complexity="LOW",
+            category="api",
+            rationale="Import statements from @patternfly/react-charts need updating"
+        )
+
+        is_import = generator._is_import_pattern(pattern)
+        assert is_import is True
+
+    def test_is_import_pattern_requires_builtin_provider(self):
+        """Should require builtin provider for import detection"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="import { Component }",
+            source_fqn="import { Component }",
+            provider_type="nodejs",
+            complexity="LOW",
+            category="api",
+            rationale="Test"
+        )
+
+        is_import = generator._is_import_pattern(pattern)
+        assert is_import is False
+
+    def test_build_custom_variables_for_import_pattern(self):
+        """Should build custom variables for import patterns"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="patternfly-5",
+            target_framework="patternfly-6"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="import { Area } from '@patternfly/react-charts'",
+            source_fqn="import.*from '@patternfly/react-charts'",
+            provider_type="builtin",
+            file_pattern="\\.(j|t)sx?$",
+            complexity="LOW",
+            category="api",
+            rationale="Victory-based charts have moved to a 'victory' directory"
+        )
+
+        custom_vars = generator._build_custom_variables(pattern)
+
+        assert len(custom_vars) == 1
+        assert custom_vars[0]["name"] == "component"
+        assert custom_vars[0]["nameOfCaptureGroup"] == "imports"
+        assert custom_vars[0]["defaultValue"] == "Component"
+        assert "import {(?P<imports>" in custom_vars[0]["pattern"]
+
+    def test_build_custom_variables_returns_empty_for_non_import(self):
+        """Should return empty list for non-import patterns"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="OldClass",
+            source_fqn="com.example.OldClass",
+            provider_type="java",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Class renamed"
+        )
+
+        custom_vars = generator._build_custom_variables(pattern)
+        assert len(custom_vars) == 0
+
+    def test_build_when_condition_adds_dollar_anchor_for_imports(self):
+        """Should add $ anchor to import patterns for precise matching"""
+        generator = AnalyzerRuleGenerator()
+
+        pattern = MigrationPattern(
+            source_pattern="import from '@patternfly/react-charts'",
+            source_fqn="import.*from '@patternfly/react-charts'",
+            provider_type="builtin",
+            file_pattern="\\.(j|t)sx?$",
+            complexity="LOW",
+            category="api",
+            rationale="Import statements need updating"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        assert "builtin.filecontent" in condition
+        # Should have $ anchor added
+        assert condition["builtin.filecontent"]["pattern"].endswith("$")
+        assert condition["builtin.filecontent"]["pattern"] == "import.*from '@patternfly/react-charts'$"
+
+    def test_extract_package_name_from_import_statement(self):
+        """Should extract package name from import statement"""
+        generator = AnalyzerRuleGenerator()
+
+        # Test with single quotes
+        result = generator._extract_package_name("import { Area } from '@patternfly/react-charts'")
+        assert result == "@patternfly/react-charts"
+
+        # Test with double quotes
+        result = generator._extract_package_name('import { Area } from "@patternfly/react-charts"')
+        assert result == "@patternfly/react-charts"
+
+    def test_build_description_for_import_pattern_with_custom_variables(self):
+        """Should build generic description for import patterns with custom variables"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="patternfly-5",
+            target_framework="patternfly-6"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="import { Area } from '@patternfly/react-charts'",
+            target_pattern="import { Area } from '@patternfly/react-charts/victory'",
+            source_fqn="import.*from '@patternfly/react-charts'",
+            provider_type="builtin",
+            file_pattern="\\.(j|t)sx?$",
+            complexity="LOW",
+            category="api",
+            rationale="Victory-based charts have moved to a 'victory' directory"
+        )
+
+        description = generator._build_description(pattern, has_custom_variables=True)
+
+        # Should use generic "imports" instead of specific component
+        assert "imports" in description
+        assert "@patternfly/react-charts" in description
+        assert "@patternfly/react-charts/victory" in description
+
+    def test_generate_complete_import_rule(self):
+        """Should generate complete rule with custom variables for import patterns"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="patternfly-5",
+            target_framework="patternfly-6",
+            rule_file_name="patternfly-5-to-patternfly-6-charts"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="import { Area } from '@patternfly/react-charts'",
+            target_pattern="import { Area } from '@patternfly/react-charts/victory'",
+            source_fqn="import.*from.*@patternfly/react-charts",
+            provider_type="builtin",
+            file_pattern="\\.(j|t)sx?$",
+            complexity="LOW",
+            category="api",
+            concern="charts",
+            rationale="Victory-based charts have moved to a 'victory' directory in @patternfly/react-charts to support multiple chart libraries",
+            example_before="import { Area } from '@patternfly/react-charts';",
+            example_after="import { Area } from '@patternfly/react-charts/victory';",
+            documentation_url="https://www.patternfly.org/get-started/upgrade"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert rule.ruleID == "patternfly-5-to-patternfly-6-charts-00000"
+
+        # Should have custom variables
+        assert len(rule.customVariables) == 1
+        assert rule.customVariables[0]["name"] == "component"
+
+        # Description should be generic
+        assert "imports" in rule.description
+
+        # When condition should have $ anchor
+        assert "builtin.filecontent" in rule.when
+        assert rule.when["builtin.filecontent"]["pattern"].endswith("$")
+
+        # Message should contain {{ component }} variable
+        assert "{{ component }}" in rule.message

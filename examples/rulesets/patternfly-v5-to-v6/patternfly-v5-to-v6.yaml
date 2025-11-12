@@ -84,8 +84,12 @@
   - konveyor.io/source=patternfly-5
   - konveyor.io/target=patternfly-6
   when:
-    nodejs.referenced:
-      pattern: Chip
+    and:
+    - nodejs.referenced:
+        pattern: Chip
+    - builtin.filecontent:
+        pattern: "import.*\\{[^}]*\\bChip\\b[^}]*\\}.*from ['\"]@patternfly/react-core['\"]"
+        filePattern: \.(j|t)sx?$
   message: 'The Chip component has been replaced with Label in PatternFly 6
 
 
@@ -120,8 +124,12 @@
   - konveyor.io/source=patternfly-5
   - konveyor.io/target=patternfly-6
   when:
-    nodejs.referenced:
-      pattern: Tile
+    and:
+    - nodejs.referenced:
+        pattern: Tile
+    - builtin.filecontent:
+        pattern: "import.*\\{[^}]*\\bTile\\b[^}]*\\}.*from ['\"]@patternfly/react-core['\"]"
+        filePattern: \.(j|t)sx?$
   message: 'The Tile component has been replaced with Card in PatternFly 6
 
 
@@ -156,8 +164,12 @@
   - konveyor.io/source=patternfly-5
   - konveyor.io/target=patternfly-6
   when:
-    nodejs.referenced:
-      pattern: Text
+    and:
+    - nodejs.referenced:
+        pattern: Text
+    - builtin.filecontent:
+        pattern: "import.*\\{[^}]*\\bText\\b[^}]*\\}.*from ['\"]@patternfly/react-core['\"]"
+        filePattern: \.(j|t)sx?$
   message: 'The Text component has been renamed to Content in PatternFly 6
 
 
@@ -230,8 +242,12 @@
   - konveyor.io/source=patternfly-5
   - konveyor.io/target=patternfly-6
   when:
-    nodejs.referenced:
-      pattern: EmptyState
+    and:
+    - nodejs.referenced:
+        pattern: EmptyState
+    - builtin.filecontent:
+        pattern: "import.*\\{[^}]*\\bEmptyState\\b[^}]*\\}.*from ['\"]@patternfly/react-core['\"]"
+        filePattern: \.(j|t)sx?$
   message: 'The EmptyState component has been refactored in PatternFly 6 and may require
     manual updates
 

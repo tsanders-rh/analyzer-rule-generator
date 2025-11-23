@@ -1,0 +1,81 @@
+- ruleID: patternfly-v5-to-patternfly-v6-accordion-00000
+  description: AccordionContent isHidden prop should be replaced with Remove isHidden
+    prop
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: AccordionContent
+  message: 'The isHidden prop has been removed from AccordionContent, as its visibility
+    will now be set automatically based on the isExpanded prop on AccordionItem.
+
+
+    Replace `AccordionContent isHidden prop` with `Remove isHidden prop`.
+
+
+    Before:
+
+    ```
+
+    import { AccordionContent } from "@patternfly/react-core"; export const AccordionContentRemoveIsHiddenPropInput
+    = () => ( <AccordionContent isHidden /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { AccordionContent } from "@patternfly/react-core"; export const AccordionContentRemoveIsHiddenPropInput
+    = () => ( <AccordionContent /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9876
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-accordion-00010
+  description: AccordionToggle isExpanded prop should be replaced with Move isExpanded
+    prop to AccordionItem
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: AccordionToggle
+  message: 'The isExpanded prop for AccordionToggle has been moved to AccordionItem.
+
+
+    Replace `AccordionToggle isExpanded prop` with `Move isExpanded prop to AccordionItem`.
+
+
+    Before:
+
+    ```
+
+    import { AccordionItem, AccordionToggle } from "@patternfly/react-core"; export
+    const AccordionToggleMoveIsExpandedPropInput = () => ( <AccordionItem> <AccordionToggle
+    isExpanded /> </AccordionItem> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { AccordionItem, AccordionToggle } from "@patternfly/react-core"; export
+    const AccordionToggleMoveIsExpandedPropInput = () => ( <AccordionItem isExpanded>
+    <AccordionToggle /> </AccordionItem> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9876
+    title: patternfly-v6 Documentation
+  customVariables: []

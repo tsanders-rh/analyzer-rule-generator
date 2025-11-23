@@ -1,0 +1,39 @@
+- ruleID: patternfly-v5-to-patternfly-v6-banner-00000
+  description: Banner variant prop should be replaced with Banner color prop
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Banner
+  message: 'The variant property has been removed from Banner. Use the new color or
+    status properties instead, depending on the original intent of the variant property.
+
+
+    Replace `Banner variant prop` with `Banner color prop`.
+
+
+    Before:
+
+    ```
+
+    import { Banner } from "@patternfly/react-core"; export const BannerReplaceVariantPropInput
+    = () => ( <> <Banner variant=''default'' /> <Banner variant=''red'' /> </> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Banner } from "@patternfly/react-core"; export const BannerReplaceVariantPropInput
+    = () => ( <> <Banner /> <Banner color=''red'' /> </> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9891
+    title: patternfly-v6 Documentation
+  customVariables: []

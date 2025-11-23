@@ -389,6 +389,47 @@ Return your findings as a JSON array. Each pattern should be an object with thes
 
 Focus on patterns that can be detected via static analysis. Skip general advice or manual migration steps.
 
+**CRITICAL: Pattern Granularity Rules**
+
+When a migration involves MULTIPLE specific value replacements, you MUST create SEPARATE patterns for EACH value pair:
+
+1. ✅ DO: Create individual patterns for each specific value
+   - Example: For pixel→rem conversions, create separate rules:
+     * "576px" → "36rem" (one pattern)
+     * "768px" → "48rem" (another pattern)
+     * "992px" → "62rem" (another pattern)
+   - Example: For enum renames, create separate rules:
+     * "alignLeft" → "alignStart" (one pattern)
+     * "alignRight" → "alignEnd" (another pattern)
+
+2. ❌ DON'T: Create generic catch-all patterns
+   - DON'T: "breakpoint pixel values" → "breakpoint rem values"
+   - DON'T: "alignment values" → "updated alignment values"
+
+3. When you see multiple related changes in the guide, treat each as a separate pattern with:
+   - Exact source value in source_pattern
+   - Exact target value in target_pattern
+   - Specific description (see below)
+
+**Description Format Rules:**
+
+- Use SPECIFIC values, not generic descriptions
+- Format: "{{exact_source}} should be replaced with {{exact_target}}"
+- ✅ GOOD: "576px should be replaced with 36rem"
+- ✅ GOOD: "alignLeft should be replaced with alignStart"
+- ✅ GOOD: "variant='button-group' should be replaced with variant='action-group'"
+- ❌ BAD: "pixel values should be replaced with rem values"
+- ❌ BAD: "alignment values should be updated"
+- ❌ BAD: "variant values have changed"
+
+**Example Code Guidelines:**
+
+- Keep examples MINIMAL - show only the code being changed
+- DO NOT include import statements unless the import path itself is changing
+- DO NOT include export/function wrappers
+- ✅ GOOD: "<Button isActive />"
+- ❌ BAD: "import {{{{ Button }}}} from '@patternfly/react-core'; export const MyButton = () => <Button isActive />"
+
 **IMPORTANT REGEX PATTERN RULES:**
 - For builtin provider: Use SIMPLE regex patterns with `.*` wildcards
 - Avoid complex regex escapes like \\s, \\(, \\) (but \\{{ and \\}} are OK in non-file-pattern contexts)

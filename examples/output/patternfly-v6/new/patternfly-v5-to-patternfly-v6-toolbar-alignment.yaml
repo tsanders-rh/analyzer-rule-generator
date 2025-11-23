@@ -1,0 +1,76 @@
+- ruleID: patternfly-v5-to-patternfly-v6-toolbar-alignment-00000
+  description: alignLeft should be replaced with alignStart
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: alignLeft
+      filePattern: \.(j|t)sx?$
+  message: 'The values for the align property on ToolbarGroup and ToolbarItem have
+    been updated from ''alignLeft'' to ''alignStart''
+
+
+    Replace `alignLeft` with `alignStart`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup align={{ default: "alignLeft" }} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup align={{ default: "alignStart" }} />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10366
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-toolbar-alignment-00010
+  description: alignRight should be replaced with alignEnd
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: alignRight
+      filePattern: \.(j|t)sx?$
+  message: 'The values for the align property on ToolbarGroup and ToolbarItem have
+    been updated from ''alignRight'' to ''alignEnd''
+
+
+    Replace `alignRight` with `alignEnd`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup align={{ default: "alignRight" }} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup align={{ default: "alignEnd" }} />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10366
+    title: patternfly-v6 Documentation
+  customVariables: []

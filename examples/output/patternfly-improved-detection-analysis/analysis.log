@@ -1,0 +1,180 @@
+Trying to pull quay.io/konveyor/kantra:v0.8.1-alpha.3...
+Getting image source signatures
+Copying blob sha256:144cb1f27d8003a8f0f0d061abb74cc9fa4609daea55e35a6d8b9ead7420a8c5
+Copying blob sha256:e8b14615b17c4477f207841a595ce1b1554a8a1fa4775554a32a92303f52ca6c
+Copying blob sha256:62b02b2312f16a68bd1d0b270b87d82a707800b5c02046f357119c0575b19b2b
+Copying blob sha256:2602e1c5e8830fe80a6207359ce01e6c9b7d6848be663c4df1e03c724149b8a6
+Copying blob sha256:bd9ddc54bea929a22b334e73e026d4136e5b73f5cc29942896c72e4ece69b13d
+Copying config sha256:0230f49aecc14d6b08853e5541a5fd02abba7a0222593e38f469f7bd90564f86
+Writing manifest to image destination
+time="2025-11-13T18:17:45Z" level=info msg="inject span info" carrier="{}"
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=9
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-groups-00010 worker=9
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=2
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-breakpoints-00030 worker=2
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=5
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-definition-00000 worker=5
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=0
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-breakpoints-00010 worker=0
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-breakpoints-00020 worker=1
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-deprecation-00000 worker=7
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-breakpoints-00040 worker=3
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=6
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-charts-00000 worker=6
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=8
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-groups-00000 worker=8
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=4
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-breakpoints-00000 worker=4
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=9
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-groups-00020 worker=9
+time="2025-11-13T18:17:45Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-groups-00010
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=6
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-props-00000 worker=6
+time="2025-11-13T18:17:45Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-charts-00000
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=4
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-props-00010 worker=4
+time="2025-11-13T18:17:45Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-breakpoints-00000
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-props-00020 worker=3
+time="2025-11-13T18:17:45Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-breakpoints-00040
+time="2025-11-13T18:17:45Z" level=info msg="Adding Carrier span info to context" worker=2
+time="2025-11-13T18:17:45Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-props-00030 worker=2
+time="2025-11-13T18:17:45Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-breakpoints-00030
+time="2025-11-13T18:17:46Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-13T18:17:46Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-props-00040 worker=1
+time="2025-11-13T18:17:46Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-breakpoints-00020
+time="2025-11-13T18:17:46Z" level=info msg="Adding Carrier span info to context" worker=0
+time="2025-11-13T18:17:46Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-props-00050 worker=0
+time="2025-11-13T18:17:46Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-breakpoints-00010
+time="2025-11-13T18:17:46Z" level=info msg="Adding Carrier span info to context" worker=5
+time="2025-11-13T18:17:46Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-props-00060 worker=5
+time="2025-11-13T18:17:46Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-definition-00000
+time="2025-11-13T18:17:46Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-groups-00020
+time="2025-11-13T18:17:46Z" level=info msg="Adding Carrier span info to context" worker=9
+time="2025-11-13T18:17:46Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-renaming-00000 worker=9
+time="2025-11-13T18:26:11Z" level=info msg="Adding Carrier span info to context" worker=0
+time="2025-11-13T18:26:11Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-component-renaming-00010 worker=0
+time="2025-11-13T18:26:11Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-props-00050
+time="2025-11-13T18:26:11Z" level=info msg="Adding Carrier span info to context" worker=8
+time="2025-11-13T18:26:11Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-groups-00000
+time="2025-11-13T18:26:11Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-components-00000 worker=8
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=5
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-components-00010 worker=5
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-props-00060
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=4
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-components-00020 worker=4
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-props-00010
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-components-00030 worker=3
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-props-00020
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=6
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-components-00040 worker=6
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-props-00000
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=2
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-css-classes-00000 worker=2
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-props-00030
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-css-classes-00010 worker=1
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-props-00040
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-css-variables-00000 worker=7
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-deprecation-00000
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-css-variables-00010 worker=7
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-css-variables-00000
+time="2025-11-13T18:26:12Z" level=error msg="failed to evaluate rule" error="failed to perform file content search - could not run grep with provided pattern exit status 2" ruleID=patternfly-5-to-patternfly-6-css-variables-00000
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=9
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-import-paths-00000 worker=9
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-renaming-00000
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-import-paths-00010 worker=7
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-css-variables-00010
+time="2025-11-13T18:26:12Z" level=error msg="failed to evaluate rule" error="failed to perform file content search - could not run grep with provided pattern exit status 2" ruleID=patternfly-5-to-patternfly-6-css-variables-00010
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-library-structure-change-00000 worker=3
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-components-00030
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=2
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-package-version-00000 worker=2
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-css-classes-00000
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-css-classes-00010
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-package-version-00010 worker=1
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-package-version-00000
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-import-paths-00010
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-package-version-00020 worker=7
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=2
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-package-version-00030 worker=2
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-patternfly-upgrade-00000 worker=3
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-library-structure-change-00000
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-package-version-00010
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-patternfly-upgrade-00010 worker=1
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=2
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-patternfly-upgrade-00020 worker=2
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-package-version-00030
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-patternfly-upgrade-00030 worker=7
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-package-version-00020
+time="2025-11-13T18:26:12Z" level=info msg="Adding Carrier span info to context" worker=9
+time="2025-11-13T18:26:12Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-property-update-00000 worker=9
+time="2025-11-13T18:26:12Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-import-paths-00000
+time="2025-11-13T18:26:13Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-13T18:26:13Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-react-components-00000 worker=3
+time="2025-11-13T18:26:13Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-patternfly-upgrade-00000
+time="2025-11-13T18:26:13Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-patternfly-upgrade-00010
+time="2025-11-13T18:26:13Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-13T18:26:13Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-react-tokens-00000 worker=1
+time="2025-11-13T18:26:13Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-patternfly-upgrade-00020
+time="2025-11-13T18:26:13Z" level=info msg="Adding Carrier span info to context" worker=2
+time="2025-11-13T18:26:13Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-toolbar-00000 worker=2
+time="2025-11-13T18:26:13Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-patternfly-upgrade-00030
+time="2025-11-13T18:26:13Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-13T18:26:13Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-toolbar-00010 worker=7
+time="2025-11-13T18:26:13Z" level=info msg="Adding Carrier span info to context" worker=2
+time="2025-11-13T18:26:13Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-toolbar-00020 worker=2
+time="2025-11-13T18:26:13Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-toolbar-00000
+time="2025-11-13T18:26:13Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-13T18:26:13Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-toolbar-00030 worker=3
+time="2025-11-13T18:26:13Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-react-components-00000
+time="2025-11-13T18:26:13Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-react-tokens-00000
+time="2025-11-13T18:26:13Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-13T18:26:13Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-toolbar-00040 worker=1
+time="2025-11-13T18:26:13Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-toolbar-00010
+time="2025-11-13T18:26:13Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-13T18:26:13Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-toolbar-00050 worker=7
+time="2025-11-13T18:26:14Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-13T18:26:14Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-toolbar-00060 worker=3
+time="2025-11-13T18:26:14Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-toolbar-00030
+time="2025-11-13T18:26:14Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-13T18:26:14Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-toolbar-00070 worker=7
+time="2025-11-13T18:26:14Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-toolbar-00050
+time="2025-11-13T18:26:14Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-13T18:26:14Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-toolbar-00080 worker=1
+time="2025-11-13T18:26:14Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-toolbar-00040
+time="2025-11-13T18:26:14Z" level=info msg="Adding Carrier span info to context" worker=3
+time="2025-11-13T18:26:14Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-ui-component-migration-00000 worker=3
+time="2025-11-13T18:26:14Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-toolbar-00060
+time="2025-11-13T18:26:14Z" level=info msg="Adding Carrier span info to context" worker=7
+time="2025-11-13T18:26:14Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-ui-component-migration-00010 worker=7
+time="2025-11-13T18:26:14Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-toolbar-00070
+time="2025-11-13T18:26:14Z" level=info msg="Adding Carrier span info to context" worker=1
+time="2025-11-13T18:26:14Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-ui-component-migration-00020 worker=1
+time="2025-11-13T18:26:14Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-toolbar-00080
+time="2025-11-13T18:34:37Z" level=info msg="Adding Carrier span info to context" worker=6
+time="2025-11-13T18:34:37Z" level=info msg="processing rule" logger=process-rule ruleID=patternfly-5-to-patternfly-6-wizard-00000 worker=6
+time="2025-11-13T18:34:37Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-components-00040
+time="2025-11-13T18:34:37Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-components-00000
+time="2025-11-13T18:34:37Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-component-renaming-00010
+time="2025-11-13T18:34:37Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-wizard-00000
+time="2025-11-13T18:34:37Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-components-00020
+time="2025-11-13T18:34:38Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-components-00010
+time="2025-11-13T18:34:38Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-property-update-00000
+time="2025-11-13T18:34:39Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-ui-component-migration-00000
+time="2025-11-13T18:34:39Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-toolbar-00020
+time="2025-11-13T18:34:40Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-ui-component-migration-00020
+time="2025-11-13T18:34:40Z" level=info msg="rule returned" ruleID=patternfly-5-to-patternfly-6-ui-component-migration-00010

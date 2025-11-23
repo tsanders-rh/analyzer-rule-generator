@@ -1,0 +1,21 @@
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00000
+  description: <MenuToggle variant='plain'><Icon /></MenuToggle> should be replaced
+    with <MenuToggle icon={Icon} variant='plain' />
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: MenuToggle
+  message: "Icons should be passed to the icon prop instead of as children for proper\
+    \ styling.\n\nReplace `<MenuToggle variant='plain'><Icon /></MenuToggle>` with\
+    \ `<MenuToggle icon={Icon} variant='plain' />`.\n\nBefore:\n```\n<MenuToggle aria-label='A\
+    \ descriptive aria-label' variant='plain'>\n  <EllipsisVIcon />\n</MenuToggle>\n\
+    ```\n\nAfter:\n```\n<MenuToggle icon={EllipsisVIcon} aria-label='A descriptive\
+    \ aria-label' variant='plain' />\n```"
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10097
+    title: patternfly-v6 Documentation
+  customVariables: []

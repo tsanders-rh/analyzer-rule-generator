@@ -1,0 +1,41 @@
+- ruleID: patternfly-v5-to-patternfly-v6-helper-text-00000
+  description: HelperTextItem hasIcon prop should be replaced with Remove hasIcon
+    prop
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: HelperTextItem
+  message: 'The hasIcon and isDynamic props have been removed from HelperTextItem.
+    An icon will now render automatically when the variant prop has a value other
+    than "default" or when the icon prop is passed in.
+
+
+    Replace `HelperTextItem hasIcon prop` with `Remove hasIcon prop`.
+
+
+    Before:
+
+    ```
+
+    import { HelperTextItem } from "@patternfly/react-core"; export const HelperTextItemRemovePropsInput
+    = () => ( <HelperTextItem hasIcon /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { HelperTextItem } from "@patternfly/react-core"; export const HelperTextItemRemovePropsInput
+    = () => ( <HelperTextItem /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10029
+    title: patternfly-v6 Documentation
+  customVariables: []

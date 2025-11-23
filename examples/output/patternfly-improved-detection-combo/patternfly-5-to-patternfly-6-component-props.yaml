@@ -1,0 +1,286 @@
+- ruleID: patternfly-5-to-patternfly-6-component-props-00000
+  description: AccordionContent isHidden should be replaced with AccordionContent
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-5
+  - konveyor.io/target=patternfly-6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: AccordionContent
+    - builtin.filecontent:
+        pattern: <AccordionContent[^>]*\bisHidden\b
+        filePattern: \.(j|t)sx?$
+  message: 'The ''isHidden'' prop has been removed as visibility is now automatically
+    managed.
+
+
+    Replace `AccordionContent isHidden` with `AccordionContent`.
+
+
+    Before:
+
+    ```
+
+    <AccordionContent isHidden />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <AccordionContent />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9876
+    title: patternfly-6 Documentation
+  customVariables: []
+- ruleID: patternfly-5-to-patternfly-6-component-props-00010
+  description: AccordionToggle isExpanded should be replaced with AccordionItem isExpanded
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-5
+  - konveyor.io/target=patternfly-6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: AccordionToggle
+    - builtin.filecontent:
+        pattern: <AccordionToggle[^>]*\bisExpanded\b
+        filePattern: \.(j|t)sx?$
+  message: 'The ''isExpanded'' prop has been moved from AccordionToggle to AccordionItem.
+
+
+    Replace `AccordionToggle isExpanded` with `AccordionItem isExpanded`.
+
+
+    Before:
+
+    ```
+
+    <AccordionItem><AccordionToggle isExpanded /></AccordionItem>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <AccordionItem isExpanded><AccordionToggle /></AccordionItem>
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9876
+    title: patternfly-6 Documentation
+  customVariables: []
+- ruleID: patternfly-5-to-patternfly-6-component-props-00020
+  description: Avatar border should be replaced with Avatar isBordered
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-5
+  - konveyor.io/target=patternfly-6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Avatar
+    - builtin.filecontent:
+        pattern: <Avatar[^>]*\bborder\s*=
+        filePattern: \.(j|t)sx?$
+  message: 'The ''border'' prop has been replaced with ''isBordered'' for theming
+    consistency.
+
+
+    Replace `Avatar border` with `Avatar isBordered`.
+
+
+    Before:
+
+    ```
+
+    <Avatar border={''dark''} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Avatar isBordered />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9881
+    title: patternfly-6 Documentation
+  customVariables: []
+- ruleID: patternfly-5-to-patternfly-6-component-props-00030
+  description: Banner variant should be replaced with Banner color
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-5
+  - konveyor.io/target=patternfly-6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Banner
+    - builtin.filecontent:
+        pattern: <Banner[^>]*\bvariant\s*=
+        filePattern: \.(j|t)sx?$
+  message: 'The ''variant'' property has been removed. Use ''color'' or ''status''
+    depending on the original intent.
+
+
+    Replace `Banner variant` with `Banner color`.
+
+
+    Before:
+
+    ```
+
+    <Banner variant=''red'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Banner color=''red'' />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9891
+    title: patternfly-6 Documentation
+  customVariables: []
+- ruleID: patternfly-5-to-patternfly-6-component-props-00040
+  description: Button isActive should be replaced with Button isClicked
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-5
+  - konveyor.io/target=patternfly-6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Button
+    - builtin.filecontent:
+        pattern: <Button[^>]*\bisActive\b
+        filePattern: \.(j|t)sx?$
+  message: 'The ''isActive'' prop has been renamed to ''isClicked'' to better reflect
+    its usage.
+
+
+    Replace `Button isActive` with `Button isClicked`.
+
+
+    Before:
+
+    ```
+
+    <Button isActive />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Button isClicked />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9934
+    title: patternfly-6 Documentation
+  customVariables: []
+- ruleID: patternfly-5-to-patternfly-6-component-props-00050
+  description: Card isSelectableRaised should be replaced with Card
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-5
+  - konveyor.io/target=patternfly-6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Card
+    - builtin.filecontent:
+        pattern: <Card[^>]*\b(isSelectableRaised|isDisabledRaised|hasSelectableInput|selectableInputAriaLabel)\b
+        filePattern: \.(j|t)sx?$
+  message: 'Props related to raised or clickable cards have been removed.
+
+
+    Replace `Card isSelectableRaised` with `Card`.
+
+
+    Before:
+
+    ```
+
+    <Card isSelectableRaised isDisabledRaised hasSelectableInput selectableInputAriaLabel=''aria
+    label'' onSelectableInputChange={() => {}} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Card />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10056
+    title: patternfly-6 Documentation
+  customVariables: []
+- ruleID: patternfly-5-to-patternfly-6-component-props-00060
+  description: Checkbox isLabelBeforeButton should be replaced with Checkbox labelPosition='start'
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-5
+  - konveyor.io/target=patternfly-6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Checkbox
+    - builtin.filecontent:
+        pattern: <Checkbox[^>]*\bisLabelBeforeButton\b
+        filePattern: \.(j|t)sx?$
+  message: 'The ''isLabelBeforeButton'' prop has been replaced with ''labelPosition="start"''
+    for better clarity.
+
+
+    Replace `Checkbox isLabelBeforeButton` with `Checkbox labelPosition=''start''`.
+
+
+    Before:
+
+    ```
+
+    <Checkbox isLabelBeforeButton />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Checkbox labelPosition=''start'' />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10016
+    title: patternfly-6 Documentation
+  customVariables: []

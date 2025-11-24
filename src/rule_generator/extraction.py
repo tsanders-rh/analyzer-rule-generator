@@ -442,17 +442,54 @@ Use when you need to find type/method/field references in C# code:
 Fields:
 - **provider_type**: Set to "csharp"
 - **source_fqn**: Fully qualified name or regex pattern (e.g., "System.Web.Http", "System.*.Http", "*.Web.Mvc")
-- **location_type**: Optional - One of FIELD, CLASS, METHOD, or ALL (defaults to ALL if not specified)
+- **location_type**: Optional - MUST be one of: FIELD, CLASS, METHOD, or ALL (defaults to ALL if not specified)
+  - **FIELD**: Use for field/property references
+  - **CLASS**: Use for class/type references (including attributes/annotations)
+  - **METHOD**: Use for method invocations
+  - **ALL**: Use for any reference type (default)
 - **file_pattern**: Must be null (csharp provider doesn't support file filtering)
 
-Example for namespace/type reference:
+**CRITICAL: C# Location Type Restrictions**
+- ❌ DO NOT use Java location types: ANNOTATION, METHOD_CALL, TYPE, IMPORT, INHERITANCE, PACKAGE
+- ✅ ONLY use C# location types: FIELD, CLASS, METHOD, ALL
+- For attributes/annotations → use "CLASS"
+- For method calls → use "METHOD" (not METHOD_CALL)
+- For type references → use "CLASS" (not TYPE)
+- For fields/properties → use "FIELD"
+- When unsure → use "ALL"
+
+Example for method invocation:
 ```json
 {{
-  "source_pattern": "HttpNotFound",
-  "target_pattern": "NotFound",
-  "source_fqn": "System.Web.Mvc.HttpNotFound",
+  "source_pattern": "SignedCms.ComputeSignature",
+  "target_pattern": "SignedCms.ComputeSignature with updated behavior",
+  "source_fqn": "System.Security.Cryptography.Pkcs.SignedCms.ComputeSignature",
   "provider_type": "csharp",
   "location_type": "METHOD",
+  "file_pattern": null
+}}
+```
+
+Example for attribute/annotation:
+```json
+{{
+  "source_pattern": "HandleProcessCorruptedStateExceptionsAttribute",
+  "target_pattern": null,
+  "source_fqn": "System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptionsAttribute",
+  "provider_type": "csharp",
+  "location_type": "CLASS",
+  "file_pattern": null
+}}
+```
+
+Example for field/property:
+```json
+{{
+  "source_pattern": "FileSystemInfo.Attributes",
+  "target_pattern": "FileSystemInfo.Attributes with updated behavior",
+  "source_fqn": "System.IO.FileSystemInfo.Attributes",
+  "provider_type": "csharp",
+  "location_type": "FIELD",
   "file_pattern": null
 }}
 ```

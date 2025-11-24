@@ -27,6 +27,14 @@ class LocationType(str, Enum):
     ANNOTATION = "ANNOTATION"
 
 
+class CSharpLocationType(str, Enum):
+    """C# provider location types."""
+    FIELD = "FIELD"
+    CLASS = "CLASS"
+    METHOD = "METHOD"
+    ALL = "ALL"
+
+
 class JavaReferenced(BaseModel):
     """Java provider condition for referenced code."""
     pattern: str = Field(..., description="Pattern to match (supports wildcards)")
@@ -48,6 +56,12 @@ class NodejsReferenced(BaseModel):
     # For file filtering, use builtin.filecontent with filePattern instead.
 
 
+class CSharpReferenced(BaseModel):
+    """C# provider condition for referenced code in C# projects."""
+    pattern: str = Field(..., description="Pattern to match (FQDN like System.Web.Http or regex like *.Web.Http, System.*.Http)")
+    location: Optional[CSharpLocationType] = Field(None, description="Where to look for the pattern (FIELD, CLASS, METHOD, ALL). Defaults to ALL if not specified.")
+
+
 class BuiltinFileContent(BaseModel):
     """Builtin provider for file content search."""
     pattern: str = Field(..., description="Regex pattern to search for")
@@ -67,7 +81,7 @@ class BuiltinXML(BaseModel):
 
 # When condition can be a provider condition or logical operator
 WhenCondition = Union[
-    Dict[str, Union['JavaReferenced', 'JavaDependency', 'NodejsReferenced', 'BuiltinFileContent', 'BuiltinFile', 'BuiltinXML', List['WhenCondition']]],
+    Dict[str, Union['JavaReferenced', 'JavaDependency', 'NodejsReferenced', 'CSharpReferenced', 'BuiltinFileContent', 'BuiltinFile', 'BuiltinXML', List['WhenCondition']]],
     List['WhenCondition']
 ]
 
@@ -110,8 +124,8 @@ class MigrationPattern(BaseModel):
     rationale: str = Field(..., description="Why this change is needed")
 
     # For generating 'when' conditions
-    source_fqn: Optional[str] = Field(None, description="Fully qualified name (e.g., 'javax.ejb.Stateless')")
-    location_type: Optional[LocationType] = Field(None, description="Where to look (ANNOTATION, IMPORT, etc.)")
+    source_fqn: Optional[str] = Field(None, description="Fully qualified name (e.g., 'javax.ejb.Stateless' for Java, 'System.Web.Http' for C#)")
+    location_type: Optional[Union[LocationType, CSharpLocationType, str]] = Field(None, description="Where to look (Java: ANNOTATION, IMPORT, etc.; C#: FIELD, CLASS, METHOD, ALL)")
 
     # Alternative FQNs (for or conditions - javax vs jakarta)
     alternative_fqns: Optional[List[str]] = Field(default_factory=list, description="Alternative FQNs (e.g., jakarta.ejb.Stateless)")
@@ -122,7 +136,7 @@ class MigrationPattern(BaseModel):
     concern: str = Field(default="general", description="Migration concern/topic for grouping (e.g., 'mongodb', 'security', 'web')")
 
     # Provider configuration
-    provider_type: Optional[str] = Field(default=None, description="Provider type: 'java', 'nodejs', 'builtin', or 'combo' (auto-detected if not specified)")
+    provider_type: Optional[str] = Field(default=None, description="Provider type: 'java', 'nodejs', 'csharp', 'builtin', or 'combo' (auto-detected if not specified)")
     file_pattern: Optional[str] = Field(default=None, description="File pattern for builtin.filecontent provider (regex, e.g., '\\.tsx$' or '\\.(j|t)sx?$')")
 
     # Combo rule configuration (when provider_type="combo")

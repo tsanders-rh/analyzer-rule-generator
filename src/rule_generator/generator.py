@@ -12,7 +12,7 @@ Generates analyzer rules with:
 from typing import List, Optional, Dict, Any
 from collections import defaultdict
 
-from .schema import AnalyzerRule, MigrationPattern, Category, Link, LocationType
+from .schema import AnalyzerRule, MigrationPattern, Category, Link, LocationType, CSharpLocationType
 
 
 class AnalyzerRuleGenerator:
@@ -233,9 +233,9 @@ class AnalyzerRuleGenerator:
 
             return {"and": conditions}
 
-        # Nodejs provider can use source_pattern as fallback
+        # Nodejs and csharp providers can use source_pattern as fallback
         # Other providers require source_fqn
-        if provider != "nodejs" and not pattern.source_fqn:
+        if provider not in ["nodejs", "csharp"] and not pattern.source_fqn:
             # If no FQN, we can't create a proper when condition for static analysis
             return None
 
@@ -275,6 +275,26 @@ class AnalyzerRuleGenerator:
                     "pattern": pattern.source_fqn or pattern.source_pattern
                 }
             }
+
+            return condition
+
+        elif provider == "csharp":
+            # Use c-sharp.referenced for semantic symbol analysis in C# code
+            # The c-sharp provider finds references to types, methods, fields, etc.
+
+            # Build c-sharp.referenced condition
+            condition = {
+                "c-sharp.referenced": {
+                    "pattern": pattern.source_fqn or pattern.source_pattern
+                }
+            }
+
+            # Add location if specified (FIELD, CLASS, METHOD, ALL)
+            # Note: If location is not specified, defaults to ALL
+            if pattern.location_type:
+                # Convert enum to string if necessary
+                location_str = pattern.location_type.value if hasattr(pattern.location_type, 'value') else str(pattern.location_type)
+                condition["c-sharp.referenced"]["location"] = location_str
 
             return condition
 

@@ -44,12 +44,23 @@ def detect_language_from_frameworks(source: str, target: str) -> str:
         'quarkus', 'micronaut', 'maven', 'gradle'
     ]
 
+    # C# / .NET frameworks
+    csharp_keywords = [
+        'dotnet', '.net', 'csharp', 'c#', 'asp.net', 'aspnet', 'entityframework',
+        'ef', 'mvc', 'webapi', 'blazor', 'xamarin', 'maui', 'nuget',
+        'dotnetcore', 'netcore', 'netframework'
+    ]
+
     # Check for JS/TS patterns
     if any(keyword in frameworks for keyword in js_ts_keywords):
         # If TypeScript is explicitly mentioned, return typescript
         if 'typescript' in frameworks:
             return 'typescript'
         return 'javascript'
+
+    # Check for C# / .NET patterns
+    if any(keyword in frameworks for keyword in csharp_keywords):
+        return 'csharp'
 
     # Check for Java patterns
     if any(keyword in frameworks for keyword in java_keywords):
@@ -414,6 +425,58 @@ This matches every occurrence of "title" as an identifier!
 - Unique props that only exist on one component (but combo is still safer!)
 
 """
+        elif language == "csharp":
+            lang_instructions = """
+**IMPORTANT - C# / .NET Detection Instructions:**
+
+For C# code patterns, use the C# provider for semantic analysis:
+
+**C# Provider (for semantic analysis)**
+Use when you need to find type/method/field references in C# code:
+- Classes: `public class MyController`
+- Methods: `public void MyMethod()`
+- Fields: `private string _field`
+- Namespaces: `System.Web.Mvc`
+- Types and interfaces
+
+Fields:
+- **provider_type**: Set to "csharp"
+- **source_fqn**: Fully qualified name or regex pattern (e.g., "System.Web.Http", "System.*.Http", "*.Web.Mvc")
+- **location_type**: Optional - One of FIELD, CLASS, METHOD, or ALL (defaults to ALL if not specified)
+- **file_pattern**: Must be null (csharp provider doesn't support file filtering)
+
+Example for namespace/type reference:
+```json
+{{
+  "source_pattern": "HttpNotFound",
+  "target_pattern": "NotFound",
+  "source_fqn": "System.Web.Mvc.HttpNotFound",
+  "provider_type": "csharp",
+  "location_type": "METHOD",
+  "file_pattern": null
+}}
+```
+
+Example with wildcard pattern:
+```json
+{{
+  "source_pattern": "System.Web.Http",
+  "target_pattern": "Microsoft.AspNetCore.Mvc",
+  "source_fqn": "System.Web.Http.*",
+  "provider_type": "csharp",
+  "location_type": "ALL",
+  "file_pattern": null
+}}
+```
+
+**Configuration File Detection:**
+For configuration file patterns (appsettings.json, web.config), use builtin provider:
+- **provider_type**: Set to "builtin"
+- **source_fqn**: SIMPLE regex pattern (e.g., "connectionStrings")
+- **file_pattern**: Regex pattern for config files (e.g., "appsettings.*\\.json$" or "web\\.config$")
+- **location_type**: null
+
+"""
         else:
             lang_instructions = """
 **Java Detection Instructions:**
@@ -530,12 +593,12 @@ Return your findings as a JSON array. Each pattern should be an object with thes
   "source_pattern": "string",
   "target_pattern": "string",
   "source_fqn": "string or null",
-  "location_type": "ANNOTATION|IMPORT|METHOD_CALL|TYPE|INHERITANCE|PACKAGE or null",
+  "location_type": "ANNOTATION|IMPORT|METHOD_CALL|TYPE|INHERITANCE|PACKAGE|FIELD|CLASS|METHOD|ALL or null",
   "alternative_fqns": ["string"] or [],
   "complexity": "TRIVIAL|LOW|MEDIUM|HIGH|EXPERT",
   "category": "string",
   "concern": "string",
-  "provider_type": "java|nodejs|builtin|combo or null",
+  "provider_type": "java|nodejs|csharp|builtin|combo or null",
   "file_pattern": "string or null",
   "when_combo": {{
     "nodejs_pattern": "string",
@@ -743,7 +806,7 @@ Return your findings as a JSON array with these fields:
   "source_pattern": "string",
   "target_pattern": "string",
   "source_fqn": "string or null",
-  "location_type": "ANNOTATION|IMPORT|METHOD_CALL|TYPE|INHERITANCE|PACKAGE or null",
+  "location_type": "ANNOTATION|IMPORT|METHOD_CALL|TYPE|INHERITANCE|PACKAGE|FIELD|CLASS|METHOD|ALL or null",
   "alternative_fqns": ["string"] or [],
   "complexity": "TRIVIAL|LOW|MEDIUM|HIGH|EXPERT",
   "category": "dependency|annotation|api|configuration|other",

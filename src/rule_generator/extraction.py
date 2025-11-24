@@ -12,7 +12,7 @@ import json
 import re
 from typing import List, Optional
 
-from .schema import MigrationPattern, LocationType
+from .schema import MigrationPattern, LocationType, CSharpLocationType
 from .llm import LLMProvider
 
 
@@ -858,13 +858,18 @@ Return ONLY the JSON array, no additional commentary."""
         patterns = []
         for data in patterns_data:
             try:
-                # Map location_type string to enum
+                # Map location_type string to enum (try both Java and C# enums)
                 location_type = None
                 if data.get("location_type"):
                     try:
+                        # Try Java LocationType first
                         location_type = LocationType(data["location_type"])
                     except ValueError:
-                        print(f"Warning: Unknown location type: {data.get('location_type')}")
+                        try:
+                            # Try C# CSharpLocationType
+                            location_type = CSharpLocationType(data["location_type"])
+                        except ValueError:
+                            print(f"Warning: Unknown location type: {data.get('location_type')}")
 
                 pattern = MigrationPattern(
                     source_pattern=data["source_pattern"],

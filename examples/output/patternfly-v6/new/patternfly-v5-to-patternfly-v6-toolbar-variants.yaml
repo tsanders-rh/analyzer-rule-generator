@@ -1,0 +1,228 @@
+- ruleID: patternfly-v5-to-patternfly-v6-toolbar-variants-00000
+  description: variant='button-group' should be replaced with variant='action-group'
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: button-group
+      filePattern: \.(j|t)sx?$
+  message: 'The variant prop of ToolbarGroup and ToolbarToggleGroup had ''button-group''
+    option renamed to ''action-group''
+
+
+    Replace `variant=''button-group''` with `variant=''action-group''`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup variant=''button-group'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup variant="action-group" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-toolbar-variants-00010
+  description: variant='icon-button-group' should be replaced with variant='action-group-plain'
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: icon-button-group
+      filePattern: \.(j|t)sx?$
+  message: 'The variant prop of ToolbarGroup and ToolbarToggleGroup had ''icon-button-group''
+    option renamed to ''action-group-plain''
+
+
+    Replace `variant=''icon-button-group''` with `variant=''action-group-plain''`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup variant=''icon-button-group'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup variant="action-group-plain" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-toolbar-variants-00020
+  description: variant="chip-group" should be replaced with variant="label-group"
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: chip-group
+      filePattern: \.(j|t)sx?$
+  message: 'The variant prop for ToolbarItem has been updated: ''chip-group'' was
+    renamed to ''label-group''
+
+
+    Replace `variant="chip-group"` with `variant="label-group"`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarItem variant="chip-group" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarItem variant="label-group" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10649
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-toolbar-variants-00030
+  description: variant="bulk-select" should be replaced with variant removed
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: bulk-select
+      filePattern: \.(j|t)sx?$
+  message: 'The variant prop for ToolbarItem has been updated: ''bulk-select'' was
+    removed
+
+
+    Replace `variant="bulk-select"` with `variant removed`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarItem variant="bulk-select" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarItem />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10649
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-toolbar-variants-00040
+  description: variant="overflow-menu" should be replaced with variant removed
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: overflow-menu
+      filePattern: \.(j|t)sx?$
+  message: 'The variant prop for ToolbarItem has been updated: ''overflow-menu'' was
+    removed
+
+
+    Replace `variant="overflow-menu"` with `variant removed`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarItem variant="overflow-menu" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarItem />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10649
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-toolbar-variants-00050
+  description: variant="search-filter" should be replaced with variant removed
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: search-filter
+      filePattern: \.(j|t)sx?$
+  message: 'The variant prop for ToolbarItem has been updated: ''search-filter'' was
+    removed
+
+
+    Replace `variant="search-filter"` with `variant removed`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarItem variant="search-filter" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarItem />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10649
+    title: patternfly-v6 Documentation
+  customVariables: []

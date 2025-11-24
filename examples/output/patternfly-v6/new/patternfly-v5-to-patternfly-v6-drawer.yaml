@@ -1,0 +1,80 @@
+- ruleID: patternfly-v5-to-patternfly-v6-drawer-00000
+  description: DrawerHead hasNoPadding prop should be replaced with Remove hasNoPadding
+    prop
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: DrawerHead
+  message: 'The hasNoPadding prop has been removed from DrawerHead.
+
+
+    Replace `DrawerHead hasNoPadding prop` with `Remove hasNoPadding prop`.
+
+
+    Before:
+
+    ```
+
+    import { DrawerHead } from "@patternfly/react-core"; export const DrawerRemovePropsInput
+    = () => <DrawerHead hasNoPadding />;
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { DrawerHead } from "@patternfly/react-core"; export const DrawerRemovePropsInput
+    = () => <DrawerHead />;
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10036
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-drawer-00010
+  description: DrawerContent colorVariant='light-200' should be replaced with DrawerContent
+    colorVariant='secondary'
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: DrawerContent
+  message: 'The "light-200" value for the colorVariant prop has been replaced with
+    the "secondary" value for DrawerContent, DrawerPanelContent, and DrawerSection
+    components.
+
+
+    Replace `DrawerContent colorVariant=''light-200''` with `DrawerContent colorVariant=''secondary''`.
+
+
+    Before:
+
+    ```
+
+    import { DrawerContent } from "@patternfly/react-core"; export const DrawerReplaceColorVariantLight200Input
+    = () => ( <DrawerContent colorVariant=''light-200'' /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { DrawerContent } from "@patternfly/react-core"; export const DrawerReplaceColorVariantLight200Input
+    = () => ( <DrawerContent colorVariant="secondary" /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10017
+    title: patternfly-v6 Documentation
+  customVariables: []

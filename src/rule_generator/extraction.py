@@ -294,6 +294,125 @@ IMPORTANT: In JSON, backslashes must be escaped. Use \\\\ for regex backslashes.
 - ✅ Use builtin provider: Patterns that need file type filtering using regex filePattern
 - When in doubt about file filtering, use builtin provider with filePattern
 
+**CRITICAL: Component Prop Changes - Use COMBO RULES (nodejs + builtin)**
+
+When a migration involves changing a prop on a SPECIFIC component (e.g., Button's isActive → isPressed), you MUST use a COMBO RULE that combines BOTH nodejs.referenced (for the component) AND builtin.filecontent (for the prop pattern).
+
+**IMPORTANT: Use "when_combo" field for combining conditions**
+
+✅ CORRECT - Combo rule for component-specific prop change:
+```json
+{{
+  "source_pattern": "Button isActive",
+  "target_pattern": "Button isPressed",
+  "source_fqn": "Button",
+  "provider_type": "combo",
+  "when_combo": {{
+    "nodejs_pattern": "Button",
+    "builtin_pattern": "<Button[^>]*\\\\bisActive\\\\b",
+    "file_pattern": "\\\\.(j|t)sx?$"
+  }},
+  "rationale": "Button's isActive prop has been renamed to isPressed",
+  "complexity": "MEDIUM"
+}}
+```
+
+This creates a rule with:
+```yaml
+when:
+  and:
+  - nodejs.referenced:
+      pattern: Button
+  - builtin.filecontent:
+      pattern: <Button[^>]*\\bisActive\\b
+      filePattern: \\.(j|t)sx?$
+```
+
+**Benefits of Combo Rules:**
+- ✅ Only matches when BOTH conditions are true
+- ✅ nodejs.referenced ensures the component exists in the file
+- ✅ builtin.filecontent ensures the specific prop usage exists
+- ✅ No false positives from other components with same prop
+- ✅ No false positives from variables with same name
+
+**Pattern Guidelines for Combo Rules:**
+
+1. **nodejs_pattern**: Component name (e.g., "Button", "AccordionContent")
+
+2. **builtin_pattern**: Component + prop regex pattern
+   - Use `<ComponentName[^>]*\\bisActive\\b` format
+   - `[^>]*` matches any content until closing `>`
+   - `\\b` creates word boundaries to avoid partial matches
+   - Escape special regex characters properly
+
+3. **file_pattern**: "\\\\.(j|t)sx?$" for JSX/TSX files
+
+**Examples:**
+
+Example 1 - Button isActive → isPressed:
+```json
+{{
+  "source_pattern": "Button isActive",
+  "target_pattern": "Button isPressed",
+  "source_fqn": "Button",
+  "provider_type": "combo",
+  "when_combo": {{
+    "nodejs_pattern": "Button",
+    "builtin_pattern": "<Button[^>]*\\\\bisActive\\\\b",
+    "file_pattern": "\\\\.(j|t)sx?$"
+  }},
+  "rationale": "Button's isActive prop renamed to isPressed"
+}}
+```
+
+Example 2 - AccordionContent isHidden (removed):
+```json
+{{
+  "source_pattern": "AccordionContent isHidden",
+  "target_pattern": "AccordionContent",
+  "source_fqn": "AccordionContent",
+  "provider_type": "combo",
+  "when_combo": {{
+    "nodejs_pattern": "AccordionContent",
+    "builtin_pattern": "<AccordionContent[^>]*\\\\bisHidden\\\\b",
+    "file_pattern": "\\\\.(j|t)sx?$"
+  }},
+  "rationale": "isHidden prop removed, visibility now automatic"
+}}
+```
+
+❌ WRONG - Using single provider for component-specific props:
+```json
+{{
+  "source_fqn": "isActive",
+  "provider_type": "builtin"
+}}
+```
+This matches isActive on ALL components and ALL variables!
+
+❌ WRONG - Using nodejs.referenced for common prop names:
+```json
+{{
+  "source_fqn": "title",
+  "provider_type": "nodejs"
+}}
+```
+This matches every occurrence of "title" as an identifier!
+
+**When to Use Combo Rules:**
+
+✅ ALWAYS use combo rules for component-specific prop changes:
+- Button's isActive → isPressed
+- AccordionToggle's isExpanded → move to AccordionItem
+- Modal's title → titleText
+- Any prop change on a specific component
+
+❌ Use single provider for:
+- Component renames (nodejs.referenced for old component name)
+- Import path changes (builtin.filecontent for import statements)
+- CSS variable changes (builtin.filecontent for CSS files)
+- Unique props that only exist on one component (but combo is still safer!)
+
 """
         else:
             lang_instructions = """
@@ -361,12 +480,49 @@ Example for Spring Boot property migration:
 10. **Documentation URL**: Link to relevant documentation (if available in guide)
 11. **Example Before/After**: Code examples if present
 
+**CRITICAL WARNING - Component Prop Detection Strategy:**
+
+For component-specific prop changes (e.g., "Button's isActive → isPressed"):
+
+**REQUIRED: Use COMBO RULES (provider_type: "combo")**
+- Set provider_type to "combo"
+- Include when_combo object with nodejs_pattern, builtin_pattern, and file_pattern
+- This combines nodejs.referenced (for component) + builtin.filecontent (for prop)
+- See the JavaScript/TypeScript instructions above for detailed examples
+
+**NEVER use generic prop detection:**
+- ❌ DON'T set provider_type to "nodejs" and source_fqn to a common prop name
+- ❌ DON'T set provider_type to "builtin" and source_fqn to a common prop name
+- ✅ DO use combo rules for ALL component-specific prop changes
+
 ---
 MIGRATION GUIDE CONTENT:
 
 {guide_content}
 
 ---
+
+**CRITICAL REMINDER - Component Prop Changes:**
+
+For JavaScript/TypeScript migrations where a prop changes on a SPECIFIC component:
+- ✅ ALWAYS use `"provider_type": "combo"`
+- ✅ ALWAYS include `"when_combo"` with nodejs_pattern (component name), builtin_pattern (component + prop), and file_pattern
+- ❌ NEVER use `"provider_type": "builtin"` with just a prop name
+- ❌ NEVER use `"provider_type": "nodejs"` with just a prop name
+
+Example - Button's isActive → isPressed:
+```json
+{{
+  "source_pattern": "Button isActive",
+  "source_fqn": "Button",
+  "provider_type": "combo",
+  "when_combo": {{
+    "nodejs_pattern": "Button",
+    "builtin_pattern": "<Button[^>]*\\\\bisActive\\\\b",
+    "file_pattern": "\\\\.(j|t)sx?$"
+  }}
+}}
+```
 
 Return your findings as a JSON array. Each pattern should be an object with these fields:
 
@@ -379,15 +535,63 @@ Return your findings as a JSON array. Each pattern should be an object with thes
   "complexity": "TRIVIAL|LOW|MEDIUM|HIGH|EXPERT",
   "category": "string",
   "concern": "string",
-  "provider_type": "java|nodejs|builtin or null",
+  "provider_type": "java|nodejs|builtin|combo or null",
   "file_pattern": "string or null",
+  "when_combo": {{
+    "nodejs_pattern": "string",
+    "builtin_pattern": "string",
+    "file_pattern": "string"
+  }} or null,
   "rationale": "string",
   "example_before": "string or null",
   "example_after": "string or null",
   "documentation_url": "string or null"
 }}
 
+Note: when_combo is REQUIRED when provider_type is "combo", otherwise it should be null.
+
 Focus on patterns that can be detected via static analysis. Skip general advice or manual migration steps.
+
+**CRITICAL: Pattern Granularity Rules**
+
+When a migration involves MULTIPLE specific value replacements, you MUST create SEPARATE patterns for EACH value pair:
+
+1. ✅ DO: Create individual patterns for each specific value
+   - Example: For pixel→rem conversions, create separate rules:
+     * "576px" → "36rem" (one pattern)
+     * "768px" → "48rem" (another pattern)
+     * "992px" → "62rem" (another pattern)
+   - Example: For enum renames, create separate rules:
+     * "alignLeft" → "alignStart" (one pattern)
+     * "alignRight" → "alignEnd" (another pattern)
+
+2. ❌ DON'T: Create generic catch-all patterns
+   - DON'T: "breakpoint pixel values" → "breakpoint rem values"
+   - DON'T: "alignment values" → "updated alignment values"
+
+3. When you see multiple related changes in the guide, treat each as a separate pattern with:
+   - Exact source value in source_pattern
+   - Exact target value in target_pattern
+   - Specific description (see below)
+
+**Description Format Rules:**
+
+- Use SPECIFIC values, not generic descriptions
+- Format: "{{exact_source}} should be replaced with {{exact_target}}"
+- ✅ GOOD: "576px should be replaced with 36rem"
+- ✅ GOOD: "alignLeft should be replaced with alignStart"
+- ✅ GOOD: "variant='button-group' should be replaced with variant='action-group'"
+- ❌ BAD: "pixel values should be replaced with rem values"
+- ❌ BAD: "alignment values should be updated"
+- ❌ BAD: "variant values have changed"
+
+**Example Code Guidelines:**
+
+- Keep examples MINIMAL - show only the code being changed
+- DO NOT include import statements unless the import path itself is changing
+- DO NOT include export/function wrappers
+- ✅ GOOD: "<Button isActive />"
+- ❌ BAD: "import {{{{ Button }}}} from '@patternfly/react-core'; export const MyButton = () => <Button isActive />"
 
 **IMPORTANT REGEX PATTERN RULES:**
 - For builtin provider: Use SIMPLE regex patterns with `.*` wildcards
@@ -610,6 +814,7 @@ Return ONLY the JSON array, no additional commentary."""
                     concern=data.get("concern", "general"),
                     provider_type=data.get("provider_type"),
                     file_pattern=data.get("file_pattern"),
+                    when_combo=data.get("when_combo"),
                     rationale=data["rationale"],
                     example_before=data.get("example_before"),
                     example_after=data.get("example_after"),

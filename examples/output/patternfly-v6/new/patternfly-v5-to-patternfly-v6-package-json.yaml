@@ -1,0 +1,140 @@
+- ruleID: patternfly-v5-to-patternfly-v6-package-json-00000
+  description: '"@patternfly/react-core": "^5 should be replaced with "@patternfly/react-core":
+    "^6'
+  effort: 1
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: '"@patternfly/react-core":\s*"\^5'
+      filePattern: package\.json$
+  message: 'Update PatternFly dependency version in package.json
+
+
+    Replace `"@patternfly/react-core": "^5` with `"@patternfly/react-core": "^6`.
+
+
+    Before:
+
+    ```
+
+    "@patternfly/react-core": "^5.0.0"
+
+    ```
+
+
+    After:
+
+    ```
+
+    "@patternfly/react-core": "^6.0.0"
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-package-json-00010
+  description: '"@patternfly/react-icons": "^5 should be replaced with "@patternfly/react-icons":
+    "^5'
+  effort: 1
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: '"@patternfly/react-icons":\s*"\^5'
+      filePattern: package\.json$
+  message: 'Update PatternFly icons dependency version in package.json
+
+
+    Replace `"@patternfly/react-icons": "^5` with `"@patternfly/react-icons": "^5`.
+
+
+    Before:
+
+    ```
+
+    "@patternfly/react-icons": "^5.0.0"
+
+    ```
+
+
+    After:
+
+    ```
+
+    "@patternfly/react-icons": "^6.0.0"
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-package-json-00020
+  description: '"@patternfly/react-table": "^5 should be replaced with "@patternfly/react-table":
+    "^6'
+  effort: 1
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: '"@patternfly/react-table":\s*"\^5'
+      filePattern: package\.json$
+  message: 'Update PatternFly table dependency version in package.json
+
+
+    Replace `"@patternfly/react-table": "^5` with `"@patternfly/react-table": "^6`.
+
+
+    Before:
+
+    ```
+
+    "@patternfly/react-table": "^5.0.0"
+
+    ```
+
+
+    After:
+
+    ```
+
+    "@patternfly/react-table": "^6.0.0"
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-package-json-00030
+  description: '"@patternfly/react-charts": "^5 should be replaced with "@patternfly/react-charts":
+    "^6'
+  effort: 1
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: '"@patternfly/react-charts":\s*"\^5'
+      filePattern: package\.json$
+  message: 'Update PatternFly charts dependency version in package.json
+
+
+    Replace `"@patternfly/react-charts": "^5` with `"@patternfly/react-charts": "^6`.
+
+
+    Before:
+
+    ```
+
+    "@patternfly/react-charts": "^5.0.0"
+
+    ```
+
+
+    After:
+
+    ```
+
+    "@patternfly/react-charts": "^6.0.0"
+
+    ```'
+  customVariables: []

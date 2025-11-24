@@ -1,0 +1,41 @@
+- ruleID: patternfly-v5-to-patternfly-v6-component-renaming-00000
+  description: NotAuthorized should be replaced with UnauthorizedAccess
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: NotAuthorized
+  message: 'In react-component-groups, NotAuthorized component has been renamed to
+    UnauthorizedAccess
+
+
+    Replace `NotAuthorized` with `UnauthorizedAccess`.
+
+
+    Before:
+
+    ```
+
+    import { NotAuthorized } from "@patternfly/react-component-groups";
+
+    export const Component = () => <NotAuthorized />;
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { UnauthorizedAccess } from "@patternfly/react-component-groups";
+
+    export const Component = () => <UnauthorizedAccess />;
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/313
+    title: patternfly-v6 Documentation
+  customVariables: []

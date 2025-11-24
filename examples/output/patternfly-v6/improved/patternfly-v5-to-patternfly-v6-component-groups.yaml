@@ -1,0 +1,153 @@
+- ruleID: patternfly-v5-to-patternfly-v6-component-groups-00000
+  description: NotAuthorized should be replaced with UnauthorizedAccess
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: NotAuthorized
+  message: 'In react-component-groups, the NotAuthorized component has been renamed
+    to UnauthorizedAccess
+
+
+    Replace `NotAuthorized` with `UnauthorizedAccess`.
+
+
+    Before:
+
+    ```
+
+    <NotAuthorized />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <UnauthorizedAccess />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/313
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-groups-00010
+  description: unavailableBodyPreStatusLinkText should be replaced with bodyText
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: unavailableBodyPreStatusLinkText
+      filePattern: \.(j|t)sx?$
+  message: 'In react-component-groups, UnavailableContent''s props unavailableBodyPreStatusLinkText
+    and unavailableBodyPostStatusLinkText have been replaced with one bodyText prop
+
+
+    Replace `unavailableBodyPreStatusLinkText` with `bodyText`.
+
+
+    Before:
+
+    ```
+
+    <UnavailableContent unavailableBodyPreStatusLinkText="Visit our" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <UnavailableContent bodyText="Visit our status page for known outages." />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/244
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-groups-00020
+  description: unavailableBodyPostStatusLinkText should be replaced with bodyText
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: unavailableBodyPostStatusLinkText
+      filePattern: \.(j|t)sx?$
+  message: 'In react-component-groups, UnavailableContent''s props unavailableBodyPreStatusLinkText
+    and unavailableBodyPostStatusLinkText have been replaced with one bodyText prop
+
+
+    Replace `unavailableBodyPostStatusLinkText` with `bodyText`.
+
+
+    Before:
+
+    ```
+
+    <UnavailableContent unavailableBodyPostStatusLinkText="for more info." />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <UnavailableContent bodyText="Try refreshing the page. If the problem persists,
+    contact your organization administrator or visit our status page for more info."
+    />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/244
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-groups-00030
+  description: unavailableTitleText should be replaced with titleText
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: unavailableTitleText
+      filePattern: \.(j|t)sx?$
+  message: 'The UnavailableContent component of React Component Groups has had the
+    unavailableTitleText prop renamed to titleText
+
+
+    Replace `unavailableTitleText` with `titleText`.
+
+
+    Before:
+
+    ```
+
+    <UnavailableContent unavailableTitleText="foo" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <UnavailableContent titleText="foo" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/145
+    title: patternfly-v6 Documentation
+  customVariables: []

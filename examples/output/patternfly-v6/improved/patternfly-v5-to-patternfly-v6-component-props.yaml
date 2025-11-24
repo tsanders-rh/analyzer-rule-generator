@@ -1,0 +1,1531 @@
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00000
+  description: isActive prop on Button should be replaced with isPressed prop on Button
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: isActive
+      filePattern: \.(j|t)sx?$
+  message: 'The isActive prop has been renamed to isPressed for better semantic meaning
+
+
+    Replace `isActive prop on Button` with `isPressed prop on Button`.
+
+
+    Before:
+
+    ```
+
+    <Button isActive />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Button isPressed />
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00010
+  description: variant='button-group' should be replaced with variant='action-group'
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: variant=['"]button-group['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The button-group variant has been renamed to action-group
+
+
+    Replace `variant=''button-group''` with `variant=''action-group''`.
+
+
+    Before:
+
+    ```
+
+    <Toolbar variant=''button-group''>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Toolbar variant=''action-group''>
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00020
+  description: alignLeft should be replaced with alignStart
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: alignLeft
+      filePattern: \.(j|t)sx?$
+  message: 'Alignment props have been renamed for better RTL support
+
+
+    Replace `alignLeft` with `alignStart`.
+
+
+    Before:
+
+    ```
+
+    <Component alignLeft />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Component alignStart />
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00030
+  description: alignRight should be replaced with alignEnd
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: alignRight
+      filePattern: \.(j|t)sx?$
+  message: 'Alignment props have been renamed for better RTL support
+
+
+    Replace `alignRight` with `alignEnd`.
+
+
+    Before:
+
+    ```
+
+    <Component alignRight />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Component alignEnd />
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00040
+  description: AccordionContent isHidden prop should be replaced with Remove isHidden
+    prop from AccordionContent
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <AccordionContent\s+isHidden
+      filePattern: \.(j|t)sx?$
+  message: 'The isHidden prop has been removed from AccordionContent, as its visibility
+    will now be set automatically based on the isExpanded prop on AccordionItem.
+
+
+    Replace `AccordionContent isHidden prop` with `Remove isHidden prop from AccordionContent`.
+
+
+    Before:
+
+    ```
+
+    <AccordionContent isHidden />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <AccordionContent />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9876
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00050
+  description: AccordionToggle isExpanded prop should be replaced with Move isExpanded
+    prop to AccordionItem
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <AccordionToggle\s+isExpanded
+      filePattern: \.(j|t)sx?$
+  message: "The isExpanded prop for AccordionToggle has been moved to AccordionItem.\n\
+    \nReplace `AccordionToggle isExpanded prop` with `Move isExpanded prop to AccordionItem`.\n\
+    \nBefore:\n```\n<AccordionItem>\n  <AccordionToggle isExpanded />\n</AccordionItem>\n\
+    ```\n\nAfter:\n```\n<AccordionItem isExpanded>\n  <AccordionToggle />\n</AccordionItem>\n\
+    ```"
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9876
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00060
+  description: Avatar border prop should be replaced with Avatar isBordered prop
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Avatar\s+border=
+      filePattern: \.(j|t)sx?$
+  message: 'The border prop has been removed from Avatar since theming is not longer
+    handled React-side. Use the isBordered prop instead to add a border to Avatar.
+
+
+    Replace `Avatar border prop` with `Avatar isBordered prop`.
+
+
+    Before:
+
+    ```
+
+    <Avatar border={''dark''} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Avatar isBordered />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9881
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00070
+  description: Banner variant='default' prop should be replaced with Remove variant
+    prop from Banner
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Banner\s+variant=['"]default['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The variant property has been removed from Banner. Use color or status
+    properties instead.
+
+
+    Replace `Banner variant=''default'' prop` with `Remove variant prop from Banner`.
+
+
+    Before:
+
+    ```
+
+    <Banner variant=''default'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Banner />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9891
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00080
+  description: Banner variant='red' prop should be replaced with Banner color='red'
+    prop
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Banner\s+variant=['"]red['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The variant property has been removed from Banner. Use color or status
+    properties instead.
+
+
+    Replace `Banner variant=''red'' prop` with `Banner color=''red'' prop`.
+
+
+    Before:
+
+    ```
+
+    <Banner variant=''red'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Banner color=''red'' />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9891
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00090
+  description: Button isActive prop should be replaced with Button isClicked prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Button\s+isActive
+      filePattern: \.(j|t)sx?$
+  message: 'isActive prop for Button has been renamed to isClicked
+
+
+    Replace `Button isActive prop` with `Button isClicked prop`.
+
+
+    Before:
+
+    ```
+
+    <Button isActive />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Button isClicked />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9934
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00100
+  description: Card isSelectableRaised prop should be replaced with Remove isSelectableRaised
+    prop from Card
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Card\s+isSelectableRaised
+      filePattern: \.(j|t)sx?$
+  message: 'Props related to raised or clickable cards have been removed.
+
+
+    Replace `Card isSelectableRaised prop` with `Remove isSelectableRaised prop from
+    Card`.
+
+
+    Before:
+
+    ```
+
+    <Card isSelectableRaised />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Card />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10056
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00110
+  description: Card isDisabledRaised prop should be replaced with Remove isDisabledRaised
+    prop from Card
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Card\s+isDisabledRaised
+      filePattern: \.(j|t)sx?$
+  message: 'Props related to raised or clickable cards have been removed.
+
+
+    Replace `Card isDisabledRaised prop` with `Remove isDisabledRaised prop from Card`.
+
+
+    Before:
+
+    ```
+
+    <Card isDisabledRaised />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Card />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10056
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00120
+  description: Card hasSelectableInput prop should be replaced with Remove hasSelectableInput
+    prop from Card
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Card\s+hasSelectableInput
+      filePattern: \.(j|t)sx?$
+  message: 'Props related to raised or clickable cards have been removed.
+
+
+    Replace `Card hasSelectableInput prop` with `Remove hasSelectableInput prop from
+    Card`.
+
+
+    Before:
+
+    ```
+
+    <Card hasSelectableInput />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Card />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10056
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00130
+  description: Card selectableInputAriaLabel prop should be replaced with Remove selectableInputAriaLabel
+    prop from Card
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Card\s+selectableInputAriaLabel
+      filePattern: \.(j|t)sx?$
+  message: 'Props related to raised or clickable cards have been removed.
+
+
+    Replace `Card selectableInputAriaLabel prop` with `Remove selectableInputAriaLabel
+    prop from Card`.
+
+
+    Before:
+
+    ```
+
+    <Card selectableInputAriaLabel="aria label" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Card />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10056
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00140
+  description: Card onSelectableInputChange prop should be replaced with Remove onSelectableInputChange
+    prop from Card
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Card\s+onSelectableInputChange
+      filePattern: \.(j|t)sx?$
+  message: 'Props related to raised or clickable cards have been removed.
+
+
+    Replace `Card onSelectableInputChange prop` with `Remove onSelectableInputChange
+    prop from Card`.
+
+
+    Before:
+
+    ```
+
+    <Card onSelectableInputChange={() => {}} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Card />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10056
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00150
+  description: Card isFlat prop should be replaced with Remove isFlat prop from Card
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Card\s+isFlat
+      filePattern: \.(j|t)sx?$
+  message: 'Props related to raised or clickable cards have been removed.
+
+
+    Replace `Card isFlat prop` with `Remove isFlat prop from Card`.
+
+
+    Before:
+
+    ```
+
+    <Card isFlat />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Card />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10056
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00160
+  description: Card isRounded prop should be replaced with Remove isRounded prop from
+    Card
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Card\s+isRounded
+      filePattern: \.(j|t)sx?$
+  message: 'Props related to raised or clickable cards have been removed.
+
+
+    Replace `Card isRounded prop` with `Remove isRounded prop from Card`.
+
+
+    Before:
+
+    ```
+
+    <Card isRounded />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Card />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10056
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00170
+  description: Checkbox isLabelBeforeButton prop should be replaced with Checkbox
+    labelPosition="start" prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Checkbox\s+isLabelBeforeButton
+      filePattern: \.(j|t)sx?$
+  message: 'The isLabelBeforeButton prop in Checkbox has been replaced with labelPosition="start"
+
+
+    Replace `Checkbox isLabelBeforeButton prop` with `Checkbox labelPosition="start"
+    prop`.
+
+
+    Before:
+
+    ```
+
+    <Checkbox isLabelBeforeButton />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Checkbox labelPosition="start" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10016
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00180
+  description: Radio isLabelBeforeButton prop should be replaced with Radio labelPosition="start"
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Radio\s+isLabelBeforeButton
+      filePattern: \.(j|t)sx?$
+  message: 'The isLabelBeforeButton prop in Radio has been replaced with labelPosition="start"
+
+
+    Replace `Radio isLabelBeforeButton prop` with `Radio labelPosition="start" prop`.
+
+
+    Before:
+
+    ```
+
+    <Radio isLabelBeforeButton />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Radio labelPosition="start" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10016
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00190
+  description: Banner color='gold' prop should be replaced with Banner color='yellow'
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Banner\s+color=['"]gold['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The color prop on Banner has been updated to replace "gold" with "yellow"
+
+
+    Replace `Banner color=''gold'' prop` with `Banner color=''yellow'' prop`.
+
+
+    Before:
+
+    ```
+
+    <Banner color=''gold'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Banner color="yellow" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10661
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00200
+  description: Banner color='cyan' prop should be replaced with Banner color='teal'
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Banner\s+color=['"]cyan['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The color prop on Banner has been updated to replace "cyan" with "teal"
+
+
+    Replace `Banner color=''cyan'' prop` with `Banner color=''teal'' prop`.
+
+
+    Before:
+
+    ```
+
+    <Banner color=''cyan'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Banner color="teal" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10661
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00210
+  description: Label color='gold' prop should be replaced with Label color='yellow'
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Label\s+color=['"]gold['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The color prop on Label has been updated to replace "gold" with "yellow"
+
+
+    Replace `Label color=''gold'' prop` with `Label color=''yellow'' prop`.
+
+
+    Before:
+
+    ```
+
+    <Label color=''gold'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Label color="yellow" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10661
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00220
+  description: Label color='cyan' prop should be replaced with Label color='teal'
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Label\s+color=['"]cyan['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The color prop on Label has been updated to replace "cyan" with "teal"
+
+
+    Replace `Label color=''cyan'' prop` with `Label color=''teal'' prop`.
+
+
+    Before:
+
+    ```
+
+    <Label color=''cyan'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Label color="teal" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10661
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00230
+  description: DataListAction isPlainButtonAction prop should be replaced with Remove
+    isPlainButtonAction prop from DataListAction
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <DataListAction\s+isPlainButtonAction
+      filePattern: \.(j|t)sx?$
+  message: 'The isPlainButtonAction prop has been removed from DataListAction as a
+    wrapper is no longer needed.
+
+
+    Replace `DataListAction isPlainButtonAction prop` with `Remove isPlainButtonAction
+    prop from DataListAction`.
+
+
+    Before:
+
+    ```
+
+    <DataListAction isPlainButtonAction/>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <DataListAction />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10939
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00240
+  description: DrawerHead hasNoPadding prop should be replaced with Remove hasNoPadding
+    prop from DrawerHead
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <DrawerHead\s+hasNoPadding
+      filePattern: \.(j|t)sx?$
+  message: 'The hasNoPadding prop has been removed from DrawerHead.
+
+
+    Replace `DrawerHead hasNoPadding prop` with `Remove hasNoPadding prop from DrawerHead`.
+
+
+    Before:
+
+    ```
+
+    <DrawerHead hasNoPadding />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <DrawerHead />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10036
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00250
+  description: DrawerContent colorVariant='light-200' prop should be replaced with
+    DrawerContent colorVariant='secondary' prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <DrawerContent\s+colorVariant=['"]light-200['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The "light-200" value for the colorVariant prop has been replaced with
+    the "secondary" value for DrawerContent.
+
+
+    Replace `DrawerContent colorVariant=''light-200'' prop` with `DrawerContent colorVariant=''secondary''
+    prop`.
+
+
+    Before:
+
+    ```
+
+    <DrawerContent colorVariant=''light-200'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <DrawerContent colorVariant="secondary" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10017
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00260
+  description: DrawerPanelContent colorVariant='light-200' prop should be replaced
+    with DrawerPanelContent colorVariant='secondary' prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <DrawerPanelContent\s+colorVariant=['"]light-200['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The "light-200" value for the colorVariant prop has been replaced with
+    the "secondary" value for DrawerPanelContent.
+
+
+    Replace `DrawerPanelContent colorVariant=''light-200'' prop` with `DrawerPanelContent
+    colorVariant=''secondary'' prop`.
+
+
+    Before:
+
+    ```
+
+    <DrawerPanelContent colorVariant=''light-200'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <DrawerPanelContent colorVariant="secondary" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10017
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00270
+  description: DrawerSection colorVariant='light-200' prop should be replaced with
+    DrawerSection colorVariant='secondary' prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <DrawerSection\s+colorVariant=['"]light-200['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The "light-200" value for the colorVariant prop has been replaced with
+    the "secondary" value for DrawerSection.
+
+
+    Replace `DrawerSection colorVariant=''light-200'' prop` with `DrawerSection colorVariant=''secondary''
+    prop`.
+
+
+    Before:
+
+    ```
+
+    <DrawerSection colorVariant=''light-200'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <DrawerSection colorVariant="secondary" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10017
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00280
+  description: DrawerContent colorVariant='no-background' prop should be replaced
+    with Remove colorVariant prop from DrawerContent
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <DrawerContent\s+colorVariant=['"]no-background['"]
+      filePattern: \.(j|t)sx?$
+  message: 'The "no-background" value of the colorVariant prop on DrawerContent has
+    been removed.
+
+
+    Replace `DrawerContent colorVariant=''no-background'' prop` with `Remove colorVariant
+    prop from DrawerContent`.
+
+
+    Before:
+
+    ```
+
+    <DrawerContent colorVariant=''no-background'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <DrawerContent />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10211
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00290
+  description: FormGroup labelIcon prop should be replaced with FormGroup labelHelp
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <FormGroup\s+labelIcon=
+      filePattern: \.(j|t)sx?$
+  message: 'The labelIcon prop for FormGroup has been renamed to labelHelp. We recommend
+    using FormGroupLabelHelp element for the labelHelp prop.
+
+
+    Replace `FormGroup labelIcon prop` with `FormGroup labelHelp prop`.
+
+
+    Before:
+
+    ```
+
+    <FormGroup labelIcon={<>Help icon</>} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <FormGroup labelHelp={<>Help icon</>} />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10016
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00300
+  description: HelperTextItem hasIcon prop should be replaced with Remove hasIcon
+    prop from HelperTextItem
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <HelperTextItem\s+hasIcon
+      filePattern: \.(j|t)sx?$
+  message: 'The hasIcon prop has been removed from HelperTextItem. An icon will now
+    render automatically when the variant prop has a value other than "default" or
+    when the icon prop is passed in.
+
+
+    Replace `HelperTextItem hasIcon prop` with `Remove hasIcon prop from HelperTextItem`.
+
+
+    Before:
+
+    ```
+
+    <HelperTextItem hasIcon />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <HelperTextItem />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10029
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00310
+  description: HelperTextItem isDynamic prop should be replaced with Remove isDynamic
+    prop from HelperTextItem
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <HelperTextItem\s+isDynamic
+      filePattern: \.(j|t)sx?$
+  message: 'The isDynamic prop has been removed from HelperTextItem. An icon will
+    now render automatically when the variant prop has a value other than "default"
+    or when the icon prop is passed in.
+
+
+    Replace `HelperTextItem isDynamic prop` with `Remove isDynamic prop from HelperTextItem`.
+
+
+    Before:
+
+    ```
+
+    <HelperTextItem isDynamic />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <HelperTextItem />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10029
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00320
+  description: import { InvalidObject } from "@patternfly/react-component-groups"
+    should be replaced with InvalidObject prop renames
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: InvalidObject
+  message: 'In react-component-groups, InvalidObject''s props invalidObjectTitleText
+    has been renamed to titleText and invalidObjectBodyText to bodyText.
+
+
+    Replace `import { InvalidObject } from "@patternfly/react-component-groups"` with
+    `InvalidObject prop renames`.
+
+
+    Before:
+
+    ```
+
+    <InvalidObject invalidObjectTitleText="Sample title" invalidObjectBodyText="Sample
+    description" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <InvalidObject titleText="Sample title" bodyText="Sample description" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/145
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00330
+  description: Label isOverflowLabel prop should be replaced with Label variant="overflow"
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Label\s+isOverflowLabel
+      filePattern: \.(j|t)sx?$
+  message: 'The isOverflowLabel prop for Label has been replaced with variant="overflow".
+
+
+    Replace `Label isOverflowLabel prop` with `Label variant="overflow" prop`.
+
+
+    Before:
+
+    ```
+
+    <Label isOverflowLabel />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Label variant="overflow" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10037
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00340
+  description: import { LogSnippet, LogSnippetBorderVariant } from "@patternfly/react-component-groups"
+    should be replaced with LogSnippet leftBorderVariant to variant prop rename
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: LogSnippet
+  message: 'In react-component-groups, LogSnippet''s prop leftBorderVariant has been
+    renamed to variant and LogSnippetBorderVariant enum has been replaced with PatternFly''s
+    AlertVariant enum.
+
+
+    Replace `import { LogSnippet, LogSnippetBorderVariant } from "@patternfly/react-component-groups"`
+    with `LogSnippet leftBorderVariant to variant prop rename`.
+
+
+    Before:
+
+    ```
+
+    <LogSnippet message="Failure - check logs for details" logSnippet="code" leftBorderVariant={LogSnippetBorderVariant.success}
+    />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <LogSnippet message="Failure - check logs for details" logSnippet="code" variant={"success"}
+    />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/145
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00350
+  description: Masthead backgroundColor prop should be replaced with Remove backgroundColor
+    prop from Masthead
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: <Masthead\s+backgroundColor
+      filePattern: \.(j|t)sx?$
+  message: 'The backgroundColor prop has been removed from Masthead as theming is
+    no longer handled React-side.
+
+
+    Replace `Masthead backgroundColor prop` with `Remove backgroundColor prop from
+    Masthead`.
+
+
+    Before:
+
+    ```
+
+    <Masthead backgroundColor />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Masthead />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9774
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00360
+  description: import { ErrorState } from "@patternfly/react-component-groups" should
+    be replaced with ErrorState prop renames
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: ErrorState
+  message: 'In react-component-groups, ErrorState props have been renamed to comply
+    with its base component, EmptyState.
+
+
+    Replace `import { ErrorState } from "@patternfly/react-component-groups"` with
+    `ErrorState prop renames`.
+
+
+    Before:
+
+    ```
+
+    <ErrorState errorTitle="Sample error title" errorDescription="Sample error description"
+    defaultErrorDescription="Sample default error description" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ErrorState titleText="Sample error title" bodyText="Sample error description"
+    defaultBodyText="Sample default error description" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/145
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00370
+  description: <MenuToggle variant='plain'><EllipsisVIcon /></MenuToggle> should be
+    replaced with <MenuToggle icon={EllipsisVIcon} variant='plain' />
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: MenuToggle
+  message: "Icons should be passed to the icon prop instead of as children for proper\
+    \ styling.\n\nReplace `<MenuToggle variant='plain'><EllipsisVIcon /></MenuToggle>`\
+    \ with `<MenuToggle icon={EllipsisVIcon} variant='plain' />`.\n\nBefore:\n```\n\
+    <MenuToggle aria-label='A descriptive aria-label' variant='plain'>\n  <EllipsisVIcon\
+    \ />\n</MenuToggle>\n```\n\nAfter:\n```\n<MenuToggle icon={EllipsisVIcon} aria-label='A\
+    \ descriptive aria-label' variant='plain' />\n```"
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10097
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00380
+  description: isDisabled should be replaced with disabled
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: isDisabled
+      filePattern: \.(j|t)sx?$
+  message: 'Boolean props have been renamed to remove ''is'' prefix in PatternFly
+    v6
+
+
+    Replace `isDisabled` with `disabled`.
+
+
+    Before:
+
+    ```
+
+    <Button isDisabled />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Button disabled />
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00390
+  description: isExpanded should be replaced with expanded
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: isExpanded
+      filePattern: \.(j|t)sx?$
+  message: 'Boolean props have been renamed to remove ''is'' prefix in PatternFly
+    v6
+
+
+    Replace `isExpanded` with `expanded`.
+
+
+    Before:
+
+    ```
+
+    <Accordion isExpanded />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Accordion expanded />
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00400
+  description: isOpen should be replaced with open
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: isOpen
+      filePattern: \.(j|t)sx?$
+  message: 'Boolean props have been renamed to remove ''is'' prefix in PatternFly
+    v6
+
+
+    Replace `isOpen` with `open`.
+
+
+    Before:
+
+    ```
+
+    <Modal isOpen />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Modal open />
+
+    ```'
+  customVariables: []

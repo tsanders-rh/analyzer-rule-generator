@@ -210,7 +210,7 @@ class TestAnthropicProvider:
         assert call_args.kwargs["model"] == "claude-3-7-sonnet-latest"
         assert call_args.kwargs["messages"] == [{"role": "user", "content": "Test prompt"}]
         assert call_args.kwargs["temperature"] == 0.0
-        assert call_args.kwargs["max_tokens"] == 8000
+        assert call_args.kwargs["max_tokens"] == 16000
 
     @patch('anthropic.Anthropic')
     def test_generate_with_custom_parameters(self, mock_anthropic_class):

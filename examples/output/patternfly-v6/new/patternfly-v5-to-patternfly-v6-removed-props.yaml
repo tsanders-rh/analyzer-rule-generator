@@ -1,0 +1,442 @@
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00000
+  description: <MultiContentCard leftBorderVariant="danger" withHeaderBorder /> should
+    be replaced with <MultiContentCard />
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: MultiContentCard
+  message: 'The leftBorderVariant and withHeaderBorder props have been removed from
+    MultiContentCard.
+
+
+    Replace `<MultiContentCard leftBorderVariant="danger" withHeaderBorder />` with
+    `<MultiContentCard />`.
+
+
+    Before:
+
+    ```
+
+    <MultiContentCard leftBorderVariant="danger" withHeaderBorder />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <MultiContentCard />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/145
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00010
+  description: <Nav theme="dark" /> should be replaced with <Nav />
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Nav
+  message: 'The theme prop is no longer supported in Nav. Use light/dark mode theming
+    instead.
+
+
+    Replace `<Nav theme="dark" />` with `<Nav />`.
+
+
+    Before:
+
+    ```
+
+    <Nav theme="dark" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Nav />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9948
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00020
+  description: <NavItem hasNavLinkWrapper /> should be replaced with <NavItem />
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: NavItem
+  message: 'The hasNavLinkWrapper prop has been removed from NavItem.
+
+
+    Replace `<NavItem hasNavLinkWrapper />` with `<NavItem />`.
+
+
+    Before:
+
+    ```
+
+    <NavItem hasNavLinkWrapper />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <NavItem />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10687
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00030
+  description: <PageHeaderToolsItem isSelected /> should be replaced with <PageHeaderToolsItem
+    />
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: PageHeaderToolsItem
+  message: 'The isSelected prop has been removed from PageHeaderToolsItem.
+
+
+    Replace `<PageHeaderToolsItem isSelected />` with `<PageHeaderToolsItem />`.
+
+
+    Before:
+
+    ```
+
+    <PageHeaderToolsItem isSelected />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <PageHeaderToolsItem />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9774
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00040
+  description: <PageSection type='nav' /> should be replaced with <PageSection />
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: PageSection
+  message: 'The ''nav'' type for PageSection has been removed.
+
+
+    Replace `<PageSection type=''nav'' />` with `<PageSection />`.
+
+
+    Before:
+
+    ```
+
+    <PageSection type=''nav'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <PageSection />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10650
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00050
+  description: <PageSidebar theme='dark' /> should be replaced with <PageSidebar />
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: PageSidebar
+  message: 'The theme prop has been removed from PageSidebar as theming is no longer
+    handled React-side.
+
+
+    Replace `<PageSidebar theme=''dark'' />` with `<PageSidebar />`.
+
+
+    Before:
+
+    ```
+
+    <PageSidebar theme=''dark'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <PageSidebar />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9774
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00060
+  description: <Switch labelOff='Some label' /> should be replaced with <Switch />
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Switch
+  message: 'The labelOff prop has been removed from Switch. The label should not dynamically
+    update based on state.
+
+
+    Replace `<Switch labelOff=''Some label'' />` with `<Switch />`.
+
+
+    Before:
+
+    ```
+
+    <Switch labelOff=''Some label'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Switch />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10646
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00070
+  description: <Toolbar usePageInsets /> should be replaced with <Toolbar />
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Toolbar
+  message: 'The usePageInsets prop has been removed from Toolbar.
+
+
+    Replace `<Toolbar usePageInsets />` with `<Toolbar />`.
+
+
+    Before:
+
+    ```
+
+    <Toolbar usePageInsets />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Toolbar />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00080
+  description: <ToolbarContent alignSelf={{}} /> should be replaced with <ToolbarContent
+    />
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: ToolbarContent
+  message: 'The alignSelf prop has been removed from ToolbarContent.
+
+
+    Replace `<ToolbarContent alignSelf={{}} />` with `<ToolbarContent />`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarContent alignSelf={{}} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarContent />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00090
+  description: <ToolbarItem widths={{}} /> should be replaced with <ToolbarItem />
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: ToolbarItem
+  message: 'The widths prop has been removed from ToolbarItem.
+
+
+    Replace `<ToolbarItem widths={{}} />` with `<ToolbarItem />`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarItem widths={{}} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarItem />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00100
+  description: <ToolbarToggleGroup alignment={{}} /> should be replaced with <ToolbarToggleGroup
+    />
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: ToolbarToggleGroup
+  message: 'The alignment prop has been removed from ToolbarToggleGroup.
+
+
+    Replace `<ToolbarToggleGroup alignment={{}} />` with `<ToolbarToggleGroup />`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarToggleGroup alignment={{}} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarToggleGroup />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-removed-props-00110
+  description: <ToolbarGroup spaceItems= should be replaced with <ToolbarGroup>
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: ToolbarGroup
+  message: 'The spaceItems property has been removed from ToolbarGroup.
+
+
+    Replace `<ToolbarGroup spaceItems=` with `<ToolbarGroup>`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup spaceItems={{ default: "spaceItemsNone", md: "spaceItemsSm", lg:
+    "spaceItemsMd" }}
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup>
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10418
+    title: patternfly-v6 Documentation
+  customVariables: []

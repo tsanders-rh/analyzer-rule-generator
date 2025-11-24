@@ -1,0 +1,80 @@
+- ruleID: patternfly-v5-to-patternfly-v6-color-props-00000
+  description: Banner color="cyan" prop should be replaced with Banner color="teal"
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Banner
+  message: 'The color prop on Banner and Label has been updated to replace "cyan"
+    with "teal" and "gold" with "yellow".
+
+
+    Replace `Banner color="cyan" prop` with `Banner color="teal" prop`.
+
+
+    Before:
+
+    ```
+
+    import { Banner } from "@patternfly/react-core"; export const ColorPropsReplacedColorsInput
+    = () => ( <Banner color=''cyan'' /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Banner } from "@patternfly/react-core"; export const ColorPropsReplacedColorsInput
+    = () => ( <Banner color="teal" /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10661
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-color-props-00010
+  description: Label color="cyan" prop should be replaced with Label color="teal"
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Label
+  message: 'The color prop on Banner and Label has been updated to replace "cyan"
+    with "teal" and "gold" with "yellow".
+
+
+    Replace `Label color="cyan" prop` with `Label color="teal" prop`.
+
+
+    Before:
+
+    ```
+
+    import { Label } from "@patternfly/react-core"; export const ColorPropsReplacedColorsInput
+    = () => ( <Label color=''cyan'' /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Label } from "@patternfly/react-core"; export const ColorPropsReplacedColorsInput
+    = () => ( <Label color="teal" /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10661
+    title: patternfly-v6 Documentation
+  customVariables: []

@@ -122,8 +122,11 @@ class MigrationPattern(BaseModel):
     concern: str = Field(default="general", description="Migration concern/topic for grouping (e.g., 'mongodb', 'security', 'web')")
 
     # Provider configuration
-    provider_type: Optional[str] = Field(default=None, description="Provider type: 'java', 'nodejs', or 'builtin' (auto-detected if not specified)")
+    provider_type: Optional[str] = Field(default=None, description="Provider type: 'java', 'nodejs', 'builtin', or 'combo' (auto-detected if not specified)")
     file_pattern: Optional[str] = Field(default=None, description="File pattern for builtin.filecontent provider (regex, e.g., '\\.tsx$' or '\\.(j|t)sx?$')")
+
+    # Combo rule configuration (when provider_type="combo")
+    when_combo: Optional[Dict[str, str]] = Field(default=None, description="Combo rule configuration with nodejs_pattern, builtin_pattern, and file_pattern")
 
     # Optional context
     example_before: Optional[str] = Field(None, description="Example code before migration")

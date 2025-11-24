@@ -1,0 +1,81 @@
+- ruleID: patternfly-v5-to-patternfly-v6-form-controls-00000
+  description: Checkbox isLabelBeforeButton prop should be replaced with Checkbox
+    labelPosition="start" prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Checkbox
+  message: 'The isLabelBeforeButton prop in Checkbox and Radio has been replaced with
+    labelPosition="start"
+
+
+    Replace `Checkbox isLabelBeforeButton prop` with `Checkbox labelPosition="start"
+    prop`.
+
+
+    Before:
+
+    ```
+
+    import { Checkbox } from "@patternfly/react-core"; export const CheckboxReplaceIsLabelBeforeButtonInput
+    = () => ( <Checkbox isLabelBeforeButton /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Checkbox } from "@patternfly/react-core"; export const CheckboxReplaceIsLabelBeforeButtonInput
+    = () => ( <Checkbox labelPosition="start" /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10016
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-form-controls-00010
+  description: Radio isLabelBeforeButton prop should be replaced with Radio labelPosition="start"
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Radio
+  message: 'The isLabelBeforeButton prop in Checkbox and Radio has been replaced with
+    labelPosition="start"
+
+
+    Replace `Radio isLabelBeforeButton prop` with `Radio labelPosition="start" prop`.
+
+
+    Before:
+
+    ```
+
+    import { Radio } from "@patternfly/react-core"; export const RadioReplaceIsLabelBeforeButtonInput
+    = () => ( <Radio isLabelBeforeButton /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Radio } from "@patternfly/react-core"; export const RadioReplaceIsLabelBeforeButtonInput
+    = () => ( <Radio labelPosition="start" /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10016
+    title: patternfly-v6 Documentation
+  customVariables: []

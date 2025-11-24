@@ -1,0 +1,79 @@
+- ruleID: patternfly-v5-to-patternfly-v6-masthead-00000
+  description: MastheadBrand component should be replaced with MastheadLogo component
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: MastheadBrand
+  message: 'Our old implementation of MastheadBrand has been renamed to MastheadLogo,
+    which must be wrapped by our new implementation of MastheadBrand.
+
+
+    Replace `MastheadBrand component` with `MastheadLogo component`.
+
+
+    Before:
+
+    ```
+
+    import { MastheadBrand } from "@patternfly/react-core"; export const MastheadNameChanges
+    = () => <MastheadBrand>Logo</MastheadBrand>;
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { MastheadLogo } from "@patternfly/react-core"; export const MastheadNameChanges
+    = () => <MastheadLogo data-codemods>Logo</MastheadLogo>;
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10809
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-masthead-00010
+  description: Masthead backgroundColor prop should be replaced with Remove backgroundColor
+    prop
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Masthead
+  message: 'The backgroundColor prop has been removed from Masthead as theming is
+    no longer handled React-side.
+
+
+    Replace `Masthead backgroundColor prop` with `Remove backgroundColor prop`.
+
+
+    Before:
+
+    ```
+
+    import { Masthead } from "@patternfly/react-core"; export const MastheadRemoveBackgroundColorInput
+    = () => <Masthead backgroundColor />
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Masthead } from "@patternfly/react-core"; export const MastheadRemoveBackgroundColorInput
+    = () => <Masthead />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9774
+    title: patternfly-v6 Documentation
+  customVariables: []

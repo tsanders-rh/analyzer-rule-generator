@@ -1,0 +1,39 @@
+- ruleID: patternfly-v5-to-patternfly-v6-label-00000
+  description: Label isOverflowLabel prop should be replaced with Label variant="overflow"
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Label
+  message: 'The isOverflowLabel prop for Label has been replaced with variant="overflow".
+
+
+    Replace `Label isOverflowLabel prop` with `Label variant="overflow" prop`.
+
+
+    Before:
+
+    ```
+
+    import { Label } from "@patternfly/react-core"; export const LabelRemoveIsOverflowLabelInput
+    = () => <Label isOverflowLabel />;
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Label } from "@patternfly/react-core"; export const LabelRemoveIsOverflowLabelInput
+    = () => ( <Label variant="overflow" /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10037
+    title: patternfly-v6 Documentation
+  customVariables: []

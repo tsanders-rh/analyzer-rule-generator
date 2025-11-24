@@ -1,0 +1,40 @@
+- ruleID: patternfly-v5-to-patternfly-v6-card-00000
+  description: Card raised/clickable props should be replaced with Remove Card raised/clickable
+    props
+  effort: 3
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Card
+  message: 'Props related to raised or clickable cards have been removed.
+
+
+    Replace `Card raised/clickable props` with `Remove Card raised/clickable props`.
+
+
+    Before:
+
+    ```
+
+    import { Card } from "@patternfly/react-core"; export const CardRemoveVariousPropsInput
+    = () => ( <Card isSelectableRaised isDisabledRaised hasSelectableInput selectableInputAriaLabel="aria
+    label" onSelectableInputChange={() => {}} /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Card } from "@patternfly/react-core"; export const CardRemoveVariousPropsInput
+    = () => ( <Card /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10056
+    title: patternfly-v6 Documentation
+  customVariables: []

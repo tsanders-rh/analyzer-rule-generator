@@ -1,0 +1,185 @@
+- ruleID: patternfly-v5-to-patternfly-v6-component-rename-00000
+  description: InvalidObject should be replaced with MissingPage
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: InvalidObject
+  message: 'In react-component-groups, InvalidObject component has been renamed to
+    MissingPage.
+
+
+    Replace `InvalidObject` with `MissingPage`.
+
+
+    Before:
+
+    ```
+
+    <InvalidObject />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <MissingPage />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/313
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-rename-00010
+  description: Text should be replaced with Content component="p"
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Text
+  message: 'Text, TextContent, TextList and TextListItem have been replaced with one
+    Content component.
+
+
+    Replace `Text` with `Content component="p"`.
+
+
+    Before:
+
+    ```
+
+    <Text>Abc</Text>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Content component="p">Abc</Content>
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10643
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-rename-00020
+  description: TextContent should be replaced with Content
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: TextContent
+  message: 'Text, TextContent, TextList and TextListItem have been replaced with one
+    Content component.
+
+
+    Replace `TextContent` with `Content`.
+
+
+    Before:
+
+    ```
+
+    <TextContent>Abc</TextContent>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Content>Abc</Content>
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10643
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-rename-00030
+  description: TextList should be replaced with Content component="ul"
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: TextList
+  message: 'Text, TextContent, TextList and TextListItem have been replaced with one
+    Content component.
+
+
+    Replace `TextList` with `Content component="ul"`.
+
+
+    Before:
+
+    ```
+
+    <TextList>Abc</TextList>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Content component="ul">Abc</Content>
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10643
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-rename-00040
+  description: TextListItem should be replaced with Content component="li"
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: TextListItem
+  message: 'Text, TextContent, TextList and TextListItem have been replaced with one
+    Content component.
+
+
+    Replace `TextListItem` with `Content component="li"`.
+
+
+    Before:
+
+    ```
+
+    <TextListItem>Abc</TextListItem>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Content component="li">Abc</Content>
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10643
+    title: patternfly-v6 Documentation
+  customVariables: []

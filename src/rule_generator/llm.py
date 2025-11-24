@@ -89,7 +89,7 @@ class AnthropicProvider(LLMProvider):
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using Anthropic API."""
         temperature = kwargs.get("temperature", 0.0)
-        max_tokens = kwargs.get("max_tokens", 8000)
+        max_tokens = kwargs.get("max_tokens", 16000)
 
         response = self.client.messages.create(
             model=self.model,

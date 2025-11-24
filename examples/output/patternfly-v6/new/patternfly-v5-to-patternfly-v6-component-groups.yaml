@@ -1,0 +1,170 @@
+- ruleID: patternfly-v5-to-patternfly-v6-component-groups-00000
+  description: ContentHeader component should be replaced with PageHeader component
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: ContentHeader
+  message: 'In react-component-groups, ContentHeader component has been renamed to
+    PageHeader
+
+
+    Replace `ContentHeader component` with `PageHeader component`.
+
+
+    Before:
+
+    ```
+
+    import { ContentHeader } from "@patternfly/react-component-groups"; export const
+    ComponentGroupsContentHeaderRenameToPageHeaderInput = () => ( <ContentHeader />
+    );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { PageHeader } from "@patternfly/react-component-groups"; export const
+    ComponentGroupsContentHeaderRenameToPageHeaderInput = () => ( <PageHeader data-codemods
+    /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/313
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-groups-00010
+  description: InvalidObject invalidObjectTitleText prop should be replaced with InvalidObject
+    titleText prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: InvalidObject
+  message: 'In react-component-groups, InvalidObject''s props invalidObjectTitleText
+    has been renamed to titleText.
+
+
+    Replace `InvalidObject invalidObjectTitleText prop` with `InvalidObject titleText
+    prop`.
+
+
+    Before:
+
+    ```
+
+    import { InvalidObject } from "@patternfly/react-component-groups"; export const
+    ComponentGroupsInvalidObjectRenamePropsInput = () => ( <InvalidObject invalidObjectTitleText="Sample
+    title" /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { InvalidObject } from "@patternfly/react-component-groups"; export const
+    ComponentGroupsInvalidObjectRenamePropsInput = () => ( <InvalidObject titleText="Sample
+    title" /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/145
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-groups-00020
+  description: LogSnippet leftBorderVariant prop should be replaced with LogSnippet
+    variant prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: LogSnippet
+  message: 'In react-component-groups, LogSnippet''s prop leftBorderVariant has been
+    renamed to variant and LogSnippetBorderVariant enum has been replaced with PatternFly''s
+    AlertVariant enum.
+
+
+    Replace `LogSnippet leftBorderVariant prop` with `LogSnippet variant prop`.
+
+
+    Before:
+
+    ```
+
+    import { LogSnippet, LogSnippetBorderVariant, } from "@patternfly/react-component-groups";
+    export const LogSnippetRenameLeftBorderVariantInput = () => ( <LogSnippet message="Failure
+    - check logs for details" logSnippet="code" leftBorderVariant={LogSnippetBorderVariant.success}
+    /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { LogSnippet } from "@patternfly/react-component-groups"; export const
+    LogSnippetRenameLeftBorderVariantInput = () => ( <LogSnippet message="Failure
+    - check logs for details" logSnippet="code" variant={"success"} /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/145
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-groups-00030
+  description: ErrorState errorTitle prop should be replaced with ErrorState titleText
+    prop
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: ErrorState
+  message: 'In react-component-groups, ErrorState''s prop errorTitle has been renamed
+    to titleText to comply with its base component, EmptyState.
+
+
+    Replace `ErrorState errorTitle prop` with `ErrorState titleText prop`.
+
+
+    Before:
+
+    ```
+
+    import { ErrorState } from "@patternfly/react-component-groups"; export const
+    ComponentGroupsErrorStateRenamePropsInput = () => ( <ErrorState errorTitle="Sample
+    error title" /> );
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { ErrorState } from "@patternfly/react-component-groups"; export const
+    ComponentGroupsErrorStateRenamePropsInput = () => ( <ErrorState titleText="Sample
+    error title" /> );
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/145
+    title: patternfly-v6 Documentation
+  customVariables: []

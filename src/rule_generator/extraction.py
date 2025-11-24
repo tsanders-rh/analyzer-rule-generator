@@ -502,6 +502,28 @@ MIGRATION GUIDE CONTENT:
 
 ---
 
+**CRITICAL REMINDER - Component Prop Changes:**
+
+For JavaScript/TypeScript migrations where a prop changes on a SPECIFIC component:
+- ✅ ALWAYS use `"provider_type": "combo"`
+- ✅ ALWAYS include `"when_combo"` with nodejs_pattern (component name), builtin_pattern (component + prop), and file_pattern
+- ❌ NEVER use `"provider_type": "builtin"` with just a prop name
+- ❌ NEVER use `"provider_type": "nodejs"` with just a prop name
+
+Example - Button's isActive → isPressed:
+```json
+{{
+  "source_pattern": "Button isActive",
+  "source_fqn": "Button",
+  "provider_type": "combo",
+  "when_combo": {{
+    "nodejs_pattern": "Button",
+    "builtin_pattern": "<Button[^>]*\\\\bisActive\\\\b",
+    "file_pattern": "\\\\.(j|t)sx?$"
+  }}
+}}
+```
+
 Return your findings as a JSON array. Each pattern should be an object with these fields:
 
 {{
@@ -792,6 +814,7 @@ Return ONLY the JSON array, no additional commentary."""
                     concern=data.get("concern", "general"),
                     provider_type=data.get("provider_type"),
                     file_pattern=data.get("file_pattern"),
+                    when_combo=data.get("when_combo"),
                     rationale=data["rationale"],
                     example_before=data.get("example_before"),
                     example_after=data.get("example_after"),

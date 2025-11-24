@@ -16,6 +16,7 @@ from src.rule_generator.schema import (
     MigrationPattern,
     Category,
     LocationType,
+    CSharpLocationType,
     AnalyzerRule
 )
 
@@ -1098,6 +1099,132 @@ class TestNodejsReferencedRules:
         assert "nodejs.referenced" in condition
         assert condition["nodejs.referenced"]["pattern"] == "useHook"
         assert "and" not in condition
+
+    def test_build_csharp_referenced_condition(self):
+        """Should build c-sharp.referenced condition"""
+        generator = AnalyzerRuleGenerator()
+        pattern = MigrationPattern(
+            source_pattern="HttpNotFound",
+            source_fqn="System.Web.Mvc.HttpNotFound",
+            location_type=CSharpLocationType.METHOD,
+            provider_type="csharp",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Method renamed in .NET Core"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        assert "c-sharp.referenced" in condition
+        assert condition["c-sharp.referenced"]["pattern"] == "System.Web.Mvc.HttpNotFound"
+        assert condition["c-sharp.referenced"]["location"] == "METHOD"
+
+    def test_build_csharp_condition_with_class_location(self):
+        """Should build c-sharp.referenced condition with CLASS location"""
+        generator = AnalyzerRuleGenerator()
+        pattern = MigrationPattern(
+            source_pattern="HandleProcessCorruptedStateExceptionsAttribute",
+            source_fqn="System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptionsAttribute",
+            location_type=CSharpLocationType.CLASS,
+            provider_type="csharp",
+            complexity="HIGH",
+            category="api",
+            rationale="Attribute removed in .NET Core"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        assert "c-sharp.referenced" in condition
+        assert condition["c-sharp.referenced"]["location"] == "CLASS"
+
+    def test_build_csharp_condition_with_field_location(self):
+        """Should build c-sharp.referenced condition with FIELD location"""
+        generator = AnalyzerRuleGenerator()
+        pattern = MigrationPattern(
+            source_pattern="FileSystemInfo.Attributes",
+            source_fqn="System.IO.FileSystemInfo.Attributes",
+            location_type=CSharpLocationType.FIELD,
+            provider_type="csharp",
+            complexity="LOW",
+            category="api",
+            rationale="Property behavior changed"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        assert "c-sharp.referenced" in condition
+        assert condition["c-sharp.referenced"]["location"] == "FIELD"
+
+    def test_build_csharp_condition_defaults_to_all(self):
+        """Should default to ALL location if not specified"""
+        generator = AnalyzerRuleGenerator()
+        pattern = MigrationPattern(
+            source_pattern="IDispatchImplAttribute",
+            source_fqn="System.Runtime.InteropServices.IDispatchImplAttribute",
+            provider_type="csharp",
+            complexity="HIGH",
+            category="api",
+            rationale="API removed"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        assert "c-sharp.referenced" in condition
+        # When location_type is None, no location field should be added (defaults to ALL)
+        assert "location" not in condition["c-sharp.referenced"]
+
+    def test_build_csharp_condition_with_all_location(self):
+        """Should build c-sharp.referenced condition with explicit ALL location"""
+        generator = AnalyzerRuleGenerator()
+        pattern = MigrationPattern(
+            source_pattern="System.Web.Http",
+            source_fqn="System.Web.Http.*",
+            location_type=CSharpLocationType.ALL,
+            provider_type="csharp",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Namespace migration"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        assert "c-sharp.referenced" in condition
+        assert condition["c-sharp.referenced"]["location"] == "ALL"
+
+    def test_build_csharp_condition_with_wildcard_pattern(self):
+        """Should build c-sharp.referenced condition with wildcard pattern"""
+        generator = AnalyzerRuleGenerator()
+        pattern = MigrationPattern(
+            source_pattern="System.Web.Http",
+            source_fqn="System.Web.Http.*",
+            provider_type="csharp",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Package migration"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        assert "c-sharp.referenced" in condition
+        assert condition["c-sharp.referenced"]["pattern"] == "System.Web.Http.*"
+
+    def test_build_csharp_condition_uses_source_pattern_fallback(self):
+        """Should use source_pattern if source_fqn not available"""
+        generator = AnalyzerRuleGenerator()
+        pattern = MigrationPattern(
+            source_pattern="ContextMenu",
+            provider_type="csharp",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Control removed"
+        )
+
+        condition = generator._build_when_condition(pattern)
+
+        # When source_fqn is None, it uses source_pattern as fallback
+        assert condition is not None
+        assert "c-sharp.referenced" in condition
+        assert condition["c-sharp.referenced"]["pattern"] == "ContextMenu"
 
     def test_generate_rule_for_patternfly_component(self):
         """Should generate simple nodejs.referenced rule for PatternFly component"""

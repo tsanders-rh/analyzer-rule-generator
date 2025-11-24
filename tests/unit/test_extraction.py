@@ -11,7 +11,7 @@ from src.rule_generator.extraction import (
     MigrationPatternExtractor,
     detect_language_from_frameworks
 )
-from src.rule_generator.schema import MigrationPattern, LocationType
+from src.rule_generator.schema import MigrationPattern, LocationType, CSharpLocationType
 
 
 class TestLanguageDetection:
@@ -61,6 +61,31 @@ class TestLanguageDetection:
         """Should detect language case-insensitively"""
         result = detect_language_from_frameworks("Spring-Boot-3", "SPRING-BOOT-4")
         assert result == "java"
+
+    def test_detect_csharp_from_dotnet(self):
+        """Should detect C# from .NET framework names"""
+        result = detect_language_from_frameworks("dotnetframework", "dotnet8")
+        assert result == "csharp"
+
+    def test_detect_csharp_from_aspnet(self):
+        """Should detect C# from ASP.NET framework names"""
+        result = detect_language_from_frameworks("aspnet-mvc-5", "aspnet-core-8")
+        assert result == "csharp"
+
+    def test_detect_csharp_from_csharp_keyword(self):
+        """Should detect C# when 'csharp' or 'c#' is mentioned"""
+        result = detect_language_from_frameworks("csharp-10", "csharp-11")
+        assert result == "csharp"
+
+    def test_detect_csharp_from_netcore(self):
+        """Should detect C# from .NET Core framework names"""
+        result = detect_language_from_frameworks("netcore-3.1", "dotnet-6")
+        assert result == "csharp"
+
+    def test_detect_csharp_from_entityframework(self):
+        """Should detect C# from Entity Framework names"""
+        result = detect_language_from_frameworks("entityframework-6", "ef-core-7")
+        assert result == "csharp"
 
 
 class TestPatternParsing:
@@ -221,6 +246,32 @@ class TestPatternParsing:
 
             assert len(patterns) == 1
             assert patterns[0].location_type == LocationType(loc_type)
+
+    def test_parse_pattern_with_csharp_location_types(self, extractor):
+        """Should correctly parse all valid C# location types"""
+        location_types = [
+            "FIELD",
+            "CLASS",
+            "METHOD",
+            "ALL"
+        ]
+
+        for loc_type in location_types:
+            response = f'''[{{
+                "source_pattern": "test",
+                "target_pattern": "new",
+                "location_type": "{loc_type}",
+                "provider_type": "csharp",
+                "complexity": "TRIVIAL",
+                "category": "api",
+                "rationale": "Test"
+            }}]'''
+
+            patterns = extractor._parse_extraction_response(response)
+
+            assert len(patterns) == 1
+            assert patterns[0].location_type == CSharpLocationType(loc_type)
+            assert patterns[0].provider_type == "csharp"
 
     def test_parse_pattern_with_optional_fields(self, extractor):
         """Should parse pattern with all optional fields"""

@@ -1,0 +1,636 @@
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00000
+  description: ContextMenu control should be replaced with ContextMenuStrip control
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.ContextMenu
+      location: CLASS
+  message: 'The ContextMenu control is no longer available in .NET Core. Use ContextMenuStrip
+    instead, which was introduced in .NET Framework 2.0.
+
+
+    Replace `ContextMenu control` with `ContextMenuStrip control`.
+
+
+    Before:
+
+    ```
+
+    var menu = new ContextMenu();
+
+    ```
+
+
+    After:
+
+    ```
+
+    var menu = new ContextMenuStrip();
+
+    ```'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00010
+  description: DataGrid control should be replaced with DataGridView control
+  effort: 7
+  category: mandatory
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.DataGrid
+      location: CLASS
+  message: 'The DataGrid control is no longer available in .NET Core. Use DataGridView
+    instead, which was introduced in .NET Framework 2.0.
+
+
+    Replace `DataGrid control` with `DataGridView control`.
+
+
+    Before:
+
+    ```
+
+    var grid = new DataGrid();
+
+    ```
+
+
+    After:
+
+    ```
+
+    var grid = new DataGridView();
+
+    ```'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00020
+  description: MainMenu control should be replaced with MenuStrip control
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.MainMenu
+      location: CLASS
+  message: 'The MainMenu control is no longer available in .NET Core. Use MenuStrip
+    instead, which was introduced in .NET Framework 2.0.
+
+
+    Replace `MainMenu control` with `MenuStrip control`.
+
+
+    Before:
+
+    ```
+
+    var menu = new MainMenu();
+
+    ```
+
+
+    After:
+
+    ```
+
+    var menu = new MenuStrip();
+
+    ```'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00030
+  description: Menu control should be replaced with ToolStripDropDown or ToolStripDropDownMenu
+    control
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.Menu
+      location: CLASS
+  message: 'The Menu control is no longer available in .NET Core. Use ToolStripDropDown
+    or ToolStripDropDownMenu instead, which were introduced in .NET Framework 2.0.
+
+
+    Replace `Menu control` with `ToolStripDropDown or ToolStripDropDownMenu control`.
+
+
+    Before:
+
+    ```
+
+    // Menu is an abstract class, typically used via MainMenu or ContextMenu
+
+    ```
+
+
+    After:
+
+    ```
+
+    var menu = new ToolStripDropDownMenu();
+
+    ```'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00040
+  description: MenuItem control should be replaced with ToolStripMenuItem control
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.MenuItem
+      location: CLASS
+  message: 'The MenuItem control is no longer available in .NET Core. Use ToolStripMenuItem
+    instead, which was introduced in .NET Framework 2.0.
+
+
+    Replace `MenuItem control` with `ToolStripMenuItem control`.
+
+
+    Before:
+
+    ```
+
+    var item = new MenuItem("File");
+
+    ```
+
+
+    After:
+
+    ```
+
+    var item = new ToolStripMenuItem("File");
+
+    ```'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00050
+  description: ToolBar control should be replaced with ToolStrip control
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.ToolBar
+      location: CLASS
+  message: 'The ToolBar control is no longer available in .NET Core. Use ToolStrip
+    instead, which was introduced in .NET Framework 2.0.
+
+
+    Replace `ToolBar control` with `ToolStrip control`.
+
+
+    Before:
+
+    ```
+
+    var toolbar = new ToolBar();
+
+    ```
+
+
+    After:
+
+    ```
+
+    var toolbar = new ToolStrip();
+
+    ```'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00060
+  description: ToolBarButton control should be replaced with ToolStripButton control
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.ToolBarButton
+      location: CLASS
+  message: 'The ToolBarButton control is no longer available in .NET Core. Use ToolStripButton
+    instead, which was introduced in .NET Framework 2.0.
+
+
+    Replace `ToolBarButton control` with `ToolStripButton control`.
+
+
+    Before:
+
+    ```
+
+    var button = new ToolBarButton();
+
+    ```
+
+
+    After:
+
+    ```
+
+    var button = new ToolStripButton();
+
+    ```'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00070
+  description: Control.DefaultFont is Microsoft Sans Serif 8.25 pt should be replaced
+    with Control.DefaultFont is Segoe UI 9 pt
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.Control.DefaultFont
+      location: FIELD
+  message: 'The default font for Windows Forms controls has changed from Microsoft
+    Sans Serif 8.25 pt to Segoe UI 9 pt to align with Windows user experience guidelines.
+
+
+    Replace `Control.DefaultFont is Microsoft Sans Serif 8.25 pt` with `Control.DefaultFont
+    is Segoe UI 9 pt`.'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00080
+  description: FolderBrowserDialog with legacy dialog should be replaced with FolderBrowserDialog
+    with modern dialog
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.FolderBrowserDialog.AutoUpgradeEnabled
+      location: FIELD
+  message: 'In .NET Core, Windows Forms uses a newer COM-based control for FolderBrowserDialog
+    that was introduced in Windows Vista.
+
+
+    Replace `FolderBrowserDialog with legacy dialog` with `FolderBrowserDialog with
+    modern dialog`.
+
+
+    Before:
+
+    ```
+
+    var dialog = new FolderBrowserDialog();
+
+    dialog.AutoUpgradeEnabled = false;
+
+    dialog.ShowDialog();
+
+    ```
+
+
+    After:
+
+    ```
+
+    var dialog = new FolderBrowserDialog();
+
+    dialog.ShowDialog();
+
+    ```'
+  links:
+  - url: https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.folderbrowserdialog.autoupgradeenabled
+    title: dotnet8 Documentation
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00090
+  description: SerializableAttribute on Windows Forms types should be replaced with
+    SerializableAttribute removed from some Windows Forms types
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.Cursor
+      location: CLASS
+  message: 'SerializableAttribute has been removed from some Windows Forms classes
+    that have no known binary serialization scenarios to address maintenance and security
+    concerns.
+
+
+    Replace `SerializableAttribute on Windows Forms types` with `SerializableAttribute
+    removed from some Windows Forms types`.'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00100
+  description: Switch.System.Windows.Forms.AllowUpdateChildControlIndexForTabControls
+    usage detected (removed API)
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    builtin.filecontent:
+      pattern: Switch.System.Windows.Forms.AllowUpdateChildControlIndexForTabControls
+      filePattern: .*\.config$
+  message: 'The Switch.System.Windows.Forms.AllowUpdateChildControlIndexForTabControls
+    compatibility switch is not supported in .NET Core or .NET 5.0 and later.
+
+
+    Remove usage of `Switch.System.Windows.Forms.AllowUpdateChildControlIndexForTabControls`
+    (API has been removed).'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00110
+  description: Switch.System.Windows.Forms.DomainUpDown.UseLegacyScrolling usage detected
+    (removed API)
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    builtin.filecontent:
+      pattern: Switch.System.Windows.Forms.DomainUpDown.UseLegacyScrolling
+      filePattern: .*\.config$
+  message: 'The Switch.System.Windows.Forms.DomainUpDown.UseLegacyScrolling compatibility
+    switch is not supported in .NET Core or .NET 5.0 and later.
+
+
+    Remove usage of `Switch.System.Windows.Forms.DomainUpDown.UseLegacyScrolling`
+    (API has been removed).'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00120
+  description: Switch.System.Windows.Forms.DoNotLoadLatestRichEditControl usage detected
+    (removed API)
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    builtin.filecontent:
+      pattern: Switch.System.Windows.Forms.DoNotLoadLatestRichEditControl
+      filePattern: .*\.config$
+  message: 'The Switch.System.Windows.Forms.DoNotLoadLatestRichEditControl compatibility
+    switch is not supported in .NET Core or .NET 5.0 and later.
+
+
+    Remove usage of `Switch.System.Windows.Forms.DoNotLoadLatestRichEditControl` (API
+    has been removed).'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00130
+  description: Switch.System.Windows.Forms.DoNotSupportSelectAllShortcutInMultilineTextBox
+    usage detected (removed API)
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    builtin.filecontent:
+      pattern: Switch.System.Windows.Forms.DoNotSupportSelectAllShortcutInMultilineTextBox
+      filePattern: .*\.config$
+  message: 'The Switch.System.Windows.Forms.DoNotSupportSelectAllShortcutInMultilineTextBox
+    compatibility switch is not supported in .NET Core or .NET 5.0 and later.
+
+
+    Remove usage of `Switch.System.Windows.Forms.DoNotSupportSelectAllShortcutInMultilineTextBox`
+    (API has been removed).'
+  links:
+  - url: https://learn.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-custom-imessagefilter-prefiltermessage-implementations
+    title: dotnet8 Documentation
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00140
+  description: Switch.System.Windows.Forms.DontSupportReentrantFilterMessage usage
+    detected (removed API)
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    builtin.filecontent:
+      pattern: Switch.System.Windows.Forms.DontSupportReentrantFilterMessage
+      filePattern: .*\.config$
+  message: 'The Switch.System.Windows.Forms.DontSupportReentrantFilterMessage compatibility
+    switch is not supported in .NET Core or .NET 5.0 and later.
+
+
+    Remove usage of `Switch.System.Windows.Forms.DontSupportReentrantFilterMessage`
+    (API has been removed).'
+  links:
+  - url: https://learn.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-custom-imessagefilter-prefiltermessage-implementations
+    title: dotnet8 Documentation
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00150
+  description: Switch.System.Windows.Forms.EnableVisualStyleValidation usage detected
+    (removed API)
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    builtin.filecontent:
+      pattern: Switch.System.Windows.Forms.EnableVisualStyleValidation
+      filePattern: .*\.config$
+  message: 'The Switch.System.Windows.Forms.EnableVisualStyleValidation compatibility
+    switch is not supported in .NET Core or .NET 5.0 and later.
+
+
+    Remove usage of `Switch.System.Windows.Forms.EnableVisualStyleValidation` (API
+    has been removed).'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00160
+  description: Switch.System.Windows.Forms.UseLegacyContextMenuStripSourceControlValue
+    usage detected (removed API)
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    builtin.filecontent:
+      pattern: Switch.System.Windows.Forms.UseLegacyContextMenuStripSourceControlValue
+      filePattern: .*\.config$
+  message: 'The Switch.System.Windows.Forms.UseLegacyContextMenuStripSourceControlValue
+    compatibility switch is not supported in .NET Core or .NET 5.0 and later.
+
+
+    Remove usage of `Switch.System.Windows.Forms.UseLegacyContextMenuStripSourceControlValue`
+    (API has been removed).'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00170
+  description: Switch.System.Windows.Forms.UseLegacyImages usage detected (removed
+    API)
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    builtin.filecontent:
+      pattern: Switch.System.Windows.Forms.UseLegacyImages
+      filePattern: .*\.config$
+  message: 'The Switch.System.Windows.Forms.UseLegacyImages compatibility switch is
+    not supported in .NET Core or .NET 5.0 and later.
+
+
+    Remove usage of `Switch.System.Windows.Forms.UseLegacyImages` (API has been removed).'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00180
+  description: Application.SetDefaultFont should be replaced with Application.SetDefaultFont
+    to restore legacy font
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.Application.SetDefaultFont
+      location: METHOD
+  message: 'To restore the original Microsoft Sans Serif 8.25pt font for an entire
+    application, you can use Application.SetDefaultFont.
+
+
+    Replace `Application.SetDefaultFont` with `Application.SetDefaultFont to restore
+    legacy font`.'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00190
+  description: ApplicationDefaultFont MSBuild property should be replaced with ApplicationDefaultFont
+    MSBuild property to restore legacy font
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    builtin.filecontent:
+      pattern: ApplicationDefaultFont
+      filePattern: .*\.csproj$|.*\.vbproj$
+  message: 'To restore the original Microsoft Sans Serif 8.25pt font for an entire
+    application, you can set the ApplicationDefaultFont MSBuild property.
+
+
+    Replace `ApplicationDefaultFont MSBuild property` with `ApplicationDefaultFont
+    MSBuild property to restore legacy font`.'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00200
+  description: IMessageFilter.PreFilterMessage implementation that adds/removes message
+    filters and pumps messages should be replaced with IMessageFilter.PreFilterMessage
+    implementation that adds/removes message filters and pumps messages (behavior
+    change in .NET Framework 4.6.1+)
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.IMessageFilter.PreFilterMessage
+      location: METHOD
+  message: "In .NET Framework 4.6.1+, custom IMessageFilter.PreFilterMessage implementations\
+    \ that add/remove message filters and call Application.DoEvents no longer throw\
+    \ IndexOutOfRangeException when Application.FilterMessage is called.\n\nReplace\
+    \ `IMessageFilter.PreFilterMessage implementation that adds/removes message filters\
+    \ and pumps messages` with `IMessageFilter.PreFilterMessage implementation that\
+    \ adds/removes message filters and pumps messages (behavior change in .NET Framework\
+    \ 4.6.1+)`.\n\nBefore:\n```\npublic bool PreFilterMessage(ref Message m) {\n \
+    \ Application.AddMessageFilter(someFilter);\n  Application.DoEvents();\n  return\
+    \ false;\n}\n```\n\nAfter:\n```\npublic bool PreFilterMessage(ref Message m) {\n\
+    \  Application.AddMessageFilter(someFilter);\n  Application.DoEvents();\n  return\
+    \ false;\n}\n```"
+  links:
+  - url: https://learn.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-custom-imessagefilter-prefiltermessage-implementations
+    title: dotnet8 Documentation
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00210
+  description: Application.AddMessageFilter in IMessageFilter.PreFilterMessage implementation
+    should be replaced with Application.AddMessageFilter in IMessageFilter.PreFilterMessage
+    implementation (behavior change in .NET Framework 4.6.1+)
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.Application.AddMessageFilter
+      location: METHOD
+  message: "In .NET Framework 4.6.1+, calling Application.AddMessageFilter within\
+    \ a custom IMessageFilter.PreFilterMessage implementation no longer throws IndexOutOfRangeException\
+    \ when Application.FilterMessage is called.\n\nReplace `Application.AddMessageFilter\
+    \ in IMessageFilter.PreFilterMessage implementation` with `Application.AddMessageFilter\
+    \ in IMessageFilter.PreFilterMessage implementation (behavior change in .NET Framework\
+    \ 4.6.1+)`.\n\nBefore:\n```\npublic bool PreFilterMessage(ref Message m) {\n \
+    \ Application.AddMessageFilter(someFilter);\n  Application.DoEvents();\n  return\
+    \ false;\n}\n```\n\nAfter:\n```\npublic bool PreFilterMessage(ref Message m) {\n\
+    \  Application.AddMessageFilter(someFilter);\n  Application.DoEvents();\n  return\
+    \ false;\n}\n```"
+  links:
+  - url: https://learn.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-custom-imessagefilter-prefiltermessage-implementations
+    title: dotnet8 Documentation
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00220
+  description: Application.RemoveMessageFilter in IMessageFilter.PreFilterMessage
+    implementation should be replaced with Application.RemoveMessageFilter in IMessageFilter.PreFilterMessage
+    implementation (behavior change in .NET Framework 4.6.1+)
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.Application.RemoveMessageFilter
+      location: METHOD
+  message: "In .NET Framework 4.6.1+, calling Application.RemoveMessageFilter within\
+    \ a custom IMessageFilter.PreFilterMessage implementation no longer throws IndexOutOfRangeException\
+    \ when Application.FilterMessage is called.\n\nReplace `Application.RemoveMessageFilter\
+    \ in IMessageFilter.PreFilterMessage implementation` with `Application.RemoveMessageFilter\
+    \ in IMessageFilter.PreFilterMessage implementation (behavior change in .NET Framework\
+    \ 4.6.1+)`.\n\nBefore:\n```\npublic bool PreFilterMessage(ref Message m) {\n \
+    \ Application.RemoveMessageFilter(someFilter);\n  Application.DoEvents();\n  return\
+    \ false;\n}\n```\n\nAfter:\n```\npublic bool PreFilterMessage(ref Message m) {\n\
+    \  Application.RemoveMessageFilter(someFilter);\n  Application.DoEvents();\n \
+    \ return false;\n}\n```"
+  links:
+  - url: https://learn.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-custom-imessagefilter-prefiltermessage-implementations
+    title: dotnet8 Documentation
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-windows-forms-00230
+  description: Application.DoEvents in IMessageFilter.PreFilterMessage implementation
+    should be replaced with Application.DoEvents in IMessageFilter.PreFilterMessage
+    implementation (behavior change in .NET Framework 4.6.1+)
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Windows.Forms.Application.DoEvents
+      location: METHOD
+  message: "In .NET Framework 4.6.1+, calling Application.DoEvents within a custom\
+    \ IMessageFilter.PreFilterMessage implementation that also adds/removes message\
+    \ filters no longer throws IndexOutOfRangeException when Application.FilterMessage\
+    \ is called.\n\nReplace `Application.DoEvents in IMessageFilter.PreFilterMessage\
+    \ implementation` with `Application.DoEvents in IMessageFilter.PreFilterMessage\
+    \ implementation (behavior change in .NET Framework 4.6.1+)`.\n\nBefore:\n```\n\
+    public bool PreFilterMessage(ref Message m) {\n  Application.AddMessageFilter(someFilter);\n\
+    \  Application.DoEvents();\n  return false;\n}\n```\n\nAfter:\n```\npublic bool\
+    \ PreFilterMessage(ref Message m) {\n  Application.AddMessageFilter(someFilter);\n\
+    \  Application.DoEvents();\n  return false;\n}\n```"
+  links:
+  - url: https://learn.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-custom-imessagefilter-prefiltermessage-implementations
+    title: dotnet8 Documentation
+  customVariables: []

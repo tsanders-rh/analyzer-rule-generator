@@ -1,0 +1,21 @@
+- ruleID: dotnetframework-to-dotnet8-exception-handling-00000
+  description: HandleProcessCorruptedStateExceptionsAttribute should be replaced with
+    Handling corrupted-process-state exceptions is not supported in .NET Core
+  effort: 7
+  category: mandatory
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptionsAttribute
+      location: CLASS
+  message: "In .NET Core, corrupted-process-state exceptions cannot be handled by\
+    \ managed code. The CLR doesn't deliver these exceptions to managed code.\n\n\
+    Replace `HandleProcessCorruptedStateExceptionsAttribute` with `Handling corrupted-process-state\
+    \ exceptions is not supported in .NET Core`.\n\nBefore:\n```\n[HandleProcessCorruptedStateExceptions]\n\
+    public void Method() {\n  try {\n    // code that might cause corrupted state\n\
+    \  } catch (Exception ex) {\n    // handle exception\n  }\n}\n```\n\nAfter:\n\
+    ```\n// Avoid the need to handle corrupted-process-state exceptions\n// or write\
+    \ exception handlers in C/C++ code\n```"
+  customVariables: []

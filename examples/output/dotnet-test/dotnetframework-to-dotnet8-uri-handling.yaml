@@ -1,0 +1,82 @@
+- ruleID: dotnetframework-to-dotnet8-uri-handling-00000
+  description: 'UriBuilder.Fragment no longer prepends # character should be replaced
+    with UriBuilder.Fragment no longer prepends # character when one is already present'
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.UriBuilder.Fragment
+      location: FIELD
+  message: 'In .NET Framework, UriBuilder.Fragment always prepends a # character.
+    In .NET Core, it doesn''t prepend # if one is already present.
+
+
+    Replace `UriBuilder.Fragment no longer prepends # character` with `UriBuilder.Fragment
+    no longer prepends # character when one is already present`.
+
+
+    Before:
+
+    ```
+
+    var builder = new UriBuilder();
+
+    builder.Fragment = "#section"; // Results in ##section in .NET Framework
+
+    ```
+
+
+    After:
+
+    ```
+
+    var builder = new UriBuilder();
+
+    builder.Fragment = "#section"; // Results in #section in .NET Core
+
+    ```'
+  customVariables: []
+- ruleID: dotnetframework-to-dotnet8-uri-handling-00010
+  description: UriBuilder.Query no longer prepends ? character should be replaced
+    with UriBuilder.Query no longer prepends ? character when one is already present
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=dotnetframework
+  - konveyor.io/target=dotnet8
+  when:
+    c-sharp.referenced:
+      pattern: System.UriBuilder.Query
+      location: FIELD
+  message: 'In .NET Framework, UriBuilder.Query always prepends a ? character. In
+    .NET Core, it doesn''t prepend ? if one is already present.
+
+
+    Replace `UriBuilder.Query no longer prepends ? character` with `UriBuilder.Query
+    no longer prepends ? character when one is already present`.
+
+
+    Before:
+
+    ```
+
+    var builder = new UriBuilder();
+
+    builder.Query = "?param=value"; // Results in ??param=value in .NET Framework
+
+    ```
+
+
+    After:
+
+    ```
+
+    var builder = new UriBuilder();
+
+    builder.Query = "?param=value"; // Results in ?param=value in .NET Core
+
+    ```'
+  customVariables: []

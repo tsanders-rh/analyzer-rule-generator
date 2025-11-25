@@ -1,0 +1,108 @@
+- ruleID: patternfly-v5-to-patternfly-v6-component-replacement-00000
+  description: Chip should be replaced with Label
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Chip
+  message: 'The Chip component has been replaced with Label component
+
+
+    Replace `Chip` with `Label`.
+
+
+    Before:
+
+    ```
+
+    <Chip>Example</Chip>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Label>Example</Label>
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade#notable-changes
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-replacement-00010
+  description: ChipGroup should be replaced with LabelGroup
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: ChipGroup
+  message: 'The ChipGroup component has been replaced with LabelGroup component
+
+
+    Replace `ChipGroup` with `LabelGroup`.
+
+
+    Before:
+
+    ```
+
+    <ChipGroup>...</ChipGroup>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <LabelGroup>...</LabelGroup>
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade#notable-changes
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-replacement-00020
+  description: Tile should be replaced with Card
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: Tile
+  message: 'The Tile component has been replaced with Card component
+
+
+    Replace `Tile` with `Card`.
+
+
+    Before:
+
+    ```
+
+    <Tile>Content</Tile>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Card>Content</Card>
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade#notable-changes
+    title: patternfly-v6 Documentation
+  customVariables: []

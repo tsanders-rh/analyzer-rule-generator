@@ -1,0 +1,82 @@
+- ruleID: patternfly-v5-to-patternfly-v6-patternfly-imports-00000
+  description: import from @patternfly/react-core/dist/esm/components should be replaced
+    with import from @patternfly/react-core
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: import.*from.*@patternfly/react-core/dist/esm/components$
+      filePattern: \.(j|t)sx?$
+  message: 'Import paths have been simplified in PatternFly 6. Components should now
+    be imported directly from @patternfly/react-core instead of from specific paths.
+
+
+    Replace `import { {{ component }} }; from import from @patternfly/react-core/dist/esm/components`
+    with `import { {{ component }} } from import from @patternfly/react-core`.
+
+
+    Before:
+
+    ```
+
+    import { {{ component }} } from ''@patternfly/react-core/dist/esm/components/Button'';
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { {{ component }} } from ''@patternfly/react-core'';
+
+    ```'
+  customVariables:
+  - pattern: import {(?P<imports>[A-z,\s]+)}
+    name: component
+    nameOfCaptureGroup: imports
+    defaultValue: Component
+- ruleID: patternfly-v5-to-patternfly-v6-patternfly-imports-00010
+  description: import from @patternfly/react-core/dist/js/components should be replaced
+    with import from @patternfly/react-core
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: import.*from.*@patternfly/react-core/dist/js/components$
+      filePattern: \.(j|t)sx?$
+  message: 'Import paths have been simplified in PatternFly 6. Components should now
+    be imported directly from @patternfly/react-core instead of from specific paths.
+
+
+    Replace `import { {{ component }} }; from import from @patternfly/react-core/dist/js/components`
+    with `import { {{ component }} } from import from @patternfly/react-core`.
+
+
+    Before:
+
+    ```
+
+    import { {{ component }} } from ''@patternfly/react-core/dist/js/components/Button'';
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { {{ component }} } from ''@patternfly/react-core'';
+
+    ```'
+  customVariables:
+  - pattern: import {(?P<imports>[A-z,\s]+)}
+    name: component
+    nameOfCaptureGroup: imports
+    defaultValue: Component

@@ -1,0 +1,99 @@
+- ruleID: patternfly-v5-to-patternfly-v6-enums-00000
+  description: ButtonVariant.link should be replaced with ButtonVariant.plain
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: ButtonVariant.link
+  message: 'ButtonVariant.link has been renamed to ButtonVariant.plain
+
+
+    Replace `ButtonVariant.link` with `ButtonVariant.plain`.
+
+
+    Before:
+
+    ```
+
+    variant={ButtonVariant.link}
+
+    ```
+
+
+    After:
+
+    ```
+
+    variant={ButtonVariant.plain}
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-enums-00010
+  description: alignLeft should be replaced with alignStart
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: alignLeft
+  message: 'alignLeft has been renamed to alignStart for better RTL support
+
+
+    Replace `alignLeft` with `alignStart`.
+
+
+    Before:
+
+    ```
+
+    align={alignLeft}
+
+    ```
+
+
+    After:
+
+    ```
+
+    align={alignStart}
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-enums-00020
+  description: alignRight should be replaced with alignEnd
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: alignRight
+  message: 'alignRight has been renamed to alignEnd for better RTL support
+
+
+    Replace `alignRight` with `alignEnd`.
+
+
+    Before:
+
+    ```
+
+    align={alignRight}
+
+    ```
+
+
+    After:
+
+    ```
+
+    align={alignEnd}
+
+    ```'
+  customVariables: []

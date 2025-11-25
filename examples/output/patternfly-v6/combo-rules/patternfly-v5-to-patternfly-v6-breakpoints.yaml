@@ -1,0 +1,190 @@
+- ruleID: patternfly-v5-to-patternfly-v6-breakpoints-00000
+  description: 576px should be replaced with 36rem
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: 576px
+      filePattern: \.(j|t)sx?$|\.(css|scss)$
+  message: 'PatternFly 6 uses rem units for global breakpoint design tokens, rather
+    than pixels
+
+
+    Replace `576px` with `36rem`.
+
+
+    Before:
+
+    ```
+
+    const smBreakpoint = 576;
+
+    ```
+
+
+    After:
+
+    ```
+
+    const smBreakpoint = 36;
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade#4.-update-any-pixel-based-logic-for-breakpoints
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-breakpoints-00010
+  description: 768px should be replaced with 48rem
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: 768px
+      filePattern: \.(j|t)sx?$|\.(css|scss)$
+  message: 'PatternFly 6 uses rem units for global breakpoint design tokens, rather
+    than pixels
+
+
+    Replace `768px` with `48rem`.
+
+
+    Before:
+
+    ```
+
+    const mdBreakpoint = 768;
+
+    ```
+
+
+    After:
+
+    ```
+
+    const mdBreakpoint = 48;
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade#4.-update-any-pixel-based-logic-for-breakpoints
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-breakpoints-00020
+  description: 992px should be replaced with 62rem
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: 992px
+      filePattern: \.(j|t)sx?$|\.(css|scss)$
+  message: 'PatternFly 6 uses rem units for global breakpoint design tokens, rather
+    than pixels
+
+
+    Replace `992px` with `62rem`.
+
+
+    Before:
+
+    ```
+
+    const lgBreakpoint = 992;
+
+    ```
+
+
+    After:
+
+    ```
+
+    const lgBreakpoint = 62;
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade#4.-update-any-pixel-based-logic-for-breakpoints
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-breakpoints-00030
+  description: 1200px should be replaced with 75rem
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: 1200px
+      filePattern: \.(j|t)sx?$|\.(css|scss)$
+  message: 'PatternFly 6 uses rem units for global breakpoint design tokens, rather
+    than pixels
+
+
+    Replace `1200px` with `75rem`.
+
+
+    Before:
+
+    ```
+
+    const xlBreakpoint = 1200;
+
+    ```
+
+
+    After:
+
+    ```
+
+    const xlBreakpoint = 75;
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade#4.-update-any-pixel-based-logic-for-breakpoints
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-breakpoints-00040
+  description: 1450px should be replaced with 90.625rem
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: 1450px
+      filePattern: \.(j|t)sx?$|\.(css|scss)$
+  message: 'PatternFly 6 uses rem units for global breakpoint design tokens, rather
+    than pixels
+
+
+    Replace `1450px` with `90.625rem`.
+
+
+    Before:
+
+    ```
+
+    const xxlBreakpoint = 1450;
+
+    ```
+
+
+    After:
+
+    ```
+
+    const xxlBreakpoint = 90.625;
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/get-started/upgrade#4.-update-any-pixel-based-logic-for-breakpoints
+    title: patternfly-v6 Documentation
+  customVariables: []

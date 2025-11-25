@@ -1,0 +1,38 @@
+- ruleID: patternfly-v5-to-patternfly-v6-drawer-00040
+  description: DrawerColorVariant.light200 should be replaced with DrawerColorVariant.secondary
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: DrawerColorVariant.light200
+      filePattern: \.(j|t)sx?$
+  message: 'The light200 property for the DrawerColorVariant enum has been replaced
+    with the secondary property.
+
+
+    Replace `DrawerColorVariant.light200` with `DrawerColorVariant.secondary`.
+
+
+    Before:
+
+    ```
+
+    colorVariant={DrawerColorVariant.light200}
+
+    ```
+
+
+    After:
+
+    ```
+
+    colorVariant={DrawerColorVariant.secondary}
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10017
+    title: patternfly-v6 Documentation
+  customVariables: []

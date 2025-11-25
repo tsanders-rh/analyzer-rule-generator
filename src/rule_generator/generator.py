@@ -199,37 +199,58 @@ class AnalyzerRuleGenerator:
         # Check provider type first
         provider = pattern.provider_type or "java"  # Default to java for backward compatibility
 
-        # Handle combo rules (nodejs + builtin)
+        # Handle combo rules (nodejs + builtin OR import + builtin)
         if provider == "combo":
             if not pattern.when_combo:
                 print(f"Warning: Combo provider specified but no when_combo config: {pattern.rationale}")
                 return None
 
             # Build combo condition with AND logic
+            import_pattern = pattern.when_combo.get("import_pattern")
             nodejs_pattern = pattern.when_combo.get("nodejs_pattern")
             builtin_pattern = pattern.when_combo.get("builtin_pattern")
             file_pattern = pattern.when_combo.get("file_pattern")
 
-            if not nodejs_pattern or not builtin_pattern:
-                print(f"Warning: Combo rule missing nodejs_pattern or builtin_pattern: {pattern.rationale}")
+            # Validate: Must have builtin_pattern and either import_pattern OR nodejs_pattern
+            if not builtin_pattern:
+                print(f"Warning: Combo rule missing builtin_pattern: {pattern.rationale}")
                 return None
 
-            conditions = [
-                {
+            if not import_pattern and not nodejs_pattern:
+                print(f"Warning: Combo rule missing both import_pattern and nodejs_pattern: {pattern.rationale}")
+                return None
+
+            conditions = []
+
+            # Add import verification condition if present (preferred over nodejs.referenced)
+            if import_pattern:
+                import_condition = {
+                    "builtin.filecontent": {
+                        "pattern": import_pattern
+                    }
+                }
+                if file_pattern:
+                    import_condition["builtin.filecontent"]["filePattern"] = file_pattern
+                conditions.append(import_condition)
+
+            # Add nodejs.referenced condition if present and no import pattern
+            # (for backward compatibility with existing combo rules)
+            elif nodejs_pattern:
+                conditions.append({
                     "nodejs.referenced": {
                         "pattern": nodejs_pattern
                     }
-                },
-                {
-                    "builtin.filecontent": {
-                        "pattern": builtin_pattern
-                    }
-                }
-            ]
+                })
 
-            # Add filePattern to builtin condition if specified
+            # Add main builtin.filecontent condition for JSX pattern
+            jsx_condition = {
+                "builtin.filecontent": {
+                    "pattern": builtin_pattern
+                }
+            }
             if file_pattern:
-                conditions[1]["builtin.filecontent"]["filePattern"] = file_pattern
+                jsx_condition["builtin.filecontent"]["filePattern"] = file_pattern
+            conditions.append(jsx_condition)
 
             return {"and": conditions}
 

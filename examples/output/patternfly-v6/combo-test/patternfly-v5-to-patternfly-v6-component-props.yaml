@@ -1,0 +1,136 @@
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00100
+  description: variant='link' should be replaced with variant='plain'
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: variant='link'
+      filePattern: \.(j|t)sx?$
+  message: 'Button variant ''link'' has been renamed to ''plain''
+
+
+    Replace `variant=''link''` with `variant=''plain''`.
+
+
+    Before:
+
+    ```
+
+    <Button variant=''link''>Link button</Button>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Button variant=''plain''>Plain button</Button>
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00110
+  description: variant="link" should be replaced with variant="plain"
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: variant="link"
+      filePattern: \.(j|t)sx?$
+  message: 'Button variant ''link'' has been renamed to ''plain''
+
+
+    Replace `variant="link"` with `variant="plain"`.
+
+
+    Before:
+
+    ```
+
+    <Button variant="link">Link button</Button>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Button variant="plain">Plain button</Button>
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00120
+  description: variant='button-group' should be replaced with variant='action-group'
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: variant='button-group'
+      filePattern: \.(j|t)sx?$
+  message: 'Toolbar variant ''button-group'' has been renamed to ''action-group''
+
+
+    Replace `variant=''button-group''` with `variant=''action-group''`.
+
+
+    Before:
+
+    ```
+
+    <Toolbar variant=''button-group''>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Toolbar variant=''action-group''>
+
+    ```'
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00130
+  description: variant="button-group" should be replaced with variant="action-group"
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: variant="button-group"
+      filePattern: \.(j|t)sx?$
+  message: 'Toolbar variant ''button-group'' has been renamed to ''action-group''
+
+
+    Replace `variant="button-group"` with `variant="action-group"`.
+
+
+    Before:
+
+    ```
+
+    <Toolbar variant="button-group">
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Toolbar variant="action-group">
+
+    ```'
+  customVariables: []

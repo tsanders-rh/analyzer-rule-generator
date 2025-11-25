@@ -1,0 +1,41 @@
+- ruleID: patternfly-v5-to-patternfly-v6-log-snippet-00010
+  description: LogSnippetBorderVariant should be replaced with AlertVariant
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: LogSnippetBorderVariant
+  message: 'In react-component-groups, LogSnippetBorderVariant enum has been replaced
+    with PatternFly''s AlertVariant enum.
+
+
+    Replace `LogSnippetBorderVariant` with `AlertVariant`.
+
+
+    Before:
+
+    ```
+
+    import { LogSnippetBorderVariant } from "@patternfly/react-component-groups";
+
+    <LogSnippet leftBorderVariant={LogSnippetBorderVariant.success} />
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { AlertVariant } from "@patternfly/react-core";
+
+    <LogSnippet variant={AlertVariant.success} />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/145
+    title: patternfly-v6 Documentation
+  customVariables: []

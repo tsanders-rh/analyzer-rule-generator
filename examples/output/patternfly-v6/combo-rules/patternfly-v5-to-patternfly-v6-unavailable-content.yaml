@@ -1,0 +1,43 @@
+- ruleID: patternfly-v5-to-patternfly-v6-unavailable-content-00000
+  description: unavailableBodyPreStatusLinkText and unavailableBodyPostStatusLinkText
+    should be replaced with bodyText
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: unavailableBodyPreStatusLinkText|unavailableBodyPostStatusLinkText
+      filePattern: \.(j|t)sx?$
+  message: 'In react-component-groups, UnavailableContent''s props ''unavailableBodyPreStatusLinkText''
+    and ''unavailableBodyPostStatusLinkText'' have been replaced with one ''bodyText''
+    prop
+
+
+    Replace `unavailableBodyPreStatusLinkText and unavailableBodyPostStatusLinkText`
+    with `bodyText`.
+
+
+    Before:
+
+    ```
+
+    <UnavailableContent unavailableBodyPreStatusLinkText="Visit our" unavailableBodyPostStatusLinkText="for
+    more info." statusPageLinkText="custom status page" />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <UnavailableContent bodyText="Visit our custom status page for more info." statusPageLinkText="Custom
+    status page" />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/244
+    title: patternfly-v6 Documentation
+  customVariables: []

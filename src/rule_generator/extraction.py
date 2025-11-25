@@ -1001,7 +1001,13 @@ Return ONLY the JSON array, no additional commentary."""
         return False
 
     def _convert_to_combo_rule(self, pattern: MigrationPattern) -> MigrationPattern:
-        """Convert a simple pattern to combo rule."""
+        """
+        Convert a simple pattern to combo rule with import verification.
+
+        For JavaScript/TypeScript component patterns, this adds import verification
+        to ensure the component is from the target library (e.g., @patternfly/react-core).
+        This prevents false positives from components with the same name in other libraries.
+        """
         parts = pattern.source_pattern.split()
         if len(parts) >= 2:
             component = parts[0]
@@ -1009,8 +1015,16 @@ Return ONLY the JSON array, no additional commentary."""
 
             pattern.provider_type = "combo"
             pattern.source_fqn = component
+
+            # Create import verification pattern for PatternFly
+            # This matches: import { Component } from '@patternfly/react-core'
+            # or: import { Component } from '@patternfly/react-core/deprecated'
+            import_pattern = f"import.*\\{{{{[^}}}}]*\\\\b{component}\\\\b[^}}}}]*\\}}}}.*from ['\"]@patternfly/react-"
+
+            # Use 2-condition combo rule (import verification + JSX pattern)
+            # This is simpler and more effective than 3-condition with nodejs.referenced
             pattern.when_combo = {
-                "nodejs_pattern": component,
+                "import_pattern": import_pattern,
                 "builtin_pattern": f"<{component}[^>]*\\\\b{prop}\\\\b",
                 "file_pattern": "\\\\.(j|t)sx?$"
             }

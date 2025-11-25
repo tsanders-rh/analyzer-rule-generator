@@ -149,6 +149,10 @@ class MigrationPatternExtractor:
             # Parse response
             patterns = self._parse_extraction_response(response_text)
 
+            # Validate and fix patterns
+            language = detect_language_from_frameworks(source_framework or "", target_framework or "")
+            patterns = self._validate_and_fix_patterns(patterns, language)
+
             return patterns
 
         except Exception as e:
@@ -624,6 +628,15 @@ Example - Button's isActive → isPressed:
 }}
 ```
 
+**AUTOMATIC VALIDATION - RULES WILL BE ENFORCED:**
+
+Your patterns will be automatically validated. Patterns violating these rules will be REJECTED or AUTO-FIXED:
+
+1. ✅ AUTO-FIX: Component-specific prop changes (e.g., "Button isActive") will be converted to combo rules
+2. ❌ REJECT: Generic prop names as standalone patterns (isActive, title, onClick, alignLeft, etc.)
+3. ❌ REJECT: Source and target must be different (source: "^5", target: "^5" → INVALID)
+4. ❌ REJECT: Overly broad patterns (wildcards like ".*", ".+", etc.)
+
 Return your findings as a JSON array. Each pattern should be an object with these fields:
 
 {{
@@ -932,3 +945,95 @@ Return ONLY the JSON array, no additional commentary."""
                 continue
 
         return patterns
+
+    def _validate_and_fix_patterns(self, patterns: List[MigrationPattern], language: str) -> List[MigrationPattern]:
+        """
+        Validate patterns and auto-fix common issues.
+
+        Args:
+            patterns: List of patterns to validate
+            language: Detected language (javascript, typescript, java, csharp)
+
+        Returns:
+            List of validated/fixed patterns
+        """
+        validated = []
+
+        for pattern in patterns:
+            # RULE 1: Component-specific prop changes MUST use combo rules
+            if language in ["javascript", "typescript"]:
+                # Detect if this is a prop change pattern
+                is_prop_pattern = self._looks_like_prop_pattern(pattern)
+
+                if is_prop_pattern and pattern.provider_type != "combo":
+                    print(f"  ! Auto-converting to combo rule: {pattern.source_pattern}")
+                    pattern = self._convert_to_combo_rule(pattern)
+
+            # RULE 2: Reject overly generic builtin patterns
+            if pattern.provider_type == "builtin" and pattern.source_fqn:
+                if self._is_overly_broad_pattern(pattern.source_fqn):
+                    print(f"  ! Rejecting overly broad pattern: {pattern.source_fqn}")
+                    continue
+
+            # RULE 3: Ensure source != target
+            if pattern.source_pattern and pattern.target_pattern:
+                if pattern.source_pattern.strip() == pattern.target_pattern.strip():
+                    print(f"  ! Rejecting pattern with identical source/target: {pattern.source_pattern}")
+                    continue
+
+            validated.append(pattern)
+
+        return validated
+
+    def _looks_like_prop_pattern(self, pattern: MigrationPattern) -> bool:
+        """Check if pattern appears to be a component prop change."""
+        # Look for patterns like "Button isActive" or "Modal title"
+        if not pattern.source_pattern:
+            return False
+
+        parts = pattern.source_pattern.split()
+        if len(parts) >= 2:
+            # First part looks like component name (PascalCase)
+            # Second part looks like prop name (camelCase)
+            if parts[0] and parts[0][0].isupper() and parts[1] and parts[1][0].islower():
+                return True
+
+        return False
+
+    def _convert_to_combo_rule(self, pattern: MigrationPattern) -> MigrationPattern:
+        """Convert a simple pattern to combo rule."""
+        parts = pattern.source_pattern.split()
+        if len(parts) >= 2:
+            component = parts[0]
+            prop = parts[1]
+
+            pattern.provider_type = "combo"
+            pattern.source_fqn = component
+            pattern.when_combo = {
+                "nodejs_pattern": component,
+                "builtin_pattern": f"<{component}[^>]*\\\\b{prop}\\\\b",
+                "file_pattern": "\\\\.(j|t)sx?$"
+            }
+
+        return pattern
+
+    def _is_overly_broad_pattern(self, pattern: str) -> bool:
+        """Check if builtin pattern is too broad."""
+        # Common prop names that should never be standalone patterns
+        overly_generic = [
+            "isActive", "isDisabled", "isOpen", "isClosed", "isExpanded",
+            "title", "name", "id", "className", "style",
+            "onClick", "onChange", "onSubmit", "onClose",
+            "alignLeft", "alignRight", "alignCenter",
+            "variant", "size", "color", "type"
+        ]
+
+        # If pattern is just one of these words, it's too broad
+        if pattern.strip() in overly_generic:
+            return True
+
+        # Patterns that are just wildcards are too broad
+        if pattern.strip() in [".*", ".+", "\\w+", "[a-zA-Z]+", ".*Icon"]:
+            return True
+
+        return False

@@ -29,6 +29,41 @@ def enum_representer(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', data.value)
 
 
+def validate_rules(rules):
+    """
+    Validate generated rules and return warnings.
+
+    Returns:
+        Dictionary of issue_type -> list of warnings
+    """
+    from collections import defaultdict
+    issues = defaultdict(list)
+
+    for rule in rules:
+        # Check for overly broad builtin patterns
+        if 'builtin.filecontent' in str(rule.when):
+            when_dict = rule.when
+            if 'builtin.filecontent' in when_dict:
+                pattern = when_dict['builtin.filecontent'].get('pattern', '')
+                if len(pattern) < 5:
+                    issues['overly_broad'].append(f"{rule.ruleID}: pattern too short '{pattern}'")
+
+        # Check for missing file patterns on builtin rules
+        if 'builtin.filecontent' in str(rule.when):
+            when_dict = rule.when
+            if 'builtin.filecontent' in when_dict:
+                if not when_dict['builtin.filecontent'].get('filePattern'):
+                    issues['missing_file_pattern'].append(f"{rule.ruleID}: builtin without filePattern")
+
+        # Check for identical before/after in description
+        if ' should be replaced with ' in rule.description:
+            parts = rule.description.split(' should be replaced with ')
+            if len(parts) == 2 and parts[0].strip() == parts[1].strip():
+                issues['identical_source_target'].append(f"{rule.ruleID}: {parts[0]}")
+
+    return dict(issues)
+
+
 # Register enum representers for clean YAML output
 yaml.add_representer(Category, enum_representer)
 yaml.add_representer(LocationType, enum_representer)
@@ -191,6 +226,32 @@ def main():
         print("Error: No rules generated")
         sys.exit(1)
 
+    # DEDUPLICATE across concerns
+    print("  → Deduplicating rules across concerns...")
+    from collections import defaultdict
+
+    # Track unique patterns by (when condition hash, description)
+    seen_patterns = {}
+    deduplicated_by_concern = defaultdict(list)
+    duplicate_count = 0
+
+    for concern, rules in rules_by_concern.items():
+        for rule in rules:
+            # Create unique key from when condition and description
+            # Convert when to string for hashing
+            when_str = str(rule.when)
+            key = (when_str, rule.description)
+
+            if key not in seen_patterns:
+                seen_patterns[key] = concern
+                deduplicated_by_concern[concern].append(rule)
+            else:
+                duplicate_count += 1
+                print(f"    ! Skipping duplicate: {rule.description[:60]}... (already in {seen_patterns[key]})")
+
+    rules_by_concern = dict(deduplicated_by_concern)
+    print(f"  ✓ Removed {duplicate_count} duplicate rules")
+
     total_rules = sum(len(rules) for rules in rules_by_concern.values())
     print(f"  ✓ Generated {total_rules} rules across {len(rules_by_concern)} concern(s)")
 
@@ -272,8 +333,25 @@ def main():
     for eff in sorted(efforts.keys()):
         print(f"  {eff}: {'▓' * efforts[eff]}")
 
+    # Validation Report
+    print("\n" + "="*60)
+    print("Validation Report")
+    print("="*60)
+    validation_issues = validate_rules(all_rules)
+    if validation_issues:
+        for issue_type, warnings in validation_issues.items():
+            print(f"\n  ⚠ {issue_type} ({len(warnings)} issues):")
+            for warning in warnings[:5]:  # Show first 5
+                print(f"    - {warning}")
+            if len(warnings) > 5:
+                print(f"    ... and {len(warnings) - 5} more")
+    else:
+        print("  ✓ No validation issues found")
+
     # Show files created
-    print(f"\nFiles created:")
+    print(f"\n" + "="*60)
+    print(f"Files Created")
+    print("="*60)
     for file in written_files:
         print(f"  {file}")
 

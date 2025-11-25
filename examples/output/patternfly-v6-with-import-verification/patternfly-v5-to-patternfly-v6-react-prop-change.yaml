@@ -1,0 +1,23 @@
+- ruleID: patternfly-v5-to-patternfly-v6-react-prop-change-00000
+  description: Nav variant='tertiary' should be replaced with Nav variant='horizontal-subnav'
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Nav
+    - builtin.filecontent:
+        pattern: <Nav[^>]*\bvariant=['"]tertiary['"]
+        filePattern: \.(j|t)sx?$
+  message: '''tertiary'' Nav variant is no longer supported, use ''horizontal-subnav''
+    instead
+
+
+    Replace `Nav variant=''tertiary''` with `Nav variant=''horizontal-subnav''`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9948
+    title: patternfly-v6 Documentation
+  customVariables: []

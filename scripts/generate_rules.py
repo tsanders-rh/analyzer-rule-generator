@@ -282,11 +282,31 @@ def main():
         # Show validation summary
         print(f"\n{validation_report.generate_report()}")
 
-        # For now, we don't auto-apply improvements - just report them
-        # In the future, we could ask user for approval or auto-apply certain fixes
+        # Auto-apply import verification improvements
         if validation_report.improvements:
-            print(f"\n⚠️  {len(validation_report.improvements)} improvements suggested but not applied")
-            print("Future enhancement: Add interactive approval or auto-apply logic")
+            print(f"\n{'='*80}")
+            print(f"APPLYING IMPROVEMENTS")
+            print(f"{'='*80}")
+            print(f"Auto-applying {len(validation_report.improvements)} import verification improvements...")
+
+            # Apply improvements to all rules
+            all_generated_rules = validator.apply_improvements(all_generated_rules, validation_report)
+
+            # Update rules in rules_by_concern dictionary
+            # Create a mapping of rule IDs to improved rules
+            improved_rules_by_id = {rule.ruleID: rule for rule in all_generated_rules}
+
+            # Replace rules in concern groups with improved versions
+            for concern in rules_by_concern:
+                updated_rules = []
+                for rule in rules_by_concern[concern]:
+                    if rule.ruleID in improved_rules_by_id:
+                        updated_rules.append(improved_rules_by_id[rule.ruleID])
+                    else:
+                        updated_rules.append(rule)
+                rules_by_concern[concern] = updated_rules
+
+            print(f"✓ Applied improvements to {len(validation_report.improvements)} rules")
 
     # Write output files (one per concern)
     output_dir = Path(args.output)

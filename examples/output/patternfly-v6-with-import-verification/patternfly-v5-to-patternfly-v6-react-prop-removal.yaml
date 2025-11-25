@@ -1,0 +1,23 @@
+- ruleID: patternfly-v5-to-patternfly-v6-react-prop-removal-00000
+  description: Nav theme prop should be replaced with Nav without theme prop
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Nav
+    - builtin.filecontent:
+        pattern: <Nav[^>]*\btheme=['"]\w+['"]
+        filePattern: \.(j|t)sx?$
+  message: '''theme'' prop is no longer supported in Nav, use light/dark mode theming
+    instead
+
+
+    Replace `Nav theme prop` with `Nav without theme prop`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9948
+    title: patternfly-v6 Documentation
+  customVariables: []

@@ -1,0 +1,38 @@
+- ruleID: patternfly-v5-to-patternfly-v6-react-component-rename-00000
+  description: <InvalidObject /> should be replaced with <MissingPage data-codemods
+    />
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: InvalidObject
+  message: 'InvalidObject component has been renamed to MissingPage to better reflect
+    its usage.
+
+
+    Replace `<InvalidObject />` with `<MissingPage data-codemods />`.
+
+
+    Before:
+
+    ```
+
+    <InvalidObject />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <MissingPage data-codemods />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/313
+    title: patternfly-v6 Documentation
+  customVariables: []

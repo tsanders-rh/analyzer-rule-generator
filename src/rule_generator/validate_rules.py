@@ -215,7 +215,7 @@ class RuleValidator:
 
     def _add_import_verification(self, rule: AnalyzerRule) -> Optional[Dict[str, Any]]:
         """
-        Use LLM to add import verification to rule.
+        Add import verification to rule directly without LLM.
 
         Args:
             rule: Rule to improve
@@ -228,48 +228,97 @@ class RuleValidator:
         if not component:
             return None
 
-        # Convert rule to YAML-like string for LLM
-        rule_yaml = self._rule_to_yaml_string(rule)
+        # Build import verification pattern
+        import_pattern = f"import.*\\{{{{[^}}}}]*\\b{component}\\b[^}}}}]*\\}}}}.*from ['\"]@patternfly/react-"
 
-        prompt = f"""Add import verification to this Konveyor analyzer rule to ensure it only
-matches components from @patternfly/react-core:
-
-```yaml
-{rule_yaml}
-```
-
-Component to verify: {component}
-
-Add a condition that checks for:
-import {{ {component} }} from '@patternfly/react-core'
-OR
-import {{ {component} }} from '@patternfly/react-core/deprecated'
-
-The import pattern should be:
-import.*\\{{{{[^}}}}]*\\b{component}\\b[^}}}}]*\\}}}}.*from ['\"]@patternfly/react-
-
-Return the complete improved rule as valid YAML.
-"""
-
-        try:
-            response = self.llm.generate(prompt)
-            response_text = response.get("response", "")
-
-            # Parse YAML response
-            import yaml
-            # Extract YAML from markdown code blocks if present
-            yaml_match = re.search(r'```ya?ml\n(.*?)\n```', response_text, re.DOTALL)
-            if yaml_match:
-                yaml_str = yaml_match.group(1)
-            else:
-                yaml_str = response_text
-
-            improved_rule = yaml.safe_load(yaml_str)
-            return improved_rule
-
-        except Exception as e:
-            print(f"  Error adding import verification: {e}")
+        # Get the current when condition
+        when = rule.when
+        if not isinstance(when, dict) or 'and' not in when:
             return None
+
+        # Find the builtin.filecontent condition with JSX pattern
+        jsx_condition = None
+        file_pattern = None
+        for cond in when['and']:
+            if isinstance(cond, dict) and 'builtin.filecontent' in cond:
+                builtin = cond['builtin.filecontent']
+                if 'pattern' in builtin and '<' in builtin['pattern']:
+                    jsx_condition = builtin
+                    file_pattern = builtin.get('filePattern', '\\.(j|t)sx?$')
+                    break
+
+        if not jsx_condition:
+            return None
+
+        # Create new combo rule with import verification
+        new_when = {
+            'and': [
+                {
+                    'builtin.filecontent': {
+                        'pattern': import_pattern,
+                        'filePattern': file_pattern
+                    }
+                },
+                {
+                    'builtin.filecontent': {
+                        'pattern': jsx_condition['pattern'],
+                        'filePattern': file_pattern
+                    }
+                }
+            ]
+        }
+
+        # Return improved rule as dict
+        return {
+            'ruleID': rule.ruleID,
+            'description': rule.description,
+            'effort': rule.effort,
+            'category': rule.category.value if hasattr(rule.category, 'value') else rule.category,
+            'labels': rule.labels,
+            'when': new_when,
+            'message': rule.message,
+            'links': [{'url': link.url, 'title': link.title} for link in rule.links] if rule.links else [],
+            'customVariables': rule.customVariables if rule.customVariables else []
+        }
+
+    def apply_improvements(self, rules: List[AnalyzerRule], report: 'ValidationReport') -> List[AnalyzerRule]:
+        """
+        Apply validated improvements to rules.
+
+        Args:
+            rules: Original list of rules
+            report: Validation report with improvements
+
+        Returns:
+            Updated list of rules with improvements applied
+        """
+        from .schema import AnalyzerRule
+
+        # Create a mapping of rule IDs to improvements
+        improvements_by_id = defaultdict(list)
+        for improvement in report.improvements:
+            rule_id = improvement['original'].ruleID
+            improvements_by_id[rule_id].append(improvement)
+
+        # Apply improvements to rules
+        improved_rules = []
+        for rule in rules:
+            if rule.ruleID in improvements_by_id:
+                # Get the latest improvement for this rule
+                improvement = improvements_by_id[rule.ruleID][-1]
+                improved_data = improvement['improved']
+
+                # Create new rule from improved data
+                try:
+                    # Update the rule with improved data
+                    rule.when = improved_data['when']
+                    print(f"  ✓ Applied import verification to {rule.ruleID}")
+                except Exception as e:
+                    print(f"  ! Failed to apply improvement to {rule.ruleID}: {e}")
+
+            improved_rules.append(rule)
+
+        return improved_rules
 
     def _check_pattern_breadth(self, rule: AnalyzerRule) -> Optional[Dict[str, Any]]:
         """

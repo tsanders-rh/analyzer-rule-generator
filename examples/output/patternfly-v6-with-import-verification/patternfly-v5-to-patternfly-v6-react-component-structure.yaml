@@ -1,0 +1,67 @@
+- ruleID: patternfly-v5-to-patternfly-v6-react-component-structure-00000
+  description: MastheadToggle should be replaced with MastheadMain > MastheadToggle
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Masthead
+    - builtin.filecontent:
+        pattern: <Masthead>.*<MastheadToggle>
+        filePattern: \.(j|t)sx?$
+  message: 'MastheadToggle should now be wrapped in MastheadMain
+
+
+    Replace `MastheadToggle` with `MastheadMain > MastheadToggle`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10809
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-react-component-structure-00010
+  description: MastheadBrand should be replaced with MastheadMain > MastheadBrand
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Masthead
+    - builtin.filecontent:
+        pattern: <Masthead>.*<MastheadBrand>
+        filePattern: \.(j|t)sx?$
+  message: 'MastheadBrand should now be wrapped in MastheadMain
+
+
+    Replace `MastheadBrand` with `MastheadMain > MastheadBrand`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10809
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-react-component-structure-00020
+  description: MenuToggle icon as children should be replaced with MenuToggle icon
+    prop
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: MenuToggle
+    - builtin.filecontent:
+        pattern: <MenuToggle>.*<EllipsisVIcon \/>
+        filePattern: \.(j|t)sx?$
+  message: 'Passing icon as children results in incorrect styling, use icon prop instead
+
+
+    Replace `MenuToggle icon as children` with `MenuToggle icon prop`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10097
+    title: patternfly-v6 Documentation
+  customVariables: []

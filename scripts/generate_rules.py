@@ -18,10 +18,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from rule_generator.ingestion import GuideIngester
-from rule_generator.extraction import MigrationPatternExtractor
+from rule_generator.extraction import MigrationPatternExtractor, detect_language_from_frameworks
 from rule_generator.generator import AnalyzerRuleGenerator
 from rule_generator.llm import get_llm_provider
 from rule_generator.schema import Category, LocationType
+from rule_generator.validate_rules import RuleValidator
 
 
 def enum_representer(dumper, data):
@@ -254,6 +255,38 @@ def main():
 
     total_rules = sum(len(rules) for rules in rules_by_concern.values())
     print(f"  ✓ Generated {total_rules} rules across {len(rules_by_concern)} concern(s)")
+
+    # POST-GENERATION LLM VALIDATION (optional, only if enabled)
+    # Collect all rules for validation
+    all_generated_rules = []
+    for rules in rules_by_concern.values():
+        all_generated_rules.extend(rules)
+
+    # Detect language for validation
+    language = detect_language_from_frameworks(args.source, args.target)
+
+    # Run LLM validation if language is JS/TS and we have rules to validate
+    if language in ["javascript", "typescript"] and all_generated_rules:
+        print("\n" + "=" * 80)
+        print("LLM-BASED VALIDATION (EXPERIMENTAL)")
+        print("=" * 80)
+        print("This step uses LLM to detect and fix common rule quality issues.")
+        print("Note: This is an experimental feature and may use additional API credits.")
+
+        # Initialize validator with same LLM as extraction
+        validator = RuleValidator(llm_provider, language)
+
+        # Run validation
+        validation_report = validator.validate_rules(all_generated_rules)
+
+        # Show validation summary
+        print(f"\n{validation_report.generate_report()}")
+
+        # For now, we don't auto-apply improvements - just report them
+        # In the future, we could ask user for approval or auto-apply certain fixes
+        if validation_report.improvements:
+            print(f"\n⚠️  {len(validation_report.improvements)} improvements suggested but not applied")
+            print("Future enhancement: Add interactive approval or auto-apply logic")
 
     # Write output files (one per concern)
     output_dir = Path(args.output)

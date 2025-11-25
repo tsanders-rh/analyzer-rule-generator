@@ -211,11 +211,22 @@ class RuleValidator:
                         if pattern and pattern[0].isupper():
                             return True
 
+        # Check for simple nodejs.referenced rule (component rename/reference)
+        elif isinstance(when, dict) and 'nodejs.referenced' in when:
+            pattern = when['nodejs.referenced'].get('pattern', '')
+            # If it looks like a component name (capitalized)
+            if pattern and pattern[0].isupper():
+                return True
+
         return False
 
     def _add_import_verification(self, rule: AnalyzerRule) -> Optional[Dict[str, Any]]:
         """
         Add import verification to rule directly without LLM.
+
+        Handles two cases:
+        1. Combo rules with nodejs.referenced + JSX pattern
+        2. Simple nodejs.referenced rules (component renames)
 
         Args:
             rule: Rule to improve
@@ -233,40 +244,66 @@ class RuleValidator:
 
         # Get the current when condition
         when = rule.when
-        if not isinstance(when, dict) or 'and' not in when:
-            return None
+        file_pattern = '\\.(j|t)sx?$'
 
-        # Find the builtin.filecontent condition with JSX pattern
-        jsx_condition = None
-        file_pattern = None
-        for cond in when['and']:
-            if isinstance(cond, dict) and 'builtin.filecontent' in cond:
-                builtin = cond['builtin.filecontent']
-                if 'pattern' in builtin and '<' in builtin['pattern']:
-                    jsx_condition = builtin
-                    file_pattern = builtin.get('filePattern', '\\.(j|t)sx?$')
-                    break
+        # Case 1: Combo rule with nodejs.referenced + JSX pattern
+        if isinstance(when, dict) and 'and' in when:
+            # Find the builtin.filecontent condition with JSX pattern
+            jsx_condition = None
+            for cond in when['and']:
+                if isinstance(cond, dict) and 'builtin.filecontent' in cond:
+                    builtin = cond['builtin.filecontent']
+                    if 'pattern' in builtin and '<' in builtin['pattern']:
+                        jsx_condition = builtin
+                        file_pattern = builtin.get('filePattern', file_pattern)
+                        break
 
-        if not jsx_condition:
-            return None
+            if not jsx_condition:
+                return None
 
-        # Create new combo rule with import verification
-        new_when = {
-            'and': [
-                {
-                    'builtin.filecontent': {
-                        'pattern': import_pattern,
-                        'filePattern': file_pattern
+            # Create new combo rule with import verification
+            new_when = {
+                'and': [
+                    {
+                        'builtin.filecontent': {
+                            'pattern': import_pattern,
+                            'filePattern': file_pattern
+                        }
+                    },
+                    {
+                        'builtin.filecontent': {
+                            'pattern': jsx_condition['pattern'],
+                            'filePattern': file_pattern
+                        }
                     }
-                },
-                {
-                    'builtin.filecontent': {
-                        'pattern': jsx_condition['pattern'],
-                        'filePattern': file_pattern
+                ]
+            }
+
+        # Case 2: Simple nodejs.referenced rule (component rename)
+        elif isinstance(when, dict) and 'nodejs.referenced' in when:
+            # Convert to combo rule with import verification + component reference
+            # Use a generic JSX pattern to match any usage of the component
+            jsx_pattern = f"<{component}[^/>]*(?:/>|>)"
+
+            new_when = {
+                'and': [
+                    {
+                        'builtin.filecontent': {
+                            'pattern': import_pattern,
+                            'filePattern': file_pattern
+                        }
+                    },
+                    {
+                        'builtin.filecontent': {
+                            'pattern': jsx_pattern,
+                            'filePattern': file_pattern
+                        }
                     }
-                }
-            ]
-        }
+                ]
+            }
+
+        else:
+            return None
 
         # Return improved rule as dict
         return {
@@ -308,15 +345,17 @@ class RuleValidator:
                 improvement = improvements_by_id[rule.ruleID][-1]
                 improved_data = improvement['improved']
 
-                # Create new rule from improved data
+                # Create new rule from improved data using model_copy
+                # Pydantic V2 requires using model_copy to create a modified version
                 try:
-                    # Update the rule with improved data
-                    rule.when = improved_data['when']
+                    improved_rule = rule.model_copy(update={'when': improved_data['when']})
+                    improved_rules.append(improved_rule)
                     print(f"  ✓ Applied import verification to {rule.ruleID}")
                 except Exception as e:
                     print(f"  ! Failed to apply improvement to {rule.ruleID}: {e}")
-
-            improved_rules.append(rule)
+                    improved_rules.append(rule)
+            else:
+                improved_rules.append(rule)
 
         return improved_rules
 
@@ -395,10 +434,17 @@ class RuleValidator:
             Component name or None
         """
         when = rule.when
+
+        # Case 1: Combo rule with 'and' conditions
         if isinstance(when, dict) and 'and' in when:
             for cond in when['and']:
                 if isinstance(cond, dict) and 'nodejs.referenced' in cond:
                     return cond['nodejs.referenced'].get('pattern')
+
+        # Case 2: Simple nodejs.referenced rule
+        elif isinstance(when, dict) and 'nodejs.referenced' in when:
+            return when['nodejs.referenced'].get('pattern')
+
         return None
 
     def _rule_to_yaml_string(self, rule: AnalyzerRule) -> str:

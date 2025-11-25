@@ -301,7 +301,8 @@ def main():
                 updated_rules = []
                 for rule in rules_by_concern[concern]:
                     if rule.ruleID in improved_rules_by_id:
-                        updated_rules.append(improved_rules_by_id[rule.ruleID])
+                        improved_rule = improved_rules_by_id[rule.ruleID]
+                        updated_rules.append(improved_rule)
                     else:
                         updated_rules.append(rule)
                 rules_by_concern[concern] = updated_rules
@@ -326,17 +327,8 @@ def main():
             # Multiple concerns - add concern suffix
             concern_output = output_dir / f"{args.source}-to-{args.target}-{concern}.yaml"
 
-        # Update generator with correct rule file name for this concern
-        generator.rule_file_name = concern_output.stem
-
-        # Regenerate rules with correct IDs
-        generator._rule_counter = 0
-        concern_patterns = [p for p in patterns if (p.concern or "general") == concern]
-        rules = []
-        for pattern in concern_patterns:
-            rule = generator._pattern_to_rule(pattern)
-            if rule:
-                rules.append(rule)
+        # Use the rules from rules_by_concern (which includes any validation improvements)
+        # instead of regenerating from patterns (which would lose improvements)
 
         # Convert rules to dicts for YAML serialization
         rules_data = [rule.model_dump(exclude_none=True) for rule in rules]

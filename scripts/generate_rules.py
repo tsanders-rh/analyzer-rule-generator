@@ -30,6 +30,18 @@ def enum_representer(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', data.value)
 
 
+def str_representer(dumper, data):
+    """
+    YAML representer for strings that uses literal block scalar (|-) for multiline strings.
+    This produces cleaner, more readable YAML output for rule messages.
+    """
+    if '\n' in data:
+        # Use literal block scalar (|) for multiline strings
+        # The | style preserves the literal formatting
+        return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+
+
 def validate_rules(rules):
     """
     Validate generated rules and return warnings.
@@ -65,9 +77,14 @@ def validate_rules(rules):
     return dict(issues)
 
 
-# Register enum representers for clean YAML output
-yaml.add_representer(Category, enum_representer)
-yaml.add_representer(LocationType, enum_representer)
+# Create custom dumper with our representers
+class CustomDumper(yaml.Dumper):
+    pass
+
+# Register representers on custom dumper
+CustomDumper.add_representer(Category, enum_representer)
+CustomDumper.add_representer(LocationType, enum_representer)
+CustomDumper.add_representer(str, str_representer)
 
 
 def main():
@@ -334,7 +351,7 @@ def main():
         rules_data = [rule.model_dump(exclude_none=True) for rule in rules]
 
         with open(concern_output, 'w') as f:
-            yaml.dump(rules_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+            yaml.dump(rules_data, f, Dumper=CustomDumper, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
         written_files.append(str(concern_output))
         all_rules.extend(rules)
@@ -347,7 +364,7 @@ def main():
         "description": f"This ruleset provides guidance for migrating from {args.source} to {args.target}"
     }
     with open(ruleset_file, 'w') as f:
-        yaml.dump(ruleset_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+        yaml.dump(ruleset_data, f, Dumper=CustomDumper, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
     written_files.append(str(ruleset_file))
     print(f"  ✓ {ruleset_file.name}: ruleset metadata")

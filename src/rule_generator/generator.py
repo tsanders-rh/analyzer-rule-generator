@@ -489,7 +489,7 @@ class AnalyzerRuleGenerator:
         if self._is_import_pattern(pattern):
             # Add variable to capture imported components
             custom_vars.append({
-                "pattern": "import {(?P<imports>[A-z,\\s]+)}",
+                "pattern": "import {(?P<imports>[A-Za-z,\\s]+)}",
                 "name": "component",
                 "nameOfCaptureGroup": "imports",
                 "defaultValue": "Component"

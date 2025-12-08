@@ -1431,6 +1431,8 @@ class TestImportPatternRules:
         assert custom_vars[0]["nameOfCaptureGroup"] == "imports"
         assert custom_vars[0]["defaultValue"] == "Component"
         assert "import {(?P<imports>" in custom_vars[0]["pattern"]
+        # Verify correct regex pattern (A-Za-z, not A-z which includes invalid chars)
+        assert custom_vars[0]["pattern"] == "import {(?P<imports>[A-Za-z,\\s]+)}"
 
     def test_build_custom_variables_returns_empty_for_non_import(self):
         """Should return empty list for non-import patterns"""

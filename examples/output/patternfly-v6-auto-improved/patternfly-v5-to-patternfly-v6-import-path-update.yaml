@@ -1,0 +1,44 @@
+- ruleID: patternfly-v5-to-patternfly-v6-import-path-update-00000
+  description: imports  from '@patternfly/react-core/next'; should be replaced with
+    imports from '@patternfly/react-core';
+  effort: 1
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    builtin.filecontent:
+      pattern: Modal$
+      filePattern: \.(j|t)sx?$
+  message: 'Modal component from the ''next'' directory has been promoted to the main
+    package.
+
+
+    Replace `import {{{ component }}} from ''@patternfly/react-core/next'';` with
+    `import {{{ component }}} from ''@patternfly/react-core'';`.
+
+
+    Before:
+
+    ```
+
+    import { {{ component }} } from ''@patternfly/react-core/next'';
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { {{ component }} } from ''@patternfly/react-core'';
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10358
+    title: patternfly-v6 Documentation
+  customVariables:
+  - pattern: import {(?P<imports>[A-z,\s]+)}
+    name: component
+    nameOfCaptureGroup: imports
+    defaultValue: Component

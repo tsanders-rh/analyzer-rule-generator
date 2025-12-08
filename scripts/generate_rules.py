@@ -18,10 +18,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from rule_generator.ingestion import GuideIngester
-from rule_generator.extraction import MigrationPatternExtractor
+from rule_generator.extraction import MigrationPatternExtractor, detect_language_from_frameworks
 from rule_generator.generator import AnalyzerRuleGenerator
 from rule_generator.llm import get_llm_provider
 from rule_generator.schema import Category, LocationType
+from rule_generator.validate_rules import RuleValidator
 
 
 def enum_representer(dumper, data):
@@ -29,9 +30,61 @@ def enum_representer(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', data.value)
 
 
-# Register enum representers for clean YAML output
-yaml.add_representer(Category, enum_representer)
-yaml.add_representer(LocationType, enum_representer)
+def str_representer(dumper, data):
+    """
+    YAML representer for strings that uses literal block scalar (|-) for multiline strings.
+    This produces cleaner, more readable YAML output for rule messages.
+    """
+    if '\n' in data:
+        # Use literal block scalar (|) for multiline strings
+        # The | style preserves the literal formatting
+        return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+
+
+def validate_rules(rules):
+    """
+    Validate generated rules and return warnings.
+
+    Returns:
+        Dictionary of issue_type -> list of warnings
+    """
+    from collections import defaultdict
+    issues = defaultdict(list)
+
+    for rule in rules:
+        # Check for overly broad builtin patterns
+        if 'builtin.filecontent' in str(rule.when):
+            when_dict = rule.when
+            if 'builtin.filecontent' in when_dict:
+                pattern = when_dict['builtin.filecontent'].get('pattern', '')
+                if len(pattern) < 5:
+                    issues['overly_broad'].append(f"{rule.ruleID}: pattern too short '{pattern}'")
+
+        # Check for missing file patterns on builtin rules
+        if 'builtin.filecontent' in str(rule.when):
+            when_dict = rule.when
+            if 'builtin.filecontent' in when_dict:
+                if not when_dict['builtin.filecontent'].get('filePattern'):
+                    issues['missing_file_pattern'].append(f"{rule.ruleID}: builtin without filePattern")
+
+        # Check for identical before/after in description
+        if ' should be replaced with ' in rule.description:
+            parts = rule.description.split(' should be replaced with ')
+            if len(parts) == 2 and parts[0].strip() == parts[1].strip():
+                issues['identical_source_target'].append(f"{rule.ruleID}: {parts[0]}")
+
+    return dict(issues)
+
+
+# Create custom dumper with our representers
+class CustomDumper(yaml.Dumper):
+    pass
+
+# Register representers on custom dumper
+CustomDumper.add_representer(Category, enum_representer)
+CustomDumper.add_representer(LocationType, enum_representer)
+CustomDumper.add_representer(str, str_representer)
 
 
 def main():
@@ -191,8 +244,87 @@ def main():
         print("Error: No rules generated")
         sys.exit(1)
 
+    # DEDUPLICATE across concerns
+    print("  → Deduplicating rules across concerns...")
+    from collections import defaultdict
+
+    # Track unique patterns by (when condition hash, description)
+    seen_patterns = {}
+    deduplicated_by_concern = defaultdict(list)
+    duplicate_count = 0
+
+    for concern, rules in rules_by_concern.items():
+        for rule in rules:
+            # Create unique key from when condition and description
+            # Convert when to string for hashing
+            when_str = str(rule.when)
+            key = (when_str, rule.description)
+
+            if key not in seen_patterns:
+                seen_patterns[key] = concern
+                deduplicated_by_concern[concern].append(rule)
+            else:
+                duplicate_count += 1
+                print(f"    ! Skipping duplicate: {rule.description[:60]}... (already in {seen_patterns[key]})")
+
+    rules_by_concern = dict(deduplicated_by_concern)
+    print(f"  ✓ Removed {duplicate_count} duplicate rules")
+
     total_rules = sum(len(rules) for rules in rules_by_concern.values())
     print(f"  ✓ Generated {total_rules} rules across {len(rules_by_concern)} concern(s)")
+
+    # POST-GENERATION LLM VALIDATION (optional, only if enabled)
+    # Collect all rules for validation
+    all_generated_rules = []
+    for rules in rules_by_concern.values():
+        all_generated_rules.extend(rules)
+
+    # Detect language for validation
+    language = detect_language_from_frameworks(args.source, args.target)
+
+    # Run LLM validation if language is JS/TS and we have rules to validate
+    if language in ["javascript", "typescript"] and all_generated_rules:
+        print("\n" + "=" * 80)
+        print("LLM-BASED VALIDATION (EXPERIMENTAL)")
+        print("=" * 80)
+        print("This step uses LLM to detect and fix common rule quality issues.")
+        print("Note: This is an experimental feature and may use additional API credits.")
+
+        # Initialize validator with same LLM as extraction
+        validator = RuleValidator(llm, language)
+
+        # Run validation
+        validation_report = validator.validate_rules(all_generated_rules)
+
+        # Show validation summary
+        print(f"\n{validation_report.generate_report()}")
+
+        # Auto-apply import verification improvements
+        if validation_report.improvements:
+            print(f"\n{'='*80}")
+            print(f"APPLYING IMPROVEMENTS")
+            print(f"{'='*80}")
+            print(f"Auto-applying {len(validation_report.improvements)} import verification improvements...")
+
+            # Apply improvements to all rules
+            all_generated_rules = validator.apply_improvements(all_generated_rules, validation_report)
+
+            # Update rules in rules_by_concern dictionary
+            # Create a mapping of rule IDs to improved rules
+            improved_rules_by_id = {rule.ruleID: rule for rule in all_generated_rules}
+
+            # Replace rules in concern groups with improved versions
+            for concern in rules_by_concern:
+                updated_rules = []
+                for rule in rules_by_concern[concern]:
+                    if rule.ruleID in improved_rules_by_id:
+                        improved_rule = improved_rules_by_id[rule.ruleID]
+                        updated_rules.append(improved_rule)
+                    else:
+                        updated_rules.append(rule)
+                rules_by_concern[concern] = updated_rules
+
+            print(f"✓ Applied improvements to {len(validation_report.improvements)} rules")
 
     # Write output files (one per concern)
     output_dir = Path(args.output)
@@ -212,23 +344,14 @@ def main():
             # Multiple concerns - add concern suffix
             concern_output = output_dir / f"{args.source}-to-{args.target}-{concern}.yaml"
 
-        # Update generator with correct rule file name for this concern
-        generator.rule_file_name = concern_output.stem
-
-        # Regenerate rules with correct IDs
-        generator._rule_counter = 0
-        concern_patterns = [p for p in patterns if (p.concern or "general") == concern]
-        rules = []
-        for pattern in concern_patterns:
-            rule = generator._pattern_to_rule(pattern)
-            if rule:
-                rules.append(rule)
+        # Use the rules from rules_by_concern (which includes any validation improvements)
+        # instead of regenerating from patterns (which would lose improvements)
 
         # Convert rules to dicts for YAML serialization
         rules_data = [rule.model_dump(exclude_none=True) for rule in rules]
 
         with open(concern_output, 'w') as f:
-            yaml.dump(rules_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+            yaml.dump(rules_data, f, Dumper=CustomDumper, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
         written_files.append(str(concern_output))
         all_rules.extend(rules)
@@ -241,7 +364,7 @@ def main():
         "description": f"This ruleset provides guidance for migrating from {args.source} to {args.target}"
     }
     with open(ruleset_file, 'w') as f:
-        yaml.dump(ruleset_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+        yaml.dump(ruleset_data, f, Dumper=CustomDumper, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
     written_files.append(str(ruleset_file))
     print(f"  ✓ {ruleset_file.name}: ruleset metadata")
@@ -272,8 +395,25 @@ def main():
     for eff in sorted(efforts.keys()):
         print(f"  {eff}: {'▓' * efforts[eff]}")
 
+    # Validation Report
+    print("\n" + "="*60)
+    print("Validation Report")
+    print("="*60)
+    validation_issues = validate_rules(all_rules)
+    if validation_issues:
+        for issue_type, warnings in validation_issues.items():
+            print(f"\n  ⚠ {issue_type} ({len(warnings)} issues):")
+            for warning in warnings[:5]:  # Show first 5
+                print(f"    - {warning}")
+            if len(warnings) > 5:
+                print(f"    ... and {len(warnings) - 5} more")
+    else:
+        print("  ✓ No validation issues found")
+
     # Show files created
-    print(f"\nFiles created:")
+    print(f"\n" + "="*60)
+    print(f"Files Created")
+    print("="*60)
     for file in written_files:
         print(f"  {file}")
 

@@ -1,0 +1,23 @@
+- ruleID: patternfly-v5-to-patternfly-v6-deprecated-import-00000
+  description: Modal from '@patternfly/react-core' should be replaced with Modal from
+    '@patternfly/react-core/deprecated'
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Modal
+    - builtin.filecontent:
+        pattern: <Modal[^>]*\\bfrom\\b
+        filePattern: \\.(j|t)sx?$
+  message: 'Modal implementation deprecated, use new promoted implementation
+
+
+    Replace `Modal from ''@patternfly/react-core''` with `Modal from ''@patternfly/react-core/deprecated''`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10358
+    title: patternfly-v6 Documentation
+  customVariables: []

@@ -1,0 +1,22 @@
+- ruleID: patternfly-v5-to-patternfly-v6-component-props-00000
+  description: icon as children should be replaced with icon prop
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: MenuToggle
+    - builtin.filecontent:
+        pattern: <MenuToggle>.*<EllipsisVIcon />.*</MenuToggle>
+        filePattern: \.(j|t)sx?$
+  message: 'MenuToggle now uses icon prop instead of children for icons
+
+
+    Replace `icon as children` with `icon prop`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10097
+    title: patternfly-v6 Documentation
+  customVariables: []

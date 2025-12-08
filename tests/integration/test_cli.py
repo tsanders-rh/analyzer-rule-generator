@@ -228,6 +228,56 @@ class TestCLIOutputGeneration:
             assert "source-fw" in ruleset["description"]
             assert "target-fw" in ruleset["description"]
 
+    def test_cli_uses_literal_block_scalar_for_multiline_messages(self, tmp_path, test_output_dir):
+        """Should use literal block scalar (|-) formatting for multiline messages."""
+        import generate_rules
+
+        # Create guide with content that will generate multiline messages
+        guide = tmp_path / "multiline-guide.md"
+        guide.write_text("""# Test Guide
+The javax.servlet package has been renamed.
+This requires updating import statements.
+""")
+
+        # Mock LLM that returns a pattern with multiline message
+        mock = Mock()
+        mock.generate = Mock(return_value={
+            "response": """[{
+                "source_pattern": "javax.servlet",
+                "target_pattern": "jakarta.servlet",
+                "source_fqn": "javax.servlet.*",
+                "location_type": "TYPE",
+                "complexity": "TRIVIAL",
+                "category": "api",
+                "rationale": "Package renamed from javax to jakarta.\\n\\nThis is a major change.",
+                "example_before": "import javax.servlet.*;",
+                "example_after": "import jakarta.servlet.*;"
+            }]""",
+            "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150}
+        })
+
+        run_cli_main([
+            "--guide", str(guide),
+            "--source", "javax",
+            "--target", "jakarta",
+            "--output", str(test_output_dir)
+        ], mock)
+
+        # Find the generated rule file
+        rule_files = list(test_output_dir.glob("*.yaml"))
+        rule_files = [f for f in rule_files if f.name != "ruleset.yaml"]
+        assert len(rule_files) > 0
+
+        # Read the raw YAML file content (not yaml.safe_load)
+        with open(rule_files[0], 'r') as f:
+            yaml_content = f.read()
+
+        # Check for literal block scalar format (|- or |)
+        # The message field should use literal block scalar for multiline content
+        assert "message: |-" in yaml_content or "message: |" in yaml_content
+        # Should NOT have escaped newlines in the YAML
+        assert "\\n" not in yaml_content
+
     @pytest.mark.skip(reason="Flaky test - generates success but timing issue with file creation")
     def test_cli_splits_multiple_concerns(self, tmp_path, test_output_dir, capsys):
         """Should split rules into separate files per concern."""

@@ -514,7 +514,7 @@ class TestCLIOutputFormatting:
         assert "Total rules:" in captured.out
         assert "Files generated:" in captured.out
         assert "Effort Distribution:" in captured.out
-        assert "Files created:" in captured.out
+        assert "Files Created" in captured.out
 
     def test_cli_shows_file_paths(self, sample_guide, test_output_dir, mock_llm, capsys):
         """Should show paths of created files."""

@@ -239,19 +239,38 @@ class MigrationPatternExtractor:
 
 For JavaScript/TypeScript patterns, choose the appropriate provider:
 
-**Option 1: Node.js Provider (for semantic analysis)**
-Use when you need to find symbol references in JavaScript/TypeScript:
-- Functions: `function MyComponent() {}`
-- Classes: `class MyComponent {}`
+**Option 1: Node.js Provider (for semantic analysis) - PREFERRED for most TypeScript/JavaScript migrations**
+Use when you need to find symbol references in JavaScript/TypeScript code:
+- Classes and types (e.g., ComponentFactoryResolver, BrowserTransferStateModule, HttpClient)
+- Functions and methods (e.g., useEffect, useState, createComponent)
+- Interfaces and types
 - Variables/Constants: `const MyComponent = () => {}`
-- Types and interfaces
-- Exported symbols
+- Exported symbols from libraries
+- Component names (e.g., Button, Modal, Accordion)
+
+**IMPORTANT: nodejs.referenced is the PREFERRED provider for Angular/TypeScript migrations.**
+- ✅ Use for ANY Angular class, type, interface, or symbol
+- ✅ Use for component names, service names, directive names
+- ✅ Use for method names and function names
+- ❌ Only use builtin if you specifically need file filtering (rare)
 
 Fields:
 - **provider_type**: Set to "nodejs"
-- **source_fqn**: Symbol name to find (e.g., "MyComponent", "useEffect", "useState")
+- **source_fqn**: Symbol name to find (e.g., "ComponentFactoryResolver", "useEffect", "BrowserTransferStateModule")
 - **file_pattern**: Must be null (nodejs provider doesn't support file filtering)
 - **location_type**: Must be null
+
+Example for Angular class reference:
+```json
+{{
+  "source_pattern": "ComponentFactoryResolver",
+  "target_pattern": "removed",
+  "source_fqn": "ComponentFactoryResolver",
+  "provider_type": "nodejs",
+  "file_pattern": null,
+  "location_type": null
+}}
+```
 
 Example for React component usage:
 ```json
@@ -265,17 +284,24 @@ Example for React component usage:
 }}
 ```
 
-**Option 2: Builtin Provider (for file-specific text/regex matching)**
-Use for patterns that require file filtering or that nodejs provider cannot find:
-- File-specific imports (e.g., `import React` in .tsx files only)
-- Type annotations in specific file types (e.g., `React.FC` in .tsx files)
-- CSS patterns in style files (e.g., `--pf-` in .css/.scss files)
-- Any complex code patterns requiring file type filtering
+**Option 2: Builtin Provider (for file-specific text/regex matching) - ONLY when file filtering is required**
+Use ONLY for patterns that specifically require file type filtering:
+- Import statement patterns with specific package paths (e.g., `import.*XhrFactory.*from.*@angular/common/http` that need $ anchor)
+- CSS patterns in style files (e.g., `--pf-` in .css/.scss files only)
+- Configuration patterns in specific config files (e.g., .json, .xml files)
+- Complex multi-line patterns that need regex matching
+
+**When to choose builtin vs nodejs:**
+- ✅ Use nodejs: For 95% of Angular/TypeScript symbol migrations (classes, types, methods, components)
+- ✅ Use builtin: ONLY when you need file filtering OR import path pattern matching with specific packages
+- ❌ Don't use builtin for: Class names, type names, method names, component names (use nodejs instead)
 
 Fields:
 - **provider_type**: Set to "builtin"
 - **source_fqn**: SIMPLE regex pattern. Use `.*` for wildcards, avoid complex escapes like \\s, \\{{, \\}} (e.g., "componentWillMount")
-- **file_pattern**: REGEX pattern for file matching (e.g., "\\.tsx$" for .tsx files, "\\.(j|t)sx?$" for .js/.jsx/.ts/.tsx)
+  - **IMPORTANT**: For import patterns matching specific symbols, add `$` anchor to match end of line (e.g., "import.*XhrFactory.*from.*@angular/common/http$")
+  - **IMPORTANT**: For symbol references (not imports), use the symbol name without anchors (e.g., "RouterEvent", "ComponentFactoryResolver")
+- **file_pattern**: REGEX pattern for file matching (e.g., "\\.tsx$" for .tsx files, "\\.(j|t)sx?$" for .js/.jsx/.ts/.tsx, "\\.(j|t)s$" for .js/.ts)
 - **location_type**: null
 
 Example for pattern in .tsx files only:
@@ -305,9 +331,9 @@ Example for CSS pattern in .css or .scss files:
 IMPORTANT: In JSON, backslashes must be escaped. Use \\\\ for regex backslashes.
 
 **IMPORTANT: Node.js Provider vs Builtin Provider**
-- ✅ Use nodejs provider: Symbol references across ALL JS/TS files (no file filtering)
-- ✅ Use builtin provider: Patterns that need file type filtering using regex filePattern
-- When in doubt about file filtering, use builtin provider with filePattern
+- ✅ Use nodejs provider: Symbol references (classes, types, methods, components) - DEFAULT for Angular/TypeScript
+- ✅ Use builtin provider: ONLY for import path patterns OR file-specific content filtering
+- When in doubt for Angular migrations: Use nodejs provider (it's the default)
 
 **CRITICAL: Component Prop Changes - Use COMBO RULES (nodejs + builtin)**
 
@@ -580,9 +606,41 @@ Example for Spring Boot property migration:
    - Changing API calls with similar alternatives = MEDIUM
    - Replacing core component types (e.g., Applet → JFrame) = HIGH
    - Migrating entire frameworks or patterns = EXPERT
-9. **Rationale**: Brief explanation of why this change is needed
+9. **Rationale**: Clear, comprehensive explanation of why this change is needed. Expand on minimal guide text to provide full context. Include:
+   - What changed and why
+   - Any important behavioral differences
+   - When applicable, explain the recommended approach
+   **IMPORTANT**: Your rationale should be detailed enough to help a developer understand the migration without reading the full guide.
 10. **Documentation URL**: Link to relevant documentation (if available in guide)
-11. **Example Before/After**: Code examples if present
+11. **Example Before/After**: High-quality, realistic code examples showing the migration.
+
+   **CRITICAL - Example Quality Guidelines:**
+
+   If the guide provides code examples, use them. If NOT, you MUST create realistic, complete examples that:
+   - Show realistic usage in the target framework/language
+   - Include necessary context (e.g., full method signatures, class constructors, realistic variable names)
+   - Demonstrate the actual change clearly
+   - Use proper language syntax (TypeScript for Angular, proper formatting)
+   - Are complete enough to be actionable (not just fragments)
+
+   **Example Quality Checklist:**
+   - ✅ GOOD: Complete TypeScript method with constructor showing before/after DI patterns
+   - ✅ GOOD: Full import statement showing package change
+   - ✅ GOOD: Realistic component code with props showing migration
+   - ❌ BAD: Generic placeholder code like "router.createComponent(ComponentFactoryResolver)"
+   - ❌ BAD: Incomplete fragments without context
+   - ❌ BAD: Abstract examples that don't show real usage
+
+   For Angular/TypeScript migrations, examples should:
+   - Use TypeScript syntax (types, interfaces, classes)
+   - Show realistic Angular patterns (dependency injection, decorators, component structure)
+   - Include full method signatures or constructors when showing API changes
+   - Use realistic variable names (not "foo", "bar")
+
+   For import path changes:
+   - Show complete import statement
+   - Use realistic imported symbols (not just "Component")
+   - Show actual package paths
 
 **CRITICAL WARNING - Component Prop Detection Strategy:**
 
@@ -636,6 +694,29 @@ Your patterns will be automatically validated. Patterns violating these rules wi
 2. ❌ REJECT: Generic prop names as standalone patterns (isActive, title, onClick, alignLeft, etc.)
 3. ❌ REJECT: Source and target must be different (source: "^5", target: "^5" → INVALID)
 4. ❌ REJECT: Overly broad patterns (wildcards like ".*", ".+", etc.)
+
+**FINAL CHECKLIST - Angular/TypeScript Migrations:**
+
+Before returning your JSON, verify each pattern:
+
+1. **Provider Selection:**
+   - ✅ Classes/Types (ComponentFactoryResolver, BrowserTransferStateModule) → nodejs provider
+   - ✅ Methods/Functions → nodejs provider
+   - ✅ Component/Service names → nodejs provider
+   - ✅ Import path changes (import X from 'old-package') → builtin provider with import pattern
+   - ❌ Don't use builtin for simple class/type names
+
+2. **Example Quality:**
+   - ✅ TypeScript syntax with types and interfaces
+   - ✅ Realistic Angular patterns (constructors, dependency injection, decorators)
+   - ✅ Full code context (not just fragments)
+   - ✅ Realistic variable names (MyComponent, not foo/bar)
+   - ❌ Don't create generic placeholders like "router.createComponent(OldClass)"
+
+3. **Rationale Quality:**
+   - ✅ Explain WHY the change is needed
+   - ✅ Explain the recommended approach
+   - ✅ Provide context beyond the minimal guide text
 
 Return your findings as a JSON array. Each pattern should be an object with these fields:
 

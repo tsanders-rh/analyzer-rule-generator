@@ -570,7 +570,7 @@ class AnalyzerRuleGenerator:
             if pattern.target_pattern:
                 message += f"Replace `{pattern.source_pattern.replace(pattern.source_pattern.split('{')[1].split('}')[0], '{{ component }}')}` with `{pattern.target_pattern.replace(pattern.target_pattern.split('{')[1].split('}')[0], '{{ component }}')}`."\
                     if '{' in pattern.source_pattern and '}' in pattern.source_pattern else \
-                    f"Replace `import {{ {{{{ component }}}} }}; from {self._extract_package_name(pattern.source_pattern) or pattern.source_pattern}` with `import {{ {{{{ component }}}} }} from {self._extract_package_name(pattern.target_pattern) or pattern.target_pattern}`."
+                    f"Replace `import {{ {{{{ component }}}} }} from '{self._extract_package_name(pattern.source_pattern) or pattern.source_pattern}'` with `import {{ {{{{ component }}}} }} from '{self._extract_package_name(pattern.target_pattern) or pattern.target_pattern}'`."
             else:
                 message += f"Remove usage of `{pattern.source_pattern}` (API has been removed)."
 
@@ -589,11 +589,37 @@ class AnalyzerRuleGenerator:
             else:
                 message += f"Remove usage of `{pattern.source_pattern}` (API has been removed)."
 
+            # Add code examples if available
             if pattern.example_before and pattern.example_after:
-                message += f"\n\nBefore:\n```\n{pattern.example_before}\n```\n\n"
-                message += f"After:\n```\n{pattern.example_after}\n```"
+                # Detect language from examples for syntax highlighting
+                language_hint = self._detect_code_language(pattern.example_before)
+
+                message += f"\n\nBefore:\n```{language_hint}\n{pattern.example_before}\n```\n\n"
+                message += f"After:\n```{language_hint}\n{pattern.example_after}\n```"
 
         return message
+
+    def _detect_code_language(self, code: str) -> str:
+        """
+        Detect programming language from code for syntax highlighting.
+
+        Args:
+            code: Code string
+
+        Returns:
+            Language identifier for markdown code blocks
+        """
+        code_lower = code.lower()
+
+        # TypeScript indicators
+        if any(indicator in code_lower for indicator in ['interface', 'type ', ': string', ': number', ': boolean', 'constructor(']):
+            return 'typescript'
+
+        # JavaScript/JSX indicators
+        if any(indicator in code for indicator in ['import ', 'export ', 'const ', 'let ', 'function', '=>']):
+            return ''  # No language hint for generic JS (could be JS or TS)
+
+        return ''
 
     def _replace_component_with_variable(self, code: str) -> str:
         """

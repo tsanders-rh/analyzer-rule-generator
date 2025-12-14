@@ -16,8 +16,8 @@ echo "Classifying rulesets in: $RULESET_DIR"
 echo "Dry run: $DRY_RUN"
 echo ""
 
-# Find all YAML files
-find "$RULESET_DIR" -name "*.yaml" -o -name "*.yml" | while read -r ruleset; do
+# Find all YAML files (excluding ruleset.yaml metadata files)
+find "$RULESET_DIR" -type f \( -name "*.yaml" -o -name "*.yml" \) ! -name "ruleset.yaml" | while read -r ruleset; do
   echo "Processing: $ruleset"
   python scripts/classify_existing_rules.py \
     --ruleset "$ruleset" \

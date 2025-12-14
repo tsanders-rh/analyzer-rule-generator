@@ -104,6 +104,10 @@ class AnalyzerRule(BaseModel):
     links: Optional[List[Link]] = Field(default=None, description="Reference documentation links")
     customVariables: Optional[List[Dict[str, str]]] = Field(default_factory=list, description="Custom variable definitions")
     tag: Optional[List[str]] = Field(default=None, description="Tags to add when rule matches")
+    migration_complexity: Optional[str] = Field(
+        default=None,
+        description="Migration complexity level (trivial, low, medium, high, expert)"
+    )
 
 
 class AnalyzerRuleset(BaseModel):

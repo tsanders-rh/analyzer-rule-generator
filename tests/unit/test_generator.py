@@ -588,6 +588,74 @@ class TestPatternToRule:
         # Will be None because java provider needs source_fqn
         assert rule is None
 
+    def test_migration_complexity_passed_to_rule(self):
+        """Should pass migration_complexity from pattern to generated rule"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="spring-boot-3",
+            target_framework="spring-boot-4"
+        )
+
+        # Test with each complexity level
+        complexities = ["trivial", "low", "medium", "high", "expert"]
+
+        for complexity in complexities:
+            pattern = MigrationPattern(
+                source_pattern=f"TestClass{complexity}",
+                source_fqn=f"com.example.TestClass{complexity}",
+                location_type=LocationType.TYPE,
+                complexity=complexity,
+                category="api",
+                rationale="Test pattern"
+            )
+
+            rule = generator._pattern_to_rule(pattern)
+
+            assert rule is not None
+            assert rule.migration_complexity == complexity, \
+                f"Expected migration_complexity '{complexity}', got '{rule.migration_complexity}'"
+
+    def test_migration_complexity_lowercase(self):
+        """Should handle lowercase complexity values"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="a",
+            target_framework="b"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="TestClass",
+            source_fqn="com.example.TestClass",
+            location_type=LocationType.TYPE,
+            complexity="medium",  # lowercase
+            category="api",
+            rationale="Test"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert rule.migration_complexity == "medium"
+
+    def test_migration_complexity_uppercase(self):
+        """Should handle uppercase complexity values"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="a",
+            target_framework="b"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="TestClass",
+            source_fqn="com.example.TestClass",
+            location_type=LocationType.TYPE,
+            complexity="HIGH",  # uppercase
+            category="api",
+            rationale="Test"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert rule.migration_complexity == "HIGH"
+
 
 class TestGenerateRules:
     """Test bulk rule generation."""

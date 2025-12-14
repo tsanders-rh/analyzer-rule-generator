@@ -319,6 +319,7 @@ description: This ruleset provides guidance for migrating from spring-boot-3 to 
   links:
     - url: "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
       title: "Spring Boot 4.0 Migration Guide"
+  migration_complexity: low
 ```
 
 ## How It Works
@@ -337,7 +338,8 @@ The script follows a three-step process:
 - LLM identifies migration patterns
 - Extracts:
   - Description and message
-  - Complexity/effort level
+  - Complexity/effort level (1-10)
+  - Migration complexity (trivial, low, medium, high, expert)
   - Category (mandatory, potential, optional)
   - Concern (security, performance, etc.)
   - Language-specific patterns

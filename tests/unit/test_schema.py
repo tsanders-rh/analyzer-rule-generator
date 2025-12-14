@@ -416,6 +416,85 @@ class TestAnalyzerRule:
         assert rule.ruleID == "test-00000"
         assert rule.category == Category.MANDATORY
 
+    def test_migration_complexity_optional_field(self):
+        """Should allow migration_complexity as optional field"""
+        # Without migration_complexity (should default to None)
+        rule = AnalyzerRule(
+            ruleID="test-00000",
+            description="Test rule",
+            effort=5,
+            when={"java.referenced": {"pattern": "test"}},
+            message="Test message"
+        )
+        assert rule.migration_complexity is None
+
+        # With migration_complexity
+        rule = AnalyzerRule(
+            ruleID="test-00001",
+            description="Test rule",
+            effort=5,
+            when={"java.referenced": {"pattern": "test"}},
+            message="Test message",
+            migration_complexity="medium"
+        )
+        assert rule.migration_complexity == "medium"
+
+    def test_migration_complexity_all_valid_values(self):
+        """Should accept all valid complexity values"""
+        valid_complexities = ["trivial", "low", "medium", "high", "expert"]
+
+        for complexity in valid_complexities:
+            rule = AnalyzerRule(
+                ruleID=f"test-{complexity}",
+                description="Test rule",
+                effort=5,
+                when={"java.referenced": {"pattern": "test"}},
+                message="Test message",
+                migration_complexity=complexity
+            )
+            assert rule.migration_complexity == complexity
+
+    def test_migration_complexity_serialization(self):
+        """Should serialize migration_complexity field"""
+        rule = AnalyzerRule(
+            ruleID="test-00000",
+            description="Test rule",
+            effort=5,
+            when={"java.referenced": {"pattern": "test"}},
+            message="Test message",
+            migration_complexity="high"
+        )
+        data = rule.model_dump()
+
+        assert data["migration_complexity"] == "high"
+
+    def test_migration_complexity_deserialization(self):
+        """Should deserialize migration_complexity field"""
+        data = {
+            "ruleID": "test-00000",
+            "description": "Test rule",
+            "effort": 5,
+            "when": {"java.referenced": {"pattern": "test"}},
+            "message": "Test message",
+            "migration_complexity": "expert"
+        }
+        rule = AnalyzerRule(**data)
+
+        assert rule.migration_complexity == "expert"
+
+    def test_migration_complexity_exclude_none(self):
+        """Should exclude migration_complexity from dict if None"""
+        rule = AnalyzerRule(
+            ruleID="test-00000",
+            description="Test rule",
+            effort=5,
+            when={"java.referenced": {"pattern": "test"}},
+            message="Test message"
+        )
+        data = rule.model_dump(exclude_none=True)
+
+        assert "migration_complexity" not in data
+
 
 class TestAnalyzerRuleset:
     """Test AnalyzerRuleset model."""

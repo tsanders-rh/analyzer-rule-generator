@@ -145,7 +145,8 @@ class AnalyzerRuleGenerator:
             message=message,
             links=links if links else None,
             customVariables=custom_variables if custom_variables else [],
-            tag=None
+            tag=None,
+            migration_complexity=pattern.complexity
         )
 
         return rule

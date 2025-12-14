@@ -16,6 +16,7 @@ The Analyzer Rule Generator uses Large Language Models (LLMs) to automatically e
 - **Multiple Input Formats**: URLs, Markdown files, plain text
 - **Multi-Language Support**: Java, TypeScript/React, Go, Python, CSS, and more
 - **LLM-Powered Extraction**: Automatically identifies migration patterns, complexity, and conditions
+- **Migration Complexity Classification**: Automatic classification (trivial, low, medium, high, expert) for generated and existing rules
 - **Konveyor Analyzer Format**: Generates rules compatible with analyzer-lsp
 - **Flexible LLM Support**: OpenAI, Anthropic Claude, Google Gemini
 - **Smart Provider Detection**: Automatically uses Java or Builtin provider based on detected language
@@ -155,6 +156,7 @@ Generates **41 comprehensive rules** with hybrid detection (nodejs + builtin pro
   links:
     - url: "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
       title: "Spring Boot 4.0 Migration Guide"
+  migration_complexity: low
 ```
 
 ### Builtin Provider Rules (TypeScript/React/Go/Python)
@@ -173,6 +175,44 @@ Generates **41 comprehensive rules** with hybrid detection (nodejs + builtin pro
       filePattern: '*.{tsx,jsx,ts,js}'
   message: "The isDisabled prop has been renamed to isAriaDisabled for better accessibility"
 ```
+
+## Migration Complexity Classification
+
+The tool automatically classifies migration complexity for generated rules and provides a script to classify existing rulesets.
+
+### Complexity Levels
+
+- **trivial** (95%+ AI success): Namespace changes, mechanical fixes (e.g., javax → jakarta)
+- **low** (80%+ AI success): Simple API equivalents, straightforward replacements
+- **medium** (60%+ AI success): Requires context understanding, moderate refactoring
+- **high** (30-50% AI success): Architectural changes, complex migrations
+- **expert** (<30% AI success): Custom implementations, likely needs human review
+
+### Classifying Existing Rulesets
+
+Add complexity classifications to existing Konveyor analyzer rulesets:
+
+```bash
+# Preview classifications (dry run)
+python scripts/classify_existing_rules.py \
+  --ruleset examples/output/spring-boot/migration-rules.yaml \
+  --dry-run
+
+# Apply classifications
+python scripts/classify_existing_rules.py \
+  --ruleset examples/output/spring-boot/migration-rules.yaml
+
+# Batch process multiple rulesets
+bash scripts/batch_classify_rulesets.sh /path/to/rulesets
+```
+
+The classifier analyzes:
+- Pattern descriptions and messages
+- Rule effort scores
+- When condition complexity
+- Migration keywords and indicators
+
+See [docs/guides/migration-complexity.md](docs/guides/migration-complexity.md) for complete documentation.
 
 ## Rule Viewer
 

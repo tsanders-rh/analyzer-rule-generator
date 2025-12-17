@@ -35,14 +35,21 @@ def detect_language(rules: list) -> str:
             return 'typescript'
         elif 'java.referenced' in cond or 'java.dependency' in cond:
             return 'java'
-        elif 'builtin.filecontent' in cond:
-            file_pattern = cond['builtin.filecontent'].get('filePattern', '')
-            if '.ts' in file_pattern or '.tsx' in file_pattern or '.js' in file_pattern or '.jsx' in file_pattern:
+        elif 'builtin.filecontent' in cond or 'builtin.file' in cond:
+            # Check filePattern for language hints
+            builtin_cond = cond.get('builtin.filecontent') or cond.get('builtin.file', {})
+            file_pattern = builtin_cond.get('filePattern', '')
+
+            # Check for JS/TS patterns: .js, .jsx, .ts, .tsx
+            # Common patterns: \.(j|t)sx?$, \.tsx?$, \.jsx?$, etc.
+            if any(pattern in file_pattern for pattern in ['.ts', '.tsx', '.js', '.jsx', '(j|t)s', 'jsx?', 'tsx?']):
                 return 'typescript'
             elif '.go' in file_pattern:
                 return 'go'
             elif '.py' in file_pattern:
                 return 'python'
+            elif '.java' in file_pattern:
+                return 'java'
         return None
 
     for rule in rules:
@@ -421,6 +428,22 @@ def generate_test_yaml(rule_file_path: Path, data_dir_name: str, rules: list, ou
             found.add('go')
         if 'python.referenced' in cond or 'python.dependency' in cond:
             found.add('python')
+
+        # If only builtin provider, try to infer language-specific provider from filePattern
+        if found == {'builtin'}:
+            builtin_cond = cond.get('builtin.filecontent') or cond.get('builtin.file', {})
+            file_pattern = builtin_cond.get('filePattern', '')
+
+            # Add language-specific provider based on filePattern
+            if any(pattern in file_pattern for pattern in ['.ts', '.tsx', '.js', '.jsx', '(j|t)s', 'jsx?', 'tsx?']):
+                found.add('nodejs')
+            elif '.java' in file_pattern:
+                found.add('java')
+            elif '.go' in file_pattern:
+                found.add('go')
+            elif '.py' in file_pattern:
+                found.add('python')
+
         return found
 
     providers = set()

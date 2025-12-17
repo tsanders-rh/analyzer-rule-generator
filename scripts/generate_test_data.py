@@ -103,8 +103,8 @@ def get_language_config(language: str) -> dict:
             'build_file': 'package.json',
             'build_file_type': 'json',
             'source_dir': 'src',
-            'main_file': 'index.ts',
-            'main_file_type': 'typescript',
+            'main_file': 'App.tsx',
+            'main_file_type': 'tsx',
             'package_manager': 'npm',
             'test_instructions': 'npm project with dependencies'
         },
@@ -140,58 +140,165 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
         language: Programming language
 
     Returns:
-        List of pattern dictionaries
+        List of pattern dictionaries with code hints
     """
     patterns_to_test = []
 
-    for rule in rules:
+    def process_condition(cond, rule_id, description):
+        """Process a single condition and extract pattern info."""
         pattern_info = {
-            'ruleID': rule.get('ruleID'),
-            'description': rule.get('description'),
+            'ruleID': rule_id,
+            'description': description,
             'pattern': None,
             'location': None,
-            'provider': None
+            'provider': None,
+            'component': None,
+            'code_hint': None
         }
 
-        # Extract pattern from when condition
-        when = rule.get('when', {})
+        # Check for nodejs.referenced
+        if 'nodejs.referenced' in cond:
+            nodejs_ref = cond['nodejs.referenced']
+            pattern_info['pattern'] = nodejs_ref.get('pattern')
+            pattern_info['component'] = nodejs_ref.get('pattern')
+            pattern_info['location'] = nodejs_ref.get('location', 'IMPORT')
+            pattern_info['provider'] = 'nodejs'
 
         # Check for java provider
-        if 'java.referenced' in when:
-            java_ref = when['java.referenced']
+        elif 'java.referenced' in cond:
+            java_ref = cond['java.referenced']
             pattern_info['pattern'] = java_ref.get('pattern')
             pattern_info['location'] = java_ref.get('location')
             pattern_info['provider'] = 'java'
-        elif 'java.dependency' in when:
-            java_dep = when['java.dependency']
+
+        elif 'java.dependency' in cond:
+            java_dep = cond['java.dependency']
             pattern_info['pattern'] = java_dep.get('name')
             pattern_info['location'] = 'DEPENDENCY'
             pattern_info['provider'] = 'java'
-        # Check for builtin provider
-        elif 'builtin.filecontent' in when:
-            builtin = when['builtin.filecontent']
+
+        # Check for builtin.filecontent (this contains the actual code pattern!)
+        elif 'builtin.filecontent' in cond:
+            builtin = cond['builtin.filecontent']
             pattern_info['pattern'] = builtin.get('pattern')
             pattern_info['location'] = 'FILE_CONTENT'
             pattern_info['provider'] = 'builtin'
-        elif 'builtin.file' in when:
-            builtin = when['builtin.file']
+
+            # Parse JSX/TSX patterns to generate code hints
+            jsx_pattern = builtin.get('pattern', '')
+            pattern_info['code_hint'] = generate_code_hint_from_pattern(jsx_pattern, language)
+
+        elif 'builtin.file' in cond:
+            builtin = cond['builtin.file']
             pattern_info['pattern'] = builtin.get('pattern')
             pattern_info['location'] = 'FILE_PATTERN'
             pattern_info['provider'] = 'builtin'
-        # Check for OR conditions
-        elif 'or' in when:
-            # Take first condition from OR
-            first_cond = when['or'][0] if isinstance(when['or'], list) else when['or']
-            if 'java.referenced' in first_cond:
-                java_ref = first_cond['java.referenced']
-                pattern_info['pattern'] = java_ref.get('pattern')
-                pattern_info['location'] = java_ref.get('location')
-                pattern_info['provider'] = 'java'
 
-        if pattern_info['pattern']:
-            patterns_to_test.append(pattern_info)
+        return pattern_info if pattern_info['pattern'] else None
+
+    for rule in rules:
+        rule_id = rule.get('ruleID')
+        description = rule.get('description', '')
+        when = rule.get('when', {})
+
+        patterns = []
+
+        # Handle 'and' conditions
+        if 'and' in when:
+            and_conditions = when['and'] if isinstance(when['and'], list) else [when['and']]
+            for cond in and_conditions:
+                info = process_condition(cond, rule_id, description)
+                if info:
+                    patterns.append(info)
+
+        # Handle 'or' conditions
+        elif 'or' in when:
+            or_conditions = when['or'] if isinstance(when['or'], list) else [when['or']]
+            for cond in or_conditions:
+                info = process_condition(cond, rule_id, description)
+                if info:
+                    patterns.append(info)
+
+        # Handle direct condition
+        else:
+            info = process_condition(when, rule_id, description)
+            if info:
+                patterns.append(info)
+
+        # Merge patterns for the same rule
+        if patterns:
+            merged = {
+                'ruleID': rule_id,
+                'description': description,
+                'patterns': patterns,
+                'component': None,
+                'code_hint': None
+            }
+
+            # Extract component name and code hint
+            for p in patterns:
+                if p.get('component'):
+                    merged['component'] = p['component']
+                if p.get('code_hint'):
+                    merged['code_hint'] = p['code_hint']
+
+            patterns_to_test.append(merged)
 
     return patterns_to_test
+
+
+def generate_code_hint_from_pattern(pattern: str, language: str) -> str:
+    """
+    Generate a code example hint from a regex pattern.
+
+    Args:
+        pattern: Regex pattern from builtin.filecontent
+        language: Programming language
+
+    Returns:
+        Code example string
+    """
+    if language != 'typescript':
+        return None
+
+    # Try to extract JSX tag patterns
+    import re
+
+    # Pattern: <ComponentName[^>]*\battribute=['"]value['"][^>]*>
+    jsx_match = re.search(r'<(\w+)([^>]*?)>', pattern)
+    if jsx_match:
+        component = jsx_match.group(1)
+        attributes_pattern = jsx_match.group(2)
+
+        # Extract specific attributes
+        attrs = []
+
+        # Look for variant="value"
+        variant_match = re.search(r'\\bvariant=.*?[\'"](\w+)[\'"]', attributes_pattern)
+        if variant_match:
+            attrs.append(f'variant="{variant_match.group(1)}"')
+
+        # Look for isFlat, isCompact, etc (boolean props)
+        bool_props = re.findall(r'\\b(is[A-Z]\w+)', attributes_pattern)
+        for prop in bool_props:
+            attrs.append(prop)
+
+        # Build example
+        attr_str = ' ' + ' '.join(attrs) if attrs else ''
+
+        # Check if it's a self-closing or has children
+        if 'icon' in pattern.lower() or 'children' in pattern.lower():
+            return f'<{component}{attr_str}>\n  <SomeIcon />\n</{component}>'
+        else:
+            return f'<{component}{attr_str}>Content</{component}>'
+
+    # Look for import patterns
+    import_match = re.search(r'import.*?from.*?[\'"](@[\w/-]+)[\'"]', pattern)
+    if import_match:
+        package = import_match.group(1)
+        return f'import {{ Component }} from "{package}";'
+
+    return None
 
 
 def build_test_generation_prompt(rules: list, source: str, target: str, guide_url: str, language: str) -> str:
@@ -211,11 +318,20 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
     config = get_language_config(language)
     patterns = extract_patterns_from_rules(rules, language)
 
-    # Build patterns summary
-    patterns_summary = "\n".join([
-        f"- Rule {p['ruleID']}: {p['description']}\n  Pattern: {p['pattern']} (location: {p['location']})"
-        for p in patterns
-    ])
+    # Build patterns summary with specific code examples
+    patterns_list = []
+    for p in patterns:
+        pattern_text = f"- Rule {p['ruleID']}: {p['description']}"
+
+        # Add code hint if available
+        if p.get('code_hint'):
+            pattern_text += f"\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n  ```tsx\n  // {p['ruleID']}\n  {p['code_hint']}\n  ```"
+        elif p.get('component'):
+            pattern_text += f"\n  Component: {p['component']} (MUST be used in JSX, not just imported)"
+
+        patterns_list.append(pattern_text)
+
+    patterns_summary = "\n\n".join(patterns_list)
 
     # Language-specific instructions
     lang_instructions = {
@@ -238,18 +354,22 @@ For Java patterns:
 """,
         'typescript': """
 1. **{build_file}** - package.json with:
-   - Dependencies at SOURCE version
-   - TypeScript configuration
+   - Dependencies at SOURCE version (e.g., "@patternfly/react-core": "^5.0.0")
+   - React and TypeScript dependencies
    - Minimal required packages
 
-2. **{main_file}** - Main application with:
-   - Imports using each deprecated pattern
-   - Comments: // Rule {source}-to-{target}-00001
+2. **{main_file}** - React/TypeScript component (.tsx file) with:
+   - Import statements for EACH component specified in the rules
+   - ACTUAL JSX CODE using each component with the exact deprecated patterns
+   - Comments before each pattern: // Rule {source}-to-{target}-XXXXX
+   - Export a React component
 
-For TypeScript patterns:
-- Import statements for deprecated modules
-- Usage of deprecated APIs, classes, functions
-- Type annotations with deprecated types
+CRITICAL REQUIREMENTS FOR REACT/JSX:
+- File MUST be valid TSX (TypeScript + JSX)
+- Components MUST be used in JSX, not just imported
+- JSX code MUST match the exact patterns shown above (attributes, props, children)
+- Each deprecated pattern MUST appear at least once in the JSX
+- Do NOT generate generic examples - use the EXACT code patterns specified above
 """,
         'go': """
 1. **{build_file}** - Go module file with:
@@ -296,17 +416,23 @@ Migration: {source} → {target}
 Guide: {guide_url}
 Language: {language}
 
-You need to create {language} code that will trigger these analyzer rules:
+CRITICAL: You MUST create code that triggers these SPECIFIC analyzer rules.
+Each rule looks for EXACT patterns in the code. You MUST include the EXACT code shown below.
 
 {patterns_summary}
 
-Requirements:
+REQUIREMENTS:
 1. Create a complete, compilable {language} project structure
-2. Include code that uses EACH deprecated pattern exactly once
-3. Keep the code minimal - just enough to trigger the rules
-4. Use realistic naming based on the patterns
-5. Add comments indicating which rule each code segment tests
-6. Ensure each pattern appears in a way that static analysis can detect
+2. For EACH rule above, include the EXACT code pattern specified
+3. If a code example is shown with "YOU MUST GENERATE THIS EXACT JSX CODE", copy it EXACTLY
+4. Add comment before each pattern: // Rule ID
+5. Keep the code minimal - one example per rule
+6. Ensure static analysis can detect each pattern
+
+CRITICAL FOR TSX/JSX FILES:
+- Components must be USED in JSX, not just imported
+- Match the EXACT JSX syntax: attributes, props, children
+- Do not improvise - use the patterns shown above
 
 Output files:
 
@@ -356,7 +482,7 @@ def extract_code_blocks(response: str, language: str) -> dict:
             if not result['build_file']:
                 result['build_file'] = content
         # Match source file types
-        elif block_type.lower() in ['java', 'typescript', 'ts', 'python', 'py', 'go', 'javascript', 'js']:
+        elif block_type.lower() in ['java', 'typescript', 'tsx', 'ts', 'python', 'py', 'go', 'javascript', 'jsx', 'js']:
             if not result['source_file']:
                 result['source_file'] = content
 

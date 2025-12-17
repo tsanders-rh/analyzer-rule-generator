@@ -11,6 +11,7 @@ import argparse
 import sys
 from pathlib import Path
 import yaml
+import time
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
@@ -28,29 +29,44 @@ def detect_language(rules: list) -> str:
     Returns:
         Language name (java, typescript, go, python, etc.)
     """
+    def check_condition(cond):
+        """Helper to check a single condition."""
+        if 'nodejs.referenced' in cond or 'nodejs.dependency' in cond:
+            return 'typescript'
+        elif 'java.referenced' in cond or 'java.dependency' in cond:
+            return 'java'
+        elif 'builtin.filecontent' in cond:
+            file_pattern = cond['builtin.filecontent'].get('filePattern', '')
+            if '.ts' in file_pattern or '.tsx' in file_pattern or '.js' in file_pattern or '.jsx' in file_pattern:
+                return 'typescript'
+            elif '.go' in file_pattern:
+                return 'go'
+            elif '.py' in file_pattern:
+                return 'python'
+        return None
+
     for rule in rules:
         when = rule.get('when', {})
 
-        # Check for language-specific providers
-        if 'java.referenced' in when or 'java.dependency' in when:
-            return 'java'
+        # Check for 'and' conditions
+        if 'and' in when:
+            and_conditions = when['and'] if isinstance(when['and'], list) else [when['and']]
+            for cond in and_conditions:
+                lang = check_condition(cond)
+                if lang:
+                    return lang
+        # Check for 'or' conditions
         elif 'or' in when:
-            # Check first condition in OR
-            first_cond = when['or'][0] if isinstance(when['or'], list) else when['or']
-            if 'java.referenced' in first_cond or 'java.dependency' in first_cond:
-                return 'java'
-
-        # Check for builtin provider patterns that might indicate language
-        if 'builtin.file' in when or 'builtin.filecontent' in when:
-            # Try to infer from file patterns
-            if 'builtin.filecontent' in when:
-                file_pattern = when['builtin.filecontent'].get('filePattern', '')
-                if '.ts' in file_pattern or '.tsx' in file_pattern:
-                    return 'typescript'
-                elif '.go' in file_pattern:
-                    return 'go'
-                elif '.py' in file_pattern:
-                    return 'python'
+            or_conditions = when['or'] if isinstance(when['or'], list) else [when['or']]
+            for cond in or_conditions:
+                lang = check_condition(cond)
+                if lang:
+                    return lang
+        # Check direct conditions
+        else:
+            lang = check_condition(when)
+            if lang:
+                return lang
 
     # Default to java if can't determine
     return 'java'
@@ -375,6 +391,91 @@ def create_directory_structure(output_dir: Path, language: str):
     return src_dir
 
 
+def generate_test_yaml(rule_file_path: Path, data_dir_name: str, rules: list, output_dir: Path) -> Path:
+    """
+    Generate a Konveyor test YAML file.
+
+    Args:
+        rule_file_path: Path to the rule YAML file
+        data_dir_name: Name of the data directory (e.g., "button")
+        rules: List of rule dictionaries
+        output_dir: Output directory for tests
+
+    Returns:
+        Path to created test YAML file
+    """
+    # Extract rule IDs
+    rule_ids = [rule.get('ruleID') for rule in rules if rule.get('ruleID')]
+
+    # Determine providers from rules
+    def extract_providers(cond):
+        """Helper to extract providers from a condition."""
+        found = set()
+        if 'java.referenced' in cond or 'java.dependency' in cond:
+            found.add('java')
+        if 'nodejs.referenced' in cond or 'nodejs.dependency' in cond:
+            found.add('nodejs')
+        if 'builtin.file' in cond or 'builtin.filecontent' in cond:
+            found.add('builtin')
+        if 'go.referenced' in cond or 'go.dependency' in cond:
+            found.add('go')
+        if 'python.referenced' in cond or 'python.dependency' in cond:
+            found.add('python')
+        return found
+
+    providers = set()
+    for rule in rules:
+        when = rule.get('when', {})
+
+        # Check for 'and' conditions
+        if 'and' in when:
+            and_conditions = when['and'] if isinstance(when['and'], list) else [when['and']]
+            for cond in and_conditions:
+                providers.update(extract_providers(cond))
+        # Check for 'or' conditions
+        elif 'or' in when:
+            or_conditions = when['or'] if isinstance(when['or'], list) else [when['or']]
+            for cond in or_conditions:
+                providers.update(extract_providers(cond))
+        # Check direct conditions
+        else:
+            providers.update(extract_providers(when))
+
+    # Default to java and builtin if we can't determine
+    if not providers:
+        providers = {'java', 'builtin'}
+
+    # Build test structure
+    test_data = {
+        'rulesPath': f'../{rule_file_path.name}',
+        'providers': [
+            {'name': provider, 'dataPath': f'./data/{data_dir_name}'}
+            for provider in sorted(providers)
+        ],
+        'tests': [
+            {
+                'ruleID': rule_id,
+                'testCases': [
+                    {
+                        'name': 'tc-1',
+                        'hasIncidents': {'atLeast': 1}
+                    }
+                ]
+            }
+            for rule_id in rule_ids
+        ]
+    }
+
+    # Write test YAML file
+    test_file_name = rule_file_path.stem + '.test.yaml'
+    test_file_path = output_dir / test_file_name
+
+    with open(test_file_path, 'w') as f:
+        yaml.dump(test_data, f, default_flow_style=False, sort_keys=False)
+
+    return test_file_path
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Generate test data for Konveyor analyzer rules using AI',
@@ -389,21 +490,21 @@ Examples:
     --target spring-boot-4.0 \\
     --guide-url "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
 
-  # Generate TypeScript test data
+  # Generate TypeScript test data for a directory of rules
   python scripts/generate_test_data.py \\
-    --rules examples/output/react-18/migration-rules.yaml \\
-    --output submission/tests/data/react \\
-    --source react-17 \\
-    --target react-18 \\
+    --rules /path/to/rulesets/patternfly \\
+    --output /path/to/rulesets/patternfly/tests \\
+    --source patternfly-v5 \\
+    --target patternfly-v6 \\
     --language typescript \\
-    --guide-url "https://react.dev/blog/2022/03/29/react-v18"
+    --guide-url "https://www.patternfly.org/get-started/upgrade/"
         """
     )
 
     parser.add_argument(
         '--rules',
         required=True,
-        help='Path to rule YAML file'
+        help='Path to rule YAML file or directory containing rule files'
     )
     parser.add_argument(
         '--output',
@@ -444,107 +545,184 @@ Examples:
         '--api-key',
         help='API key (uses environment variable if not specified)'
     )
+    parser.add_argument(
+        '--delay',
+        type=float,
+        default=8.0,
+        help='Delay in seconds between API calls to avoid rate limits (default: 8.0)'
+    )
+    parser.add_argument(
+        '--max-retries',
+        type=int,
+        default=3,
+        help='Maximum number of retries for rate limit errors (default: 3)'
+    )
+    parser.add_argument(
+        '--skip-existing',
+        action='store_true',
+        help='Skip rule files that already have generated test data'
+    )
 
     args = parser.parse_args()
 
     # Validate inputs
-    rule_file = Path(args.rules)
-    if not rule_file.exists():
-        print(f"Error: Rule file not found: {rule_file}", file=sys.stderr)
+    rules_path = Path(args.rules)
+    if not rules_path.exists():
+        print(f"Error: Path not found: {rules_path}", file=sys.stderr)
         return 1
 
-    # Load rules
-    print(f"Loading rules from {rule_file}...")
-    with open(rule_file, 'r') as f:
-        content = yaml.safe_load(f)
-        if isinstance(content, list):
-            rules = content
-        else:
-            rules = [content]
+    # Determine if input is a file or directory
+    if rules_path.is_file():
+        # Single file mode
+        rule_files = [rules_path]
+    elif rules_path.is_dir():
+        # Directory mode - find all YAML files except ruleset.yaml
+        rule_files = sorted([
+            f for f in rules_path.glob('*.yaml')
+            if f.name != 'ruleset.yaml' and not f.name.endswith('.test.yaml')
+        ])
+        if not rule_files:
+            print(f"Error: No rule YAML files found in {rules_path}", file=sys.stderr)
+            return 1
+    else:
+        print(f"Error: {rules_path} is neither a file nor directory", file=sys.stderr)
+        return 1
 
-    print(f"  ✓ Loaded {len(rules)} rules")
+    print(f"Found {len(rule_files)} rule file(s) to process")
 
-    # Detect or use specified language
-    language = args.language or detect_language(rules)
-    print(f"  ✓ Detected language: {language}")
-
-    config = get_language_config(language)
-
-    # Initialize LLM
+    # Initialize LLM once
     print(f"\nInitializing {args.provider} LLM...")
     llm = get_llm_provider(args.provider, args.model, args.api_key)
     print(f"  ✓ Using model: {llm.model if hasattr(llm, 'model') else llm.model_name}")
 
-    # Build prompt
-    print(f"\nGenerating {language} test data with AI...")
-    prompt = build_test_generation_prompt(rules, args.source, args.target, args.guide_url, language)
-
-    # Generate with LLM
-    try:
-        result = llm.generate(prompt)
-        response = result.get('response', '')
-
-        # Show token usage if available
-        if 'usage' in result:
-            usage = result['usage']
-            if 'input_tokens' in usage:
-                print(f"  Input tokens: {usage['input_tokens']}")
-                print(f"  Output tokens: {usage['output_tokens']}")
-            elif 'prompt_tokens' in usage:
-                print(f"  Prompt tokens: {usage['prompt_tokens']}")
-                print(f"  Completion tokens: {usage['completion_tokens']}")
-
-    except Exception as e:
-        print(f"Error generating test data: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc()
-        return 1
-
-    # Extract code blocks
-    print(f"\nExtracting generated code...")
-    code = extract_code_blocks(response, language)
-
-    if not code['build_file']:
-        print(f"Error: Could not extract {config['build_file']} from response", file=sys.stderr)
-        print(f"\nResponse preview:\n{response[:500]}", file=sys.stderr)
-        return 1
-
-    if not code['source_file']:
-        print(f"Error: Could not extract {config['main_file']} from response", file=sys.stderr)
-        print(f"\nResponse preview:\n{response[:500]}", file=sys.stderr)
-        return 1
-
-    # Create output directory structure
+    # Setup output directory structure
     output_dir = Path(args.output)
-    src_dir = create_directory_structure(output_dir, language)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    data_dir = output_dir / 'data'
+    data_dir.mkdir(exist_ok=True)
 
-    # Write build file
-    build_file_path = output_dir / config['build_file']
-    with open(build_file_path, 'w') as f:
-        f.write(code['build_file'])
-    print(f"  ✓ {build_file_path}")
+    # Process each rule file
+    total_files = len(rule_files)
+    skipped_count = 0
+    for idx, rule_file in enumerate(rule_files, 1):
+        print(f"\n{'='*70}")
+        print(f"Processing {idx}/{total_files}: {rule_file.name}")
+        print(f"{'='*70}")
 
-    # Write source file
-    source_file_path = src_dir / config['main_file']
-    with open(source_file_path, 'w') as f:
-        f.write(code['source_file'])
-    print(f"  ✓ {source_file_path}")
+        # Check if test already exists
+        test_file_name = rule_file.stem + '.test.yaml'
+        test_file_path = output_dir / test_file_name
+        if args.skip_existing and test_file_path.exists():
+            print(f"  ⊘ Skipping (test already exists)")
+            skipped_count += 1
+            continue
 
-    print(f"\n✓ Test data generated successfully!")
+        # Load rules from file
+        with open(rule_file, 'r') as f:
+            content = yaml.safe_load(f)
+            if isinstance(content, list):
+                rules = content
+            else:
+                rules = [content]
+
+        print(f"  ✓ Loaded {len(rules)} rule(s)")
+
+        # Detect or use specified language
+        language = args.language or detect_language(rules)
+        print(f"  ✓ Language: {language}")
+
+        config = get_language_config(language)
+
+        # Generate data directory name from rule file
+        # e.g., "patternfly-v5-to-patternfly-v6-button.yaml" -> "button"
+        data_dir_name = rule_file.stem.replace(f'{args.source}-to-{args.target}-', '')
+
+        # Build prompt
+        print(f"  Generating test data with AI...")
+        prompt = build_test_generation_prompt(rules, args.source, args.target, args.guide_url, language)
+
+        # Generate with LLM (with retry logic for rate limits)
+        response = None
+        for retry in range(args.max_retries):
+            try:
+                result = llm.generate(prompt)
+                response = result.get('response', '')
+
+                # Show token usage if available
+                if 'usage' in result:
+                    usage = result['usage']
+                    if 'input_tokens' in usage:
+                        print(f"    Input tokens: {usage['input_tokens']}, Output tokens: {usage['output_tokens']}")
+                    elif 'prompt_tokens' in usage:
+                        print(f"    Prompt tokens: {usage['prompt_tokens']}, Completion tokens: {usage['completion_tokens']}")
+                break  # Success, exit retry loop
+
+            except Exception as e:
+                error_str = str(e)
+                if 'rate_limit' in error_str.lower() or '429' in error_str:
+                    if retry < args.max_retries - 1:
+                        wait_time = 60 * (retry + 1)  # Exponential backoff: 60s, 120s, 180s
+                        print(f"  ⚠ Rate limit hit, waiting {wait_time}s before retry {retry + 2}/{args.max_retries}...")
+                        time.sleep(wait_time)
+                    else:
+                        print(f"  ✗ Rate limit exceeded after {args.max_retries} retries", file=sys.stderr)
+                        response = None
+                        break
+                else:
+                    print(f"  ✗ Error generating test data: {e}", file=sys.stderr)
+                    import traceback
+                    traceback.print_exc()
+                    response = None
+                    break
+
+        if not response:
+            continue  # Skip to next file
+
+        # Extract code blocks
+        code = extract_code_blocks(response, language)
+
+        if not code['build_file'] or not code['source_file']:
+            print(f"  ✗ Could not extract required files from response", file=sys.stderr)
+            continue  # Skip to next file
+
+        # Create test data directory
+        test_data_dir = data_dir / data_dir_name
+        src_dir = create_directory_structure(test_data_dir, language)
+
+        # Write build file
+        build_file_path = test_data_dir / config['build_file']
+        with open(build_file_path, 'w') as f:
+            f.write(code['build_file'])
+        print(f"  ✓ {build_file_path.relative_to(output_dir)}")
+
+        # Write source file
+        source_file_path = src_dir / config['main_file']
+        with open(source_file_path, 'w') as f:
+            f.write(code['source_file'])
+        print(f"  ✓ {source_file_path.relative_to(output_dir)}")
+
+        # Generate test YAML file
+        test_yaml_path = generate_test_yaml(rule_file, data_dir_name, rules, output_dir)
+        print(f"  ✓ {test_yaml_path.relative_to(output_dir)}")
+
+        # Add delay between API calls (except for the last file)
+        if idx < total_files and args.delay > 0:
+            print(f"  Waiting {args.delay}s before next file...")
+            time.sleep(args.delay)
+
+    print(f"\n{'='*70}")
+    generated_count = total_files - skipped_count
+    print(f"✓ Processed {total_files} rule file(s)")
+    if skipped_count > 0:
+        print(f"  - Generated: {generated_count}")
+        print(f"  - Skipped: {skipped_count}")
+    print(f"\nOutput directory: {output_dir}")
+    print(f"  - Test YAML files: {len(list(output_dir.glob('*.test.yaml')))} files")
+    if data_dir.exists():
+        print(f"  - Test data directories: {len(list(data_dir.iterdir()))} directories")
     print(f"\nNext steps:")
     print(f"  1. Review generated files in: {output_dir}")
-
-    # Language-specific verification commands
-    verify_commands = {
-        'java': f"mvn -f {build_file_path} compile",
-        'typescript': f"cd {output_dir} && npm install && npm run build",
-        'go': f"cd {output_dir} && go build",
-        'python': f"cd {output_dir} && pip install -r requirements.txt"
-    }
-
-    if language in verify_commands:
-        print(f"  2. Verify code compiles: {verify_commands[language]}")
-    print(f"  3. Run analyzer tests: kantra test <test-file>.test.yaml")
+    print(f"  2. Run tests: kantra test {output_dir}/*.test.yaml")
 
     return 0
 

@@ -11,6 +11,7 @@ import argparse
 import sys
 from pathlib import Path
 import yaml
+import time
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
@@ -28,29 +29,51 @@ def detect_language(rules: list) -> str:
     Returns:
         Language name (java, typescript, go, python, etc.)
     """
+    def check_condition(cond):
+        """Helper to check a single condition."""
+        if 'nodejs.referenced' in cond or 'nodejs.dependency' in cond:
+            return 'typescript'
+        elif 'java.referenced' in cond or 'java.dependency' in cond:
+            return 'java'
+        elif 'builtin.filecontent' in cond or 'builtin.file' in cond:
+            # Check filePattern for language hints
+            builtin_cond = cond.get('builtin.filecontent') or cond.get('builtin.file', {})
+            file_pattern = builtin_cond.get('filePattern', '')
+
+            # Check for JS/TS patterns: .js, .jsx, .ts, .tsx
+            # Common patterns: \.(j|t)sx?$, \.tsx?$, \.jsx?$, etc.
+            if any(pattern in file_pattern for pattern in ['.ts', '.tsx', '.js', '.jsx', '(j|t)s', 'jsx?', 'tsx?']):
+                return 'typescript'
+            elif '.go' in file_pattern:
+                return 'go'
+            elif '.py' in file_pattern:
+                return 'python'
+            elif '.java' in file_pattern:
+                return 'java'
+        return None
+
     for rule in rules:
         when = rule.get('when', {})
 
-        # Check for language-specific providers
-        if 'java.referenced' in when or 'java.dependency' in when:
-            return 'java'
+        # Check for 'and' conditions
+        if 'and' in when:
+            and_conditions = when['and'] if isinstance(when['and'], list) else [when['and']]
+            for cond in and_conditions:
+                lang = check_condition(cond)
+                if lang:
+                    return lang
+        # Check for 'or' conditions
         elif 'or' in when:
-            # Check first condition in OR
-            first_cond = when['or'][0] if isinstance(when['or'], list) else when['or']
-            if 'java.referenced' in first_cond or 'java.dependency' in first_cond:
-                return 'java'
-
-        # Check for builtin provider patterns that might indicate language
-        if 'builtin.file' in when or 'builtin.filecontent' in when:
-            # Try to infer from file patterns
-            if 'builtin.filecontent' in when:
-                file_pattern = when['builtin.filecontent'].get('filePattern', '')
-                if '.ts' in file_pattern or '.tsx' in file_pattern:
-                    return 'typescript'
-                elif '.go' in file_pattern:
-                    return 'go'
-                elif '.py' in file_pattern:
-                    return 'python'
+            or_conditions = when['or'] if isinstance(when['or'], list) else [when['or']]
+            for cond in or_conditions:
+                lang = check_condition(cond)
+                if lang:
+                    return lang
+        # Check direct conditions
+        else:
+            lang = check_condition(when)
+            if lang:
+                return lang
 
     # Default to java if can't determine
     return 'java'
@@ -80,8 +103,8 @@ def get_language_config(language: str) -> dict:
             'build_file': 'package.json',
             'build_file_type': 'json',
             'source_dir': 'src',
-            'main_file': 'index.ts',
-            'main_file_type': 'typescript',
+            'main_file': 'App.tsx',
+            'main_file_type': 'tsx',
             'package_manager': 'npm',
             'test_instructions': 'npm project with dependencies'
         },
@@ -117,58 +140,188 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
         language: Programming language
 
     Returns:
-        List of pattern dictionaries
+        List of pattern dictionaries with code hints
     """
     patterns_to_test = []
 
-    for rule in rules:
+    def process_condition(cond, rule_id, description, message=''):
+        """Process a single condition and extract pattern info."""
         pattern_info = {
-            'ruleID': rule.get('ruleID'),
-            'description': rule.get('description'),
+            'ruleID': rule_id,
+            'description': description,
+            'message': message,
             'pattern': None,
             'location': None,
-            'provider': None
+            'provider': None,
+            'component': None,
+            'code_hint': None
         }
 
-        # Extract pattern from when condition
-        when = rule.get('when', {})
+        # Check for nodejs.referenced
+        if 'nodejs.referenced' in cond:
+            nodejs_ref = cond['nodejs.referenced']
+            pattern_info['pattern'] = nodejs_ref.get('pattern')
+            pattern_info['component'] = nodejs_ref.get('pattern')
+            pattern_info['location'] = nodejs_ref.get('location', 'IMPORT')
+            pattern_info['provider'] = 'nodejs'
 
         # Check for java provider
-        if 'java.referenced' in when:
-            java_ref = when['java.referenced']
+        elif 'java.referenced' in cond:
+            java_ref = cond['java.referenced']
             pattern_info['pattern'] = java_ref.get('pattern')
             pattern_info['location'] = java_ref.get('location')
             pattern_info['provider'] = 'java'
-        elif 'java.dependency' in when:
-            java_dep = when['java.dependency']
+
+        elif 'java.dependency' in cond:
+            java_dep = cond['java.dependency']
             pattern_info['pattern'] = java_dep.get('name')
             pattern_info['location'] = 'DEPENDENCY'
             pattern_info['provider'] = 'java'
-        # Check for builtin provider
-        elif 'builtin.filecontent' in when:
-            builtin = when['builtin.filecontent']
+
+        # Check for builtin.filecontent (this contains the actual code pattern!)
+        elif 'builtin.filecontent' in cond:
+            builtin = cond['builtin.filecontent']
             pattern_info['pattern'] = builtin.get('pattern')
             pattern_info['location'] = 'FILE_CONTENT'
             pattern_info['provider'] = 'builtin'
-        elif 'builtin.file' in when:
-            builtin = when['builtin.file']
+
+            # Parse JSX/TSX patterns to generate code hints
+            jsx_pattern = builtin.get('pattern', '')
+            pattern_info['code_hint'] = generate_code_hint_from_pattern(jsx_pattern, language, description, message)
+
+        elif 'builtin.file' in cond:
+            builtin = cond['builtin.file']
             pattern_info['pattern'] = builtin.get('pattern')
             pattern_info['location'] = 'FILE_PATTERN'
             pattern_info['provider'] = 'builtin'
-        # Check for OR conditions
-        elif 'or' in when:
-            # Take first condition from OR
-            first_cond = when['or'][0] if isinstance(when['or'], list) else when['or']
-            if 'java.referenced' in first_cond:
-                java_ref = first_cond['java.referenced']
-                pattern_info['pattern'] = java_ref.get('pattern')
-                pattern_info['location'] = java_ref.get('location')
-                pattern_info['provider'] = 'java'
 
-        if pattern_info['pattern']:
-            patterns_to_test.append(pattern_info)
+        return pattern_info if pattern_info['pattern'] else None
+
+    for rule in rules:
+        rule_id = rule.get('ruleID')
+        description = rule.get('description', '')
+        message = rule.get('message', '')
+        when = rule.get('when', {})
+
+        patterns = []
+
+        # Handle 'and' conditions
+        if 'and' in when:
+            and_conditions = when['and'] if isinstance(when['and'], list) else [when['and']]
+            for cond in and_conditions:
+                info = process_condition(cond, rule_id, description, message)
+                if info:
+                    patterns.append(info)
+
+        # Handle 'or' conditions
+        elif 'or' in when:
+            or_conditions = when['or'] if isinstance(when['or'], list) else [when['or']]
+            for cond in or_conditions:
+                info = process_condition(cond, rule_id, description, message)
+                if info:
+                    patterns.append(info)
+
+        # Handle direct condition
+        else:
+            info = process_condition(when, rule_id, description, message)
+            if info:
+                patterns.append(info)
+
+        # Merge patterns for the same rule
+        if patterns:
+            merged = {
+                'ruleID': rule_id,
+                'description': description,
+                'patterns': patterns,
+                'component': None,
+                'code_hint': None
+            }
+
+            # Extract component name and code hint
+            for p in patterns:
+                if p.get('component'):
+                    merged['component'] = p['component']
+                if p.get('code_hint'):
+                    merged['code_hint'] = p['code_hint']
+
+            patterns_to_test.append(merged)
 
     return patterns_to_test
+
+
+def generate_code_hint_from_pattern(pattern: str, language: str, description: str = '', message: str = '') -> str:
+    """
+    Generate a code example hint from a regex pattern or rule message.
+
+    Args:
+        pattern: Regex pattern from builtin.filecontent
+        language: Programming language
+        description: Rule description
+        message: Rule message (may contain Before/After code examples)
+
+    Returns:
+        Code example string
+    """
+    if language != 'typescript':
+        return None
+
+    import re
+
+    # FIRST: Try to extract code from the message's "Before:" section
+    # This is the most reliable source of correct JSX
+    if message:
+        # Look for code blocks after "Before:"
+        # Handle both actual newlines and literal \n (backslash-n) in the message
+        # Some YAML files have literal \n sequences instead of actual newlines
+        before_match = re.search(r'Before:(?:\\n|\n)```(?:\\n|\n)(.*?)(?:\\n|\n)```', message, re.DOTALL)
+        if before_match:
+            code = before_match.group(1).strip()
+            # Replace literal \n with actual newlines if present
+            if '\\n' in code:
+                code = code.replace('\\n', '\n')
+            # Skip if contains template variables ({{ }})
+            if '{{' not in code and '}}' not in code:
+                # Return the code if it looks like JSX (contains < and >)
+                if '<' in code and '>' in code:
+                    return code
+
+    # Fallback: Try to extract JSX tag patterns from the regex
+
+    # Pattern: <ComponentName[^>]*\battribute=['"]value['"][^>]*>
+    jsx_match = re.search(r'<(\w+)([^>]*?)>', pattern)
+    if jsx_match:
+        component = jsx_match.group(1)
+        attributes_pattern = jsx_match.group(2)
+
+        # Extract specific attributes
+        attrs = []
+
+        # Look for variant="value"
+        variant_match = re.search(r'\\bvariant=.*?[\'"](\w+)[\'"]', attributes_pattern)
+        if variant_match:
+            attrs.append(f'variant="{variant_match.group(1)}"')
+
+        # Look for isFlat, isCompact, etc (boolean props)
+        bool_props = re.findall(r'\\b(is[A-Z]\w+)', attributes_pattern)
+        for prop in bool_props:
+            attrs.append(prop)
+
+        # Build example
+        attr_str = ' ' + ' '.join(attrs) if attrs else ''
+
+        # Check if it's a self-closing or has children
+        if 'icon' in pattern.lower() or 'children' in pattern.lower():
+            return f'<{component}{attr_str}>\n  <SomeIcon />\n</{component}>'
+        else:
+            return f'<{component}{attr_str}>Content</{component}>'
+
+    # Look for import patterns
+    import_match = re.search(r'import.*?from.*?[\'"](@[\w/-]+)[\'"]', pattern)
+    if import_match:
+        package = import_match.group(1)
+        return f'import {{ Component }} from "{package}";'
+
+    return None
 
 
 def build_test_generation_prompt(rules: list, source: str, target: str, guide_url: str, language: str) -> str:
@@ -188,11 +341,20 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
     config = get_language_config(language)
     patterns = extract_patterns_from_rules(rules, language)
 
-    # Build patterns summary
-    patterns_summary = "\n".join([
-        f"- Rule {p['ruleID']}: {p['description']}\n  Pattern: {p['pattern']} (location: {p['location']})"
-        for p in patterns
-    ])
+    # Build patterns summary with specific code examples
+    patterns_list = []
+    for p in patterns:
+        pattern_text = f"- Rule {p['ruleID']}: {p['description']}"
+
+        # Add code hint if available
+        if p.get('code_hint'):
+            pattern_text += f"\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n  ```tsx\n  // {p['ruleID']}\n  {p['code_hint']}\n  ```"
+        elif p.get('component'):
+            pattern_text += f"\n  Component: {p['component']} (MUST be used in JSX, not just imported)"
+
+        patterns_list.append(pattern_text)
+
+    patterns_summary = "\n\n".join(patterns_list)
 
     # Language-specific instructions
     lang_instructions = {
@@ -215,18 +377,22 @@ For Java patterns:
 """,
         'typescript': """
 1. **{build_file}** - package.json with:
-   - Dependencies at SOURCE version
-   - TypeScript configuration
+   - Dependencies at SOURCE version (e.g., "@patternfly/react-core": "^5.0.0")
+   - React and TypeScript dependencies
    - Minimal required packages
 
-2. **{main_file}** - Main application with:
-   - Imports using each deprecated pattern
-   - Comments: // Rule {source}-to-{target}-00001
+2. **{main_file}** - React/TypeScript component (.tsx file) with:
+   - Import statements for EACH component specified in the rules
+   - ACTUAL JSX CODE using each component with the exact deprecated patterns
+   - Comments before each pattern: // Rule {source}-to-{target}-XXXXX
+   - Export a React component
 
-For TypeScript patterns:
-- Import statements for deprecated modules
-- Usage of deprecated APIs, classes, functions
-- Type annotations with deprecated types
+CRITICAL REQUIREMENTS FOR REACT/JSX:
+- File MUST be valid TSX (TypeScript + JSX)
+- Components MUST be used in JSX, not just imported
+- JSX code MUST match the exact patterns shown above (attributes, props, children)
+- Each deprecated pattern MUST appear at least once in the JSX
+- Do NOT generate generic examples - use the EXACT code patterns specified above
 """,
         'go': """
 1. **{build_file}** - Go module file with:
@@ -273,17 +439,23 @@ Migration: {source} → {target}
 Guide: {guide_url}
 Language: {language}
 
-You need to create {language} code that will trigger these analyzer rules:
+CRITICAL: You MUST create code that triggers these SPECIFIC analyzer rules.
+Each rule looks for EXACT patterns in the code. You MUST include the EXACT code shown below.
 
 {patterns_summary}
 
-Requirements:
+REQUIREMENTS:
 1. Create a complete, compilable {language} project structure
-2. Include code that uses EACH deprecated pattern exactly once
-3. Keep the code minimal - just enough to trigger the rules
-4. Use realistic naming based on the patterns
-5. Add comments indicating which rule each code segment tests
-6. Ensure each pattern appears in a way that static analysis can detect
+2. For EACH rule above, include the EXACT code pattern specified
+3. If a code example is shown with "YOU MUST GENERATE THIS EXACT JSX CODE", copy it EXACTLY
+4. Add comment before each pattern: // Rule ID
+5. Keep the code minimal - one example per rule
+6. Ensure static analysis can detect each pattern
+
+CRITICAL FOR TSX/JSX FILES:
+- Components must be USED in JSX, not just imported
+- Match the EXACT JSX syntax: attributes, props, children
+- Do not improvise - use the patterns shown above
 
 Output files:
 
@@ -333,7 +505,7 @@ def extract_code_blocks(response: str, language: str) -> dict:
             if not result['build_file']:
                 result['build_file'] = content
         # Match source file types
-        elif block_type.lower() in ['java', 'typescript', 'ts', 'python', 'py', 'go', 'javascript', 'js']:
+        elif block_type.lower() in ['java', 'typescript', 'tsx', 'ts', 'python', 'py', 'go', 'javascript', 'jsx', 'js']:
             if not result['source_file']:
                 result['source_file'] = content
 
@@ -375,6 +547,107 @@ def create_directory_structure(output_dir: Path, language: str):
     return src_dir
 
 
+def generate_test_yaml(rule_file_path: Path, data_dir_name: str, rules: list, output_dir: Path) -> Path:
+    """
+    Generate a Konveyor test YAML file.
+
+    Args:
+        rule_file_path: Path to the rule YAML file
+        data_dir_name: Name of the data directory (e.g., "button")
+        rules: List of rule dictionaries
+        output_dir: Output directory for tests
+
+    Returns:
+        Path to created test YAML file
+    """
+    # Extract rule IDs
+    rule_ids = [rule.get('ruleID') for rule in rules if rule.get('ruleID')]
+
+    # Determine providers from rules
+    def extract_providers(cond):
+        """Helper to extract providers from a condition."""
+        found = set()
+        if 'java.referenced' in cond or 'java.dependency' in cond:
+            found.add('java')
+        if 'nodejs.referenced' in cond or 'nodejs.dependency' in cond:
+            found.add('nodejs')
+        if 'builtin.file' in cond or 'builtin.filecontent' in cond:
+            found.add('builtin')
+        if 'go.referenced' in cond or 'go.dependency' in cond:
+            found.add('go')
+        if 'python.referenced' in cond or 'python.dependency' in cond:
+            found.add('python')
+
+        # If only builtin provider, try to infer language-specific provider from filePattern
+        if found == {'builtin'}:
+            builtin_cond = cond.get('builtin.filecontent') or cond.get('builtin.file', {})
+            file_pattern = builtin_cond.get('filePattern', '')
+
+            # Add language-specific provider based on filePattern
+            if any(pattern in file_pattern for pattern in ['.ts', '.tsx', '.js', '.jsx', '(j|t)s', 'jsx?', 'tsx?']):
+                found.add('nodejs')
+            elif '.java' in file_pattern:
+                found.add('java')
+            elif '.go' in file_pattern:
+                found.add('go')
+            elif '.py' in file_pattern:
+                found.add('python')
+
+        return found
+
+    providers = set()
+    for rule in rules:
+        when = rule.get('when', {})
+
+        # Check for 'and' conditions
+        if 'and' in when:
+            and_conditions = when['and'] if isinstance(when['and'], list) else [when['and']]
+            for cond in and_conditions:
+                providers.update(extract_providers(cond))
+        # Check for 'or' conditions
+        elif 'or' in when:
+            or_conditions = when['or'] if isinstance(when['or'], list) else [when['or']]
+            for cond in or_conditions:
+                providers.update(extract_providers(cond))
+        # Check direct conditions
+        else:
+            providers.update(extract_providers(when))
+
+    # Default to java and builtin if we can't determine
+    if not providers:
+        providers = {'java', 'builtin'}
+
+    # Build test structure
+    test_data = {
+        'rulesPath': f'../{rule_file_path.name}',
+        'providers': [
+            {'name': provider, 'dataPath': f'./data/{data_dir_name}'}
+            for provider in sorted(providers)
+        ],
+        'tests': [
+            {
+                'ruleID': rule_id,
+                'testCases': [
+                    {
+                        'name': 'tc-1',
+                        'hasIncidents': {'atLeast': 1}
+                    }
+                ]
+            }
+            for rule_id in rule_ids
+        ]
+    }
+
+    # Write test YAML file
+    test_file_name = rule_file_path.stem + '.test.yaml'
+    test_file_path = output_dir / test_file_name
+
+    with open(test_file_path, 'w') as f:
+        yaml.dump(test_data, f, default_flow_style=False, sort_keys=False)
+
+    return test_file_path
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Generate test data for Konveyor analyzer rules using AI',
@@ -389,21 +662,21 @@ Examples:
     --target spring-boot-4.0 \\
     --guide-url "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
 
-  # Generate TypeScript test data
+  # Generate TypeScript test data for a directory of rules
   python scripts/generate_test_data.py \\
-    --rules examples/output/react-18/migration-rules.yaml \\
-    --output submission/tests/data/react \\
-    --source react-17 \\
-    --target react-18 \\
+    --rules /path/to/rulesets/patternfly \\
+    --output /path/to/rulesets/patternfly/tests \\
+    --source patternfly-v5 \\
+    --target patternfly-v6 \\
     --language typescript \\
-    --guide-url "https://react.dev/blog/2022/03/29/react-v18"
+    --guide-url "https://www.patternfly.org/get-started/upgrade/"
         """
     )
 
     parser.add_argument(
         '--rules',
         required=True,
-        help='Path to rule YAML file'
+        help='Path to rule YAML file or directory containing rule files'
     )
     parser.add_argument(
         '--output',
@@ -444,107 +717,184 @@ Examples:
         '--api-key',
         help='API key (uses environment variable if not specified)'
     )
+    parser.add_argument(
+        '--delay',
+        type=float,
+        default=8.0,
+        help='Delay in seconds between API calls to avoid rate limits (default: 8.0)'
+    )
+    parser.add_argument(
+        '--max-retries',
+        type=int,
+        default=3,
+        help='Maximum number of retries for rate limit errors (default: 3)'
+    )
+    parser.add_argument(
+        '--skip-existing',
+        action='store_true',
+        help='Skip rule files that already have generated test data'
+    )
 
     args = parser.parse_args()
 
     # Validate inputs
-    rule_file = Path(args.rules)
-    if not rule_file.exists():
-        print(f"Error: Rule file not found: {rule_file}", file=sys.stderr)
+    rules_path = Path(args.rules)
+    if not rules_path.exists():
+        print(f"Error: Path not found: {rules_path}", file=sys.stderr)
         return 1
 
-    # Load rules
-    print(f"Loading rules from {rule_file}...")
-    with open(rule_file, 'r') as f:
-        content = yaml.safe_load(f)
-        if isinstance(content, list):
-            rules = content
-        else:
-            rules = [content]
+    # Determine if input is a file or directory
+    if rules_path.is_file():
+        # Single file mode
+        rule_files = [rules_path]
+    elif rules_path.is_dir():
+        # Directory mode - find all YAML files except ruleset.yaml
+        rule_files = sorted([
+            f for f in rules_path.glob('*.yaml')
+            if f.name != 'ruleset.yaml' and not f.name.endswith('.test.yaml')
+        ])
+        if not rule_files:
+            print(f"Error: No rule YAML files found in {rules_path}", file=sys.stderr)
+            return 1
+    else:
+        print(f"Error: {rules_path} is neither a file nor directory", file=sys.stderr)
+        return 1
 
-    print(f"  ✓ Loaded {len(rules)} rules")
+    print(f"Found {len(rule_files)} rule file(s) to process")
 
-    # Detect or use specified language
-    language = args.language or detect_language(rules)
-    print(f"  ✓ Detected language: {language}")
-
-    config = get_language_config(language)
-
-    # Initialize LLM
+    # Initialize LLM once
     print(f"\nInitializing {args.provider} LLM...")
     llm = get_llm_provider(args.provider, args.model, args.api_key)
     print(f"  ✓ Using model: {llm.model if hasattr(llm, 'model') else llm.model_name}")
 
-    # Build prompt
-    print(f"\nGenerating {language} test data with AI...")
-    prompt = build_test_generation_prompt(rules, args.source, args.target, args.guide_url, language)
-
-    # Generate with LLM
-    try:
-        result = llm.generate(prompt)
-        response = result.get('response', '')
-
-        # Show token usage if available
-        if 'usage' in result:
-            usage = result['usage']
-            if 'input_tokens' in usage:
-                print(f"  Input tokens: {usage['input_tokens']}")
-                print(f"  Output tokens: {usage['output_tokens']}")
-            elif 'prompt_tokens' in usage:
-                print(f"  Prompt tokens: {usage['prompt_tokens']}")
-                print(f"  Completion tokens: {usage['completion_tokens']}")
-
-    except Exception as e:
-        print(f"Error generating test data: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc()
-        return 1
-
-    # Extract code blocks
-    print(f"\nExtracting generated code...")
-    code = extract_code_blocks(response, language)
-
-    if not code['build_file']:
-        print(f"Error: Could not extract {config['build_file']} from response", file=sys.stderr)
-        print(f"\nResponse preview:\n{response[:500]}", file=sys.stderr)
-        return 1
-
-    if not code['source_file']:
-        print(f"Error: Could not extract {config['main_file']} from response", file=sys.stderr)
-        print(f"\nResponse preview:\n{response[:500]}", file=sys.stderr)
-        return 1
-
-    # Create output directory structure
+    # Setup output directory structure
     output_dir = Path(args.output)
-    src_dir = create_directory_structure(output_dir, language)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    data_dir = output_dir / 'data'
+    data_dir.mkdir(exist_ok=True)
 
-    # Write build file
-    build_file_path = output_dir / config['build_file']
-    with open(build_file_path, 'w') as f:
-        f.write(code['build_file'])
-    print(f"  ✓ {build_file_path}")
+    # Process each rule file
+    total_files = len(rule_files)
+    skipped_count = 0
+    for idx, rule_file in enumerate(rule_files, 1):
+        print(f"\n{'='*70}")
+        print(f"Processing {idx}/{total_files}: {rule_file.name}")
+        print(f"{'='*70}")
 
-    # Write source file
-    source_file_path = src_dir / config['main_file']
-    with open(source_file_path, 'w') as f:
-        f.write(code['source_file'])
-    print(f"  ✓ {source_file_path}")
+        # Check if test already exists
+        test_file_name = rule_file.stem + '.test.yaml'
+        test_file_path = output_dir / test_file_name
+        if args.skip_existing and test_file_path.exists():
+            print(f"  ⊘ Skipping (test already exists)")
+            skipped_count += 1
+            continue
 
-    print(f"\n✓ Test data generated successfully!")
+        # Load rules from file
+        with open(rule_file, 'r') as f:
+            content = yaml.safe_load(f)
+            if isinstance(content, list):
+                rules = content
+            else:
+                rules = [content]
+
+        print(f"  ✓ Loaded {len(rules)} rule(s)")
+
+        # Detect or use specified language
+        language = args.language or detect_language(rules)
+        print(f"  ✓ Language: {language}")
+
+        config = get_language_config(language)
+
+        # Generate data directory name from rule file
+        # e.g., "patternfly-v5-to-patternfly-v6-button.yaml" -> "button"
+        data_dir_name = rule_file.stem.replace(f'{args.source}-to-{args.target}-', '')
+
+        # Build prompt
+        print(f"  Generating test data with AI...")
+        prompt = build_test_generation_prompt(rules, args.source, args.target, args.guide_url, language)
+
+        # Generate with LLM (with retry logic for rate limits)
+        response = None
+        for retry in range(args.max_retries):
+            try:
+                result = llm.generate(prompt)
+                response = result.get('response', '')
+
+                # Show token usage if available
+                if 'usage' in result:
+                    usage = result['usage']
+                    if 'input_tokens' in usage:
+                        print(f"    Input tokens: {usage['input_tokens']}, Output tokens: {usage['output_tokens']}")
+                    elif 'prompt_tokens' in usage:
+                        print(f"    Prompt tokens: {usage['prompt_tokens']}, Completion tokens: {usage['completion_tokens']}")
+                break  # Success, exit retry loop
+
+            except Exception as e:
+                error_str = str(e)
+                if 'rate_limit' in error_str.lower() or '429' in error_str:
+                    if retry < args.max_retries - 1:
+                        wait_time = 60 * (retry + 1)  # Exponential backoff: 60s, 120s, 180s
+                        print(f"  ⚠ Rate limit hit, waiting {wait_time}s before retry {retry + 2}/{args.max_retries}...")
+                        time.sleep(wait_time)
+                    else:
+                        print(f"  ✗ Rate limit exceeded after {args.max_retries} retries", file=sys.stderr)
+                        response = None
+                        break
+                else:
+                    print(f"  ✗ Error generating test data: {e}", file=sys.stderr)
+                    import traceback
+                    traceback.print_exc()
+                    response = None
+                    break
+
+        if not response:
+            continue  # Skip to next file
+
+        # Extract code blocks
+        code = extract_code_blocks(response, language)
+
+        if not code['build_file'] or not code['source_file']:
+            print(f"  ✗ Could not extract required files from response", file=sys.stderr)
+            continue  # Skip to next file
+
+        # Create test data directory
+        test_data_dir = data_dir / data_dir_name
+        src_dir = create_directory_structure(test_data_dir, language)
+
+        # Write build file
+        build_file_path = test_data_dir / config['build_file']
+        with open(build_file_path, 'w') as f:
+            f.write(code['build_file'])
+        print(f"  ✓ {build_file_path.relative_to(output_dir)}")
+
+        # Write source file
+        source_file_path = src_dir / config['main_file']
+        with open(source_file_path, 'w') as f:
+            f.write(code['source_file'])
+        print(f"  ✓ {source_file_path.relative_to(output_dir)}")
+
+        # Generate test YAML file
+        test_yaml_path = generate_test_yaml(rule_file, data_dir_name, rules, output_dir)
+        print(f"  ✓ {test_yaml_path.relative_to(output_dir)}")
+
+        # Add delay between API calls (except for the last file)
+        if idx < total_files and args.delay > 0:
+            print(f"  Waiting {args.delay}s before next file...")
+            time.sleep(args.delay)
+
+    print(f"\n{'='*70}")
+    generated_count = total_files - skipped_count
+    print(f"✓ Processed {total_files} rule file(s)")
+    if skipped_count > 0:
+        print(f"  - Generated: {generated_count}")
+        print(f"  - Skipped: {skipped_count}")
+    print(f"\nOutput directory: {output_dir}")
+    print(f"  - Test YAML files: {len(list(output_dir.glob('*.test.yaml')))} files")
+    if data_dir.exists():
+        print(f"  - Test data directories: {len(list(data_dir.iterdir()))} directories")
     print(f"\nNext steps:")
     print(f"  1. Review generated files in: {output_dir}")
-
-    # Language-specific verification commands
-    verify_commands = {
-        'java': f"mvn -f {build_file_path} compile",
-        'typescript': f"cd {output_dir} && npm install && npm run build",
-        'go': f"cd {output_dir} && go build",
-        'python': f"cd {output_dir} && pip install -r requirements.txt"
-    }
-
-    if language in verify_commands:
-        print(f"  2. Verify code compiles: {verify_commands[language]}")
-    print(f"  3. Run analyzer tests: kantra test <test-file>.test.yaml")
+    print(f"  2. Run tests: kantra test {output_dir}/*.test.yaml")
 
     return 0
 

@@ -144,11 +144,12 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
     """
     patterns_to_test = []
 
-    def process_condition(cond, rule_id, description):
+    def process_condition(cond, rule_id, description, message=''):
         """Process a single condition and extract pattern info."""
         pattern_info = {
             'ruleID': rule_id,
             'description': description,
+            'message': message,
             'pattern': None,
             'location': None,
             'provider': None,
@@ -186,7 +187,7 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
 
             # Parse JSX/TSX patterns to generate code hints
             jsx_pattern = builtin.get('pattern', '')
-            pattern_info['code_hint'] = generate_code_hint_from_pattern(jsx_pattern, language)
+            pattern_info['code_hint'] = generate_code_hint_from_pattern(jsx_pattern, language, description, message)
 
         elif 'builtin.file' in cond:
             builtin = cond['builtin.file']
@@ -199,6 +200,7 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
     for rule in rules:
         rule_id = rule.get('ruleID')
         description = rule.get('description', '')
+        message = rule.get('message', '')
         when = rule.get('when', {})
 
         patterns = []
@@ -207,7 +209,7 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
         if 'and' in when:
             and_conditions = when['and'] if isinstance(when['and'], list) else [when['and']]
             for cond in and_conditions:
-                info = process_condition(cond, rule_id, description)
+                info = process_condition(cond, rule_id, description, message)
                 if info:
                     patterns.append(info)
 
@@ -215,13 +217,13 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
         elif 'or' in when:
             or_conditions = when['or'] if isinstance(when['or'], list) else [when['or']]
             for cond in or_conditions:
-                info = process_condition(cond, rule_id, description)
+                info = process_condition(cond, rule_id, description, message)
                 if info:
                     patterns.append(info)
 
         # Handle direct condition
         else:
-            info = process_condition(when, rule_id, description)
+            info = process_condition(when, rule_id, description, message)
             if info:
                 patterns.append(info)
 
@@ -247,13 +249,15 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
     return patterns_to_test
 
 
-def generate_code_hint_from_pattern(pattern: str, language: str) -> str:
+def generate_code_hint_from_pattern(pattern: str, language: str, description: str = '', message: str = '') -> str:
     """
-    Generate a code example hint from a regex pattern.
+    Generate a code example hint from a regex pattern or rule message.
 
     Args:
         pattern: Regex pattern from builtin.filecontent
         language: Programming language
+        description: Rule description
+        message: Rule message (may contain Before/After code examples)
 
     Returns:
         Code example string
@@ -261,8 +265,27 @@ def generate_code_hint_from_pattern(pattern: str, language: str) -> str:
     if language != 'typescript':
         return None
 
-    # Try to extract JSX tag patterns
     import re
+
+    # FIRST: Try to extract code from the message's "Before:" section
+    # This is the most reliable source of correct JSX
+    if message:
+        # Look for code blocks after "Before:"
+        # Handle both actual newlines and literal \n (backslash-n) in the message
+        # Some YAML files have literal \n sequences instead of actual newlines
+        before_match = re.search(r'Before:(?:\\n|\n)```(?:\\n|\n)(.*?)(?:\\n|\n)```', message, re.DOTALL)
+        if before_match:
+            code = before_match.group(1).strip()
+            # Replace literal \n with actual newlines if present
+            if '\\n' in code:
+                code = code.replace('\\n', '\n')
+            # Skip if contains template variables ({{ }})
+            if '{{' not in code and '}}' not in code:
+                # Return the code if it looks like JSX (contains < and >)
+                if '<' in code and '>' in code:
+                    return code
+
+    # Fallback: Try to extract JSX tag patterns from the regex
 
     # Pattern: <ComponentName[^>]*\battribute=['"]value['"][^>]*>
     jsx_match = re.search(r'<(\w+)([^>]*?)>', pattern)

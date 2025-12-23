@@ -190,13 +190,33 @@ Violations found: 15
 
 ### Use a Different Migration Guide
 
-Edit `scripts/demo.sh` variables:
+The demo script includes 3 pre-configured options. Edit `scripts/demo.sh` and uncomment your choice:
 
+**Option 1: React 17→18 (SMALL - ~5 min) ⭐ Recommended for quick demos**
 ```bash
-GUIDE_URL="https://your-migration-guide-url"
-SOURCE="framework-v1"
-TARGET="framework-v2"
+GUIDE_URL="https://react.dev/blog/2022/03/08/react-18-upgrade-guide"
+SOURCE="react-17"
+TARGET="react-18"
+FOLLOW_LINKS_FLAG=""  # Single page guide
 ```
+
+**Option 2: Spring Boot 2→3 (MEDIUM - ~8-10 min)**
+```bash
+GUIDE_URL="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
+SOURCE="spring-boot-2"
+TARGET="spring-boot-3"
+FOLLOW_LINKS_FLAG=""  # Single page guide
+```
+
+**Option 3: PatternFly v5→v6 (LARGE - ~15-20 min, comprehensive) - Default**
+```bash
+GUIDE_URL="https://www.patternfly.org/get-started/upgrade/"
+SOURCE="patternfly-v5"
+TARGET="patternfly-v6"
+FOLLOW_LINKS_FLAG="--follow-links --max-depth 1"
+```
+
+To switch, simply comment out the current option and uncomment your preferred one in `scripts/demo.sh`.
 
 ### Change LLM Provider
 

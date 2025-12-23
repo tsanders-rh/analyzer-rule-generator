@@ -138,11 +138,15 @@ ls -la
 cat patternfly-v6/*/accessibility.yaml
 ```
 
-## Demo URL
+## Quick Guide Options
 
-Default demo uses: https://www.patternfly.org/get-started/upgrade/
+**3 pre-configured options in `scripts/demo.sh`:**
 
-To change: Edit `scripts/demo.sh` lines 24-27
+1. **React 17→18** (SMALL ~5 min) ⭐ Best for quick demos
+2. **Spring Boot 2→3** (MEDIUM ~8-10 min)
+3. **PatternFly v5→v6** (LARGE ~15-20 min) - Default
+
+**To switch**: Edit `scripts/demo.sh` and uncomment your choice
 
 ---
 

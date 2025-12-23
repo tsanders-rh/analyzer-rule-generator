@@ -42,11 +42,30 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Demo configuration
-DEMO_DIR="demo-output"
+# ============================================================================
+# Demo Configuration - Choose your migration guide
+# ============================================================================
+
+# Option 1: React 17 to 18 (SMALL - Recommended for quick demos ~5 min)
+# GUIDE_URL="https://react.dev/blog/2022/03/08/react-18-upgrade-guide"
+# SOURCE="react-17"
+# TARGET="react-18"
+# FOLLOW_LINKS_FLAG=""  # Single page guide
+
+# Option 2: Spring Boot 2 to 3 (MEDIUM - ~8-10 min)
+# GUIDE_URL="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
+# SOURCE="spring-boot-2"
+# TARGET="spring-boot-3"
+# FOLLOW_LINKS_FLAG=""  # Single page guide
+
+# Option 3: PatternFly v5 to v6 (LARGE - ~15-20 min, comprehensive)
 GUIDE_URL="https://www.patternfly.org/get-started/upgrade/"
 SOURCE="patternfly-v5"
 TARGET="patternfly-v6"
+FOLLOW_LINKS_FLAG="--follow-links --max-depth 1"
+
+# Demo output directories
+DEMO_DIR="demo-output"
 RULES_OUTPUT="${DEMO_DIR}/rules"
 TEST_OUTPUT="${DEMO_DIR}/tests"
 
@@ -140,30 +159,48 @@ step_1_generate_rules() {
 
     # Show the command
     echo -e "${YELLOW}Command:${NC}"
-    cat <<EOF
+    if [ -n "${FOLLOW_LINKS_FLAG}" ]; then
+        cat <<EOF
 python3 scripts/generate_rules.py \\
   --guide "${GUIDE_URL}" \\
   --source "${SOURCE}" \\
   --target "${TARGET}" \\
   --output "${RULES_OUTPUT}" \\
   --provider "${PROVIDER}" \\
-  --follow-links \\
-  --max-depth 1
+  ${FOLLOW_LINKS_FLAG}
 EOF
+    else
+        cat <<EOF
+python3 scripts/generate_rules.py \\
+  --guide "${GUIDE_URL}" \\
+  --source "${SOURCE}" \\
+  --target "${TARGET}" \\
+  --output "${RULES_OUTPUT}" \\
+  --provider "${PROVIDER}"
+EOF
+    fi
     echo ""
 
     pause_for_demo
 
     # Run the command
     print_info "Running rule generation..."
-    python3 scripts/generate_rules.py \
-      --guide "${GUIDE_URL}" \
-      --source "${SOURCE}" \
-      --target "${TARGET}" \
-      --output "${RULES_OUTPUT}" \
-      --provider "${PROVIDER}" \
-      --follow-links \
-      --max-depth 1
+    if [ -n "${FOLLOW_LINKS_FLAG}" ]; then
+        python3 scripts/generate_rules.py \
+          --guide "${GUIDE_URL}" \
+          --source "${SOURCE}" \
+          --target "${TARGET}" \
+          --output "${RULES_OUTPUT}" \
+          --provider "${PROVIDER}" \
+          ${FOLLOW_LINKS_FLAG}
+    else
+        python3 scripts/generate_rules.py \
+          --guide "${GUIDE_URL}" \
+          --source "${SOURCE}" \
+          --target "${TARGET}" \
+          --output "${RULES_OUTPUT}" \
+          --provider "${PROVIDER}"
+    fi
 
     # Show results
     echo ""

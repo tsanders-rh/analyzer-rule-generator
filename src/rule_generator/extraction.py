@@ -590,9 +590,15 @@ Example for Spring Boot property migration:
 
 {frameworks}{lang_instructions}For each pattern you find, identify:
 
-1. **Source Pattern**: The old code/annotation/configuration (e.g., "@Stateless")
-2. **Target Pattern**: The new replacement (e.g., "@ApplicationScoped")
+1. **Source Pattern**: The old code/annotation/configuration (e.g., "@Stateless", "Button isActive prop", "@patternfly/react-core/v5 import")
+2. **Target Pattern**: The new replacement (e.g., "@ApplicationScoped", "Button isPressed prop", "@patternfly/react-core import")
 3. **Source FQN**: Fully qualified name for detection (e.g., "javax.ejb.Stateless")
+
+   **CRITICAL ALIGNMENT RULE**: Your source_pattern MUST accurately describe what the detection pattern will actually find:
+   - If detecting an import path change: source_pattern should be the import path (e.g., "@patternfly/react-core/v5")
+   - If detecting a component prop: source_pattern should mention the component AND prop (e.g., "Button isActive prop")
+   - If detecting a class/annotation: source_pattern should be the class/annotation name
+   - NEVER describe one thing (e.g., "import path") when actually detecting something else (e.g., "component usage")
 4. **Location Type**: Where to detect it. Choose from:
    - ANNOTATION: For annotations like @Stateless, @Autowired
    - IMPORT: For import statements

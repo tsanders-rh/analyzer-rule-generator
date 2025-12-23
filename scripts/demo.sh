@@ -47,10 +47,10 @@ NC='\033[0m' # No Color
 # ============================================================================
 
 # Option 1: React 17 to 18 (SMALL - Recommended for quick demos ~5 min)
-# GUIDE_URL="https://react.dev/blog/2022/03/08/react-18-upgrade-guide"
-# SOURCE="react-17"
-# TARGET="react-18"
-# FOLLOW_LINKS_FLAG=""  # Single page guide
+ GUIDE_URL="https://react.dev/blog/2022/03/08/react-18-upgrade-guide"
+ SOURCE="react-17"
+ TARGET="react-18"
+ FOLLOW_LINKS_FLAG=""  # Single page guide
 
 # Option 2: Go 1.17 to 1.18 (SMALL - Go generics migration ~5-8 min)
 # GUIDE_URL="https://go.dev/blog/go1.18"
@@ -65,10 +65,10 @@ NC='\033[0m' # No Color
 # FOLLOW_LINKS_FLAG=""  # Single page guide
 
 # Option 4: PatternFly v5 to v6 (LARGE - ~15-20 min, comprehensive)
-GUIDE_URL="https://www.patternfly.org/get-started/upgrade/"
-SOURCE="patternfly-v5"
-TARGET="patternfly-v6"
-FOLLOW_LINKS_FLAG="--follow-links --max-depth 1"
+#GUIDE_URL="https://www.patternfly.org/get-started/upgrade/"
+#SOURCE="patternfly-v5"
+#TARGET="patternfly-v6"
+#FOLLOW_LINKS_FLAG="--follow-links --max-depth 1"
 
 # Demo output directories - organized by migration guide
 DEMO_DIR="demo-output"
@@ -352,6 +352,65 @@ EOF
     pause_for_demo
 }
 
+step_view_rules() {
+    print_header "Step 1c: View Rules in Interactive Viewer (Optional)"
+
+    if [ ! -d "${RULES_OUTPUT}" ]; then
+        print_error "No rules directory found. Run step 1 first."
+        exit 1
+    fi
+
+    # Find first rule file
+    FIRST_RULE_FILE=$(find "${RULES_OUTPUT}" -name "*.yaml" -type f | head -1)
+
+    if [ -z "${FIRST_RULE_FILE}" ]; then
+        print_error "No rule files found in ${RULES_OUTPUT}"
+        exit 1
+    fi
+
+    print_info "Generating interactive HTML viewer for: $(basename ${FIRST_RULE_FILE})"
+    echo ""
+
+    # Generate viewer HTML
+    VIEWER_OUTPUT="${MIGRATION_DIR}/rules-viewer.html"
+
+    # Show the command
+    echo -e "${YELLOW}Command:${NC}"
+    cat <<EOF
+python3 scripts/generate_rule_viewer.py \\
+  --rules "${FIRST_RULE_FILE}" \\
+  --output "${VIEWER_OUTPUT}" \\
+  --title "${SOURCE} → ${TARGET} Migration Rules" \\
+  --open
+EOF
+    echo ""
+
+    pause_for_demo
+
+    # Generate viewer
+    print_info "Generating viewer..."
+    python3 scripts/generate_rule_viewer.py \
+      --rules "${FIRST_RULE_FILE}" \
+      --output "${VIEWER_OUTPUT}" \
+      --title "${SOURCE} → ${TARGET} Migration Rules" \
+      --open
+
+    echo ""
+    print_success "Viewer generated!"
+    print_info "Location: ${VIEWER_OUTPUT}"
+    echo ""
+    print_info "The viewer provides:"
+    echo "  - Searchable, filterable rule browser"
+    echo "  - Expandable rule details"
+    echo "  - Category and effort filtering"
+    echo "  - Syntax highlighting"
+    echo ""
+    print_info "You can also use the web-based viewer at docs/rule-viewer.html"
+    print_info "to load multiple rulesets dynamically"
+
+    pause_for_demo
+}
+
 step_3_validate_with_kantra() {
     print_header "Step 3: Validate with Kantra (Optional)"
 
@@ -510,6 +569,7 @@ Usage:
 Steps:
   1      - Generate rules from migration guide
   1b     - Validate generated rules (optional)
+  1c     - View rules in interactive HTML viewer (optional)
   2      - Generate test data
   3      - Validate with kantra (if installed)
   4      - Show submission next steps
@@ -547,6 +607,10 @@ main() {
         1b)
             check_prerequisites
             step_validate_rules
+            ;;
+        1c)
+            check_prerequisites
+            step_view_rules
             ;;
         2)
             check_prerequisites

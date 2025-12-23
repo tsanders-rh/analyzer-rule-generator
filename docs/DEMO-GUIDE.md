@@ -76,6 +76,14 @@ Run each step individually with pauses for explanation:
 # - Syntactic checks (fast, free)
 # - Optional semantic validation (AI-powered)
 
+# Step 1c (OPTIONAL): View rules in interactive browser
+./scripts/demo.sh 1c
+
+# Explain rule viewer:
+# - Generates interactive HTML viewer
+# - Searchable, filterable interface
+# - Opens automatically in browser
+
 # Step 2: Show generated rules, then run
 ./scripts/demo.sh 2
 
@@ -90,7 +98,8 @@ Run each step individually with pauses for explanation:
 
 **Timing**: ~15-20 minutes total
 - Step 1: 5-8 minutes
-- Step 1b: 1-2 minutes (optional)
+- Step 1b: 1-2 minutes (optional - validation)
+- Step 1c: 30 seconds (optional - viewer)
 - Step 2: 5-8 minutes
 - Step 3: 2-3 minutes (if kantra installed)
 - Step 4: 2 minutes
@@ -172,6 +181,39 @@ Validation Summary:
 - Catches common issues before submission
 - Prevents description/pattern mismatches
 - Ensures rules meet quality standards
+
+### Step 1c: Rule Viewer (Optional)
+
+**Key Points**:
+- "Interactive HTML viewer for exploring rules"
+- "Searchable, filterable browser interface"
+- "Opens automatically - instant visualization"
+
+**Show**:
+- Browser opening with interactive viewer
+- Search and filter capabilities
+- Expandable rule details with syntax highlighting
+- Category and effort level filters
+
+**Expected Output**:
+```
+✓ Generating viewer...
+✓ Viewer generated!
+
+Location: demo-output/patternfly-v5-to-patternfly-v6/rules-viewer.html
+
+The viewer provides:
+  - Searchable, filterable rule browser
+  - Expandable rule details
+  - Category and effort filtering
+  - Syntax highlighting
+```
+
+**Why This Matters**:
+- Visual exploration of generated rules
+- Easy sharing with stakeholders
+- No need to read raw YAML
+- Professional presentation of results
 
 ### Step 2: Test Generation
 

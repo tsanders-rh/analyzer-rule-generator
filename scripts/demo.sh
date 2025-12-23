@@ -70,10 +70,11 @@ SOURCE="patternfly-v5"
 TARGET="patternfly-v6"
 FOLLOW_LINKS_FLAG="--follow-links --max-depth 1"
 
-# Demo output directories
+# Demo output directories - organized by migration guide
 DEMO_DIR="demo-output"
-RULES_OUTPUT="${DEMO_DIR}/rules"
-TEST_OUTPUT="${DEMO_DIR}/tests"
+MIGRATION_DIR="${DEMO_DIR}/${SOURCE}-to-${TARGET}"
+RULES_OUTPUT="${MIGRATION_DIR}/rules"
+TEST_OUTPUT="${MIGRATION_DIR}/tests"
 
 # Helper functions
 print_header() {
@@ -321,7 +322,7 @@ step_3_validate_with_kantra() {
 kantra analyze \\
   --input "${TEST_DIR}" \\
   --rules "${RULE_FILE}" \\
-  --output "${DEMO_DIR}/analysis-output.yaml"
+  --output "${MIGRATION_DIR}/analysis-output.yaml"
 EOF
     echo ""
 
@@ -332,19 +333,19 @@ EOF
     kantra analyze \
       --input "${TEST_DIR}" \
       --rules "${RULE_FILE}" \
-      --output "${DEMO_DIR}/analysis-output.yaml" || true
+      --output "${MIGRATION_DIR}/analysis-output.yaml" || true
 
-    if [ -f "${DEMO_DIR}/analysis-output.yaml" ]; then
+    if [ -f "${MIGRATION_DIR}/analysis-output.yaml" ]; then
         print_success "Analysis completed!"
 
         # Count violations
-        VIOLATION_COUNT=$(grep -c "ruleID:" "${DEMO_DIR}/analysis-output.yaml" || true)
+        VIOLATION_COUNT=$(grep -c "ruleID:" "${MIGRATION_DIR}/analysis-output.yaml" || true)
         print_info "Violations found: ${VIOLATION_COUNT}"
 
         # Show sample violations
         echo ""
         print_info "Sample violations:"
-        head -50 "${DEMO_DIR}/analysis-output.yaml"
+        head -50 "${MIGRATION_DIR}/analysis-output.yaml"
     else
         print_warning "Analysis output not found"
     fi
@@ -362,8 +363,10 @@ step_4_show_submission() {
     echo "  1. Rules: ${RULES_OUTPUT}/*.yaml"
     echo "  2. Tests: ${TEST_OUTPUT}/"
     if [ "${KANTRA_AVAILABLE}" = true ]; then
-        echo "  3. Validation: ${DEMO_DIR}/analysis-output.yaml"
+        echo "  3. Validation: ${MIGRATION_DIR}/analysis-output.yaml"
     fi
+    echo ""
+    print_info "All output for this demo: ${MIGRATION_DIR}/"
     echo ""
 
     echo "📦 Next steps for contribution:"
@@ -420,13 +423,19 @@ cleanup_demo() {
     print_header "Cleanup Demo Files"
 
     if [ -d "${DEMO_DIR}" ]; then
-        echo -e "${YELLOW}Remove demo output directory? (y/N)${NC}"
+        # Show what's in the demo directory
+        echo "Demo output contains:"
+        ls -1 "${DEMO_DIR}" | sed 's/^/  - /'
+        echo ""
+
+        echo -e "${YELLOW}Remove demo output directory (all migrations)? (y/N)${NC}"
         read -r response
         if [[ "$response" =~ ^[Yy]$ ]]; then
             rm -rf "${DEMO_DIR}"
             print_success "Demo files removed"
         else
-            print_info "Keeping demo files in ${DEMO_DIR}"
+            print_info "Keeping demo files in ${DEMO_DIR}/"
+            print_info "Each migration is in its own subdirectory"
         fi
     else
         print_info "No demo files to clean up"

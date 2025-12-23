@@ -156,9 +156,19 @@ class MigrationPatternExtractor:
             return patterns
 
         except Exception as e:
-            print(f"Error extracting patterns: {e}")
-            import traceback
-            traceback.print_exc()
+            error_message = str(e)
+
+            # Check if it's a transient API error
+            if "500" in error_message or "api_error" in error_message.lower():
+                print(f"⚠ API temporarily unavailable, skipping this chunk (will continue with others)")
+            elif "rate_limit" in error_message.lower() or "429" in error_message:
+                print(f"⚠ Rate limit reached, skipping this chunk")
+            else:
+                # For unexpected errors, show more detail
+                print(f"Error extracting patterns: {e}")
+                import traceback
+                traceback.print_exc()
+
             return []
 
     def _extract_patterns_chunked(

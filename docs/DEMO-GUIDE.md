@@ -262,6 +262,14 @@ echo $ANTHROPIC_API_KEY
 - Consider using a smaller guide for demos
 - Or pre-generate and show results
 
+### "API temporarily unavailable" warning during generation
+
+- This is normal - transient API errors happen occasionally
+- The tool automatically skips the failed chunk and continues
+- You'll still get rules from successful chunks
+- **What to say**: "The tool handles API hiccups gracefully - it just skips that chunk and continues. This is exactly the kind of resilience you want in automation."
+- Consider it a feature demonstration!
+
 ### "Test generation failed"
 
 - Check API rate limits

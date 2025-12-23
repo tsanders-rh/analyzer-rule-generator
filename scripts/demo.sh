@@ -421,7 +421,12 @@ step_3_validate_with_kantra() {
         return 0
     fi
 
-    RULE_FILE=$(find "${RULES_OUTPUT}" -name "*.yaml" -type f | head -1)
+    # Use entire rules directory instead of single file
+    if [ ! -d "${RULES_OUTPUT}" ]; then
+        print_warning "No rules directory found - skipping validation"
+        return 0
+    fi
+
     TEST_DIR=$(find "${TEST_OUTPUT}" -type d -name "data" | head -1)
 
     if [ -z "${TEST_DIR}" ]; then
@@ -429,7 +434,11 @@ step_3_validate_with_kantra() {
         return 0
     fi
 
-    print_info "Rules: ${RULE_FILE}"
+    # Count non-empty rule files
+    RULE_COUNT=$(find "${RULES_OUTPUT}" -name "*.yaml" -type f -exec grep -l "ruleID:" {} \; | wc -l | tr -d ' ')
+
+    print_info "Rules directory: ${RULES_OUTPUT}"
+    print_info "Rule files with rules: ${RULE_COUNT}"
     print_info "Test app: ${TEST_DIR}"
     echo ""
 
@@ -438,7 +447,7 @@ step_3_validate_with_kantra() {
     cat <<EOF
 kantra analyze \\
   --input "${TEST_DIR}" \\
-  --rules "${RULE_FILE}" \\
+  --rules "${RULES_OUTPUT}" \\
   --output "${MIGRATION_DIR}/analysis-output.yaml"
 EOF
     echo ""
@@ -449,7 +458,7 @@ EOF
     print_info "Running Kantra analysis..."
     kantra analyze \
       --input "${TEST_DIR}" \
-      --rules "${RULE_FILE}" \
+      --rules "${RULES_OUTPUT}" \
       --output "${MIGRATION_DIR}/analysis-output.yaml" || true
 
     if [ -f "${MIGRATION_DIR}/analysis-output.yaml" ]; then

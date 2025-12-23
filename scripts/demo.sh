@@ -242,15 +242,22 @@ EOF
 step_2_generate_tests() {
     print_header "Step 2: Generate Test Data"
 
-    # Find a rule file that has actual rules (contains "ruleID:")
-    RULE_FILE=$(find "${RULES_OUTPUT}" -name "*.yaml" -type f -exec grep -l "ruleID:" {} \; | head -1)
+    # Check rules directory exists
+    if [ ! -d "${RULES_OUTPUT}" ]; then
+        print_error "No rules directory found. Run step 1 first."
+        exit 1
+    fi
 
-    if [ -z "${RULE_FILE}" ]; then
+    # Count rule files with actual rules (contains "ruleID:")
+    RULE_COUNT=$(find "${RULES_OUTPUT}" -name "*.yaml" -type f -exec grep -l "ruleID:" {} \; | wc -l | tr -d ' ')
+
+    if [ "${RULE_COUNT}" -eq 0 ]; then
         print_error "No rule files with rules found. Run step 1 first."
         exit 1
     fi
 
-    print_info "Input: ${RULE_FILE}"
+    print_info "Input: ${RULES_OUTPUT}"
+    print_info "Rule files: ${RULE_COUNT}"
     print_info "Output: ${TEST_OUTPUT}"
     print_info "Language: Auto-detected from rules"
     echo ""
@@ -262,7 +269,7 @@ step_2_generate_tests() {
     echo -e "${YELLOW}Command:${NC}"
     cat <<EOF
 python3 scripts/generate_test_data.py \\
-  --rules "${RULE_FILE}" \\
+  --rules "${RULES_OUTPUT}" \\
   --output "${TEST_OUTPUT}" \\
   --source "${SOURCE}" \\
   --target "${TARGET}" \\
@@ -276,7 +283,7 @@ EOF
     # Run the command
     print_info "Running test data generation..."
     python3 scripts/generate_test_data.py \
-      --rules "${RULE_FILE}" \
+      --rules "${RULES_OUTPUT}" \
       --output "${TEST_OUTPUT}" \
       --source "${SOURCE}" \
       --target "${TARGET}" \

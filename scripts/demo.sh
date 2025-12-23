@@ -448,7 +448,8 @@ step_3_validate_with_kantra() {
 kantra analyze \\
   --input "${TEST_DIR}" \\
   --rules "${RULES_OUTPUT}" \\
-  --output "${MIGRATION_DIR}/analysis-output.yaml"
+  --output "${MIGRATION_DIR}/analysis-output.yaml" \\
+  --overwrite
 EOF
     echo ""
 
@@ -459,7 +460,8 @@ EOF
     kantra analyze \
       --input "${TEST_DIR}" \
       --rules "${RULES_OUTPUT}" \
-      --output "${MIGRATION_DIR}/analysis-output.yaml" || true
+      --output "${MIGRATION_DIR}/analysis-output.yaml" \
+      --overwrite || true
 
     if [ -f "${MIGRATION_DIR}/analysis-output.yaml" ]; then
         print_success "Analysis completed!"

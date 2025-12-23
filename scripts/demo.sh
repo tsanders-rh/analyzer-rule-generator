@@ -449,31 +449,43 @@ kantra analyze \\
   --input "${TEST_DIR}" \\
   --rules "${RULES_OUTPUT}" \\
   --output "${MIGRATION_DIR}/analysis-output.yaml" \\
-  --overwrite
+  --overwrite \\
+  --analyze-known-libraries=false
 EOF
     echo ""
 
     pause_for_demo
 
     # Run kantra
-    print_info "Running Kantra analysis..."
+    print_info "Running Kantra analysis (using only custom rules)..."
     kantra analyze \
       --input "${TEST_DIR}" \
       --rules "${RULES_OUTPUT}" \
       --output "${MIGRATION_DIR}/analysis-output.yaml" \
-      --overwrite || true
+      --overwrite \
+      --analyze-known-libraries=false || true
 
-    if [ -f "${MIGRATION_DIR}/analysis-output.yaml" ]; then
+    # Kantra creates a directory, not a file
+    if [ -d "${MIGRATION_DIR}/analysis-output.yaml" ]; then
         print_success "Analysis completed!"
 
-        # Count violations
-        VIOLATION_COUNT=$(grep -c "ruleID:" "${MIGRATION_DIR}/analysis-output.yaml" || true)
-        print_info "Violations found: ${VIOLATION_COUNT}"
+        # Show report location
+        REPORT="${MIGRATION_DIR}/analysis-output.yaml/static-report/index.html"
+        if [ -f "${REPORT}" ]; then
+            print_info "Report: file://${REPORT}"
+            echo ""
+            print_info "Opening report in browser..."
+            open "${REPORT}" 2>/dev/null || xdg-open "${REPORT}" 2>/dev/null || true
+        fi
 
-        # Show sample violations
-        echo ""
-        print_info "Sample violations:"
-        head -50 "${MIGRATION_DIR}/analysis-output.yaml"
+        # Count violations from analysis.log if available
+        LOG="${MIGRATION_DIR}/analysis-output.yaml/analysis.log"
+        if [ -f "${LOG}" ]; then
+            VIOLATION_COUNT=$(grep -c "matched rule" "${LOG}" 2>/dev/null || echo "0")
+            if [ "${VIOLATION_COUNT}" != "0" ]; then
+                print_info "Violations found: ${VIOLATION_COUNT}"
+            fi
+        fi
     else
         print_warning "Analysis output not found"
     fi

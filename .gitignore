@@ -74,3 +74,6 @@ Thumbs.db
 demo.gif
 demo.mp4
 examples/output/jdk21/demo-output.yaml
+
+# Demo script output
+demo-output/

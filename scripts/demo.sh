@@ -229,6 +229,13 @@ EOF
         awk '/^- ruleID:/{p=1} p{print} /^$/{if(p) exit}' "${FIRST_RULE_FILE}" | head -20
     fi
 
+    # Optional: Validate generated rules
+    if [ "${VALIDATE_RULES:-no}" = "yes" ]; then
+        echo ""
+        print_info "Validating generated rules..."
+        step_validate_rules
+    fi
+
     pause_for_demo
 }
 
@@ -290,6 +297,56 @@ EOF
         print_info "Sample test configuration:"
         echo ""
         head -30 "${TEST_FILE}"
+    fi
+
+    pause_for_demo
+}
+
+step_validate_rules() {
+    print_header "Step 1b: Validate Generated Rules (Optional)"
+
+    if [ ! -d "${RULES_OUTPUT}" ]; then
+        print_error "No rules directory found. Run step 1 first."
+        exit 1
+    fi
+
+    print_info "Validating rules in: ${RULES_OUTPUT}"
+    echo ""
+
+    # Show the command
+    echo -e "${YELLOW}Command:${NC}"
+    cat <<EOF
+python3 scripts/validate_rules.py \\
+  --rules "${RULES_OUTPUT}"
+EOF
+    echo ""
+
+    pause_for_demo
+
+    # Run validation (syntactic only by default)
+    print_info "Running syntactic validation (fast, free)..."
+    python3 scripts/validate_rules.py --rules "${RULES_OUTPUT}"
+    VALIDATION_RESULT=$?
+
+    echo ""
+    if [ ${VALIDATION_RESULT} -eq 0 ]; then
+        print_success "All rules passed validation!"
+    else
+        print_warning "Some rules have issues - review warnings above"
+        print_info "Rules are still usable, but consider fixing issues"
+    fi
+
+    # Offer semantic validation if user wants
+    if [ "${INTERACTIVE:-yes}" = "yes" ]; then
+        echo ""
+        print_info "Semantic validation uses AI to check description/pattern alignment (~\$0.01 per rule)"
+        echo -e "${YELLOW}Run semantic validation? (y/N)${NC}"
+        read -r response
+        if [[ "$response" =~ ^[Yy]$ ]]; then
+            echo ""
+            print_info "Running semantic validation..."
+            python3 scripts/validate_rules.py --rules "${RULES_OUTPUT}" --semantic --provider "${PROVIDER}"
+        fi
     fi
 
     pause_for_demo
@@ -394,6 +451,7 @@ show_summary() {
     echo "     - Extracted migration patterns using AI"
     echo "     - Created analyzer-lsp compatible YAML"
     echo "     - Classified complexity levels"
+    echo "     - Optional: Validated rule quality (step 1b)"
     echo ""
     echo "  2️⃣  Generated test data automatically"
     echo "     - AI-created test applications"
@@ -450,17 +508,19 @@ Usage:
   $0 [step]
 
 Steps:
-  1     - Generate rules from migration guide
-  2     - Generate test data
-  3     - Validate with kantra (if installed)
-  4     - Show submission next steps
-  all   - Run all steps sequentially
-  clean - Remove demo output files
+  1      - Generate rules from migration guide
+  1b     - Validate generated rules (optional)
+  2      - Generate test data
+  3      - Validate with kantra (if installed)
+  4      - Show submission next steps
+  all    - Run all steps sequentially
+  clean  - Remove demo output files
 
 Environment Variables:
   ANTHROPIC_API_KEY - Anthropic API key (recommended)
   OPENAI_API_KEY    - OpenAI API key (alternative)
   INTERACTIVE=no    - Skip pauses between steps
+  VALIDATE_RULES=yes - Auto-run rule validation after step 1
 
 Examples:
   # Run complete demo with pauses
@@ -483,6 +543,10 @@ main() {
         1)
             check_prerequisites
             step_1_generate_rules
+            ;;
+        1b)
+            check_prerequisites
+            step_validate_rules
             ;;
         2)
             check_prerequisites

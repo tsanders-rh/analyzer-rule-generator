@@ -69,6 +69,13 @@ Run each step individually with pauses for explanation:
 # - LLM extracting patterns
 # - Generating YAML rules
 
+# Step 1b (OPTIONAL): Validate generated rules
+./scripts/demo.sh 1b
+
+# Explain rule validation:
+# - Syntactic checks (fast, free)
+# - Optional semantic validation (AI-powered)
+
 # Step 2: Show generated rules, then run
 ./scripts/demo.sh 2
 
@@ -83,6 +90,7 @@ Run each step individually with pauses for explanation:
 
 **Timing**: ~15-20 minutes total
 - Step 1: 5-8 minutes
+- Step 1b: 1-2 minutes (optional)
 - Step 2: 5-8 minutes
 - Step 3: 2-3 minutes (if kantra installed)
 - Step 4: 2 minutes
@@ -136,6 +144,34 @@ Generated files:
   - components.yaml: 12 rules
   - props.yaml: 15 rules
 ```
+
+### Step 1b: Rule Validation (Optional)
+
+**Key Points**:
+- "Quality checks ensure rules are well-formed"
+- "Syntactic validation is instant and free"
+- "Optional semantic validation uses AI to verify description/pattern alignment"
+
+**Show**:
+- Syntactic validation output (required fields, effort scores)
+- Optional: Semantic validation checking for mismatches
+- Green checkmarks for clean rules
+
+**Expected Output**:
+```
+✓ Running syntactic validation (fast, free)...
+
+Validation Summary:
+  Issues:   0
+  Warnings: 0
+
+✅ All rules validated successfully!
+```
+
+**Why This Matters**:
+- Catches common issues before submission
+- Prevents description/pattern mismatches
+- Ensures rules meet quality standards
 
 ### Step 2: Test Generation
 

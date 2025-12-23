@@ -450,7 +450,7 @@ kantra analyze \\
   --rules "${RULES_OUTPUT}" \\
   --output "${MIGRATION_DIR}/analysis-output.yaml" \\
   --overwrite \\
-  --analyze-known-libraries=false
+  --enable-default-rulesets=false
 EOF
     echo ""
 
@@ -463,7 +463,7 @@ EOF
       --rules "${RULES_OUTPUT}" \
       --output "${MIGRATION_DIR}/analysis-output.yaml" \
       --overwrite \
-      --analyze-known-libraries=false || true
+      --enable-default-rulesets=false || true
 
     # Kantra creates a directory, not a file
     if [ -d "${MIGRATION_DIR}/analysis-output.yaml" ]; then

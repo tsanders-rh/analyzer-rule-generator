@@ -485,12 +485,14 @@ EOF
             open "${REPORT}" 2>/dev/null || xdg-open "${REPORT}" 2>/dev/null || true
         fi
 
-        # Count violations from analysis.log if available
-        LOG="${MIGRATION_DIR}/analysis-output.yaml/analysis.log"
-        if [ -f "${LOG}" ]; then
-            VIOLATION_COUNT=$(grep -c "matched rule" "${LOG}" 2>/dev/null || echo "0")
-            if [ "${VIOLATION_COUNT}" != "0" ]; then
-                print_info "Violations found: ${VIOLATION_COUNT}"
+        # Count incidents from output.yaml
+        OUTPUT_FILE="${MIGRATION_DIR}/analysis-output.yaml/output.yaml"
+        if [ -f "${OUTPUT_FILE}" ]; then
+            INCIDENT_COUNT=$(grep -c -- "- uri:" "${OUTPUT_FILE}" 2>/dev/null || echo "0")
+            if [ "${INCIDENT_COUNT}" != "0" ]; then
+                print_info "Incidents found: ${INCIDENT_COUNT}"
+            else
+                print_warning "No incidents found - rules may not match test code"
             fi
         fi
     else

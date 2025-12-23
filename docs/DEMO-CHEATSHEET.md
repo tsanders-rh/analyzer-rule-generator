@@ -140,11 +140,12 @@ cat patternfly-v6/*/accessibility.yaml
 
 ## Quick Guide Options
 
-**3 pre-configured options in `scripts/demo.sh`:**
+**4 pre-configured options in `scripts/demo.sh`:**
 
-1. **React 17→18** (SMALL ~5 min) ⭐ Best for quick demos
-2. **Spring Boot 2→3** (MEDIUM ~8-10 min)
-3. **PatternFly v5→v6** (LARGE ~15-20 min) - Default
+1. **React 17→18** (SMALL ~5 min) ⭐ Best for quick demos - TypeScript/React
+2. **Go 1.17→1.18** (SMALL ~5-8 min) - Go generics migration
+3. **Spring Boot 2→3** (MEDIUM ~8-10 min) - Java migration
+4. **PatternFly v5→v6** (LARGE ~15-20 min) - Default, comprehensive TypeScript
 
 **To switch**: Edit `scripts/demo.sh` and uncomment your choice
 

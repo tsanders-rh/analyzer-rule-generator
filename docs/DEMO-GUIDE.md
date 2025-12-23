@@ -190,7 +190,7 @@ Violations found: 15
 
 ### Use a Different Migration Guide
 
-The demo script includes 3 pre-configured options. Edit `scripts/demo.sh` and uncomment your choice:
+The demo script includes 4 pre-configured options. Edit `scripts/demo.sh` and uncomment your choice:
 
 **Option 1: React 17→18 (SMALL - ~5 min) ⭐ Recommended for quick demos**
 ```bash
@@ -200,7 +200,15 @@ TARGET="react-18"
 FOLLOW_LINKS_FLAG=""  # Single page guide
 ```
 
-**Option 2: Spring Boot 2→3 (MEDIUM - ~8-10 min)**
+**Option 2: Go 1.17→1.18 (SMALL - ~5-8 min) - Go generics migration**
+```bash
+GUIDE_URL="https://go.dev/blog/go1.18"
+SOURCE="go-1.17"
+TARGET="go-1.18"
+FOLLOW_LINKS_FLAG=""  # Single page guide
+```
+
+**Option 3: Spring Boot 2→3 (MEDIUM - ~8-10 min)**
 ```bash
 GUIDE_URL="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
 SOURCE="spring-boot-2"
@@ -208,7 +216,7 @@ TARGET="spring-boot-3"
 FOLLOW_LINKS_FLAG=""  # Single page guide
 ```
 
-**Option 3: PatternFly v5→v6 (LARGE - ~15-20 min, comprehensive) - Default**
+**Option 4: PatternFly v5→v6 (LARGE - ~15-20 min, comprehensive) - Default**
 ```bash
 GUIDE_URL="https://www.patternfly.org/get-started/upgrade/"
 SOURCE="patternfly-v5"

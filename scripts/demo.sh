@@ -360,15 +360,16 @@ step_view_rules() {
         exit 1
     fi
 
-    # Find first rule file
-    FIRST_RULE_FILE=$(find "${RULES_OUTPUT}" -name "*.yaml" -type f | head -1)
+    # Count rule files
+    RULE_COUNT=$(find "${RULES_OUTPUT}" -name "*.yaml" -type f | wc -l | tr -d ' ')
 
-    if [ -z "${FIRST_RULE_FILE}" ]; then
+    if [ "$RULE_COUNT" -eq 0 ]; then
         print_error "No rule files found in ${RULES_OUTPUT}"
         exit 1
     fi
 
-    print_info "Generating interactive HTML viewer for: $(basename ${FIRST_RULE_FILE})"
+    print_info "Generating interactive HTML viewer for all rules in: ${RULES_OUTPUT}"
+    print_info "Found ${RULE_COUNT} rule file(s)"
     echo ""
 
     # Generate viewer HTML
@@ -378,7 +379,7 @@ step_view_rules() {
     echo -e "${YELLOW}Command:${NC}"
     cat <<EOF
 python3 scripts/generate_rule_viewer.py \\
-  --rules "${FIRST_RULE_FILE}" \\
+  --rules "${RULES_OUTPUT}" \\
   --output "${VIEWER_OUTPUT}" \\
   --title "${SOURCE} → ${TARGET} Migration Rules" \\
   --open
@@ -390,7 +391,7 @@ EOF
     # Generate viewer
     print_info "Generating viewer..."
     python3 scripts/generate_rule_viewer.py \
-      --rules "${FIRST_RULE_FILE}" \
+      --rules "${RULES_OUTPUT}" \
       --output "${VIEWER_OUTPUT}" \
       --title "${SOURCE} → ${TARGET} Migration Rules" \
       --open

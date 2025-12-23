@@ -427,6 +427,19 @@ step_3_validate_with_kantra() {
         return 0
     fi
 
+    # Detect if rules use nodejs/builtin providers (TypeScript/React/etc)
+    # Kantra works best with Java rules currently
+    if grep -q "nodejs.referenced\|builtin.filecontent" "${RULES_OUTPUT}"/*.yaml 2>/dev/null; then
+        print_warning "Detected non-Java rules (nodejs/builtin providers)"
+        print_info "Kantra validation works best with Java rules currently"
+        print_info "For TypeScript/React migrations, you can:"
+        echo "  - Test rules manually with konveyor/analyzer-lsp"
+        echo "  - Skip to submission (rules are already validated in step 1b)"
+        echo ""
+        print_info "Skipping Kantra validation for this migration"
+        return 0
+    fi
+
     TEST_DIR=$(find "${TEST_OUTPUT}" -type d -name "data" | head -1)
 
     if [ -z "${TEST_DIR}" ]; then

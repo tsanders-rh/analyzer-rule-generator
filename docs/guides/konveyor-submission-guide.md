@@ -176,7 +176,38 @@ python scripts/generate_rules.py \
   --model claude-3-7-sonnet-20250219
 ```
 
-**Output:** AI-generated rules ready for testing
+**Output:** AI-generated rules ready for validation
+
+### Phase 1b: Validate Rules (Optional but Recommended)
+
+Before creating test data, validate your rules to catch common issues:
+
+```bash
+# Quick syntactic validation (free, instant)
+python scripts/validate_rules.py \
+  --rules rules/spring-boot-4.0-mongodb.yaml
+
+# Deep semantic validation (AI-powered, ~$0.01/rule)
+python scripts/validate_rules.py \
+  --rules rules/spring-boot-4.0-mongodb.yaml \
+  --semantic \
+  --provider anthropic
+```
+
+**What it checks:**
+- ✅ Required fields present (ruleID, description, effort, when, message)
+- ✅ Valid effort scores (1-10)
+- ✅ Non-empty patterns
+- ✅ Pattern broadness warnings
+- ✅ Description/pattern alignment (semantic mode)
+
+**Why validate:**
+- Catches issues early before creating test data
+- Ensures description matches what the pattern actually detects
+- Identifies overly broad patterns that might cause false positives
+- Saves time by preventing test failures
+
+See [Validate Rules Reference](../reference/validate-rules.md) for complete documentation.
 
 ### Phase 2: Prepare Test Data
 

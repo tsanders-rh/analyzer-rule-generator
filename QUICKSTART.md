@@ -269,7 +269,26 @@ This creates:
 - Test data directory structure
 - README with submission instructions
 
-### Step 2: Generate Test Data with AI
+### Step 2: Validate Rules (Optional but Recommended)
+```bash
+# Quick syntactic validation (free, instant)
+python scripts/validate_rules.py \
+  --rules examples/output/spring-boot-4.0/migration-rules.yaml
+
+# Deep semantic validation (AI-powered, ~$0.01/rule)
+python scripts/validate_rules.py \
+  --rules examples/output/spring-boot-4.0/migration-rules.yaml \
+  --semantic \
+  --provider anthropic
+```
+
+This checks:
+- ✅ Required fields present (ruleID, description, effort, when, message)
+- ✅ Valid effort scores (1-10)
+- ✅ Non-empty patterns
+- ✅ Description/pattern alignment (semantic mode)
+
+### Step 3: Generate Test Data with AI
 ```bash
 python scripts/generate_test_data.py \
   --rules examples/output/spring-boot-4.0/migration-rules.yaml \
@@ -286,7 +305,7 @@ This generates:
 - Java application code with violations for each rule
 - Comments mapping code to rule IDs
 
-### Step 3: Test and Submit
+### Step 4: Test and Submit
 ```bash
 # Test locally with Kantra
 kantra test submission/spring-boot-4.0/tests/*.test.yaml
@@ -320,10 +339,14 @@ python scripts/generate_rules.py \
   --output jdk21-applet-removal.yaml \
   --provider anthropic
 
-# 2. Review output
+# 2. Validate rules (optional)
+python scripts/validate_rules.py \
+  --rules jdk21-applet-removal.yaml
+
+# 3. Review output
 cat jdk21-applet-removal.yaml
 
-# 3. Use with Konveyor analyzer
+# 4. Use with Konveyor analyzer
 kantra analyze \
   --input /path/to/your/java/app \
   --rules jdk21-applet-removal.yaml \

@@ -21,6 +21,7 @@ The Analyzer Rule Generator uses Large Language Models (LLMs) to automatically e
 - **Flexible LLM Support**: OpenAI, Anthropic Claude, Google Gemini
 - **Smart Provider Detection**: Automatically uses Java or Builtin provider based on detected language
 - **Pattern Detection**: Extracts fully qualified class names, regex patterns, and file globs
+- **Rule Validation**: Syntactic and optional semantic validation to ensure rule quality
 - **Test Data Generation**: AI-powered generation of test applications for rule validation
 - **CI Test Updater**: Automated updates to go-konveyor-tests expectations
 
@@ -74,6 +75,8 @@ See [.claude/skills/konveyor-rules/README.md](.claude/skills/konveyor-rules/READ
 flowchart TD
     A[📄 Migration Guide] --> B[🤖 Generate Rules]
     B --> C[📋 Konveyor Rules]
+    C -.Optional.-> C1[✅ Validate Rules]
+    C1 --> C
     C --> D[🤖 Generate Test Data]
     D --> E[🧪 Kantra Test]
 
@@ -89,6 +92,7 @@ flowchart TD
     style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
     style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     style C fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style C1 fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,stroke-dasharray: 5 5
     style D fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     style E fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
     style F fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
@@ -103,12 +107,15 @@ flowchart TD
    - Detects language (Java vs TypeScript/React/Go/Python)
    - For Java: Fully qualified class names and location types
    - For others: Regex patterns and file globs
-2. **Generate Test Data**: AI creates test applications with violations
-3. **Test Locally**: Validate rules with Kantra
-4. **Submit Rules**: PR to konveyor/rulesets
-5. **Run Analysis**: Test rules on reference applications
-6. **Update CI Tests**: Automated update of go-konveyor-tests expectations
-7. **Submit Tests**: PR to go-konveyor-tests (linked with rules PR)
+2. **Validate Rules** (Optional): Check rule quality before testing
+   - Syntactic validation: Required fields, effort scores, pattern checks
+   - Semantic validation: AI-powered description/pattern alignment
+3. **Generate Test Data**: AI creates test applications with violations
+4. **Test Locally**: Validate rules with Kantra
+5. **Submit Rules**: PR to konveyor/rulesets
+6. **Run Analysis**: Test rules on reference applications
+7. **Update CI Tests**: Automated update of go-konveyor-tests expectations
+8. **Submit Tests**: PR to go-konveyor-tests (linked with rules PR)
 
 ## Examples
 
@@ -238,6 +245,7 @@ See [Rule Viewers Guide](docs/reference/rule-viewers.md) for more options.
 
 **Technical Reference:**
 - [Generate Rules Script Reference](docs/reference/generate-rules.md) - Complete script documentation
+- [Validate Rules Script Reference](docs/reference/validate-rules.md) - Rule validation documentation
 - [CI Test Updater Reference](docs/reference/ci-test-updater.md) - Script documentation
 - [Java Rule Schema](docs/reference/java-rule-schema.md) - Rule structure and syntax
 

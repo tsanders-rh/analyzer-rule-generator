@@ -69,6 +69,11 @@ Turn migration guides into Konveyor rules automatically:
 - Predicts AI automation success rates
 - Helps prioritize migration work
 
+**Rule Quality Validation**
+- Syntactic validation (free, instant)
+- Semantic validation (AI-powered)
+- Catches description/pattern mismatches
+
 ---
 
 ## Slide 6: Real Results

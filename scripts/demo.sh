@@ -47,13 +47,13 @@ NC='\033[0m' # No Color
 # ============================================================================
 
 # Option 1: React 17 to 18 (SMALL - Recommended for quick demos ~5 min)
- GUIDE_URL="https://react.dev/blog/2022/03/08/react-18-upgrade-guide"
- SOURCE="react-17"
- TARGET="react-18"
- FOLLOW_LINKS_FLAG=""  # Single page guide
+GUIDE_URL="https://react.dev/blog/2022/03/08/react-18-upgrade-guide"
+SOURCE="react-17"
+TARGET="react-18"
+FOLLOW_LINKS_FLAG=""  # Single page guide
 
-# Option 2: Go 1.17 to 1.18 (SMALL - Go generics migration ~5-8 min)
-# GUIDE_URL="https://go.dev/blog/go1.18"
+# Option 2: Go 1.17 to 1.18 (SMALL - Deprecated API migrations ~5-8 min)
+# GUIDE_URL="https://tip.golang.org/doc/go1.18"
 # SOURCE="go-1.17"
 # TARGET="go-1.18"
 # FOLLOW_LINKS_FLAG=""  # Single page guide

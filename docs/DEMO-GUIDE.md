@@ -278,9 +278,9 @@ TARGET="react-18"
 FOLLOW_LINKS_FLAG=""  # Single page guide
 ```
 
-**Option 2: Go 1.17→1.18 (SMALL - ~5-8 min) - Go generics migration**
+**Option 2: Go 1.17→1.18 (SMALL - ~5-8 min) - Deprecated API migrations**
 ```bash
-GUIDE_URL="https://go.dev/blog/go1.18"
+GUIDE_URL="https://tip.golang.org/doc/go1.18"
 SOURCE="go-1.17"
 TARGET="go-1.18"
 FOLLOW_LINKS_FLAG=""  # Single page guide

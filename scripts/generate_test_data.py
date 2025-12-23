@@ -29,6 +29,22 @@ def detect_language(rules: list) -> str:
     Returns:
         Language name (java, typescript, go, python, etc.)
     """
+    # First, check labels for language hints (e.g., konveyor.io/source=go-1.17)
+    for rule in rules:
+        labels = rule.get('labels', [])
+        for label in labels:
+            if isinstance(label, str):
+                label_lower = label.lower()
+                # Check source/target labels for language hints
+                if 'go-' in label_lower or '=go' in label_lower or label_lower.startswith('go'):
+                    return 'go'
+                elif 'java-' in label_lower or '=java' in label_lower or 'spring' in label_lower:
+                    return 'java'
+                elif 'node' in label_lower or 'react' in label_lower or 'angular' in label_lower or 'typescript' in label_lower:
+                    return 'typescript'
+                elif 'python' in label_lower or 'django' in label_lower:
+                    return 'python'
+
     def check_condition(cond):
         """Helper to check a single condition."""
         if 'nodejs.referenced' in cond or 'nodejs.dependency' in cond:

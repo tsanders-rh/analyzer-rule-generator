@@ -242,17 +242,17 @@ EOF
 step_2_generate_tests() {
     print_header "Step 2: Generate Test Data"
 
-    # Find a rule file to use
-    RULE_FILE=$(find "${RULES_OUTPUT}" -name "*.yaml" -type f | head -1)
+    # Find a rule file that has actual rules (contains "ruleID:")
+    RULE_FILE=$(find "${RULES_OUTPUT}" -name "*.yaml" -type f -exec grep -l "ruleID:" {} \; | head -1)
 
     if [ -z "${RULE_FILE}" ]; then
-        print_error "No rule files found. Run step 1 first."
+        print_error "No rule files with rules found. Run step 1 first."
         exit 1
     fi
 
     print_info "Input: ${RULE_FILE}"
     print_info "Output: ${TEST_OUTPUT}"
-    print_info "Language: TypeScript (auto-detected)"
+    print_info "Language: Auto-detected from rules"
     echo ""
 
     # Create output directory
@@ -424,19 +424,6 @@ step_3_validate_with_kantra() {
     # Use entire rules directory instead of single file
     if [ ! -d "${RULES_OUTPUT}" ]; then
         print_warning "No rules directory found - skipping validation"
-        return 0
-    fi
-
-    # Detect if rules use nodejs/builtin providers (TypeScript/React/etc)
-    # Kantra works best with Java rules currently
-    if grep -q "nodejs.referenced\|builtin.filecontent" "${RULES_OUTPUT}"/*.yaml 2>/dev/null; then
-        print_warning "Detected non-Java rules (nodejs/builtin providers)"
-        print_info "Kantra validation works best with Java rules currently"
-        print_info "For TypeScript/React migrations, you can:"
-        echo "  - Test rules manually with konveyor/analyzer-lsp"
-        echo "  - Skip to submission (rules are already validated in step 1b)"
-        echo ""
-        print_info "Skipping Kantra validation for this migration"
         return 0
     fi
 

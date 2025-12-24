@@ -457,19 +457,21 @@ EOF
     pause_for_demo
 
     # Run kantra test on all test files
-    print_info "Running Kantra tests..."
+    print_info "Running Kantra tests (this may take several minutes for Maven builds)..."
     echo ""
 
     # Change to project root for kantra test (it needs relative paths to work)
     cd "${PROJECT_ROOT}" || exit 1
 
-    # Run kantra test and capture output
-    KANTRA_OUTPUT=$(kantra test ${TEST_OUTPUT}/*.test.yaml 2>&1) || true
-    echo "${KANTRA_OUTPUT}"
+    # Run kantra test with output streaming in real-time
+    # Save to temp file for parsing results
+    TEMP_OUTPUT=$(mktemp)
+    kantra test ${TEST_OUTPUT}/*.test.yaml 2>&1 | tee "${TEMP_OUTPUT}" || true
 
-    # Count passed and failed tests
-    PASSED_COUNT=$(echo "${KANTRA_OUTPUT}" | grep -c "PASS" || echo "0")
-    FAILED_COUNT=$(echo "${KANTRA_OUTPUT}" | grep -c "FAIL" || echo "0")
+    # Count passed and failed tests from output
+    PASSED_COUNT=$(grep -c "PASS" "${TEMP_OUTPUT}" 2>/dev/null || echo "0")
+    FAILED_COUNT=$(grep -c "FAIL" "${TEMP_OUTPUT}" 2>/dev/null || echo "0")
+    rm -f "${TEMP_OUTPUT}"
 
     echo ""
     if [ "${FAILED_COUNT}" -eq 0 ] && [ "${PASSED_COUNT}" -gt 0 ]; then

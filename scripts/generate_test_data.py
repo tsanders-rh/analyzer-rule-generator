@@ -635,7 +635,7 @@ def generate_test_yaml(rule_file_path: Path, data_dir_name: str, rules: list, ou
 
     # Build test structure
     test_data = {
-        'rulesPath': f'../{rule_file_path.name}',
+        'rulesPath': f'../rules/{rule_file_path.name}',
         'providers': [
             {'name': provider, 'dataPath': f'./data/{data_dir_name}'}
             for provider in sorted(providers)

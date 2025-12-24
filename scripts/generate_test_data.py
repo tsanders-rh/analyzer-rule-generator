@@ -200,6 +200,21 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
             pattern_info['pattern'] = builtin.get('pattern')
             pattern_info['location'] = 'FILE_CONTENT'
             pattern_info['provider'] = 'builtin'
+            pattern_info['filePattern'] = builtin.get('filePattern', '')
+
+            # Check if this is a configuration file pattern
+            file_pattern = builtin.get('filePattern', '')
+            if any(ext in file_pattern for ext in ['.properties', '.yaml', '.yml']):
+                pattern_info['is_config_file'] = True
+                # Determine config file type
+                if '.properties' in file_pattern:
+                    pattern_info['config_type'] = 'properties'
+                elif '.yaml' in file_pattern or '.yml' in file_pattern:
+                    pattern_info['config_type'] = 'yaml'
+                else:
+                    pattern_info['config_type'] = 'properties'  # default
+            else:
+                pattern_info['is_config_file'] = False
 
             # Parse JSX/TSX patterns to generate code hints
             jsx_pattern = builtin.get('pattern', '')
@@ -210,6 +225,7 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
             pattern_info['pattern'] = builtin.get('pattern')
             pattern_info['location'] = 'FILE_PATTERN'
             pattern_info['provider'] = 'builtin'
+            pattern_info['filePattern'] = builtin.get('filePattern', '')
 
         return pattern_info if pattern_info['pattern'] else None
 
@@ -359,10 +375,22 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
 
     # Build patterns summary with specific code examples
     patterns_list = []
+    has_config_files = False
+    config_file_type = 'properties'  # default
+
     for p in patterns:
         pattern_text = f"- Rule {p['ruleID']}: {p['description']}"
 
-        # Add code hint if available
+        # Check if any pattern needs config files
+        for pattern in p.get('patterns', []):
+            if pattern.get('is_config_file'):
+                has_config_files = True
+                config_file_type = pattern.get('config_type', 'properties')
+                # Add config file specific instruction
+                pattern_obj = pattern.get('pattern', '')
+                pattern_text += f"\n  **MUST BE IN CONFIG FILE ({config_file_type}):** {pattern_obj}"
+
+        # Add code hint if available (for code-based rules)
         if p.get('code_hint'):
             pattern_text += f"\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n  ```tsx\n  // {p['ruleID']}\n  {p['code_hint']}\n  ```"
         elif p.get('component'):
@@ -373,6 +401,17 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
     patterns_summary = "\n\n".join(patterns_list)
 
     # Language-specific instructions
+    config_file_instructions = ""
+    if has_config_files and language == 'java':
+        config_file_name = f'application.{config_file_type}'
+        config_file_instructions = f"""
+3. **{config_file_name}** - Configuration file with:
+   - Spring Boot properties/settings
+   - Properties that match the EXACT patterns marked as "MUST BE IN CONFIG FILE"
+   - Format the properties correctly for {config_file_type} format
+   - Include actual values for the deprecated properties
+"""
+
     lang_instructions = {
         'java': """
 1. **{build_file}** - Maven project file with:
@@ -385,11 +424,14 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
    - Code using each deprecated pattern
    - Comments: // Rule {source}-to-{target}-00001
 
+{config_file_instructions}
+
 For Java patterns:
 - PACKAGE location: Use @Value("${{property}}") or @ConfigurationProperties
 - TYPE location: Use class/interface in field declarations or method signatures
 - ANNOTATION location: Use @Annotation on classes/methods
 - DEPENDENCY location: Include in pom.xml dependencies
+- CONFIG FILE patterns: Add actual property in application.properties or application.yaml
 """,
         'typescript': """
 1. **{build_file}** - package.json with:
@@ -446,7 +488,8 @@ For Python patterns:
         build_file=config['build_file'],
         main_file=config['main_file'],
         source=source,
-        target=target
+        target=target,
+        config_file_instructions=config_file_instructions
     )
 
     prompt = f"""Generate a minimal {language.upper()} test application for Konveyor analyzer rule testing.
@@ -486,7 +529,11 @@ Format your response with clear code blocks:
 ```{config['main_file_type']}
 {config['main_file']}
 ```
-
+{"" if not has_config_files else f'''
+```{config_file_type}
+application.{config_file_type}
+```
+'''}
 Generate ONLY the file contents. Do not include explanations before or after the code blocks.
 """
 
@@ -495,19 +542,19 @@ Generate ONLY the file contents. Do not include explanations before or after the
 
 def extract_code_blocks(response: str, language: str) -> dict:
     """
-    Extract build file and source file from LLM response.
+    Extract build file, source file, and config file from LLM response.
 
     Args:
         response: LLM response text
         language: Programming language
 
     Returns:
-        Dict with build_file and source_file keys
+        Dict with build_file, source_file, and config_file keys
     """
     import re
 
     config = get_language_config(language)
-    result = {'build_file': None, 'source_file': None}
+    result = {'build_file': None, 'source_file': None, 'config_file': None}
 
     # Try to extract code blocks
     # Pattern: ```type\n content \n```
@@ -520,6 +567,10 @@ def extract_code_blocks(response: str, language: str) -> dict:
         if block_type.lower() in ['xml', 'json', 'go', 'text', 'txt', 'toml']:
             if not result['build_file']:
                 result['build_file'] = content
+        # Match config file types
+        elif block_type.lower() in ['properties', 'yaml', 'yml']:
+            if not result['config_file']:
+                result['config_file'] = {'type': block_type.lower(), 'content': content}
         # Match source file types
         elif block_type.lower() in ['java', 'typescript', 'tsx', 'ts', 'python', 'py', 'go', 'javascript', 'jsx', 'js']:
             if not result['source_file']:
@@ -888,6 +939,20 @@ Examples:
         with open(source_file_path, 'w') as f:
             f.write(code['source_file'])
         print(f"  ✓ {source_file_path.relative_to(output_dir)}")
+
+        # Write config file if present (for Java/Spring Boot projects)
+        if code['config_file'] and language == 'java':
+            # Create resources directory for config files
+            resources_dir = test_data_dir / 'src' / 'main' / 'resources'
+            resources_dir.mkdir(parents=True, exist_ok=True)
+
+            config_type = code['config_file']['type']
+            config_filename = f"application.{config_type}"
+            config_file_path = resources_dir / config_filename
+
+            with open(config_file_path, 'w') as f:
+                f.write(code['config_file']['content'])
+            print(f"  ✓ {config_file_path.relative_to(output_dir)}")
 
         # Generate test YAML file
         test_yaml_path = generate_test_yaml(rule_file, data_dir_name, rules, output_dir)

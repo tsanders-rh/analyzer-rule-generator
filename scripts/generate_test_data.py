@@ -210,15 +210,25 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
 
             # Check if this is a configuration file pattern
             file_pattern = builtin.get('filePattern', '')
-            if any(ext in file_pattern for ext in ['.properties', '.yaml', '.yml']):
+            if any(ext in file_pattern for ext in ['.properties', '.yaml', '.yml', '.factories', '.xml']):
                 pattern_info['is_config_file'] = True
-                # Determine config file type
-                if '.properties' in file_pattern:
+                # Determine config file type and name
+                if '.properties' in file_pattern and 'spring.factories' not in file_pattern:
                     pattern_info['config_type'] = 'properties'
+                    pattern_info['config_file_name'] = 'application.properties'
+                elif 'spring.factories' in file_pattern or '.factories' in file_pattern:
+                    pattern_info['config_type'] = 'properties'  # spring.factories uses properties format
+                    pattern_info['config_file_name'] = 'spring.factories'
+                    pattern_info['config_file_path'] = 'META-INF/spring.factories'  # Standard location
                 elif '.yaml' in file_pattern or '.yml' in file_pattern:
                     pattern_info['config_type'] = 'yaml'
+                    pattern_info['config_file_name'] = 'application.yaml'
+                elif '.xml' in file_pattern:
+                    pattern_info['config_type'] = 'xml'
+                    pattern_info['config_file_name'] = 'application.xml'
                 else:
                     pattern_info['config_type'] = 'properties'  # default
+                    pattern_info['config_file_name'] = 'application.properties'
             else:
                 pattern_info['is_config_file'] = False
 
@@ -424,13 +434,20 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
 
         # Check if any pattern needs config files or has Java imports
         has_java_imports = False
+        config_file_name = None
+        config_file_path = None
         for pattern in p.get('patterns', []):
             if pattern.get('is_config_file'):
                 has_config_files = True
                 config_file_type = pattern.get('config_type', 'properties')
+                config_file_name = pattern.get('config_file_name', f'application.{config_file_type}')
+                config_file_path = pattern.get('config_file_path', '')
                 # Add config file specific instruction
                 pattern_obj = pattern.get('pattern', '')
-                pattern_text += f"\n  **MUST BE IN CONFIG FILE ({config_file_type}):** {pattern_obj}"
+                if config_file_path:
+                    pattern_text += f"\n  **MUST BE IN CONFIG FILE ({config_file_type}) at {config_file_path}:** {pattern_obj}"
+                else:
+                    pattern_text += f"\n  **MUST BE IN CONFIG FILE ({config_file_type}) named {config_file_name}:** {pattern_obj}"
 
             # Check for Java imports
             if pattern.get('provider') == 'java' and pattern.get('location') == 'IMPORT' and pattern.get('code_hint'):
@@ -450,14 +467,20 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
 
     # Language-specific instructions
     config_file_instructions = ""
+    final_config_file_name = config_file_name if config_file_name else f'application.{config_file_type}'
+    final_config_file_path = config_file_path if config_file_path else f'src/main/resources/{final_config_file_name}'
     if has_config_files and language == 'java':
-        config_file_name = f'application.{config_file_type}'
         config_file_instructions = f"""
-3. **{config_file_name}** - Configuration file with:
-   - Spring Boot properties/settings
-   - Properties that match the EXACT patterns marked as "MUST BE IN CONFIG FILE"
+3. **{final_config_file_name}** - Configuration file with deprecated properties:
+   - Location: {final_config_file_path}
+   - CRITICAL: The deprecated property patterns marked as "MUST BE IN CONFIG FILE" below MUST appear in this file
+   - Do NOT use @Value annotations in Java code for these patterns
+   - Include the EXACT deprecated property names from the "Before:" examples in the rule messages
    - Format the properties correctly for {config_file_type} format
-   - Include actual values for the deprecated properties
+   - Include actual values for each deprecated property
+   - Example: If pattern is spring\\.data\\.cassandra\\., include properties like:
+     spring.data.cassandra.contact-points=localhost
+     spring.data.cassandra.port=9042
 """
 
     lang_instructions = {
@@ -557,11 +580,17 @@ Each rule looks for EXACT patterns in the code. You MUST include the EXACT code 
 
 REQUIREMENTS:
 1. Create a complete, compilable {language} project structure
-2. For EACH rule above, include the EXACT code pattern specified
+2. For EACH rule above, include the EXACT code/configuration pattern specified
 3. If a code example is shown with "YOU MUST GENERATE THIS EXACT JSX CODE", copy it EXACTLY
-4. Add comment before each pattern: // Rule ID
+4. Add comment before each pattern: // Rule ID (or # Rule ID for properties/yaml files)
 5. Keep the code minimal - one example per rule
 6. Ensure static analysis can detect each pattern
+
+CRITICAL FOR CONFIGURATION FILES:
+- If a rule says "MUST BE IN CONFIG FILE", create the configuration file (application.properties or application.yaml)
+- Extract the EXACT deprecated property names from the rule's "Before:" code example
+- Include those deprecated properties with realistic values in your configuration file
+- Do NOT use @Value annotations in Java code for config file patterns - put them in the actual config file
 
 CRITICAL FOR TSX/JSX FILES:
 - Components must be USED in JSX, not just imported
@@ -583,10 +612,13 @@ Format your response with clear code blocks:
 ```
 {"" if not has_config_files else f'''
 ```{config_file_type}
-application.{config_file_type}
+{final_config_file_name}
 ```
 '''}
 Generate ONLY the file contents. Do not include explanations before or after the code blocks.
+
+IMPORTANT: If generating a config file other than application.properties/yaml, include the FULL filename in the code block header.
+For example: ```properties spring.factories``` or ```yaml application-dev.yaml```
 """
 
     return prompt
@@ -622,7 +654,24 @@ def extract_code_blocks(response: str, language: str) -> dict:
         # Match config file types
         elif block_type.lower() in ['properties', 'yaml', 'yml']:
             if not result['config_file']:
-                result['config_file'] = {'type': block_type.lower(), 'content': content}
+                # Try to extract filename from content (first line might have filename as comment)
+                # or infer from block type
+                filename = None
+                first_line = content.split('\n')[0].strip() if content else ''
+                # Check if first line looks like a filename comment or path
+                if first_line.startswith('#') or first_line.startswith('//'):
+                    potential_name = first_line.lstrip('#/ ').strip()
+                    if '.' in potential_name and not potential_name.startswith('Rule'):
+                        filename = potential_name.split('/')[-1]  # Extract just filename from path
+
+                if not filename:
+                    filename = f'application.{block_type.lower()}'
+
+                result['config_file'] = {
+                    'type': block_type.lower(),
+                    'content': content,
+                    'filename': filename
+                }
         # Match source file types
         elif block_type.lower() in ['java', 'typescript', 'tsx', 'ts', 'python', 'py', 'go', 'javascript', 'jsx', 'js']:
             if not result['source_file']:
@@ -994,13 +1043,18 @@ Examples:
 
         # Write config file if present (for Java/Spring Boot projects)
         if code['config_file'] and language == 'java':
-            # Create resources directory for config files
-            resources_dir = test_data_dir / 'src' / 'main' / 'resources'
-            resources_dir.mkdir(parents=True, exist_ok=True)
+            config_filename = code['config_file'].get('filename', f"application.{code['config_file']['type']}")
 
-            config_type = code['config_file']['type']
-            config_filename = f"application.{config_type}"
-            config_file_path = resources_dir / config_filename
+            # Determine the correct directory based on the filename
+            if 'spring.factories' in config_filename:
+                # spring.factories goes in META-INF/
+                config_dir = test_data_dir / 'src' / 'main' / 'resources' / 'META-INF'
+            else:
+                # Other config files go in resources/
+                config_dir = test_data_dir / 'src' / 'main' / 'resources'
+
+            config_dir.mkdir(parents=True, exist_ok=True)
+            config_file_path = config_dir / config_filename
 
             with open(config_file_path, 'w') as f:
                 f.write(code['config_file']['content'])

@@ -47,10 +47,10 @@ NC='\033[0m' # No Color
 # ============================================================================
 
 # Option 1: React 17 to 18 (SMALL - Recommended for quick demos ~5 min)
-GUIDE_URL="https://react.dev/blog/2022/03/08/react-18-upgrade-guide"
-SOURCE="react-17"
-TARGET="react-18"
-FOLLOW_LINKS_FLAG=""  # Single page guide
+#GUIDE_URL="https://react.dev/blog/2022/03/08/react-18-upgrade-guide"
+#SOURCE="react-17"
+#TARGET="react-18"
+#FOLLOW_LINKS_FLAG=""  # Single page guide
 
 # Option 2: Go 1.17 to 1.18 (SMALL - Deprecated API migrations ~5-8 min)
 # GUIDE_URL="https://tip.golang.org/doc/go1.18"
@@ -59,10 +59,10 @@ FOLLOW_LINKS_FLAG=""  # Single page guide
 # FOLLOW_LINKS_FLAG=""  # Single page guide
 
 # Option 3: Spring Boot 2 to 3 (MEDIUM - ~8-10 min)
-# GUIDE_URL="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
-# SOURCE="spring-boot-2"
-# TARGET="spring-boot-3"
-# FOLLOW_LINKS_FLAG=""  # Single page guide
+ GUIDE_URL="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
+ SOURCE="spring-boot-2"
+ TARGET="spring-boot-3"
+ FOLLOW_LINKS_FLAG=""  # Single page guide
 
 # Option 4: PatternFly v5 to v6 (LARGE - ~15-20 min, comprehensive)
 #GUIDE_URL="https://www.patternfly.org/get-started/upgrade/"
@@ -428,75 +428,57 @@ step_3_validate_with_kantra() {
         return 0
     fi
 
-    # Use entire rules directory instead of single file
-    if [ ! -d "${RULES_OUTPUT}" ]; then
-        print_warning "No rules directory found - skipping validation"
+    # Check test output directory exists
+    if [ ! -d "${TEST_OUTPUT}" ]; then
+        print_warning "No test output directory found - skipping validation"
         return 0
     fi
 
-    TEST_DIR=$(find "${TEST_OUTPUT}" -type d -name "data" | head -1)
+    # Find all .test.yaml files
+    TEST_FILES=$(find "${TEST_OUTPUT}" -name "*.test.yaml" -type f 2>/dev/null)
+    TEST_COUNT=$(echo "${TEST_FILES}" | grep -v '^$' | wc -l | tr -d ' ')
 
-    if [ -z "${TEST_DIR}" ]; then
-        print_warning "No test data directory found - skipping validation"
+    if [ "${TEST_COUNT}" -eq 0 ]; then
+        print_warning "No test files found - skipping validation"
         return 0
     fi
 
-    # Count non-empty rule files
-    RULE_COUNT=$(find "${RULES_OUTPUT}" -name "*.yaml" -type f -exec grep -l "ruleID:" {} \; | wc -l | tr -d ' ')
-
-    print_info "Rules directory: ${RULES_OUTPUT}"
-    print_info "Rule files with rules: ${RULE_COUNT}"
-    print_info "Test app: ${TEST_DIR}"
+    print_info "Test directory: ${TEST_OUTPUT}"
+    print_info "Test files: ${TEST_COUNT}"
     echo ""
 
     # Show the command
     echo -e "${YELLOW}Command:${NC}"
     cat <<EOF
-kantra analyze \\
-  --input "${TEST_DIR}" \\
-  --rules "${RULES_OUTPUT}" \\
-  --output "${MIGRATION_DIR}/analysis-output.yaml" \\
-  --overwrite \\
-  --enable-default-rulesets=false
+kantra test ${TEST_OUTPUT}/*.test.yaml
 EOF
     echo ""
 
     pause_for_demo
 
-    # Run kantra
-    print_info "Running Kantra analysis (using only custom rules)..."
-    kantra analyze \
-      --input "${TEST_DIR}" \
-      --rules "${RULES_OUTPUT}" \
-      --output "${MIGRATION_DIR}/analysis-output.yaml" \
-      --overwrite \
-      --enable-default-rulesets=false || true
+    # Run kantra test on all test files
+    print_info "Running Kantra tests..."
+    echo ""
 
-    # Kantra creates a directory, not a file
-    if [ -d "${MIGRATION_DIR}/analysis-output.yaml" ]; then
-        print_success "Analysis completed!"
+    # Change to project root for kantra test (it needs relative paths to work)
+    cd "${PROJECT_ROOT}" || exit 1
 
-        # Show report location
-        REPORT="${MIGRATION_DIR}/analysis-output.yaml/static-report/index.html"
-        if [ -f "${REPORT}" ]; then
-            print_info "Report: file://${REPORT}"
-            echo ""
-            print_info "Opening report in browser..."
-            open "${REPORT}" 2>/dev/null || xdg-open "${REPORT}" 2>/dev/null || true
-        fi
+    # Run kantra test and capture output
+    KANTRA_OUTPUT=$(kantra test ${TEST_OUTPUT}/*.test.yaml 2>&1) || true
+    echo "${KANTRA_OUTPUT}"
 
-        # Count incidents from output.yaml
-        OUTPUT_FILE="${MIGRATION_DIR}/analysis-output.yaml/output.yaml"
-        if [ -f "${OUTPUT_FILE}" ]; then
-            INCIDENT_COUNT=$(grep -c -- "- uri:" "${OUTPUT_FILE}" 2>/dev/null || echo "0")
-            if [ "${INCIDENT_COUNT}" != "0" ]; then
-                print_info "Incidents found: ${INCIDENT_COUNT}"
-            else
-                print_warning "No incidents found - rules may not match test code"
-            fi
-        fi
+    # Count passed and failed tests
+    PASSED_COUNT=$(echo "${KANTRA_OUTPUT}" | grep -c "PASS" || echo "0")
+    FAILED_COUNT=$(echo "${KANTRA_OUTPUT}" | grep -c "FAIL" || echo "0")
+
+    echo ""
+    if [ "${FAILED_COUNT}" -eq 0 ] && [ "${PASSED_COUNT}" -gt 0 ]; then
+        print_success "All tests passed! (${PASSED_COUNT} tests)"
+    elif [ "${FAILED_COUNT}" -gt 0 ]; then
+        print_warning "Some tests failed: ${FAILED_COUNT} failed, ${PASSED_COUNT} passed"
+        print_info "Review the output above for details"
     else
-        print_warning "Analysis output not found"
+        print_warning "No test results found - check output above"
     fi
 
     pause_for_demo

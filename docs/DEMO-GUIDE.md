@@ -247,14 +247,13 @@ Generated structure:
 - "Ready for submission"
 
 **Show**:
-- Kantra command
-- Analysis output
-- Violation counts
+- Kantra test command
+- Test results (pass/fail for each rule)
+- Summary of passed/failed tests
 
 **Expected Output**:
 ```
-✓ Analysis completed!
-Violations found: 15
+✓ All tests passed! (22 tests)
 ```
 
 ### Step 4: Submission

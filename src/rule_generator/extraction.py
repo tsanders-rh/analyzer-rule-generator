@@ -560,8 +560,22 @@ For configuration file patterns (appsettings.json, web.config), use builtin prov
 For Java code patterns (classes, annotations, imports), use these fields:
 - **provider_type**: Set to "java" (or leave null for auto-detection)
 - **source_fqn**: Fully qualified class name (e.g., "javax.ejb.Stateless")
-- **location_type**: One of ANNOTATION, IMPORT, METHOD_CALL, TYPE, INHERITANCE, PACKAGE
+- **location_type**: One of:
+  - **IMPORT**: For specific class imports only (exact FQN required like "org.springframework.boot.actuate.trace.http.HttpTraceRepository")
+  - **ANNOTATION**: For annotation usage
+  - **METHOD_CALL**: For method invocations
+  - **TYPE**: For type references
+  - **INHERITANCE**: For class inheritance
+  - **PACKAGE**: For package references
 - **file_pattern**: Can be null
+
+**Maven Dependency Detection Instructions:**
+For Maven dependency changes (pom.xml), use these fields:
+- **provider_type**: Set to "java" (the java provider handles Maven dependencies)
+- **category**: MUST set to "dependency"
+- **source_fqn**: Maven coordinates in format "groupId:artifactId" (e.g., "mysql:mysql-connector-java" or "org.springframework.boot:spring-boot-starter-web")
+- **location_type**: null (not needed for dependency detection)
+- **file_pattern**: null
 
 **Configuration File Detection Instructions:**
 For property/configuration file patterns (application.properties, application.yaml), use these fields:
@@ -846,12 +860,20 @@ For Java code patterns (classes, annotations, imports), use these fields:
 - **source_fqn**: Fully qualified class name (e.g., "javax.ejb.Stateless")
 - **location_type**: Choose based on what you're detecting:
   - **TYPE**: For package changes with wildcards (e.g., "com.sun.net.ssl.*") - PREFERRED for ChangePackage
-  - **IMPORT**: For specific class imports only (no wildcards, exact FQN required)
+  - **IMPORT**: For specific class imports only (no wildcards, exact FQN required like "org.springframework.boot.actuate.trace.http.HttpTraceRepository")
   - **METHOD_CALL**: For method invocations
   - **ANNOTATION**: For annotation usage
   - **INHERITANCE**: For class inheritance
   - **PACKAGE**: Do not use - TYPE is preferred
 - **file_pattern**: Can be null
+
+**Maven Dependency Detection Instructions:**
+For Maven dependency changes (pom.xml), use these fields:
+- **provider_type**: Set to "java" (the java provider handles Maven dependencies)
+- **category**: MUST set to "dependency"
+- **source_fqn**: Maven coordinates in format "groupId:artifactId" (e.g., "mysql:mysql-connector-java" or "org.springframework.boot:spring-boot-starter-web")
+- **location_type**: null (not needed for dependency detection)
+- **file_pattern**: null
 
 **Configuration File Detection Instructions:**
 For property/configuration file patterns (application.properties, application.yaml), use these fields:

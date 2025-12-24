@@ -265,8 +265,15 @@ class AnalyzerRuleGenerator:
             # Build builtin.filecontent condition
             regex_pattern = pattern.source_fqn  # For builtin, source_fqn contains regex
 
-            # For import patterns, ensure pattern ends with $ anchor for precise matching
-            if self._is_import_pattern(pattern) and not regex_pattern.endswith('$'):
+            # Check if this is a configuration file pattern (properties, yaml, etc.)
+            is_config_file = False
+            if pattern.file_pattern:
+                config_extensions = ['.properties', '.yaml', '.yml', '.xml', '.json', '.conf', '.cfg', '.ini', '.factories']
+                is_config_file = any(ext in pattern.file_pattern for ext in config_extensions)
+
+            # For import patterns (but NOT config files), ensure pattern ends with $ anchor for precise matching
+            # Don't add $ to config file patterns because property keys have values after them
+            if self._is_import_pattern(pattern) and not is_config_file and not regex_pattern.endswith('$'):
                 # Add $ anchor to match end of import statement
                 # This prevents false positives from partial matches
                 regex_pattern = regex_pattern + '$'
@@ -321,35 +328,71 @@ class AnalyzerRuleGenerator:
             return condition
 
         else:  # Java provider
-            # Determine location (default to TYPE if not specified)
-            location = pattern.location_type or LocationType.TYPE
+            # Check if this is a Maven dependency pattern
+            if pattern.category == "dependency":
+                # Use java.dependency for Maven dependencies
+                # Convert Maven coordinates from groupId:artifactId to groupId.artifactId
+                dependency_name = pattern.source_fqn.replace(':', '.')
 
-            # Build java.referenced condition
-            java_referenced = {
-                "pattern": pattern.source_fqn,
-                "location": location.value
-            }
+                java_dependency = {
+                    "name": dependency_name,
+                    "lowerbound": "0.0.0"  # Match any version
+                }
 
-            # If there are alternative FQNs (e.g., javax vs jakarta), use OR condition
-            if pattern.alternative_fqns and len(pattern.alternative_fqns) > 0:
-                conditions = [
-                    {"java.referenced": {
-                        "pattern": pattern.source_fqn,
-                        "location": location.value
-                    }}
-                ]
+                # If there are alternative dependencies, use OR condition
+                if pattern.alternative_fqns and len(pattern.alternative_fqns) > 0:
+                    conditions = [
+                        {"java.dependency": java_dependency}
+                    ]
 
-                for alt_fqn in pattern.alternative_fqns:
-                    conditions.append({
-                        "java.referenced": {
-                            "pattern": alt_fqn,
-                            "location": location.value
-                        }
-                    })
+                    for alt_fqn in pattern.alternative_fqns:
+                        alt_name = alt_fqn.replace(':', '.')
+                        conditions.append({
+                            "java.dependency": {
+                                "name": alt_name,
+                                "lowerbound": "0.0.0"
+                            }
+                        })
 
-                return {"or": conditions}
+                    return {"or": conditions}
+                else:
+                    return {"java.dependency": java_dependency}
+
             else:
-                return {"java.referenced": java_referenced}
+                # Use java.referenced for code patterns
+                # Determine location (default to TYPE if not specified)
+                location = pattern.location_type or LocationType.TYPE
+
+                # For IMPORT location, ensure we use specific class names, not package wildcards
+                # The pattern should already be a fully qualified class name from extraction
+                pattern_str = pattern.source_fqn
+
+                # Build java.referenced condition
+                java_referenced = {
+                    "pattern": pattern_str,
+                    "location": location.value
+                }
+
+                # If there are alternative FQNs (e.g., javax vs jakarta), use OR condition
+                if pattern.alternative_fqns and len(pattern.alternative_fqns) > 0:
+                    conditions = [
+                        {"java.referenced": {
+                            "pattern": pattern_str,
+                            "location": location.value
+                        }}
+                    ]
+
+                    for alt_fqn in pattern.alternative_fqns:
+                        conditions.append({
+                            "java.referenced": {
+                                "pattern": alt_fqn,
+                                "location": location.value
+                            }
+                        })
+
+                    return {"or": conditions}
+                else:
+                    return {"java.referenced": java_referenced}
 
     def _map_complexity_to_effort(self, complexity: str) -> int:
         """

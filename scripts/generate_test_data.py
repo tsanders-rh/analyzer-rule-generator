@@ -489,6 +489,9 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
    - Parent: Spring Boot or appropriate framework at SOURCE version
    - Minimal dependencies needed for the patterns
    - Java version (11 or 17)
+   - CRITICAL: All <dependency> entries MUST include a <version> tag
+   - Exception: Only omit <version> for spring-boot-starter-* dependencies (they inherit from parent)
+   - For all other dependencies (mysql-connector-java, etc.), explicitly specify a version
 
 2. **{main_file}** - Main application with:
    - Package: com.example
@@ -502,11 +505,19 @@ For Java patterns:
 - PACKAGE location: Use @Value("${{property}}") or @ConfigurationProperties
 - TYPE location: Use class/interface in field declarations or method signatures
 - ANNOTATION location: Use @Annotation on classes/methods
-- DEPENDENCY location: Include in pom.xml dependencies
+- DEPENDENCY location: Include in pom.xml dependencies with explicit <version> tags
 - CONFIG FILE patterns: Add actual property in application.properties or application.yaml
 
 CRITICAL: When import statements are shown above with "YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS",
 add them EXACTLY as shown at the top of your Java file, after the package declaration.
+
+CRITICAL FOR MAVEN DEPENDENCIES:
+- spring-boot-starter-web: no version needed (managed by parent)
+- spring-boot-starter-data-jpa: no version needed (managed by parent)
+- spring-boot-starter-test: no version needed (managed by parent)
+- mysql-connector-java: MUST include <version>8.0.33</version>
+- postgresql: MUST include <version>42.6.0</version>
+- Any non-Spring Boot dependency: MUST include explicit <version> tag
 """,
         'typescript': """
 1. **{build_file}** - package.json with:

@@ -977,6 +977,45 @@ Return ONLY the JSON array, no additional commentary."""
 
         return prompt
 
+    def _repair_json(self, json_str: str) -> str:
+        """
+        Attempt to repair common JSON syntax errors.
+
+        Args:
+            json_str: Potentially malformed JSON string
+
+        Returns:
+            Repaired JSON string
+        """
+        # Remove trailing commas before closing brackets/braces
+        # e.g., {"key": "value",} -> {"key": "value"}
+        json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
+
+        # Fix missing commas between objects in arrays
+        # e.g., }{"key" -> },{"key"
+        json_str = re.sub(r'\}(\s*)\{', r'},\1{', json_str)
+
+        # Fix missing commas between array items
+        # e.g., ]["key" -> ],["key"
+        json_str = re.sub(r'\](\s*)\[', r'],\1[', json_str)
+
+        # Fix unescaped quotes in string values (basic heuristic)
+        # This is tricky - only fix obvious cases like: "description": "It's a test"
+        # Convert to: "description": "It\'s a test"
+        # But skip already escaped quotes
+        def fix_unescaped_quotes(match):
+            key = match.group(1)
+            value = match.group(2)
+            # Escape single quotes that aren't already escaped
+            value = re.sub(r"(?<!\\)'", r"\'", value)
+            return f'"{key}": "{value}"'
+
+        # Match "key": "value" pairs and fix unescaped quotes in values
+        # This pattern is conservative to avoid breaking valid JSON
+        json_str = re.sub(r'"([^"]+)":\s*"([^"]*[^\\]"[^"]*)"', fix_unescaped_quotes, json_str)
+
+        return json_str
+
     def _parse_extraction_response(self, response: str) -> List[MigrationPattern]:
         """
         Parse LLM response into MigrationPattern objects.
@@ -994,12 +1033,24 @@ Return ONLY the JSON array, no additional commentary."""
             print("Warning: No JSON array found in response")
             return []
 
+        json_str = json_match.group(0)
+
         try:
-            patterns_data = json.loads(json_match.group(0))
+            patterns_data = json.loads(json_str)
         except json.JSONDecodeError as e:
             print(f"Error parsing JSON: {e}")
-            print(f"Response: {response[:500]}")
-            return []
+            print("Attempting to repair JSON...")
+
+            # Try to repair the JSON
+            repaired_json = self._repair_json(json_str)
+
+            try:
+                patterns_data = json.loads(repaired_json)
+                print("✓ Successfully repaired JSON")
+            except json.JSONDecodeError as e2:
+                print(f"Failed to repair JSON: {e2}")
+                print(f"Response: {response[:500]}")
+                return []
 
         # Convert to MigrationPattern objects
         patterns = []

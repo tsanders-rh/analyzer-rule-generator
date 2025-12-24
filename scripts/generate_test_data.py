@@ -188,6 +188,12 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
             pattern_info['location'] = java_ref.get('location')
             pattern_info['provider'] = 'java'
 
+            # Extract import statements if location is IMPORT
+            if java_ref.get('location') == 'IMPORT' and message:
+                imports = extract_java_imports_from_message(message)
+                if imports:
+                    pattern_info['code_hint'] = '\n'.join(imports)
+
         elif 'java.dependency' in cond:
             java_dep = cond['java.dependency']
             pattern_info['pattern'] = java_dep.get('name')
@@ -279,6 +285,41 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
             patterns_to_test.append(merged)
 
     return patterns_to_test
+
+
+def extract_java_imports_from_message(message: str) -> list:
+    """
+    Extract Java import statements from a rule message's "Before:" section.
+
+    Args:
+        message: Rule message (may contain Before/After code examples)
+
+    Returns:
+        List of import statement strings
+    """
+    if not message:
+        return []
+
+    import re
+
+    imports = []
+
+    # Look for code blocks after "Before:"
+    # Handle both actual newlines and literal \n (backslash-n) in the message
+    before_match = re.search(r'Before:(?:\\n|\n)```(?:java)?(?:\\n|\n)(.*?)(?:\\n|\n)```', message, re.DOTALL)
+    if before_match:
+        code = before_match.group(1).strip()
+        # Replace literal \n with actual newlines if present
+        if '\\n' in code:
+            code = code.replace('\\n', '\n')
+
+        # Extract import statements from the code
+        # Pattern: import package.name.ClassName;
+        import_pattern = r'import\s+[\w.]+\s*;'
+        found_imports = re.findall(import_pattern, code)
+        imports.extend(found_imports)
+
+    return imports
 
 
 def generate_code_hint_from_pattern(pattern: str, language: str, description: str = '', message: str = '') -> str:
@@ -381,7 +422,8 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
     for p in patterns:
         pattern_text = f"- Rule {p['ruleID']}: {p['description']}"
 
-        # Check if any pattern needs config files
+        # Check if any pattern needs config files or has Java imports
+        has_java_imports = False
         for pattern in p.get('patterns', []):
             if pattern.get('is_config_file'):
                 has_config_files = True
@@ -390,9 +432,15 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
                 pattern_obj = pattern.get('pattern', '')
                 pattern_text += f"\n  **MUST BE IN CONFIG FILE ({config_file_type}):** {pattern_obj}"
 
+            # Check for Java imports
+            if pattern.get('provider') == 'java' and pattern.get('location') == 'IMPORT' and pattern.get('code_hint'):
+                has_java_imports = True
+                pattern_text += f"\n\n  **YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS:**\n  ```java\n  // {p['ruleID']}\n  {pattern['code_hint']}\n  ```"
+
         # Add code hint if available (for code-based rules)
-        if p.get('code_hint'):
-            pattern_text += f"\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n  ```tsx\n  // {p['ruleID']}\n  {p['code_hint']}\n  ```"
+        if p.get('code_hint') and not has_java_imports:
+            if language == 'typescript':
+                pattern_text += f"\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n  ```tsx\n  // {p['ruleID']}\n  {p['code_hint']}\n  ```"
         elif p.get('component'):
             pattern_text += f"\n  Component: {p['component']} (MUST be used in JSX, not just imported)"
 
@@ -427,11 +475,15 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
 {config_file_instructions}
 
 For Java patterns:
+- IMPORT location: Add actual import statements at the top of the file (e.g., import org.example.ClassName;)
 - PACKAGE location: Use @Value("${{property}}") or @ConfigurationProperties
 - TYPE location: Use class/interface in field declarations or method signatures
 - ANNOTATION location: Use @Annotation on classes/methods
 - DEPENDENCY location: Include in pom.xml dependencies
 - CONFIG FILE patterns: Add actual property in application.properties or application.yaml
+
+CRITICAL: When import statements are shown above with "YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS",
+add them EXACTLY as shown at the top of your Java file, after the package declaration.
 """,
         'typescript': """
 1. **{build_file}** - package.json with:

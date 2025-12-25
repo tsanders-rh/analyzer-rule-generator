@@ -467,16 +467,48 @@ EOF
     TEMP_OUTPUT=$(mktemp)
     kantra test ${TEST_OUTPUT}/*.test.yaml 2>&1 | tee "${TEMP_OUTPUT}" || true
 
-    # Count passed and failed tests from output
-    PASSED_COUNT=$(grep -c "PASS" "${TEMP_OUTPUT}" 2>/dev/null || echo "0")
-    FAILED_COUNT=$(grep -c "FAIL" "${TEMP_OUTPUT}" 2>/dev/null || echo "0")
+    # Parse accurate test statistics from output
+    echo ""
+    echo "======================================================================"
+    echo "Test Summary:"
+    echo "======================================================================"
+
+    # Count test files (.test.yaml lines)
+    TEST_FILES_TOTAL=$(grep -c "\.test\.yaml.*PASSED\|\.test\.yaml.*FAILED" "${TEMP_OUTPUT}" 2>/dev/null || echo "0")
+    TEST_FILES_PASSED=$(grep -c "\.test\.yaml.*PASSED" "${TEMP_OUTPUT}" 2>/dev/null || echo "0")
+    TEST_FILES_FAILED=$((TEST_FILES_TOTAL - TEST_FILES_PASSED))
+
+    # Count individual test cases (rule IDs with numbers)
+    TEST_CASES_TOTAL=$(grep -E "[0-9]{5}.*[0-9]+/[0-9]+.*PASSED|[0-9]{5}.*[0-9]+/[0-9]+.*FAILED" "${TEMP_OUTPUT}" | wc -l | tr -d ' ')
+    TEST_CASES_PASSED=$(grep -E "[0-9]{5}.*[0-9]+/[0-9]+.*PASSED" "${TEMP_OUTPUT}" | wc -l | tr -d ' ')
+    TEST_CASES_FAILED=$((TEST_CASES_TOTAL - TEST_CASES_PASSED))
+
+    # Calculate percentages
+    if [ "${TEST_FILES_TOTAL}" -gt 0 ]; then
+        TEST_FILES_PCT=$(awk "BEGIN {printf \"%.1f\", ($TEST_FILES_PASSED / $TEST_FILES_TOTAL) * 100}")
+    else
+        TEST_FILES_PCT="0.0"
+    fi
+
+    if [ "${TEST_CASES_TOTAL}" -gt 0 ]; then
+        TEST_CASES_PCT=$(awk "BEGIN {printf \"%.1f\", ($TEST_CASES_PASSED / $TEST_CASES_TOTAL) * 100}")
+    else
+        TEST_CASES_PCT="0.0"
+    fi
+
+    # Display summary
+    echo "Test Files:  ${TEST_FILES_PASSED}/${TEST_FILES_TOTAL} passed (${TEST_FILES_PCT}%)"
+    echo "Test Cases:  ${TEST_CASES_PASSED}/${TEST_CASES_TOTAL} passed (${TEST_CASES_PCT}%)"
+    echo "======================================================================"
+
     rm -f "${TEMP_OUTPUT}"
 
     echo ""
-    if [ "${FAILED_COUNT}" -eq 0 ] && [ "${PASSED_COUNT}" -gt 0 ]; then
-        print_success "All tests passed! (${PASSED_COUNT} tests)"
-    elif [ "${FAILED_COUNT}" -gt 0 ]; then
-        print_warning "Some tests failed: ${FAILED_COUNT} failed, ${PASSED_COUNT} passed"
+    if [ "${TEST_FILES_FAILED}" -eq 0 ] && [ "${TEST_FILES_TOTAL}" -gt 0 ]; then
+        print_success "All test files passed! (${TEST_FILES_TOTAL} files, ${TEST_CASES_TOTAL} test cases)"
+    elif [ "${TEST_FILES_FAILED}" -gt 0 ]; then
+        print_warning "${TEST_FILES_FAILED} test file(s) failed, ${TEST_FILES_PASSED} passed"
+        print_warning "${TEST_CASES_FAILED} test case(s) failed, ${TEST_CASES_PASSED} passed"
         print_info "Review the output above for details"
     else
         print_warning "No test results found - check output above"

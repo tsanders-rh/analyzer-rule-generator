@@ -582,6 +582,11 @@ For Maven dependency changes (pom.xml), use these fields:
 - **provider_type**: Set to "java" (the java provider handles Maven dependencies)
 - **category**: MUST set to "dependency"
 - **source_fqn**: Maven coordinates in format "groupId:artifactId" (e.g., "mysql:mysql-connector-java" or "org.springframework.boot:spring-boot-starter-web")
+- **alternative_fqns**: CRITICAL - Include Maven relocations! Many Maven artifacts have been relocated:
+  * "mysql:mysql-connector-java" → "com.mysql:mysql-connector-j" (relocated in 8.0+)
+  * If the migration guide mentions a dependency change, check if it's a Maven relocation
+  * Include BOTH the old and relocated coordinates in alternative_fqns (e.g., ["com.mysql:mysql-connector-j"])
+  * Maven automatically resolves relocations, so the analyzer will see the NEW coordinates even if pom.xml has OLD ones
 - **location_type**: null (not needed for dependency detection)
 - **file_pattern**: null
 
@@ -888,6 +893,11 @@ For Maven dependency changes (pom.xml), use these fields:
 - **provider_type**: Set to "java" (the java provider handles Maven dependencies)
 - **category**: MUST set to "dependency"
 - **source_fqn**: Maven coordinates in format "groupId:artifactId" (e.g., "mysql:mysql-connector-java" or "org.springframework.boot:spring-boot-starter-web")
+- **alternative_fqns**: CRITICAL - Include Maven relocations! Many Maven artifacts have been relocated:
+  * "mysql:mysql-connector-java" → "com.mysql:mysql-connector-j" (relocated in 8.0+)
+  * If the migration guide mentions a dependency change, check if it's a Maven relocation
+  * Include BOTH the old and relocated coordinates in alternative_fqns (e.g., ["com.mysql:mysql-connector-j"])
+  * Maven automatically resolves relocations, so the analyzer will see the NEW coordinates even if pom.xml has OLD ones
 - **location_type**: null (not needed for dependency detection)
 - **file_pattern**: null
 

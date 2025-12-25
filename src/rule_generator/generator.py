@@ -74,8 +74,7 @@ class AnalyzerRuleGenerator:
         # Generate rules for each concern
         rules_by_concern = {}
         for concern, concern_patterns in patterns_by_concern.items():
-            # Reset rule counter for each concern
-            self._rule_counter = 0
+            # Do NOT reset counter - rule IDs must be globally unique across all files
 
             rules = []
             for pattern in concern_patterns:

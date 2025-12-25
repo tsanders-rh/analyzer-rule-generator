@@ -463,10 +463,79 @@ EOF
     # Change to project root for kantra test (it needs relative paths to work)
     cd "${PROJECT_ROOT}" || exit 1
 
-    # Run kantra test with output streaming in real-time
-    # Save to temp file for parsing results
+    # Run kantra test and save output for formatting
     TEMP_OUTPUT=$(mktemp)
     kantra test ${TEST_OUTPUT}/*.test.yaml 2>&1 | tee "${TEMP_OUTPUT}" || true
+
+    echo ""
+    echo "Formatted Test Results:"
+    echo "======================================================================"
+
+    # Format the output with proper alignment and line breaks
+    awk '
+    BEGIN { in_test_file = 0; }
+
+    # Match test file header lines (*.test.yaml)
+    /\.test\.yaml.*PASSED|\.test\.yaml.*FAILED/ {
+        if (in_test_file) print "";  # Add blank line before new test file
+        # Extract filename, count, and status
+        filename = $1
+        count = $2
+        status = $3
+        printf "%-62s %6s  %s\n", filename, count, status
+        in_test_file = 1
+        next
+    }
+
+    # Match rule result lines (any-rule-id-format...)
+    # Matches patterns like: spring-boot-..., react-..., patternfly-..., etc.
+    /-[0-9]{5}.*PASSED|-[0-9]{5}.*FAILED/ {
+        if (in_test_file) {
+            # Extract rule ID, count, and status
+            ruleid = $1
+            count = $2
+            status = $3
+            printf "  %-60s %6s  %s\n", ruleid, count, status
+        }
+        next
+    }
+
+    # Match test case lines (tc-1, tc-2, etc.)
+    /^[ ]*tc-[0-9]+.*PASSED|^[ ]*tc-[0-9]+.*FAILED/ {
+        if (in_test_file) {
+            # Extract test case name and status (no count)
+            gsub(/^[ ]+/, "")  # Remove leading spaces
+            tcname = $1
+            status = $2
+            printf "    %-58s          %s\n", tcname, status
+        }
+        next
+    }
+
+    # Match error message lines (start with "- ")
+    /^[ ]*- / {
+        if (in_test_file) {
+            # Print error messages indented
+            print "    " $0
+        }
+        next
+    }
+
+    # Match summary separator
+    /^-+$/ {
+        print ""
+        print $0
+        next
+    }
+
+    # Match summary lines (Rules Summary, Test Cases Summary)
+    /Rules Summary:|Test Cases Summary:/ {
+        print $0
+        next
+    }
+    ' "${TEMP_OUTPUT}"
+
+    echo "======================================================================"
 
     # Count passed and failed tests from output
     PASSED_COUNT=$(grep -c "PASS" "${TEMP_OUTPUT}" 2>/dev/null || echo "0")

@@ -271,9 +271,15 @@ class AnalyzerRuleGenerator:
                 config_extensions = ['.properties', '.yaml', '.yml', '.xml', '.json', '.conf', '.cfg', '.ini', '.factories']
                 is_config_file = any(ext in pattern.file_pattern for ext in config_extensions)
 
-            # For import patterns (but NOT config files), ensure pattern ends with $ anchor for precise matching
-            # Don't add $ to config file patterns because property keys have values after them
-            if self._is_import_pattern(pattern) and not is_config_file and not regex_pattern.endswith('$'):
+            # For COMPLETE import line patterns (but NOT config files or partial text patterns),
+            # ensure pattern ends with $ anchor for precise matching.
+            # Don't add $ to:
+            #   - Config file patterns (property keys have values after them)
+            #   - Partial text patterns (e.g., "javax\." which should match anywhere in file)
+            # Only add $ to full import statement patterns (e.g., "import.*XhrFactory.*from.*@angular/common/http")
+            if (self._is_complete_import_line_pattern(pattern) and
+                not is_config_file and
+                not regex_pattern.endswith('$')):
                 # Add $ anchor to match end of import statement
                 # This prevents false positives from partial matches
                 regex_pattern = regex_pattern + '$'
@@ -513,6 +519,36 @@ class AnalyzerRuleGenerator:
         if pattern.example_before and "import" in pattern.example_before.lower():
             return True
 
+        return False
+
+    def _is_complete_import_line_pattern(self, pattern: MigrationPattern) -> bool:
+        """
+        Determine if pattern is a COMPLETE import line pattern that should have $ anchor.
+
+        This is different from _is_import_pattern() which checks if the pattern is ABOUT imports.
+        This function checks if the pattern is matching a FULL import line (e.g., "import.*from.*")
+        vs a partial text pattern (e.g., "javax\." which matches package names anywhere).
+
+        Args:
+            pattern: Migration pattern
+
+        Returns:
+            True if pattern is a complete import line pattern that needs $ anchor
+        """
+        # Check if this is a builtin provider pattern
+        if pattern.provider_type != "builtin":
+            return False
+
+        source = pattern.source_fqn or pattern.source_pattern or ""
+
+        # Check if pattern itself starts with "import" (indicates full import line matching)
+        # Examples: "import.*XhrFactory.*from.*@angular/common/http"
+        if source.strip().lower().startswith("import"):
+            return True
+
+        # Patterns that are just package/class names should NOT have $ anchor
+        # Examples: "javax\.", "React.FC", "RouterEvent"
+        # These patterns should match anywhere in the file, not just at end of line
         return False
 
     def _build_custom_variables(self, pattern: MigrationPattern) -> List[Dict[str, str]]:

@@ -8,6 +8,7 @@ contains code violations matching the generated rules.
 Supports multiple languages: Java, TypeScript, Go, Python, etc.
 """
 import argparse
+import os
 import sys
 from pathlib import Path
 import yaml
@@ -332,6 +333,68 @@ def extract_java_imports_from_message(message: str) -> list:
     return imports
 
 
+def inject_missing_java_imports(source_code: str, patterns_to_test: list, rules: list) -> str:
+    """
+    Post-process Java source code to inject missing import statements.
+
+    This ensures that even if the AI doesn't include required imports,
+    they get added automatically for IMPORT location rules.
+
+    Args:
+        source_code: Generated Java source code
+        patterns_to_test: List of pattern dictionaries from extract_patterns_from_rules
+        rules: List of rules with messages
+
+    Returns:
+        Java source code with missing imports injected
+    """
+    import re
+
+    # Collect all required imports from IMPORT location patterns
+    required_imports = set()
+
+    for pattern_group in patterns_to_test:
+        # Each pattern_group has a 'patterns' list with sub-patterns
+        if 'patterns' in pattern_group:
+            for pattern in pattern_group['patterns']:
+                if pattern.get('location') == 'IMPORT' and pattern.get('code_hint'):
+                    # code_hint contains the full import statements
+                    imports = pattern['code_hint'].split('\n')
+                    for imp in imports:
+                        imp = imp.strip()
+                        if imp and imp.startswith('import '):
+                            required_imports.add(imp)
+
+    if not required_imports:
+        return source_code  # No imports to inject
+
+    # Check which imports are missing
+    missing_imports = []
+    for required_import in required_imports:
+        if required_import not in source_code:
+            missing_imports.append(required_import)
+
+    if not missing_imports:
+        return source_code  # All imports already present
+
+    # Inject missing imports after package declaration
+    # Find package declaration
+    package_match = re.search(r'(package\s+[\w.]+\s*;)', source_code)
+
+    if package_match:
+        package_end = package_match.end()
+
+        # Build import block with comments indicating which rules need them
+        import_block = '\n\n// Auto-injected imports for IMPORT location rules\n'
+        for imp in sorted(missing_imports):
+            import_block += f'{imp}\n'
+
+        # Inject imports after package declaration
+        source_code = source_code[:package_end] + import_block + source_code[package_end:]
+
+    return source_code
+
+
 def generate_code_hint_from_pattern(pattern: str, language: str, description: str = '', message: str = '') -> str:
     """
     Generate a code example hint from a regex pattern or rule message.
@@ -502,6 +565,9 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
 
 For Java patterns:
 - IMPORT location: Add actual import statements at the top of the file (e.g., import org.example.ClassName;)
+- METHOD_CALL location: Call a method on the specified class instance (e.g., configurer.setUseTrailingSlashMatch(false);)
+  * You MUST include an actual method invocation like object.methodName()
+  * Just importing or declaring the type is NOT enough - you must CALL a method on it
 - PACKAGE location: Use @Value("${{property}}") or @ConfigurationProperties
 - TYPE location: Use class/interface in field declarations or method signatures
 - ANNOTATION location: Use @Annotation on classes/methods
@@ -796,9 +862,32 @@ def generate_test_yaml(rule_file_path: Path, data_dir_name: str, rules: list, ou
     if not providers:
         providers = {'java', 'builtin'}
 
+    # Write test YAML file first to determine location
+    test_file_name = rule_file_path.stem + '.test.yaml'
+    test_file_path = output_dir / test_file_name
+
+    # Calculate relative path from test file to rule file
+    # Use pathlib to compute the relative path automatically
+    try:
+        # Get absolute paths
+        test_abs = test_file_path.resolve().parent
+        rule_abs = rule_file_path.resolve()
+
+        # Calculate relative path from test directory to rule file
+        relative_rules_path = os.path.relpath(rule_abs, test_abs)
+    except (ValueError, OSError):
+        # Fallback: assume standard structure (tests/data/<concern>/ → rules/)
+        # Count how many levels deep we are from a common root
+        # If output_dir has "data" in it, we're likely in tests/data/<concern>/
+        # Otherwise, we're in tests/
+        if 'data' in str(output_dir):
+            relative_rules_path = f'../../../rules/{rule_file_path.name}'
+        else:
+            relative_rules_path = f'../rules/{rule_file_path.name}'
+
     # Build test structure
     test_data = {
-        'rulesPath': f'../rules/{rule_file_path.name}',
+        'rulesPath': relative_rules_path,
         'providers': [
             {'name': provider, 'dataPath': f'./data/{data_dir_name}'}
             for provider in sorted(providers)
@@ -816,10 +905,6 @@ def generate_test_yaml(rule_file_path: Path, data_dir_name: str, rules: list, ou
             for rule_id in rule_ids
         ]
     }
-
-    # Write test YAML file
-    test_file_name = rule_file_path.stem + '.test.yaml'
-    test_file_path = output_dir / test_file_name
 
     with open(test_file_path, 'w') as f:
         yaml.dump(test_data, f, default_flow_style=False, sort_keys=False)
@@ -1048,8 +1133,19 @@ Examples:
 
         # Write source file
         source_file_path = src_dir / config['main_file']
+        source_content = code['source_file']
+
+        # Post-process Java files to inject missing imports
+        if language == 'java':
+            # Extract patterns from rules to get import requirements
+            patterns_to_test = extract_patterns_from_rules(rules, language)
+            original_content = source_content
+            source_content = inject_missing_java_imports(source_content, patterns_to_test, rules)
+            if source_content != original_content:
+                print(f"  → Auto-injected missing import statements for IMPORT location rules")
+
         with open(source_file_path, 'w') as f:
-            f.write(code['source_file'])
+            f.write(source_content)
         print(f"  ✓ {source_file_path.relative_to(output_dir)}")
 
         # Write config file if present (for Java/Spring Boot projects)

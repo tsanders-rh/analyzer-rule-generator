@@ -309,7 +309,10 @@ Use ONLY for patterns that specifically require file type filtering:
 Fields:
 - **provider_type**: Set to "builtin"
 - **source_fqn**: SIMPLE regex pattern. Use `.*` for wildcards, avoid complex escapes like \\s, \\{{, \\}} (e.g., "componentWillMount")
-  - **IMPORTANT**: For import patterns matching specific symbols, add `$` anchor to match end of line (e.g., "import.*XhrFactory.*from.*@angular/common/http$")
+  - **IMPORTANT - $  anchor usage**:
+    - **Add $ anchor**: ONLY for COMPLETE import statement patterns (e.g., "import.*XhrFactory.*from.*@angular/common/http$")
+    - **NO $ anchor**: For partial text/package name matching (e.g., "javax\\." to match javax.servlet, javax.persistence, etc.)
+    - The $ anchor means "end of line" - only use it when you're matching a full line, not partial text
   - **IMPORTANT**: For symbol references (not imports), use the symbol name without anchors (e.g., "RouterEvent", "ComponentFactoryResolver")
 - **file_pattern**: REGEX pattern for file matching (e.g., "\\.tsx$" for .tsx files, "\\.(j|t)sx?$" for .js/.jsx/.ts/.tsx, "\\.(j|t)s$" for .js/.ts)
 - **location_type**: null
@@ -561,12 +564,17 @@ For Java code patterns (classes, annotations, imports), use these fields:
 - **provider_type**: Set to "java" (or leave null for auto-detection)
 - **source_fqn**: Fully qualified class name (e.g., "javax.ejb.Stateless")
 - **location_type**: One of:
-  - **IMPORT**: For specific class imports only (exact FQN required like "org.springframework.boot.actuate.trace.http.HttpTraceRepository")
-  - **ANNOTATION**: For annotation usage
-  - **METHOD_CALL**: For method invocations
-  - **TYPE**: For type references
-  - **INHERITANCE**: For class inheritance
-  - **PACKAGE**: For package references
+  - **IMPORT**: For detecting import statements of specific classes (e.g., "import org.example.ClassName;")
+  - **TYPE**: For detecting when a class is used as a type (field type, parameter type, return type, variable declaration)
+    * Use this when the pattern is a CLASS that appears in code as a type reference
+    * Example: "PathMatchConfigurer" used as parameter type in "void config(PathMatchConfigurer c)"
+  - **METHOD_CALL**: For detecting specific METHOD NAME invocations (pattern should be method name, not class name)
+    * Use this when the pattern is a METHOD that is being called
+    * Example: pattern "getSomething" to find calls to "object.getSomething()"
+    * DO NOT use for detecting usage of a class - use TYPE instead
+  - **ANNOTATION**: For annotation usage (e.g., @Deprecated, @Stateless)
+  - **INHERITANCE**: For detecting class inheritance (extends/implements)
+  - **PACKAGE**: For detecting package references
 - **file_pattern**: Can be null
 
 **Maven Dependency Detection Instructions:**
@@ -817,15 +825,23 @@ When a migration involves MULTIPLE specific value replacements, you MUST create 
 - ✅ GOOD: "<Button isActive />"
 - ❌ BAD: "import {{{{ Button }}}} from '@patternfly/react-core'; export const MyButton = () => <Button isActive />"
 
+**CRITICAL JSON FORMATTING RULES:**
+- You are generating JSON - ALL backslashes in string values MUST be escaped
+- In JSON: `\\.` is INVALID, `\\\\.` is CORRECT (escaped backslash + escaped dot)
+- For regex dot: write `\\\\.` not `\\.`
+- For file patterns: `".*\\\\.properties"` not `".*\\.properties"`
+- ALWAYS double your backslashes in JSON strings!
+
 **IMPORTANT REGEX PATTERN RULES:**
 - For builtin provider: Use SIMPLE regex patterns with `.*` wildcards
 - Avoid complex regex escapes like \\s, \\(, \\) (but \\{{ and \\}} are OK in non-file-pattern contexts)
 - Example: Use "import.*Component.*from.*library" NOT "import\\s*\\{{\\s*Component\\s*\\}}"
+- Remember: Escape your backslashes for JSON!
 
 **FILE PATTERN RULES:**
 - For builtin.filecontent provider: Use REGEX patterns for filePattern field
 - Examples: "\\\\.tsx$" for .tsx files, "\\\\.(j|t)sx?$" for .js/.jsx/.ts/.tsx files
-- Remember: In JSON, backslashes must be escaped with \\\\
+- CRITICAL: In JSON, write `\\\\.` for a literal dot in regex (four backslashes become two in the string, one in the actual regex)
 - For nodejs provider: Do NOT use filePattern (matches all JS/TS files)
 
 Return ONLY the JSON array, no additional commentary."""
@@ -1009,6 +1025,21 @@ Return ONLY the JSON array, no additional commentary."""
         Returns:
             Repaired JSON string
         """
+        # Fix invalid escape sequences in string values FIRST
+        # JSON only allows: \" \\ \/ \b \f \n \r \t \uXXXX
+        # Regex patterns often have: \. \d \w \s etc. which are invalid in JSON
+        def fix_invalid_escapes(match):
+            value = match.group(1)
+            # Double-escape backslashes that aren't followed by valid JSON escape chars
+            # Valid JSON escapes: " \ / b f n r t u
+            # Replace \X (where X is not a valid escape) with \\X
+            fixed = re.sub(r'\\([^"\\/bfnrtu])', r'\\\\\1', value)
+            return f'"{fixed}"'
+
+        # Match string values and fix invalid escapes
+        # This pattern matches: "..." string values
+        json_str = re.sub(r'"((?:[^"\\]|\\.)*)"', fix_invalid_escapes, json_str)
+
         # Remove trailing commas before closing brackets/braces
         # e.g., {"key": "value",} -> {"key": "value"}
         json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
@@ -1071,8 +1102,20 @@ Return ONLY the JSON array, no additional commentary."""
                 print("✓ Successfully repaired JSON")
             except json.JSONDecodeError as e2:
                 print(f"Failed to repair JSON: {e2}")
-                print(f"Response: {response[:500]}")
-                return []
+                # Try one more aggressive repair: escape all single backslashes
+                try:
+                    # Replace single backslash with double backslash in string values
+                    aggressive_json = repaired_json
+                    # This is a last resort - may break some patterns but better than nothing
+                    aggressive_json = aggressive_json.replace('\\', '\\\\')
+                    # But we may have over-escaped, so fix double-double backslashes
+                    aggressive_json = aggressive_json.replace('\\\\\\\\', '\\\\')
+                    patterns_data = json.loads(aggressive_json)
+                    print("✓ Successfully repaired JSON with aggressive escaping")
+                except json.JSONDecodeError as e3:
+                    print(f"Final attempt failed: {e3}")
+                    print(f"Response preview: {response[:500]}")
+                    return []
 
         # Convert to MigrationPattern objects
         patterns = []

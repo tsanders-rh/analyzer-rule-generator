@@ -47,10 +47,10 @@ NC='\033[0m' # No Color
 # ============================================================================
 
 # Option 1: React 17 to 18 (SMALL - Recommended for quick demos ~5 min)
-#GUIDE_URL="https://react.dev/blog/2022/03/08/react-18-upgrade-guide"
-#SOURCE="react-17"
-#TARGET="react-18"
-#FOLLOW_LINKS_FLAG=""  # Single page guide
+GUIDE_URL="https://react.dev/blog/2022/03/08/react-18-upgrade-guide"
+SOURCE="react-17"
+TARGET="react-18"
+FOLLOW_LINKS_FLAG=""  # Single page guide
 
 # Option 2: Go 1.17 to 1.18 (SMALL - Deprecated API migrations ~5-8 min)
 # GUIDE_URL="https://tip.golang.org/doc/go1.18"
@@ -59,10 +59,10 @@ NC='\033[0m' # No Color
 # FOLLOW_LINKS_FLAG=""  # Single page guide
 
 # Option 3: Spring Boot 2 to 3 (MEDIUM - ~8-10 min)
- GUIDE_URL="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
- SOURCE="spring-boot-2"
- TARGET="spring-boot-3"
- FOLLOW_LINKS_FLAG=""  # Single page guide
+# GUIDE_URL="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
+# SOURCE="spring-boot-2"
+# TARGET="spring-boot-3"
+# FOLLOW_LINKS_FLAG=""  # Single page guide
 
 # Option 4: PatternFly v5 to v6 (LARGE - ~15-20 min, comprehensive)
 #GUIDE_URL="https://www.patternfly.org/get-started/upgrade/"
@@ -474,13 +474,36 @@ EOF
     echo "======================================================================"
 
     # Count test files (.test.yaml lines)
-    TEST_FILES_TOTAL=$(grep -c "\.test\.yaml.*PASSED\|\.test\.yaml.*FAILED" "${TEMP_OUTPUT}" 2>/dev/null || echo "0")
-    TEST_FILES_PASSED=$(grep -c "\.test\.yaml.*PASSED" "${TEMP_OUTPUT}" 2>/dev/null || echo "0")
+    # Kantra always prints "PASSED" even for failed tests (shows "0/1 PASSED")
+    # We need to parse X/Y and only count as passed when X == Y
+    TEST_FILES_TOTAL=0
+    TEST_FILES_PASSED=0
+    while IFS= read -r line; do
+        if [[ "$line" =~ \.test\.yaml[[:space:]]+([0-9]+)/([0-9]+) ]]; then
+            passed="${BASH_REMATCH[1]}"
+            total="${BASH_REMATCH[2]}"
+            TEST_FILES_TOTAL=$((TEST_FILES_TOTAL + 1))
+            if [ "$passed" -eq "$total" ]; then
+                TEST_FILES_PASSED=$((TEST_FILES_PASSED + 1))
+            fi
+        fi
+    done < "${TEMP_OUTPUT}"
     TEST_FILES_FAILED=$((TEST_FILES_TOTAL - TEST_FILES_PASSED))
 
     # Count individual test cases (rule IDs with numbers)
-    TEST_CASES_TOTAL=$(grep -E "[0-9]{5}.*[0-9]+/[0-9]+.*PASSED|[0-9]{5}.*[0-9]+/[0-9]+.*FAILED" "${TEMP_OUTPUT}" | wc -l | tr -d ' ')
-    TEST_CASES_PASSED=$(grep -E "[0-9]{5}.*[0-9]+/[0-9]+.*PASSED" "${TEMP_OUTPUT}" | wc -l | tr -d ' ')
+    # Same issue - parse X/Y counts instead of looking for "PASSED" keyword
+    TEST_CASES_TOTAL=0
+    TEST_CASES_PASSED=0
+    while IFS= read -r line; do
+        if [[ "$line" =~ -[0-9]{5}[[:space:]]+([0-9]+)/([0-9]+) ]]; then
+            passed="${BASH_REMATCH[1]}"
+            total="${BASH_REMATCH[2]}"
+            TEST_CASES_TOTAL=$((TEST_CASES_TOTAL + 1))
+            if [ "$passed" -eq "$total" ]; then
+                TEST_CASES_PASSED=$((TEST_CASES_PASSED + 1))
+            fi
+        fi
+    done < "${TEMP_OUTPUT}"
     TEST_CASES_FAILED=$((TEST_CASES_TOTAL - TEST_CASES_PASSED))
 
     # Calculate percentages

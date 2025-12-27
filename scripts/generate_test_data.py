@@ -1029,9 +1029,9 @@ def run_kantra_tests(output_dir: Path) -> dict:
             'exit_code': 1
         }
 
-    # Run kantra test with explicit file list
+    # Run kantra test with explicit file list (use just filenames since cwd is set)
     result = subprocess.run(
-        ['kantra', 'test'] + [str(f) for f in test_files],
+        ['kantra', 'test'] + [f.name for f in test_files],
         cwd=output_dir,
         capture_output=True,
         text=True

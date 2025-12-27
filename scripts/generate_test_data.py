@@ -427,14 +427,16 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
                 code = code.replace('\\n', '\n')
             # Skip if contains template variables ({{ }})
             if '{{' not in code and '}}' not in code:
-                # CRITICAL: Validate that the code actually matches the pattern using regex
-                # For example, if pattern is ReactDOM\.render\(, the code must contain "ReactDOM.render("
-                # not just "render(" which won't be detected
-                if pattern:
+                # CRITICAL: Prefer single-line code for line-by-line matching
+                # If code contains newlines, skip it and use pattern-based generation instead
+                # This ensures tests work with Konveyor's line-by-line builtin.filecontent matching
+                if '\n' in code:
+                    # Code spans multiple lines, skip and use pattern-based generation
+                    pass
+                elif pattern:
                     try:
-                        # Use actual regex matching to validate
-                        # Add flags for multiline and dotall to handle code that spans multiple lines
-                        if re.search(pattern, code, re.MULTILINE | re.DOTALL):
+                        # Use actual regex matching to validate single-line code
+                        if re.search(pattern, code):
                             # Pattern matches, return this code
                             return code
                         else:
@@ -470,6 +472,11 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
     if 'interface' in pattern and 'Props' in pattern:
         # TypeScript interface (single line for line-by-line matching)
         return "interface ButtonProps { onClick: () => void; disabled?: boolean; }"
+
+    # Pattern 5: IS_REACT_ACT_ENVIRONMENT - needs to be referenced as an identifier, not property access
+    if pattern == 'IS_REACT_ACT_ENVIRONMENT':
+        # Use as identifier, not global.IS_REACT_ACT_ENVIRONMENT (which is property access)
+        return "const testEnv = IS_REACT_ACT_ENVIRONMENT;"
 
     # Pattern 4: Method calls like ReactDOM\.render\( or obj\.method\(
     # Match: ObjectName.methodName( or functionName(

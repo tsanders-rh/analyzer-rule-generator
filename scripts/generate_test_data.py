@@ -453,17 +453,23 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
 
     # Pattern 1: render with callback - render\([^,]+,[^,]+,\s*\([^)]*\)\s*=>
     if 'render\\(' in pattern and '=>' in pattern:
-        # This is render with a callback function
-        return "render(<App tab=\"home\" />, container, () => {\n  console.log('rendered');\n});"
+        # This is render with a callback function (single line for line-by-line matching)
+        return "render(<App tab=\"home\" />, container, () => { console.log('rendered'); });"
 
     # Pattern 2: renderToString with Suspense - renderToString\([^)]*<Suspense
     if 'renderToString' in pattern and 'Suspense' in pattern:
-        return "renderToString(\n  <Suspense fallback={<Loading />}>\n    <App />\n  </Suspense>\n);"
+        # Single line for line-by-line matching
+        return "renderToString(<Suspense fallback={<Loading />}><App /></Suspense>);"
 
     # Pattern 3: setTimeout with multiple setState - setTimeout\([^{]*\{[^}]*set...
     if 'setTimeout' in pattern and pattern.count('set[A-Za-z') >= 2:
-        # Multiple setState calls in setTimeout
-        return "setTimeout(() => {\n  setCount(c => c + 1);\n  setFlag(f => !f);\n}, 1000);"
+        # Multiple setState calls in setTimeout (single line for line-by-line matching)
+        return "setTimeout(() => { setCount(c => c + 1); setFlag(f => !f); }, 1000);"
+
+    # Pattern 4: Interface with Props - interface\s+[A-Za-z0-9_]+Props\s*\{[^}]*\}
+    if 'interface' in pattern and 'Props' in pattern:
+        # TypeScript interface (single line for line-by-line matching)
+        return "interface ButtonProps { onClick: () => void; disabled?: boolean; }"
 
     # Pattern 4: Method calls like ReactDOM\.render\( or obj\.method\(
     # Match: ObjectName.methodName( or functionName(

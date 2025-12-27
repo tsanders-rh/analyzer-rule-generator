@@ -14,6 +14,7 @@ from pathlib import Path
 import yaml
 import time
 import shutil
+import re
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
@@ -1017,9 +1018,20 @@ def run_kantra_tests(output_dir: Path) -> dict:
     print("Running kantra tests...")
     print(f"{'='*70}")
 
-    # Run kantra test
+    # Find all test files
+    test_files = list(output_dir.glob('*.test.yaml'))
+    if not test_files:
+        print("No test files found")
+        return {
+            'passed': 0,
+            'total': 0,
+            'failures': [],
+            'exit_code': 1
+        }
+
+    # Run kantra test with explicit file list
     result = subprocess.run(
-        ['kantra', 'test', '*.test.yaml'],
+        ['kantra', 'test'] + [str(f) for f in test_files],
         cwd=output_dir,
         capture_output=True,
         text=True

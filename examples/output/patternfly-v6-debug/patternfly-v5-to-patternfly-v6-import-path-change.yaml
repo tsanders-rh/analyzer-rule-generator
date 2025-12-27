@@ -1,0 +1,23 @@
+- ruleID: patternfly-v5-to-patternfly-v6-00000
+  description: AccordionContent isHidden should be replaced with AccordionContent
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bAccordionContent\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <AccordionContent[^>]*\bisHidden\b
+        filePattern: \.(j|t)sx?$
+  message: 'isHidden prop removed, visibility now automatic
+
+
+    Replace `AccordionContent isHidden` with `AccordionContent`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-org/blob/main/packages/documentation-site/patternfly-docs/content/get-started/release-notes.md
+    title: patternfly-v6 Documentation
+  customVariables: []

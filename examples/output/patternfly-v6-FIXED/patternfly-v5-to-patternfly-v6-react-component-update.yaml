@@ -1,0 +1,160 @@
+- ruleID: patternfly-v5-to-patternfly-v6-00000
+  description: button-group should be replaced with action-group
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bToolbarGroup\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <ToolbarGroup[^>]*\bbutton-group\b
+        filePattern: \.(j|t)sx?$
+  message: 'button-group variant is renamed to action-group to better align with design
+    terminology
+
+
+    Replace `button-group` with `action-group`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup variant=''button-group'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup variant=''action-group'' />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00010
+  description: icon as children should be replaced with icon prop
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bMenuToggle\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <MenuToggle>.*<EllipsisVIcon \/>
+        filePattern: \.(j|t)sx?$
+  message: 'Passing icon as children results in incorrect styling, use icon prop instead
+
+
+    Replace `icon as children` with `icon prop`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10097
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00020
+  description: InvalidObject should be replaced with MissingPage
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bInvalidObject\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <InvalidObject[^/>]*(?:/>|>)
+        filePattern: \.(j|t)sx?$
+  message: 'InvalidObject component has been renamed to MissingPage
+
+
+    Replace `InvalidObject` with `MissingPage`.'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/313
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00030
+  description: Modal from '@patternfly/react-core/next' should be replaced with Modal
+    from '@patternfly/react-core'
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bToolbarChipGroupContent\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <ToolbarChipGroupContent[^/>]*(?:/>|>)
+        filePattern: \.(j|t)sx?$
+  message: 'Next implementation of Modal has been promoted as our recommended implementation
+
+
+    Replace `Modal from ''@patternfly/react-core/next''` with `Modal from ''@patternfly/react-core''`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10358
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00040
+  description: leftBorderVariant and withHeaderBorder props should be replaced with
+    no props
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bMultiContentCard\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <MultiContentCard.*leftBorderVariant|withHeaderBorder
+        filePattern: \.(j|t)sx?$
+  message: 'leftBorderVariant and withHeaderBorder props have been removed from MultiContentCard
+
+
+    Replace `leftBorderVariant and withHeaderBorder props` with `no props`.'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/145
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00050
+  description: variant='tertiary' should be replaced with variant='horizontal-subnav'
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bNav\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <Nav.*variant=['"]tertiary['"]
+        filePattern: \.(j|t)sx?$
+  message: '''tertiary'' Nav variant is no longer supported, use ''horizontal-subnav''
+    instead
+
+
+    Replace `variant=''tertiary''` with `variant=''horizontal-subnav''`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9948
+    title: patternfly-v6 Documentation
+  customVariables: []

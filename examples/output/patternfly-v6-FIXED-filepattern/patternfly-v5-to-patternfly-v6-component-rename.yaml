@@ -1,0 +1,215 @@
+- ruleID: patternfly-v5-to-patternfly-v6-00000
+  description: button-group should be replaced with action-group
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: ToolbarGroup
+      ignore: true
+    - builtin.filecontent:
+        pattern: <ToolbarGroup[^>]*\bbutton-group\b
+        filepaths: '{{componentFiles.filepaths}}'
+      from: componentFiles
+  message: 'Variant prop values updated to reflect new naming conventions
+
+
+    Replace `button-group` with `action-group`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup variant=''button-group'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup variant=''action-group'' />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00010
+  description: MastheadBrand should be replaced with MastheadLogo
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: Masthead
+      ignore: true
+    - builtin.filecontent:
+        pattern: <Masthead>.*<MastheadBrand>
+        filepaths: '{{componentFiles.filepaths}}'
+      from: componentFiles
+  message: 'MastheadBrand should be replaced with MastheadLogo
+
+
+    Replace `MastheadBrand` with `MastheadLogo`.
+
+
+    Before:
+
+    ```
+
+    <Masthead><MastheadBrand>Bar</MastheadBrand></Masthead>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Masthead><MastheadLogo>Bar</MastheadLogo></Masthead>
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10809
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00020
+  description: Text should be replaced with Content
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: Text
+      ignore: true
+    - builtin.filecontent:
+        pattern: <Text[^/>]*(?:/>|>)
+        filepaths: '{{componentFiles.filepaths}}'
+      from: componentFiles
+  message: 'Component ''Text'' is renamed to ''Content'' in PatternFly 6
+
+
+    Replace `Text` with `Content`.
+
+
+    Before:
+
+    ```
+
+    <Text />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Content />
+
+    ```'
+  links:
+  - url: https://www.patternfly.org/components/content
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00030
+  description: ToolbarChipGroupContent should be replaced with ToolbarLabelGroupContent
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: ToolbarChipGroupContent
+      ignore: true
+    - builtin.filecontent:
+        pattern: <ToolbarChipGroupContent[^/>]*(?:/>|>)
+        filepaths: '{{componentFiles.filepaths}}'
+      from: componentFiles
+  message: 'Component renamed to better reflect its usage and functionality
+
+
+    Replace `ToolbarChipGroupContent` with `ToolbarLabelGroupContent`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarChipGroupContent />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarLabelGroupContent />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10649
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00040
+  description: NotAuthorized should be replaced with UnauthorizedAccess
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: NotAuthorized
+      ignore: true
+    - builtin.filecontent:
+        pattern: <NotAuthorized[^/>]*(?:/>|>)
+        filepaths: '{{componentFiles.filepaths}}'
+      from: componentFiles
+  message: 'Component renamed to better align with common terminology
+
+
+    Replace `NotAuthorized` with `UnauthorizedAccess`.
+
+
+    Before:
+
+    ```
+
+    <NotAuthorized />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <UnauthorizedAccess />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/313
+    title: patternfly-v6 Documentation
+  customVariables: []

@@ -1,0 +1,88 @@
+- ruleID: patternfly-v5-to-patternfly-v6-00000
+  description: button-group should be replaced with action-group
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bToolbarGroup\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <ToolbarGroup[^>]*\bbutton-group\b
+        filePattern: \.(j|t)sx?$
+  message: 'Variant prop values updated to new naming convention
+
+
+    Replace `button-group` with `action-group`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup variant=''button-group'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup variant=''action-group'' />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00010
+  description: Nav variant='tertiary' should be replaced with Nav variant='horizontal-subnav'
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bNav\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <Nav[^>]*\bvariant=['"]tertiary['"]
+        filePattern: \.(j|t)sx?$
+  message: 'The ''tertiary'' Nav variant is no longer supported, use ''horizontal-subnav''
+    instead
+
+
+    Replace `Nav variant=''tertiary''` with `Nav variant=''horizontal-subnav''`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9948
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00020
+  description: Page header prop should be replaced with Page masthead prop
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bPage\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <Page[^>]*\bheader\b
+        filePattern: \.(j|t)sx?$
+  message: 'The `header` prop for Page has been renamed to `masthead`
+
+
+    Replace `Page header prop` with `Page masthead prop`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10454
+    title: patternfly-v6 Documentation
+  customVariables: []

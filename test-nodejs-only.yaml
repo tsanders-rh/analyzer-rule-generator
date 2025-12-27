@@ -1,0 +1,11 @@
+- ruleID: test-nodejs-only-00000
+  description: Test nodejs.referenced alone
+  effort: 1
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    nodejs.referenced:
+      pattern: ToolbarGroup
+  message: Found ToolbarGroup reference

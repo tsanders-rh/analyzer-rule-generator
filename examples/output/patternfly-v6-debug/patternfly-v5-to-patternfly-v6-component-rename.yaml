@@ -1,0 +1,190 @@
+- ruleID: patternfly-v5-to-patternfly-v6-00000
+  description: AccordionContent isHidden should be replaced with AccordionContent
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bAccordionContent\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <AccordionContent[^>]*\bisHidden\b
+        filePattern: \.(j|t)sx?$
+  message: 'isHidden prop removed, visibility now automatic
+
+
+    Replace `AccordionContent isHidden` with `AccordionContent`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-org/blob/main/packages/documentation-site/patternfly-docs/content/get-started/release-notes.md
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00010
+  description: Modal from '@patternfly/react-core/next' should be replaced with Modal
+    from '@patternfly/react-core'
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bMasthead\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <Masthead>.*<MastheadBrand
+        filePattern: \.(j|t)sx?$
+  message: 'Next implementation of Modal has been promoted, update import paths
+
+
+    Replace `Modal from ''@patternfly/react-core/next''` with `Modal from ''@patternfly/react-core''`.
+
+
+    Before:
+
+    ```
+
+    import { Modal } from ''@patternfly/react-core/next'';
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { Modal } from ''@patternfly/react-core'';
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10358
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00020
+  description: MenuToggle icon as children should be replaced with MenuToggle icon
+    prop
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bMenuToggle\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <MenuToggle>.*<EllipsisVIcon
+        filePattern: \.(j|t)sx?$
+  message: 'Passing icon as children results in incorrect styling, use icon prop instead
+
+
+    Replace `MenuToggle icon as children` with `MenuToggle icon prop`.
+
+
+    Before:
+
+    ```
+
+    <MenuToggle><EllipsisVIcon /></MenuToggle>
+
+    ```
+
+
+    After:
+
+    ```
+
+    <MenuToggle icon={EllipsisVIcon} />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10097
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00030
+  description: Nav variant='tertiary' should be replaced with Nav variant='horizontal-subnav'
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bNav\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <Nav[^>]*\bvariant=['"]tertiary['"]
+        filePattern: \.(j|t)sx?$
+  message: '''tertiary'' Nav variant is no longer supported, use ''horizontal-subnav''
+    instead
+
+
+    Replace `Nav variant=''tertiary''` with `Nav variant=''horizontal-subnav''`.
+
+
+    Before:
+
+    ```
+
+    <Nav variant=''tertiary'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <Nav variant=''horizontal-subnav'' />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9948
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00040
+  description: NotAuthorized should be replaced with UnauthorizedAccess
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: import.*\{{[^}}]*\bNotAuthorized\b[^}}]*\}}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <NotAuthorized[^/>]*(?:/>|>)
+        filePattern: \.(j|t)sx?$
+  message: 'Component has been renamed to better reflect its purpose
+
+
+    Replace `NotAuthorized` with `UnauthorizedAccess`.
+
+
+    Before:
+
+    ```
+
+    import { NotAuthorized } from ''@patternfly/react-component-groups'';
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { UnauthorizedAccess } from ''@patternfly/react-component-groups'';
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/313
+    title: patternfly-v6 Documentation
+  customVariables: []

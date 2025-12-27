@@ -1,0 +1,162 @@
+- ruleID: patternfly-v5-to-patternfly-v6-00000
+  description: button-group should be replaced with action-group
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: ToolbarGroup
+      ignore: true
+    - as: patternflyFiles
+      builtin.filecontent:
+        pattern: '@patternfly/react-'
+        filepaths: '{{componentFiles.filepaths}}'
+      from: componentFiles
+      ignore: true
+    - builtin.filecontent:
+        pattern: <ToolbarGroup[^>]*\bbutton-group\b
+        filepaths: '{{patternflyFiles.filepaths}}'
+      from: patternflyFiles
+  message: 'Prop values have been updated to new naming convention
+
+
+    Replace `button-group` with `action-group`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup variant=''button-group'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup variant=''action-group'' />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00010
+  description: NotAuthorized should be replaced with UnauthorizedAccess
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: NotAuthorized
+      ignore: true
+    - as: patternflyFiles
+      builtin.filecontent:
+        pattern: '@patternfly/react-'
+        filepaths: '{{componentFiles.filepaths}}'
+      from: componentFiles
+      ignore: true
+    - builtin.filecontent:
+        pattern: <NotAuthorized[^/>]*(?:/>|>)
+        filepaths: '{{patternflyFiles.filepaths}}'
+      from: patternflyFiles
+  message: 'Component has been renamed to better reflect its purpose
+
+
+    Replace `NotAuthorized` with `UnauthorizedAccess`.
+
+
+    Before:
+
+    ```
+
+    import { NotAuthorized } from ''@patternfly/react-component-groups'';
+
+    ```
+
+
+    After:
+
+    ```
+
+    import { UnauthorizedAccess } from ''@patternfly/react-component-groups'';
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/react-component-groups/pull/313
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00020
+  description: Nav variant='tertiary' should be replaced with Nav variant='horizontal-subnav'
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: Nav
+      ignore: true
+    - as: patternflyFiles
+      builtin.filecontent:
+        pattern: '@patternfly/react-'
+        filepaths: '{{componentFiles.filepaths}}'
+      from: componentFiles
+      ignore: true
+    - builtin.filecontent:
+        pattern: <Nav[^>]*\bvariant=['"]tertiary['"]
+        filepaths: '{{patternflyFiles.filepaths}}'
+      from: patternflyFiles
+  message: '''tertiary'' Nav variant is no longer supported, use ''horizontal-subnav''
+    instead
+
+
+    Replace `Nav variant=''tertiary''` with `Nav variant=''horizontal-subnav''`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/9948
+    title: patternfly-v6 Documentation
+  customVariables: []
+- ruleID: patternfly-v5-to-patternfly-v6-00030
+  description: Page header={<Masthead />} should be replaced with Page masthead={<Masthead
+    />}
+  effort: 5
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: Page
+      ignore: true
+    - as: patternflyFiles
+      builtin.filecontent:
+        pattern: '@patternfly/react-'
+        filepaths: '{{componentFiles.filepaths}}'
+      from: componentFiles
+      ignore: true
+    - builtin.filecontent:
+        pattern: <Page[^>]*\bheader={[^}]*}
+        filepaths: '{{patternflyFiles.filepaths}}'
+      from: patternflyFiles
+  message: '''header'' prop for Page has been renamed to ''masthead''
+
+
+    Replace `Page header={<Masthead />}` with `Page masthead={<Masthead />}`.'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10454
+    title: patternfly-v6 Documentation
+  customVariables: []

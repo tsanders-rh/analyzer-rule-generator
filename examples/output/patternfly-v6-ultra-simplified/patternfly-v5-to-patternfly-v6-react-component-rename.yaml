@@ -1,0 +1,42 @@
+- ruleID: patternfly-v5-to-patternfly-v6-00000
+  description: button-group should be replaced with action-group
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - builtin.filecontent:
+        pattern: '@patternfly/react-'
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <ToolbarGroup[^>]*\bbutton-group\b
+        filePattern: \.(j|t)sx?$
+  message: 'The ''button-group'' variant has been renamed to ''action-group'' to better
+    describe its function
+
+
+    Replace `button-group` with `action-group`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup variant=''button-group'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup variant=''action-group'' />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10674
+    title: patternfly-v6 Documentation
+  customVariables: []

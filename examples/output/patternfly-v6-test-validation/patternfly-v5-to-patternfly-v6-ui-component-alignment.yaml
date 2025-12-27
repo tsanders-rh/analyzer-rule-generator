@@ -1,0 +1,40 @@
+- ruleID: patternfly-v5-to-patternfly-v6-ui-component-alignment-00000
+  description: alignLeft should be replaced with alignStart
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: ToolbarGroup
+    - builtin.filecontent:
+        pattern: <ToolbarGroup[^>]*\balignLeft\b
+        filePattern: \.(j|t)sx?$
+  message: 'Alignment property values have been updated to new naming conventions
+
+
+    Replace `alignLeft` with `alignStart`.
+
+
+    Before:
+
+    ```
+
+    <ToolbarGroup align=''alignLeft'' />
+
+    ```
+
+
+    After:
+
+    ```
+
+    <ToolbarGroup align=''alignStart'' />
+
+    ```'
+  links:
+  - url: https://github.com/patternfly/patternfly-react/pull/10366
+    title: patternfly-v6 Documentation
+  customVariables: []

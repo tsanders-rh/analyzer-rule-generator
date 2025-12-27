@@ -1,0 +1,18 @@
+- ruleID: test-chain-00000
+  description: Test chained rule - ToolbarGroup with button-group
+  effort: 1
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: ToolbarGroup
+      ignore: true
+    - builtin.filecontent:
+        filepaths: '{{componentFiles.filepaths}}'
+        pattern: button-group
+      from: componentFiles
+  message: Found ToolbarGroup usage with button-group

@@ -1,0 +1,74 @@
+# Test 1: Try without 'from' parameter
+- ruleID: test-chain-no-from-00000
+  description: Test chaining without explicit from parameter
+  effort: 1
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: ToolbarGroup
+      ignore: true
+    - builtin.filecontent:
+        pattern: <ToolbarGroup[^>]*\bbutton-group\b
+        filepaths: '{{componentFiles.filepaths}}'
+  message: Test without explicit from parameter
+
+# Test 2: Try using just 'ignore' without 'as'
+- ruleID: test-chain-just-ignore-00001
+  description: Test with ignore but no as/from
+  effort: 1
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: ToolbarGroup
+      ignore: true
+    - builtin.filecontent:
+        pattern: <ToolbarGroup[^>]*\bbutton-group\b
+  message: Test with just ignore, no chaining
+
+# Test 3: Try chaining with java.referenced instead (if it exists)
+- ruleID: test-chain-different-ref-00002
+  description: Test if any referenced provider can chain
+  effort: 1
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: importFiles
+      builtin.filecontent:
+        pattern: "import.*ToolbarGroup"
+        filePattern: \.(j|t)sx?$
+      ignore: true
+    - nodejs.referenced:
+        pattern: ToolbarGroup
+      from: importFiles
+  message: Test chaining TO nodejs.referenced instead of FROM
+
+# Test 4: Try nodejs.referenced without ignore flag
+- ruleID: test-chain-no-ignore-00003
+  description: Test chaining without ignore flag
+  effort: 1
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: componentFiles
+      nodejs.referenced:
+        pattern: ToolbarGroup
+    - builtin.filecontent:
+        pattern: <ToolbarGroup[^>]*\bbutton-group\b
+        filepaths: '{{componentFiles.filepaths}}'
+      from: componentFiles
+  message: Test without ignore flag on first condition

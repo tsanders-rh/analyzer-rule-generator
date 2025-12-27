@@ -151,7 +151,7 @@ class MigrationPatternExtractor:
 
             # Validate and fix patterns
             language = detect_language_from_frameworks(source_framework or "", target_framework or "")
-            patterns = self._validate_and_fix_patterns(patterns, language)
+            patterns = self._validate_and_fix_patterns(patterns, language, source_framework, target_framework)
 
             return patterns
 
@@ -1169,22 +1169,36 @@ Return ONLY the JSON array, no additional commentary."""
 
         return patterns
 
-    def _validate_and_fix_patterns(self, patterns: List[MigrationPattern], language: str) -> List[MigrationPattern]:
+    def _validate_and_fix_patterns(
+        self,
+        patterns: List[MigrationPattern],
+        language: str,
+        source_framework: Optional[str] = None,
+        target_framework: Optional[str] = None
+    ) -> List[MigrationPattern]:
         """
         Validate patterns and auto-fix common issues.
 
         Args:
             patterns: List of patterns to validate
             language: Detected language (javascript, typescript, java, csharp)
+            source_framework: Source framework name (e.g., "patternfly-v5", "react-17")
+            target_framework: Target framework name (e.g., "patternfly-v6", "react-18")
 
         Returns:
             List of validated/fixed patterns
         """
         validated = []
 
+        # Check if this is a PatternFly migration (only auto-convert to combo rules for PatternFly)
+        is_patternfly = False
+        if source_framework and target_framework:
+            frameworks = f"{source_framework} {target_framework}".lower()
+            is_patternfly = "patternfly" in frameworks
+
         for pattern in patterns:
-            # RULE 1: Component-specific prop changes MUST use combo rules
-            if language in ["javascript", "typescript"]:
+            # RULE 1: Component-specific prop changes MUST use combo rules (PatternFly only)
+            if language in ["javascript", "typescript"] and is_patternfly:
                 # Detect if this is a prop change pattern
                 is_prop_pattern = self._looks_like_prop_pattern(pattern)
 
@@ -1219,6 +1233,11 @@ Return ONLY the JSON array, no additional commentary."""
             # First part looks like component name (PascalCase)
             # Second part looks like prop name (camelCase)
             if parts[0] and parts[0][0].isupper() and parts[1] and parts[1][0].islower():
+                # Exclude common method names that look like props but aren't
+                # These are method calls, not component props
+                method_names = ["render", "mount", "unmount", "update", "setState", "useState", "useEffect"]
+                if parts[1] in method_names:
+                    return False
                 return True
 
         return False

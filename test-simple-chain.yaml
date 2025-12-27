@@ -1,0 +1,19 @@
+- ruleID: test-simple-chain-00000
+  description: Test simple chained builtin.filecontent
+  effort: 1
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - as: patternflyFiles
+      builtin.filecontent:
+        pattern: '@patternfly/react-'
+        filePattern: \.(j|t)sx?$
+      ignore: true
+    - builtin.filecontent:
+        filepaths: '{{patternflyFiles.filepaths}}'
+        pattern: ToolbarGroup
+      from: patternflyFiles
+  message: Found ToolbarGroup in PatternFly file

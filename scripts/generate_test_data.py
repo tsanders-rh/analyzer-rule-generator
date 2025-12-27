@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 import yaml
 import time
+import shutil
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
@@ -463,8 +464,9 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
 
     # Fallback: Try to extract patterns from the regex
 
-    # Pattern 1: render with callback - render\([^,]+,[^,]+,\s*\([^)]*\)\s*=>
-    if 'render\\(' in pattern and '=>' in pattern:
+    # Pattern 1: render with callback - render\([^,]+,[^,]+,\s*\(
+    # This pattern matches render with 3 args where the 3rd is a callback starting with (
+    if pattern.startswith('render\\(') and ',\\s*\\(' in pattern:
         # This is render with a callback function (single line for line-by-line matching)
         return "render(<App tab=\"home\" />, container, () => { console.log('rendered'); });"
 
@@ -999,6 +1001,175 @@ def generate_test_yaml(rule_file_path: Path, data_dir_name: str, rules: list, ou
     return test_file_path
 
 
+def run_kantra_tests(output_dir: Path) -> dict:
+    """
+    Run kantra tests and parse results.
+
+    Args:
+        output_dir: Directory containing test YAML files
+
+    Returns:
+        Dict with test results including failures and debug paths
+    """
+    import subprocess
+
+    print(f"\n{'='*70}")
+    print("Running kantra tests...")
+    print(f"{'='*70}")
+
+    # Run kantra test
+    result = subprocess.run(
+        ['kantra', 'test', '*.test.yaml'],
+        cwd=output_dir,
+        capture_output=True,
+        text=True
+    )
+
+    output = result.stdout + result.stderr
+    print(output)
+
+    # Parse summary
+    summary_match = re.search(r'Rules Summary:\s+(\d+)/(\d+)', output)
+    if summary_match:
+        passed = int(summary_match.group(1))
+        total = int(summary_match.group(2))
+    else:
+        passed = 0
+        total = 0
+
+    # Extract failed rules with debug paths
+    failures = []
+    for match in re.finditer(r'([\w-]+)\s+0/1\s+PASSED.*?find debug data in (/[^\s]+)', output, re.DOTALL):
+        rule_id = match.group(1)
+        debug_path = match.group(2).strip()
+        failures.append({
+            'rule_id': rule_id,
+            'debug_path': debug_path
+        })
+
+    return {
+        'passed': passed,
+        'total': total,
+        'failures': failures,
+        'exit_code': result.returncode
+    }
+
+
+def analyze_test_failure(debug_path: str) -> dict:
+    """
+    Analyze test failure from kantra debug data.
+
+    Args:
+        debug_path: Path to kantra debug directory
+
+    Returns:
+        Dict with failure details (pattern, actual code, etc.)
+    """
+    debug_dir = Path(debug_path)
+    if not debug_dir.exists():
+        return {'error': 'Debug directory not found'}
+
+    output_yaml = debug_dir / 'output.yaml'
+    rules_yaml = debug_dir / 'rules.yaml'
+
+    if not output_yaml.exists() or not rules_yaml.exists():
+        return {'error': 'Debug files missing'}
+
+    # Read debug data
+    with open(output_yaml) as f:
+        output_data = yaml.safe_load(f)
+    with open(rules_yaml) as f:
+        rules_data = yaml.safe_load(f)
+
+    # Find unmatched rule
+    unmatched = []
+    if isinstance(output_data, list) and len(output_data) > 0:
+        violations = output_data[0].get('violations', {})
+        unmatched = violations.get('unmatched', [])
+
+    if not unmatched:
+        return {'error': 'No unmatched rules found'}
+
+    rule_id = unmatched[0]
+
+    # Find rule pattern
+    rule = None
+    if isinstance(rules_data, list):
+        for r in rules_data:
+            if r.get('ruleID') == rule_id:
+                rule = r
+                break
+
+    if not rule:
+        return {'error': f'Rule {rule_id} not found'}
+
+    # Extract pattern
+    when = rule.get('when', {})
+    pattern = None
+    provider = None
+
+    if 'builtin.filecontent' in when:
+        pattern = when['builtin.filecontent'].get('pattern')
+        provider = 'builtin.filecontent'
+    elif 'nodejs.referenced' in when:
+        pattern = when['nodejs.referenced'].get('pattern')
+        provider = 'nodejs.referenced'
+
+    return {
+        'rule_id': rule_id,
+        'pattern': pattern,
+        'provider': provider
+    }
+
+
+def fix_pattern_detection(failure_info: dict, llm) -> str:
+    """
+    Use LLM to generate code hint for failing pattern.
+
+    Args:
+        failure_info: Dict from analyze_test_failure
+        llm: LLM provider
+
+    Returns:
+        Generated code hint string
+    """
+    pattern = failure_info['pattern']
+    provider = failure_info['provider']
+    rule_id = failure_info['rule_id']
+
+    prompt = f"""Generate a single-line code snippet that matches this Konveyor analyzer rule pattern.
+
+Rule ID: {rule_id}
+Provider: {provider}
+Pattern (regex): {pattern}
+
+Requirements:
+1. MUST be a SINGLE line of code (no newlines)
+2. MUST match the regex pattern exactly
+3. For TypeScript/JavaScript, use realistic syntax
+4. Keep it minimal and simple
+
+Return ONLY the code snippet, nothing else. No markdown, no explanations.
+Example formats:
+- For setTimeout pattern: setTimeout(() => {{ setCount(c => c + 1); setFlag(f => !f); }}, 1000);
+- For render callback: render(<App />, container, () => {{ console.log('rendered'); }});
+- For interface: interface ButtonProps {{ onClick: () => void; disabled?: boolean; }}
+"""
+
+    result = llm.generate(prompt)
+    code_hint = result.get('response', '').strip()
+
+    # Clean up markdown formatting
+    code_hint = re.sub(r'^```\w*\n?', '', code_hint)
+    code_hint = re.sub(r'\n?```$', '', code_hint)
+    code_hint = code_hint.strip()
+
+    # Remove newlines if present
+    code_hint = code_hint.replace('\n', ' ')
+
+    return code_hint
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Generate test data for Konveyor analyzer rules using AI',
@@ -1084,6 +1255,12 @@ Examples:
         '--skip-existing',
         action='store_true',
         help='Skip rule files that already have generated test data'
+    )
+    parser.add_argument(
+        '--max-iterations',
+        type=int,
+        default=0,
+        help='Run test-fix loop: generate, test, fix failures, repeat (0=disable, default: 0)'
     )
 
     args = parser.parse_args()
@@ -1276,6 +1453,159 @@ Examples:
     print(f"\nNext steps:")
     print(f"  1. Review generated files in: {output_dir}")
     print(f"  2. Run tests: kantra test {output_dir}/*.test.yaml")
+
+    # Test-fix loop if enabled
+    if args.max_iterations > 0:
+        print(f"\n{'='*70}")
+        print(f"TEST-FIX LOOP ENABLED (max {args.max_iterations} iterations)")
+        print(f"{'='*70}")
+
+        for iteration in range(1, args.max_iterations + 1):
+            print(f"\n{'='*70}")
+            print(f"ITERATION {iteration}/{args.max_iterations}")
+            print(f"{'='*70}")
+
+            # Run tests
+            test_results = run_kantra_tests(output_dir)
+
+            if test_results['exit_code'] == 0:
+                print(f"\n{'='*70}")
+                print(f"🎉 SUCCESS! All {test_results['total']} tests passing!")
+                print(f"{'='*70}")
+                return 0
+
+            print(f"\nTests: {test_results['passed']}/{test_results['total']} passing")
+            print(f"Failures: {len(test_results['failures'])}")
+
+            if not test_results['failures']:
+                print("⚠ No specific failures detected. Check test output above.")
+                break
+
+            # Analyze and fix each failure
+            fixed_patterns = {}
+            for failure in test_results['failures']:
+                rule_id = failure['rule_id']
+                debug_path = failure['debug_path']
+
+                print(f"\n--- Analyzing {rule_id} ---")
+
+                analysis = analyze_test_failure(debug_path)
+                if 'error' in analysis:
+                    print(f"  ✗ {analysis['error']}")
+                    continue
+
+                print(f"  Pattern: {analysis['pattern']}")
+                print(f"  Provider: {analysis['provider']}")
+
+                # Generate fixed code hint
+                print(f"  Generating code hint...")
+                code_hint = fix_pattern_detection(analysis, llm)
+                print(f"  Code hint: {code_hint}")
+
+                # Store for regeneration
+                fixed_patterns[rule_id] = {
+                    'pattern': analysis['pattern'],
+                    'code_hint': code_hint,
+                    'provider': analysis['provider']
+                }
+
+            # Find which rule files need regeneration
+            rules_to_regen = set()
+            for rule_id in fixed_patterns.keys():
+                # Find which rule file contains this rule ID
+                for rule_file in rule_files:
+                    with open(rule_file) as f:
+                        if rule_id in f.read():
+                            rules_to_regen.add(rule_file)
+                            break
+
+            if not rules_to_regen:
+                print("\n⚠ Could not find rule files to regenerate")
+                break
+
+            print(f"\nRegenerating {len(rules_to_regen)} rule file(s)...")
+
+            # Temporarily update generate_code_hint_from_pattern by injecting hints
+            # Store original function
+            global generate_code_hint_from_pattern
+            original_func = generate_code_hint_from_pattern
+
+            # Create wrapper that uses our fixed patterns
+            def patched_generate_code_hint(pattern, language, description='', message=''):
+                # Check if we have a fix for this pattern
+                for fix_info in fixed_patterns.values():
+                    if fix_info['pattern'] == pattern:
+                        return fix_info['code_hint']
+                # Fall back to original
+                return original_func(pattern, language, description, message)
+
+            # Patch the function
+            generate_code_hint_from_pattern = patched_generate_code_hint
+
+            # Regenerate failed tests
+            for rule_file in rules_to_regen:
+                data_dir_name = rule_file.stem.replace(f'{args.source}-to-{args.target}-', '')
+                test_data_dir = data_dir / data_dir_name
+
+                # Remove old test data
+                if test_data_dir.exists():
+                    shutil.rmtree(test_data_dir)
+
+                print(f"  Regenerating: {rule_file.name}")
+
+                # Load and regenerate
+                with open(rule_file, 'r') as f:
+                    content = yaml.safe_load(f)
+                    rules = content if isinstance(content, list) else [content]
+
+                language = args.language or detect_language(rules)
+                config = get_language_config(language)
+                prompt = build_test_generation_prompt(rules, args.source, args.target, args.guide_url, language)
+
+                # Generate with LLM
+                result = llm.generate(prompt)
+                response = result.get('response', '')
+
+                # Extract and write files
+                code = extract_code_blocks(response, language)
+                if code['build_file'] and code['source_file']:
+                    src_dir = create_directory_structure(test_data_dir, language)
+
+                    # Write build file
+                    with open(test_data_dir / config['build_file'], 'w') as f:
+                        f.write(code['build_file'])
+
+                    # Write source file
+                    with open(src_dir / config['main_file'], 'w') as f:
+                        f.write(code['source_file'])
+
+                    # Write config file if present
+                    if code['config_file'] and language == 'java':
+                        config_filename = code['config_file'].get('filename', f"application.{code['config_file']['type']}")
+                        if 'spring.factories' in config_filename:
+                            config_dir = test_data_dir / 'src' / 'main' / 'resources' / 'META-INF'
+                        else:
+                            config_dir = test_data_dir / 'src' / 'main' / 'resources'
+                        config_dir.mkdir(parents=True, exist_ok=True)
+                        with open(config_dir / config_filename, 'w') as f:
+                            f.write(code['config_file']['content'])
+
+                    print(f"    ✓ Regenerated test data")
+                else:
+                    print(f"    ✗ Could not extract code")
+
+            # Restore original function
+            generate_code_hint_from_pattern = original_func
+
+            print(f"\n  Waiting {args.delay}s before next iteration...")
+            time.sleep(args.delay)
+
+        # Max iterations reached
+        print(f"\n{'='*70}")
+        print(f"⚠ Maximum iterations ({args.max_iterations}) reached")
+        final_results = run_kantra_tests(output_dir)
+        print(f"Final: {final_results['passed']}/{final_results['total']} tests passing")
+        print(f"{'='*70}")
 
     return 0
 

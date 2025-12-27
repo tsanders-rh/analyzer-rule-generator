@@ -427,29 +427,45 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
                 code = code.replace('\\n', '\n')
             # Skip if contains template variables ({{ }})
             if '{{' not in code and '}}' not in code:
-                # CRITICAL: Validate that the code actually matches the pattern
+                # CRITICAL: Validate that the code actually matches the pattern using regex
                 # For example, if pattern is ReactDOM\.render\(, the code must contain "ReactDOM.render("
                 # not just "render(" which won't be detected
                 if pattern:
-                    # Convert regex pattern to a simple string to check
-                    # Remove regex escapes: ReactDOM\.render\( -> ReactDOM.render(
-                    simple_pattern = pattern.replace('\\', '').replace('(', '').replace(')', '')
-                    # Check if the code contains the pattern
-                    if simple_pattern not in code.replace(' ', ''):
-                        # Pattern mismatch - don't use this code, fall back to pattern matching
-                        pass
-                    else:
-                        # Return the code if it looks like JSX (contains < and >)
-                        if '<' in code and '>' in code:
+                    try:
+                        # Use actual regex matching to validate
+                        # Add flags for multiline and dotall to handle code that spans multiple lines
+                        if re.search(pattern, code, re.MULTILINE | re.DOTALL):
+                            # Pattern matches, return this code
+                            return code
+                        else:
+                            # Pattern doesn't match, fall back to pattern-based generation
+                            pass
+                    except re.error:
+                        # Invalid regex pattern, fall back to simple check
+                        simple_pattern = pattern.replace('\\', '').replace('.', '')
+                        if simple_pattern in code:
                             return code
                 else:
-                    # No pattern to validate, return if JSX
-                    if '<' in code and '>' in code:
-                        return code
+                    # No pattern to validate, return the code
+                    return code
 
     # Fallback: Try to extract patterns from the regex
 
-    # Pattern 1: Method calls like ReactDOM\.render\( or obj\.method\(
+    # Pattern 1: render with callback - render\([^,]+,[^,]+,\s*\([^)]*\)\s*=>
+    if 'render\\(' in pattern and '=>' in pattern:
+        # This is render with a callback function
+        return "render(<App tab=\"home\" />, container, () => {\n  console.log('rendered');\n});"
+
+    # Pattern 2: renderToString with Suspense - renderToString\([^)]*<Suspense
+    if 'renderToString' in pattern and 'Suspense' in pattern:
+        return "renderToString(\n  <Suspense fallback={<Loading />}>\n    <App />\n  </Suspense>\n);"
+
+    # Pattern 3: setTimeout with multiple setState - setTimeout\([^{]*\{[^}]*set...
+    if 'setTimeout' in pattern and pattern.count('set[A-Za-z') >= 2:
+        # Multiple setState calls in setTimeout
+        return "setTimeout(() => {\n  setCount(c => c + 1);\n  setFlag(f => !f);\n}, 1000);"
+
+    # Pattern 4: Method calls like ReactDOM\.render\( or obj\.method\(
     # Match: ObjectName.methodName( or functionName(
     method_call_match = re.match(r'([A-Za-z_][\w.]*)\\\.([A-Za-z_]\w*)\\?\(', pattern)
     if method_call_match:
@@ -467,7 +483,7 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
             # Generic method call
             return f"{obj_name}.{method_name}();"
 
-    # Pattern 2: Standalone function calls like render\( or hydrate\(
+    # Pattern 5: Standalone function calls like render\( or hydrate\(
     function_call_match = re.match(r'([A-Za-z_]\w*)\\?\(', pattern)
     if function_call_match:
         func_name = function_call_match.group(1)

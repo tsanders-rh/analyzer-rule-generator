@@ -249,20 +249,26 @@ class MigrationPatternExtractor:
 
 For JavaScript/TypeScript patterns, choose the appropriate provider:
 
-**Option 1: Node.js Provider (for semantic analysis) - PREFERRED for most TypeScript/JavaScript migrations**
-Use when you need to find symbol references in JavaScript/TypeScript code:
+**Option 1: Node.js Provider (for semantic analysis) - For symbol/identifier references**
+Use when you need to find **symbol REFERENCES** (imports, identifiers, type usage) in JavaScript/TypeScript code:
 - Classes and types (e.g., ComponentFactoryResolver, BrowserTransferStateModule, HttpClient)
-- Functions and methods (e.g., useEffect, useState, createComponent)
+- Function/method **imports** (e.g., `import { useEffect } from 'react'`)
+- Function/method **names** as identifiers (e.g., `const x = useEffect`)
 - Interfaces and types
 - Variables/Constants: `const MyComponent = () => {}`
-- Exported symbols from libraries
 - Component names (e.g., Button, Modal, Accordion)
 
-**IMPORTANT: nodejs.referenced is the PREFERRED provider for Angular/TypeScript migrations.**
-- ✅ Use for ANY Angular class, type, interface, or symbol
-- ✅ Use for component names, service names, directive names
-- ✅ Use for method names and function names
-- ❌ Only use builtin if you specifically need file filtering (rare)
+**CRITICAL: nodejs.referenced finds SYMBOL REFERENCES, NOT METHOD CALLS**
+- ✅ Use for imports: `import { useEffect } from 'react'` → pattern: "useEffect"
+- ✅ Use for identifier references: `const x = ComponentFactoryResolver` → pattern: "ComponentFactoryResolver"
+- ✅ Use for type usage: `const c: MyComponent` → pattern: "MyComponent"
+- ❌ DO NOT use for method calls: `ReactDOM.render()` (this is a method CALL, use builtin.filecontent)
+- ❌ DO NOT use for function calls: `useEffect(() => {})` (this is a function CALL, use builtin.filecontent)
+
+**When to use builtin vs nodejs:**
+- For METHOD CALLS (e.g., `ReactDOM.render()`, `obj.method()`): Use builtin.filecontent with pattern `ReactDOM\\.render\\(`
+- For SYMBOL REFERENCES (e.g., imports, type usage): Use nodejs.referenced
+- When in doubt: If the pattern includes parentheses `()`, it's a call → use builtin
 
 Fields:
 - **provider_type**: Set to "nodejs"
@@ -282,7 +288,7 @@ Example for Angular class reference:
 }}
 ```
 
-Example for React component usage:
+Example for React component reference (import/usage):
 ```json
 {{
   "source_pattern": "MyComponent",
@@ -294,17 +300,33 @@ Example for React component usage:
 }}
 ```
 
-**Option 2: Builtin Provider (for file-specific text/regex matching) - ONLY when file filtering is required**
-Use ONLY for patterns that specifically require file type filtering:
-- Import statement patterns with specific package paths (e.g., `import.*XhrFactory.*from.*@angular/common/http` that need $ anchor)
+Example for React method CALL (use builtin, not nodejs):
+```json
+{{
+  "source_pattern": "ReactDOM.render",
+  "target_pattern": "createRoot",
+  "source_fqn": "ReactDOM\\\\\\\\.render\\\\\\\\(",
+  "provider_type": "builtin",
+  "file_pattern": "\\\\\\\\.(j|t)sx?$",
+  "location_type": null
+}}
+```
+
+**Option 2: Builtin Provider (for text/regex matching) - For method calls, expressions, and file-specific patterns**
+Use for patterns that require regex matching or file filtering:
+- **METHOD CALLS**: `ReactDOM.render()`, `obj.method()`, function invocations
+- **EXPRESSIONS**: Complex code patterns that aren't simple symbol references
+- Import statement patterns with specific package paths (e.g., `import.*XhrFactory.*from.*@angular/common/http`)
 - CSS patterns in style files (e.g., `--pf-` in .css/.scss files only)
 - Configuration patterns in specific config files (e.g., .json, .xml files)
 - Complex multi-line patterns that need regex matching
 
-**When to choose builtin vs nodejs:**
-- ✅ Use nodejs: For 95% of Angular/TypeScript symbol migrations (classes, types, methods, components)
-- ✅ Use builtin: ONLY when you need file filtering OR import path pattern matching with specific packages
-- ❌ Don't use builtin for: Class names, type names, method names, component names (use nodejs instead)
+**CRITICAL: Use builtin for method calls, nodejs for symbol references**
+- ✅ Use builtin for: `ReactDOM.render()` → pattern: `ReactDOM\\.render\\(`
+- ✅ Use builtin for: `unmountComponentAtNode()` → pattern: `unmountComponentAtNode\\(`
+- ✅ Use builtin for: `obj.method()` → pattern: `obj\\.method\\(`
+- ✅ Use nodejs for: Symbol imports, type usage, identifier references
+- When in doubt: If the code includes `()`, it's likely a call → use builtin
 
 Fields:
 - **provider_type**: Set to "builtin"

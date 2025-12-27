@@ -427,9 +427,25 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
                 code = code.replace('\\n', '\n')
             # Skip if contains template variables ({{ }})
             if '{{' not in code and '}}' not in code:
-                # Return the code if it looks like JSX (contains < and >)
-                if '<' in code and '>' in code:
-                    return code
+                # CRITICAL: Validate that the code actually matches the pattern
+                # For example, if pattern is ReactDOM\.render\(, the code must contain "ReactDOM.render("
+                # not just "render(" which won't be detected
+                if pattern:
+                    # Convert regex pattern to a simple string to check
+                    # Remove regex escapes: ReactDOM\.render\( -> ReactDOM.render(
+                    simple_pattern = pattern.replace('\\', '').replace('(', '').replace(')', '')
+                    # Check if the code contains the pattern
+                    if simple_pattern not in code.replace(' ', ''):
+                        # Pattern mismatch - don't use this code, fall back to pattern matching
+                        pass
+                    else:
+                        # Return the code if it looks like JSX (contains < and >)
+                        if '<' in code and '>' in code:
+                            return code
+                else:
+                    # No pattern to validate, return if JSX
+                    if '<' in code and '>' in code:
+                        return code
 
     # Fallback: Try to extract patterns from the regex
 

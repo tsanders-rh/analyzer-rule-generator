@@ -182,6 +182,16 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
             pattern_info['location'] = nodejs_ref.get('location', 'IMPORT')
             pattern_info['provider'] = 'nodejs'
 
+            # Generate code hint for nodejs.referenced patterns
+            code_hint = generate_code_hint_from_pattern(
+                pattern_info['pattern'],
+                language,
+                description,
+                message
+            )
+            if code_hint:
+                pattern_info['code_hint'] = code_hint
+
         # Check for java provider
         elif 'java.referenced' in cond:
             java_ref = cond['java.referenced']

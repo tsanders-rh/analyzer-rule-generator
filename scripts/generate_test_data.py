@@ -474,7 +474,7 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
         return "renderToString(<Suspense fallback={<Loading />}><App /></Suspense>);"
 
     # Pattern 3: setTimeout with multiple setState - setTimeout\([^{]*\{[^}]*set...
-    if 'setTimeout' in pattern and pattern.count('set[A-Za-z') >= 2:
+    if 'setTimeout' in pattern and 'set[A-Z]' in pattern:
         # Multiple setState calls in setTimeout (single line for line-by-line matching)
         return "setTimeout(() => { setCount(c => c + 1); setFlag(f => !f); }, 1000);"
 

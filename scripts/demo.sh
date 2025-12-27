@@ -274,21 +274,23 @@ python3 scripts/generate_test_data.py \\
   --source "${SOURCE}" \\
   --target "${TARGET}" \\
   --guide-url "${GUIDE_URL}" \\
-  --provider "${PROVIDER}"
+  --provider "${PROVIDER}" \\
+  --max-iterations 3
 EOF
     echo ""
 
     pause_for_demo
 
     # Run the command
-    print_info "Running test data generation..."
+    print_info "Running test data generation with autonomous test-fix loop..."
     python3 scripts/generate_test_data.py \
       --rules "${RULES_OUTPUT}" \
       --output "${TEST_OUTPUT}" \
       --source "${SOURCE}" \
       --target "${TARGET}" \
       --guide-url "${GUIDE_URL}" \
-      --provider "${PROVIDER}"
+      --provider "${PROVIDER}" \
+      --max-iterations 3
 
     # Show results
     echo ""
@@ -586,6 +588,7 @@ show_summary() {
     echo "  2️⃣  Generated test data automatically"
     echo "     - AI-created test applications"
     echo "     - Test configurations for validation"
+    echo "     - Autonomous test-fix loop (up to 3 iterations)"
     echo "     - Ready for kantra testing"
     echo ""
 

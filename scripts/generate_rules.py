@@ -291,7 +291,7 @@ def main():
         print("Note: This is an experimental feature and may use additional API credits.")
 
         # Initialize validator with same LLM as extraction
-        validator = RuleValidator(llm, language)
+        validator = RuleValidator(llm, language, args.source, args.target)
 
         # Run validation
         validation_report = validator.validate_rules(all_generated_rules)

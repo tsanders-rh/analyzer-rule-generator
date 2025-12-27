@@ -114,16 +114,32 @@ class ValidationReport:
 class RuleValidator:
     """Post-generation LLM-based rule validator."""
 
-    def __init__(self, llm_provider: LLMProvider, language: str):
+    def __init__(
+        self,
+        llm_provider: LLMProvider,
+        language: str,
+        source_framework: Optional[str] = None,
+        target_framework: Optional[str] = None
+    ):
         """
         Initialize rule validator.
 
         Args:
             llm_provider: LLM provider instance
             language: Programming language (javascript, typescript, java, csharp)
+            source_framework: Source framework name (e.g., "patternfly-v5", "react-17")
+            target_framework: Target framework name (e.g., "patternfly-v6", "react-18")
         """
         self.llm = llm_provider
         self.language = language
+        self.source_framework = source_framework
+        self.target_framework = target_framework
+
+        # Check if this is a PatternFly migration
+        self.is_patternfly = False
+        if source_framework and target_framework:
+            frameworks = f"{source_framework} {target_framework}".lower()
+            self.is_patternfly = "patternfly" in frameworks
 
     def validate_rules(self, rules: List[AnalyzerRule]) -> ValidationReport:
         """
@@ -142,8 +158,8 @@ class RuleValidator:
         print("POST-GENERATION VALIDATION")
         print("=" * 80)
 
-        # 1. Import verification check (for JavaScript/TypeScript combo rules)
-        if self.language in ["javascript", "typescript"]:
+        # 1. Import verification check (for JavaScript/TypeScript PatternFly migrations only)
+        if self.language in ["javascript", "typescript"] and self.is_patternfly:
             print("\n→ Checking for missing import verification...")
             for rule in rules:
                 if self._needs_import_verification(rule):

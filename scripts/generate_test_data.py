@@ -431,9 +431,38 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
                 if '<' in code and '>' in code:
                     return code
 
-    # Fallback: Try to extract JSX tag patterns from the regex
+    # Fallback: Try to extract patterns from the regex
 
-    # Pattern: <ComponentName[^>]*\battribute=['"]value['"][^>]*>
+    # Pattern 1: Method calls like ReactDOM\.render\( or obj\.method\(
+    # Match: ObjectName.methodName( or functionName(
+    method_call_match = re.match(r'([A-Za-z_][\w.]*)\\\.([A-Za-z_]\w*)\\?\(', pattern)
+    if method_call_match:
+        obj_name = method_call_match.group(1).replace('\\', '')  # Remove regex escapes
+        method_name = method_call_match.group(2)
+
+        # Generate appropriate code based on the pattern
+        if 'ReactDOM' in obj_name and method_name == 'render':
+            return f"ReactDOM.render(<App />, container);"
+        elif 'ReactDOM' in obj_name and method_name == 'hydrate':
+            return f"ReactDOM.hydrate(<App />, container);"
+        elif method_name == 'unmountComponentAtNode':
+            return f"ReactDOM.unmountComponentAtNode(container);"
+        else:
+            # Generic method call
+            return f"{obj_name}.{method_name}();"
+
+    # Pattern 2: Standalone function calls like render\( or hydrate\(
+    function_call_match = re.match(r'([A-Za-z_]\w*)\\?\(', pattern)
+    if function_call_match:
+        func_name = function_call_match.group(1)
+        # Generate appropriate code based on function name
+        if func_name in ['render', 'hydrate']:
+            # These are likely from react-dom imports
+            return f"{func_name}(<App />, container);"
+        else:
+            return f"{func_name}();"
+
+    # Pattern 3: JSX tag patterns <ComponentName[^>]*\battribute=['"]value['"][^>]*>
     jsx_match = re.search(r'<(\w+)([^>]*?)>', pattern)
     if jsx_match:
         component = jsx_match.group(1)
@@ -461,7 +490,7 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
         else:
             return f'<{component}{attr_str}>Content</{component}>'
 
-    # Look for import patterns
+    # Pattern 4: Import patterns
     import_match = re.search(r'import.*?from.*?[\'"](@[\w/-]+)[\'"]', pattern)
     if import_match:
         package = import_match.group(1)
@@ -598,11 +627,14 @@ CRITICAL FOR MAVEN DEPENDENCIES:
    - Export a React component
 
 CRITICAL REQUIREMENTS FOR REACT/JSX:
-- File MUST be valid TSX (TypeScript + JSX)
+- File MUST be valid TSX (TypeScript + JSX) - NO syntax errors
+- All import statements MUST be at the TOP of the file, NOT inside functions or useEffect
 - Components MUST be used in JSX, not just imported
 - JSX code MUST match the exact patterns shown above (attributes, props, children)
 - Each deprecated pattern MUST appear at least once in the JSX
 - Do NOT generate generic examples - use the EXACT code patterns specified above
+- For method call patterns like "ReactDOM.render()", use the EXACT syntax shown in the code hint
+- NEVER put import statements inside functions, useEffect hooks, or any other code blocks
 """,
         'go': """
 1. **{build_file}** - Go module file with:

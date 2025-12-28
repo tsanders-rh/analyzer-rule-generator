@@ -528,7 +528,7 @@ class TestRuleValidator:
     def test_validate_rules_javascript(self, capsys):
         """Test validate_rules for JavaScript with import verification."""
         llm = Mock(spec=LLMProvider)
-        validator = RuleValidator(llm, 'javascript')
+        validator = RuleValidator(llm, 'javascript', 'patternfly-v5', 'patternfly-v6')
 
         rule1 = AnalyzerRule(
             ruleID="test-00000",

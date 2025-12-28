@@ -777,7 +777,7 @@ class TestGenerateRulesByConcern:
         assert len(rules_by_concern["general"]) == 1
 
     def test_reset_rule_counter_per_concern(self):
-        """Should reset rule counter for each concern"""
+        """Should NOT reset rule counter per concern - IDs must be globally unique"""
         generator = AnalyzerRuleGenerator(
             source_framework="a",
             target_framework="b"
@@ -817,9 +817,9 @@ class TestGenerateRulesByConcern:
         assert concern_a_rules[0].ruleID.endswith("-00000")
         assert concern_a_rules[1].ruleID.endswith("-00010")
 
-        # Second concern should reset and start at 00000
+        # Second concern should continue with 00020 (counter does NOT reset)
         concern_b_rules = rules_by_concern["concern-b"]
-        assert concern_b_rules[0].ruleID.endswith("-00000")
+        assert concern_b_rules[0].ruleID.endswith("-00020")
 
 
 class TestEdgeCases:

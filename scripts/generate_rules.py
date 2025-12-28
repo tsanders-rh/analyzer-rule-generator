@@ -22,7 +22,10 @@ from rule_generator.extraction import MigrationPatternExtractor, detect_language
 from rule_generator.generator import AnalyzerRuleGenerator
 from rule_generator.llm import get_llm_provider
 from rule_generator.schema import Category, LocationType
-from rule_generator.validate_rules import RuleValidator
+
+# Import comprehensive validator from scripts
+sys.path.insert(0, str(Path(__file__).parent))
+from validate_rules import RuleValidator
 
 
 def enum_representer(dumper, data):
@@ -42,39 +45,62 @@ def str_representer(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', data)
 
 
-def validate_rules(rules):
+def validate_rules_temp_file(rules):
     """
-    Validate generated rules and return warnings.
+    Validate generated rules using comprehensive RuleValidator.
+
+    Writes rules to a temp file, validates, then cleans up.
 
     Returns:
-        Dictionary of issue_type -> list of warnings
+        Dictionary with 'issues' and 'warnings' lists
     """
-    from collections import defaultdict
-    issues = defaultdict(list)
+    import tempfile
 
+    # Convert rules to dict format for YAML
+    rules_dicts = []
     for rule in rules:
-        # Check for overly broad builtin patterns
-        if 'builtin.filecontent' in str(rule.when):
-            when_dict = rule.when
-            if 'builtin.filecontent' in when_dict:
-                pattern = when_dict['builtin.filecontent'].get('pattern', '')
-                if len(pattern) < 5:
-                    issues['overly_broad'].append(f"{rule.ruleID}: pattern too short '{pattern}'")
+        rule_dict = {
+            'ruleID': rule.ruleID,
+            'description': rule.description,
+            'when': rule.when,
+            'message': rule.message,
+            'effort': rule.effort,
+            'category': rule.category.value if hasattr(rule.category, 'value') else rule.category,
+            'labels': rule.labels,
+            'links': [{'url': link.url, 'title': link.title} for link in rule.links] if rule.links else [],
+            'customVariables': rule.customVariables if hasattr(rule, 'customVariables') else []
+        }
+        if hasattr(rule, 'migration_complexity'):
+            rule_dict['migration_complexity'] = rule.migration_complexity
+        rules_dicts.append(rule_dict)
 
-        # Check for missing file patterns on builtin rules
-        if 'builtin.filecontent' in str(rule.when):
-            when_dict = rule.when
-            if 'builtin.filecontent' in when_dict:
-                if not when_dict['builtin.filecontent'].get('filePattern'):
-                    issues['missing_file_pattern'].append(f"{rule.ruleID}: builtin without filePattern")
+    # Write to temp file
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        yaml.dump(rules_dicts, f, default_flow_style=False, sort_keys=False)
+        temp_path = Path(f.name)
 
-        # Check for identical before/after in description
-        if ' should be replaced with ' in rule.description:
-            parts = rule.description.split(' should be replaced with ')
-            if len(parts) == 2 and parts[0].strip() == parts[1].strip():
-                issues['identical_source_target'].append(f"{rule.ruleID}: {parts[0]}")
+    try:
+        # Run comprehensive validation (suppress verbose output)
+        import io
+        import sys as system
+        old_stdout = system.stdout
+        system.stdout = io.StringIO()  # Suppress print statements
 
-    return dict(issues)
+        try:
+            validator = RuleValidator(use_semantic=False)  # Don't use LLM for auto-validation
+            result = validator.validate_ruleset(temp_path)
+        finally:
+            system.stdout = old_stdout  # Restore stdout
+
+        # Combine issues and warnings
+        combined = {
+            'issues': validator.issues,
+            'warnings': validator.warnings
+        }
+        return combined
+    finally:
+        # Clean up temp file
+        temp_path.unlink()
 
 
 # Create custom dumper with our representers
@@ -399,15 +425,25 @@ def main():
     print("\n" + "="*60)
     print("Validation Report")
     print("="*60)
-    validation_issues = validate_rules(all_rules)
-    if validation_issues:
-        for issue_type, warnings in validation_issues.items():
-            print(f"\n  ⚠ {issue_type} ({len(warnings)} issues):")
-            for warning in warnings[:5]:  # Show first 5
-                print(f"    - {warning}")
-            if len(warnings) > 5:
-                print(f"    ... and {len(warnings) - 5} more")
-    else:
+    validation_result = validate_rules_temp_file(all_rules)
+
+    has_issues = validation_result['issues'] or validation_result['warnings']
+
+    if validation_result['issues']:
+        print(f"\n  ❌ Issues ({len(validation_result['issues'])} found):")
+        for issue in validation_result['issues'][:10]:  # Show first 10
+            print(f"    - {issue}")
+        if len(validation_result['issues']) > 10:
+            print(f"    ... and {len(validation_result['issues']) - 10} more")
+
+    if validation_result['warnings']:
+        print(f"\n  ⚠ Warnings ({len(validation_result['warnings'])} found):")
+        for warning in validation_result['warnings'][:10]:  # Show first 10
+            print(f"    - {warning}")
+        if len(validation_result['warnings']) > 10:
+            print(f"    ... and {len(validation_result['warnings']) - 10} more")
+
+    if not has_issues:
         print("  ✓ No validation issues found")
 
     # Show files created

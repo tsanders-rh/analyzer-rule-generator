@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from rule_generator.ingestion import GuideIngester
-from rule_generator.security import validate_path, is_safe_path
+from rule_generator.security import validate_path, is_safe_path, validate_framework_name
 from rule_generator.extraction import MigrationPatternExtractor, detect_language_from_frameworks
 from rule_generator.generator import AnalyzerRuleGenerator
 from rule_generator.llm import get_llm_provider
@@ -182,6 +182,14 @@ def main():
     )
 
     args = parser.parse_args()
+
+    # Validate framework names
+    try:
+        args.source = validate_framework_name(args.source)
+        args.target = validate_framework_name(args.target)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
 
     # Auto-generate output directory if not specified
     if not args.output:

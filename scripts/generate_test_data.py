@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from rule_generator.llm import get_llm_provider
 from rule_generator.config import config
-from rule_generator.security import validate_path, is_safe_path
+from rule_generator.security import validate_path, is_safe_path, validate_framework_name
 
 
 def detect_language(rules: list) -> str:
@@ -1340,6 +1340,14 @@ Examples:
     )
 
     args = parser.parse_args()
+
+    # Validate framework names
+    try:
+        args.source = validate_framework_name(args.source)
+        args.target = validate_framework_name(args.target)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
 
     # Validate inputs
     rules_path = Path(args.rules)

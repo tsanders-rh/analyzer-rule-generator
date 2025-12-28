@@ -22,10 +22,11 @@ from rule_generator.extraction import MigrationPatternExtractor, detect_language
 from rule_generator.generator import AnalyzerRuleGenerator
 from rule_generator.llm import get_llm_provider
 from rule_generator.schema import Category, LocationType
+from rule_generator.validate_rules import RuleValidator as LLMRuleValidator
 
-# Import comprehensive validator from scripts
+# Import comprehensive validator from scripts for syntactic validation
 sys.path.insert(0, str(Path(__file__).parent))
-from validate_rules import RuleValidator
+from validate_rules import RuleValidator as SyntacticRuleValidator
 
 
 def enum_representer(dumper, data):
@@ -87,7 +88,7 @@ def validate_rules_temp_file(rules):
         system.stdout = io.StringIO()  # Suppress print statements
 
         try:
-            validator = RuleValidator(use_semantic=False)  # Don't use LLM for auto-validation
+            validator = SyntacticRuleValidator(use_semantic=False)  # Don't use LLM for auto-validation
             result = validator.validate_ruleset(temp_path)
         finally:
             system.stdout = old_stdout  # Restore stdout
@@ -317,7 +318,7 @@ def main():
         print("Note: This is an experimental feature and may use additional API credits.")
 
         # Initialize validator with same LLM as extraction
-        validator = RuleValidator(llm, language, args.source, args.target)
+        validator = LLMRuleValidator(llm, language, args.source, args.target)
 
         # Run validation
         validation_report = validator.validate_rules(all_generated_rules)

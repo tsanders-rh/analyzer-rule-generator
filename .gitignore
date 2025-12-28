@@ -49,6 +49,9 @@ examples/output/*.yaml
 !examples/output/.gitkeep
 
 # Test output directories (generated during testing)
+examples/output/*test*/
+examples/output/*-test/
+examples/output/test/
 examples/output/angular-test/
 examples/output/angular-test-main/
 examples/output/openrewrite-demo/
@@ -56,6 +59,9 @@ examples/output/openrewrite-final/
 examples/output/openrewrite-test/
 examples/output/openrewrite-test-fixed/
 examples/output/patternfly-escaping-test/
+examples/output/patternfly-v6-final-test/
+examples/output/patternfly-v6-test-validation/
+examples/output/dotnet-test/
 
 # Test data and analysis artifacts
 examples/rulesets/**/nodejs-provider-settings.json

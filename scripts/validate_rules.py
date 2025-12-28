@@ -90,6 +90,7 @@ class RuleValidator:
             self._validate_when_condition(rule, rule_id)
             self._validate_effort_score(rule, rule_id)
             self._validate_pattern_broadness(rule, rule_id)
+            self._validate_pattern_matches_example(rule, rule_id)
 
             # Semantic validation (optional, uses LLM)
             if self.use_semantic:
@@ -201,6 +202,54 @@ class RuleValidator:
                 self.warnings.append(
                     f"{rule_id}: Checks imports but not usage - may flag unused imports"
                 )
+
+    def _validate_pattern_matches_example(self, rule: Dict, rule_id: str):
+        """Check if pattern actually matches example code from 'Before:' section in message."""
+        when = rule.get('when', {})
+        message = rule.get('message', '')
+
+        # Only validate builtin.filecontent patterns
+        if 'builtin.filecontent' not in when:
+            return
+
+        pattern = when['builtin.filecontent'].get('pattern', '')
+        if not pattern:
+            return
+
+        # Extract code from "Before:" section
+        # Handle both actual newlines and literal \n in messages
+        before_match = re.search(r'Before:(?:\\n|\n)```(?:\w*)?(?:\\n|\n)(.*?)(?:\\n|\n)```', message, re.DOTALL)
+        if not before_match:
+            return  # No example code found, skip validation
+
+        example_code = before_match.group(1).strip()
+
+        # Replace literal \n with actual newlines if present
+        if '\\n' in example_code:
+            example_code = example_code.replace('\\n', '\n')
+
+        # Test if pattern matches the example code
+        try:
+            # Test line-by-line since builtin.filecontent matches per line
+            matches = False
+            for line in example_code.split('\n'):
+                if re.search(pattern, line):
+                    matches = True
+                    break
+
+            if not matches:
+                self.issues.append(
+                    f"{rule_id}: Pattern '{pattern}' does NOT match example code from 'Before:' section"
+                )
+                # Show first line of example for context
+                first_line = example_code.split('\n')[0][:80]
+                self.issues.append(
+                    f"  Example starts with: {first_line}..."
+                )
+        except re.error as e:
+            self.warnings.append(
+                f"{rule_id}: Invalid regex pattern '{pattern}': {e}"
+            )
 
     def _validate_description_pattern_alignment(self, rule: Dict, rule_id: str):
         """Use LLM to check if description matches what the pattern actually detects."""

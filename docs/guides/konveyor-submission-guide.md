@@ -228,7 +228,39 @@ python scripts/generate_test_data.py \
   --model claude-3-7-sonnet-20250219
 ```
 
-This generates:
+**Optional: Add autonomous test-fix loop**
+
+For automatic test failure fixing, add `--max-iterations 3`:
+
+```bash
+python scripts/generate_test_data.py \
+  --rules examples/output/spring-boot-4.0/migration-rules.yaml \
+  --output submission/spring-boot-4.0/tests/data/mongodb \
+  --source spring-boot-3.5 \
+  --target spring-boot-4.0 \
+  --guide-url "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide" \
+  --provider anthropic \
+  --model claude-3-7-sonnet-20250219 \
+  --max-iterations 3
+```
+
+This will automatically:
+1. Generate test data
+2. Run `kantra test` to check for failures
+3. If failures occur, use AI to analyze and fix them
+4. Regenerate test data with fixes
+5. Repeat up to 3 times or until all tests pass
+
+**When to use `--max-iterations`:**
+- ✅ Complex patterns with tricky language constructs
+- ✅ First-time generation when unsure if patterns will work
+- ✅ Want fully hands-off automation
+- ❌ Simple rules where initial generation usually works
+- ❌ Minimizing API costs is priority
+
+See [Complete Automation Guide](complete-automation.md#3b-autonomous-test-fix-loop-experimental) for details.
+
+**What gets generated:**
 - ✅ Complete `pom.xml` with correct dependencies
 - ✅ Java application code with violations for each rule
 - ✅ Comments mapping code to rule IDs

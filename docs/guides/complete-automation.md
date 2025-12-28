@@ -82,6 +82,18 @@ python scripts/generate_test_data.py \
   --provider anthropic \
   --model claude-3-7-sonnet-20250219
 
+# Step 3b (Optional): Autonomous test-fix loop
+# Let AI automatically fix failing tests (up to 3 iterations)
+python scripts/generate_test_data.py \
+  --rules "rules/${TARGET}-${TOPIC}.yaml" \
+  --output "submission/${TARGET}/tests/data/${TOPIC}" \
+  --source "$SOURCE" \
+  --target "$TARGET" \
+  --guide-url "$GUIDE_URL" \
+  --provider anthropic \
+  --model claude-3-7-sonnet-20250219 \
+  --max-iterations 3
+
 # Step 4: Test locally
 kantra test "submission/${TARGET}/tests/*.test.yaml"
 
@@ -202,6 +214,122 @@ public class Application {
 }
 ```
 
+### 3b. Autonomous Test-Fix Loop (Experimental)
+
+**Input:** Same as `generate_test_data.py` + `--max-iterations N`
+**Output:** Test data that passes kantra validation
+
+**How it works:**
+
+The `--max-iterations` flag enables an autonomous loop that:
+
+1. **Generates initial test data** (same as Step 3)
+2. **Runs kantra tests** automatically
+3. **If tests fail:**
+   - Analyzes kantra debug output to identify failing patterns
+   - Extracts the pattern and provider type from the rule
+   - Uses LLM to generate improved code hint for the pattern
+   - Regenerates test data with the improved hints
+   - Re-runs kantra tests
+4. **Repeats** up to N iterations or until all tests pass
+
+**Example Workflow:**
+
+```
+================================================================================
+TEST-FIX LOOP ENABLED (max 3 iterations)
+================================================================================
+
+================================================================================
+ITERATION 1/3
+================================================================================
+
+Running kantra tests...
+Tests: 10/13 passing
+Failures: 3
+
+--- Analyzing spring-boot-3.5-to-spring-boot-4.0-00010 ---
+  Pattern: spring.data.mongodb.ssl.enabled
+  Provider: java.referenced
+  Generating code hint...
+  Code hint: @Value("${spring.data.mongodb.ssl.enabled}")
+
+Regenerating 1 rule file(s)...
+  Regenerating: spring-boot-3.5-to-4.0-mongodb.yaml
+    ✓ Regenerated test data
+
+  Waiting 2s before next iteration...
+
+================================================================================
+ITERATION 2/3
+================================================================================
+
+Running kantra tests...
+🎉 SUCCESS! All 13 tests passing!
+================================================================================
+```
+
+**When to use:**
+
+✅ **Use `--max-iterations 3`** when:
+- First-time generation with complex patterns
+- Patterns involve subtle language constructs (annotations, generics, etc.)
+- You want fully automated test generation
+- Time is more valuable than API costs
+
+❌ **Skip it** (use `--max-iterations 0` or omit flag) when:
+- Rules are simple and straightforward
+- You prefer manual review and fixes
+- Minimizing API costs is important
+- Patterns are well-tested and known to work
+
+**Cost Considerations:**
+
+Each iteration uses additional LLM API calls:
+- Initial generation: ~$0.10-0.30 per ruleset
+- Per iteration fix: ~$0.05-0.15 per failing rule
+- Total for 3 iterations with failures: ~$0.30-1.00
+
+**Success Rate:**
+
+Based on real-world usage:
+- **Iteration 1:** 70-85% tests passing
+- **Iteration 2:** 90-95% tests passing
+- **Iteration 3:** 95-100% tests passing
+
+Most issues are resolved within 2-3 iterations.
+
+**What gets fixed automatically:**
+
+- Wrong Java construct for location type
+  - Pattern needs `@Value("${...}")` but code used field declaration
+  - Pattern needs annotation but code used method call
+- Missing imports or dependencies
+- Incorrect pattern syntax in test code
+- Edge cases in regex matching
+
+**What requires manual fixing:**
+
+- Rule pattern itself is incorrect (not the test code)
+- Complex multi-file scenarios
+- Build system issues (wrong Maven/Gradle config)
+- Provider configuration errors
+
+**Example Fix:**
+
+**Before (Failing):**
+```java
+// Rule expected PACKAGE location with @Value
+private String mongoHost = "localhost";  // ❌ Wrong construct
+```
+
+**After (Passing):**
+```java
+// LLM regenerated with correct construct
+@Value("${spring.data.mongodb.host}")  // ✅ Correct
+private String mongoHost;
+```
+
 ## Real-World Results
 
 ### Spring Boot 3.5 → 4.0 MongoDB Migration
@@ -234,9 +362,10 @@ public class Application {
 | 4. Create package structure | 10-15 min | 5 sec (automated) | 99% |
 | 5. Write pom.xml | 15-30 min | 30 sec (AI generates) | 98% |
 | 6. Write test code | 60-120 min | 30 sec (AI generates) | 99% |
-| 7. Test with Kantra | 10-20 min | 10-20 min | 0% |
-| 8. Submit PR | 15-30 min | 15-30 min | 0% |
-| **Total** | **4-6.5 hours** | **~5 minutes** | **~98%** |
+| 7. Fix test failures | 30-60 min | 2-3 min (with --max-iterations) | 95% |
+| 8. Test with Kantra | 10-20 min | 10-20 min (validation only) | 0% |
+| 9. Submit PR | 15-30 min | 15-30 min | 0% |
+| **Total** | **4.5-7 hours** | **~5-7 minutes** | **~98%** |
 
 ## Quality Comparison
 

@@ -1050,8 +1050,9 @@ def run_kantra_tests(output_dir: Path) -> dict:
         total = 0
 
     # Extract failed rules with debug paths
+    # Look for rule IDs (format: source-to-target-NNNNN) followed by 0/1 PASSED and debug path
     failures = []
-    for match in re.finditer(r'([\w-]+)\s+0/1\s+PASSED.*?find debug data in (/[^\s]+)', output, re.DOTALL):
+    for match in re.finditer(r'(\w+-\d{5})\s+0/1\s+PASSED.*?find debug data in (/[^\s]+)', output, re.DOTALL):
         rule_id = match.group(1)
         debug_path = match.group(2).strip()
         failures.append({
@@ -1093,16 +1094,25 @@ def analyze_test_failure(debug_path: str) -> dict:
     with open(rules_yaml) as f:
         rules_data = yaml.safe_load(f)
 
-    # Find unmatched rule
+    # Find unmatched rules - handle different output formats
     unmatched = []
+
+    # Format 1: List with violations dict
     if isinstance(output_data, list) and len(output_data) > 0:
         violations = output_data[0].get('violations', {})
-        unmatched = violations.get('unmatched', [])
+        if isinstance(violations, dict):
+            unmatched = violations.get('unmatched', [])
+
+    # Format 2: Direct dict with violations
+    elif isinstance(output_data, dict):
+        violations = output_data.get('violations', {})
+        if isinstance(violations, dict):
+            unmatched = violations.get('unmatched', [])
 
     if not unmatched:
         return {'error': 'No unmatched rules found'}
 
-    rule_id = unmatched[0]
+    rule_id = unmatched[0] if isinstance(unmatched, list) else unmatched
 
     # Find rule pattern
     rule = None

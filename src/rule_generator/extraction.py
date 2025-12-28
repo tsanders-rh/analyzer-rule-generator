@@ -155,10 +155,18 @@ class MigrationPatternExtractor:
 
             return patterns
 
+        except (ValueError, TypeError, KeyError) as e:
+            # Handle validation or parsing errors gracefully
+            print(f"Error parsing LLM response: {e}")
+            return []
+        except (ConnectionError, TimeoutError, OSError) as e:
+            # Handle network-related errors
+            print(f"⚠ Network error communicating with LLM: {e}")
+            return []
         except Exception as e:
             error_message = str(e)
 
-            # Check if it's a transient API error
+            # Check for specific API errors by message content
             if "500" in error_message or "api_error" in error_message.lower():
                 print(f"⚠ API temporarily unavailable, skipping this chunk (will continue with others)")
             elif "rate_limit" in error_message.lower() or "429" in error_message:

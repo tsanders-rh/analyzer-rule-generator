@@ -136,8 +136,17 @@ class GuideIngester:
         except requests.RequestException as e:
             print(f"Error fetching URL {url}: {e}")
             return None
+        except (ValueError, KeyError, AttributeError) as e:
+            print(f"Error parsing HTML content from {url}: {e}")
+            return None
+        except (UnicodeDecodeError, LookupError) as e:
+            print(f"Error decoding content from {url}: {e}")
+            return None
         except Exception as e:
-            print(f"Error parsing content from {url}: {e}")
+            # Catch any truly unexpected errors
+            print(f"Unexpected error processing {url}: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def ingest_file(self, file_path: str) -> Optional[str]:
@@ -175,8 +184,17 @@ class GuideIngester:
                     content = f.read()
                 return self._clean_text(content)
 
-        except Exception as e:
+        except (IOError, OSError, PermissionError) as e:
             print(f"Error reading file {file_path}: {e}")
+            return None
+        except UnicodeDecodeError as e:
+            print(f"Error decoding file {file_path} (not valid UTF-8): {e}")
+            return None
+        except Exception as e:
+            # Catch any truly unexpected errors
+            print(f"Unexpected error reading file {file_path}: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def chunk_content(self, content: str, max_tokens: int = 8000) -> List[str]:

@@ -367,8 +367,13 @@ class RuleValidator:
                     improved_rule = rule.model_copy(update={'when': improved_data['when']})
                     improved_rules.append(improved_rule)
                     print(f"  ✓ Applied import verification to {rule.ruleID}")
+                except (ValueError, TypeError, KeyError) as e:
+                    # Handle validation or data access errors
+                    print(f"  ! Failed to apply improvement to {rule.ruleID}: Invalid data - {e}")
+                    improved_rules.append(rule)
                 except Exception as e:
-                    print(f"  ! Failed to apply improvement to {rule.ruleID}: {e}")
+                    # Catch any unexpected errors to avoid breaking the entire batch
+                    print(f"  ! Unexpected error applying improvement to {rule.ruleID}: {e}")
                     improved_rules.append(rule)
             else:
                 improved_rules.append(rule)

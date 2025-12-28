@@ -1111,10 +1111,25 @@ def analyze_test_failure(debug_path: str) -> dict:
         return {'error': 'Debug files missing'}
 
     # Read debug data
-    with open(output_yaml) as f:
-        output_data = yaml.safe_load(f)
-    with open(rules_yaml) as f:
-        rules_data = yaml.safe_load(f)
+    try:
+        with open(output_yaml) as f:
+            output_data = yaml.safe_load(f)
+
+        # Validate output data structure
+        if not isinstance(output_data, (list, dict)):
+            return {'error': f'Invalid YAML structure in {output_yaml}: expected list or dict'}
+
+        with open(rules_yaml) as f:
+            rules_data = yaml.safe_load(f)
+
+        # Validate rules data structure
+        if not isinstance(rules_data, (list, dict)):
+            return {'error': f'Invalid YAML structure in {rules_yaml}: expected list or dict'}
+
+    except yaml.YAMLError as e:
+        return {'error': f'YAML parsing error: {e}'}
+    except (IOError, OSError) as e:
+        return {'error': f'Error reading file: {e}'}
 
     # Find unmatched rules - kantra output format is:
     # - name: konveyor-analysis
@@ -1358,12 +1373,35 @@ Examples:
             continue
 
         # Load rules from file
-        with open(rule_file, 'r') as f:
-            content = yaml.safe_load(f)
+        try:
+            with open(rule_file, 'r') as f:
+                content = yaml.safe_load(f)
+
+            # Validate structure
+            if not isinstance(content, (list, dict)):
+                print(f"  ⚠ Error: Invalid YAML structure in {rule_file}: expected list or dict")
+                skipped_count += 1
+                continue
+
             if isinstance(content, list):
                 rules = content
             else:
                 rules = [content]
+
+            # Validate that rules have required fields
+            if not rules or not all(isinstance(r, dict) for r in rules):
+                print(f"  ⚠ Error: Invalid rule structure in {rule_file}")
+                skipped_count += 1
+                continue
+
+        except yaml.YAMLError as e:
+            print(f"  ⚠ Error: YAML parsing error in {rule_file}: {e}")
+            skipped_count += 1
+            continue
+        except (IOError, OSError) as e:
+            print(f"  ⚠ Error reading {rule_file}: {e}")
+            skipped_count += 1
+            continue
 
         print(f"  ✓ Loaded {len(rules)} rule(s)")
 
@@ -1594,9 +1632,28 @@ Examples:
                 print(f"  Regenerating: {rule_file.name}")
 
                 # Load and regenerate
-                with open(rule_file, 'r') as f:
-                    content = yaml.safe_load(f)
+                try:
+                    with open(rule_file, 'r') as f:
+                        content = yaml.safe_load(f)
+
+                    # Validate structure
+                    if not isinstance(content, (list, dict)):
+                        print(f"  ⚠ Error: Invalid YAML structure in {rule_file}, skipping")
+                        continue
+
                     rules = content if isinstance(content, list) else [content]
+
+                    # Validate that rules have required fields
+                    if not rules or not all(isinstance(r, dict) for r in rules):
+                        print(f"  ⚠ Error: Invalid rule structure in {rule_file}, skipping")
+                        continue
+
+                except yaml.YAMLError as e:
+                    print(f"  ⚠ Error: YAML parsing error in {rule_file}: {e}, skipping")
+                    continue
+                except (IOError, OSError) as e:
+                    print(f"  ⚠ Error reading {rule_file}: {e}, skipping")
+                    continue
 
                 language = args.language or detect_language(rules)
                 config = get_language_config(language)

@@ -88,8 +88,17 @@ class OpenRewriteRecipeIngester:
         except yaml.YAMLError as e:
             print(f"Error parsing YAML from {source}: {e}")
             return None
+        except (IOError, OSError, UnicodeDecodeError) as e:
+            print(f"Error reading file from {source}: {e}")
+            return None
+        except (ValueError, KeyError, TypeError) as e:
+            print(f"Error processing recipe data from {source}: {e}")
+            return None
         except Exception as e:
-            print(f"Error loading recipe from {source}: {e}")
+            # Catch any truly unexpected errors
+            print(f"Unexpected error loading recipe from {source}: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def _format_recipe_for_llm(self, recipe_data: Dict[str, Any]) -> str:

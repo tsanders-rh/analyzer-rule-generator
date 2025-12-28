@@ -1845,3 +1845,133 @@ class TestProviderFallbacks:
         # Should return None because Java requires source_fqn
         assert rule is None
 
+
+
+class TestJavaDependencyPatterns:
+    """Test Java dependency pattern generation with alternatives."""
+
+    def test_java_dependency_without_alternatives(self):
+        """Should generate simple java.dependency condition"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="spring-boot-2",
+            target_framework="spring-boot-3"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="spring-boot-starter-web",  # Required field
+            source_fqn="org.springframework:spring-boot-starter-web",
+            category="dependency",
+            rationale="Dependency update",
+            complexity="MEDIUM"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert "java.dependency" in rule.when
+        # Should convert colons to dots in dependency name
+        assert rule.when["java.dependency"]["name"] == "org.springframework.spring-boot-starter-web"
+        assert rule.when["java.dependency"]["lowerbound"] == "0.0.0"
+
+    def test_java_dependency_with_alternative_fqns(self):
+        """Should generate OR condition with alternatives"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="jakarta-9",
+            target_framework="jakarta-10"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="servlet-api",  # Required field
+            source_fqn="javax.servlet:servlet-api",
+            alternative_fqns=[
+                "javax.servlet:javax.servlet-api",
+                "jakarta.servlet:jakarta.servlet-api"
+            ],
+            category="dependency",
+            rationale="Multiple possible dependency names",
+            complexity="MEDIUM"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert "or" in rule.when
+        
+        # Should have 3 conditions (main + 2 alternatives)
+        conditions = rule.when["or"]
+        assert len(conditions) == 3
+        
+        # Each condition should be a java.dependency
+        assert all("java.dependency" in cond for cond in conditions)
+        
+        # Check the dependency names are converted correctly (: to .)
+        names = [cond["java.dependency"]["name"] for cond in conditions]
+        assert "javax.servlet.servlet-api" in names
+        assert "javax.servlet.javax.servlet-api" in names
+        assert "jakarta.servlet.jakarta.servlet-api" in names
+
+    def test_java_dependency_converts_colons_to_dots(self):
+        """Should convert Maven-style coordinates (colon) to dots"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="test",
+            target_framework="test2"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="artifact-name",  # Required field
+            source_fqn="com.example:artifact-name",
+            category="dependency",
+            rationale="Test",
+            complexity="MEDIUM"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        # Should convert "com.example:artifact-name" to "com.example.artifact-name"
+        assert rule.when["java.dependency"]["name"] == "com.example.artifact-name"
+
+    def test_java_dependency_with_empty_alternative_fqns_list(self):
+        """Should handle empty alternative_fqns list"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="test",
+            target_framework="test2"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="library",  # Required field
+            source_fqn="org.example:library",
+            alternative_fqns=[],  # Empty list
+            category="dependency",
+            rationale="Test",
+            complexity="MEDIUM"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        # Should NOT create OR condition with empty alternatives
+        assert "or" not in rule.when
+        assert "java.dependency" in rule.when
+        assert rule.when["java.dependency"]["name"] == "org.example.library"
+
+    def test_java_dependency_sets_lowerbound_zero(self):
+        """Should always set lowerbound to 0.0.0 to match any version"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="test",
+            target_framework="test2"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="lib",  # Required field
+            source_fqn="com.example:lib",
+            category="dependency",
+            rationale="Test",
+            complexity="MEDIUM"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        # Should set lowerbound to match any version
+        assert rule.when["java.dependency"]["lowerbound"] == "0.0.0"

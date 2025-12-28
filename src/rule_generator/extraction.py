@@ -17,6 +17,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .schema import MigrationPattern, LocationType, CSharpLocationType
 from .llm import LLMProvider
+from .config import config
 
 
 # Set up Jinja2 template environment
@@ -114,9 +115,7 @@ class MigrationPatternExtractor:
             List of extracted migration patterns
         """
         # Check if content needs chunking (>40KB)
-        max_content_size = 40000  # ~10K tokens
-
-        if guide_content and len(guide_content) > max_content_size:
+        if guide_content and len(guide_content) > config.MAX_CONTENT_SIZE:
             print(f"  → Content is large ({len(guide_content):,} chars), using chunked extraction")
             return self._extract_patterns_chunked(
                 guide_content,
@@ -203,7 +202,7 @@ class MigrationPatternExtractor:
 
         # Chunk the content
         ingester = GuideIngester()
-        chunks = ingester.chunk_content(guide_content, max_tokens=8000)
+        chunks = ingester.chunk_content(guide_content, max_tokens=config.EXTRACTION_MAX_TOKENS)
 
         print(f"  → Split into {len(chunks)} chunks")
 

@@ -13,6 +13,7 @@ from typing import List, Optional, Dict, Any
 from collections import defaultdict
 
 from .schema import AnalyzerRule, MigrationPattern, Category, Link, LocationType, CSharpLocationType
+from .config import config
 
 
 class AnalyzerRuleGenerator:
@@ -165,8 +166,8 @@ class AnalyzerRuleGenerator:
         Returns:
             Rule ID (e.g., "patternfly-v5-to-patternfly-v6-00000")
         """
-        # Increment counter by 10 following Konveyor convention
-        rule_number = self._rule_counter * 10
+        # Increment counter by RULE_ID_INCREMENT following Konveyor convention
+        rule_number = self._rule_counter * config.RULE_ID_INCREMENT
         self._rule_counter += 1
 
         if self.rule_file_name:
@@ -181,8 +182,8 @@ class AnalyzerRuleGenerator:
         # so we don't include it in the rule ID to avoid duplication
         # The rule ID will match the filename without concern
 
-        # Format: prefix-00000 (5 digits, incrementing by 10)
-        rule_id = f"{prefix}-{rule_number:05d}"
+        # Format: prefix-00000 (RULE_ID_PADDING digits, incrementing by RULE_ID_INCREMENT)
+        rule_id = f"{prefix}-{rule_number:0{config.RULE_ID_PADDING}d}"
 
         return rule_id
 

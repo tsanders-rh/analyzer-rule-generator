@@ -20,6 +20,7 @@ import re
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from rule_generator.llm import get_llm_provider
+from rule_generator.config import config
 
 
 def detect_language(rules: list) -> str:
@@ -1051,11 +1052,30 @@ def run_kantra_tests(output_dir: Path) -> dict:
         }
 
     # Run kantra test with explicit file list (use just filenames since cwd is set)
+    # Validate filenames to prevent injection (though subprocess.run with list is safe)
+    safe_filenames = []
+    for f in test_files:
+        # Ensure filename is safe (no path traversal, no shell metacharacters)
+        if not f.name.endswith('.test.yaml') or '/' in f.name or '\\' in f.name:
+            print(f"⚠ Skipping suspicious filename: {f.name}")
+            continue
+        safe_filenames.append(f.name)
+
+    if not safe_filenames:
+        print("No valid test files after validation")
+        return {
+            'passed': 0,
+            'total': 0,
+            'failures': [],
+            'exit_code': 1
+        }
+
     result = subprocess.run(
-        ['kantra', 'test'] + [f.name for f in test_files],
+        ['kantra', 'test'] + safe_filenames,
         cwd=output_dir,
         capture_output=True,
-        text=True
+        text=True,
+        timeout=config.KANTRA_TIMEOUT_SECONDS
     )
 
     output = result.stdout + result.stderr
@@ -1297,14 +1317,14 @@ Examples:
     parser.add_argument(
         '--delay',
         type=float,
-        default=8.0,
-        help='Delay in seconds between API calls to avoid rate limits (default: 8.0)'
+        default=config.TEST_GENERATION_DELAY,
+        help=f'Delay in seconds between API calls to avoid rate limits (default: {config.TEST_GENERATION_DELAY})'
     )
     parser.add_argument(
         '--max-retries',
         type=int,
-        default=3,
-        help='Maximum number of retries for rate limit errors (default: 3)'
+        default=config.MAX_RETRY_ATTEMPTS,
+        help=f'Maximum number of retries for rate limit errors (default: {config.MAX_RETRY_ATTEMPTS})'
     )
     parser.add_argument(
         '--skip-existing',

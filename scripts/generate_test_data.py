@@ -479,7 +479,8 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
     # Pattern 3: setTimeout with multiple setState - setTimeout\([^{]*\{[^}]*set...
     if 'setTimeout' in pattern and 'set[A-Z]' in pattern:
         # Multiple setState calls in setTimeout (single line for line-by-line matching)
-        return "setTimeout(() => { setCount(c => c + 1); setFlag(f => !f); }, 1000);"
+        # Use old-style function syntax to match pattern [^)]* (no closing parens allowed)
+        return "setTimeout(function() { setCount(c + 1); setFlag(!f); }, 1000);"
 
     # Pattern 4: Interface with Props - interface\s+[A-Za-z0-9_]+Props\s*\{[^}]*\}
     if 'interface' in pattern and 'Props' in pattern:
@@ -584,6 +585,7 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
 
         # Check if any pattern needs config files or has Java imports
         has_java_imports = False
+        has_nodejs_referenced = False
         config_file_name = None
         config_file_path = None
         for pattern in p.get('patterns', []):
@@ -604,11 +606,30 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
                 has_java_imports = True
                 pattern_text += f"\n\n  **YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS:**\n  ```java\n  // {p['ruleID']}\n  {pattern['code_hint']}\n  ```"
 
+            # Check for nodejs.referenced (TypeScript/JavaScript)
+            if pattern.get('provider') == 'nodejs' and language == 'typescript':
+                has_nodejs_referenced = True
+                api_name = pattern.get('pattern', '')
+                # Extract from message if available to get import location
+                message = p.get('message', '')
+                import_statement = ''
+                if 'from \'react\'' in message or 'from "react"' in message:
+                    import_statement = f"import {{ {api_name} }} from 'react';"
+                elif 'from \'react-dom\'' in message or 'from "react-dom"' in message:
+                    import_statement = f"import {{ {api_name} }} from 'react-dom';"
+                elif 'from \'react-dom/server\'' in message or 'from "react-dom/server"' in message:
+                    import_statement = f"import {{ {api_name} }} from 'react-dom/server';"
+                else:
+                    # Default to react
+                    import_statement = f"import {{ {api_name} }} from 'react';"
+
+                pattern_text += f"\n\n  **CRITICAL - nodejs.referenced pattern:**\n  You MUST import AND use `{api_name}` in your code.\n  ```tsx\n  // {p['ruleID']}\n  {import_statement}\n  \n  // Then CALL or USE {api_name} somewhere in your component code\n  // Example: const result = {api_name}(...);\n  ```"
+
         # Add code hint if available (for code-based rules)
-        if p.get('code_hint') and not has_java_imports:
+        if p.get('code_hint') and not has_java_imports and not has_nodejs_referenced:
             if language == 'typescript':
                 pattern_text += f"\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n  ```tsx\n  // {p['ruleID']}\n  {p['code_hint']}\n  ```"
-        elif p.get('component'):
+        elif p.get('component') and not has_nodejs_referenced:
             pattern_text += f"\n  Component: {p['component']} (MUST be used in JSX, not just imported)"
 
         patterns_list.append(pattern_text)
@@ -1095,20 +1116,16 @@ def analyze_test_failure(debug_path: str) -> dict:
     with open(rules_yaml) as f:
         rules_data = yaml.safe_load(f)
 
-    # Find unmatched rules - handle different output formats
+    # Find unmatched rules - kantra output format is:
+    # - name: konveyor-analysis
+    #   unmatched:
+    #   - rule-id-1
+    #   - rule-id-2
     unmatched = []
 
-    # Format 1: List with violations dict
     if isinstance(output_data, list) and len(output_data) > 0:
-        violations = output_data[0].get('violations', {})
-        if isinstance(violations, dict):
-            unmatched = violations.get('unmatched', [])
-
-    # Format 2: Direct dict with violations
-    elif isinstance(output_data, dict):
-        violations = output_data.get('violations', {})
-        if isinstance(violations, dict):
-            unmatched = violations.get('unmatched', [])
+        # Direct access to unmatched list (no 'violations' wrapper)
+        unmatched = output_data[0].get('unmatched', [])
 
     if not unmatched:
         return {'error': 'No unmatched rules found'}

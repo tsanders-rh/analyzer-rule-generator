@@ -1,0 +1,243 @@
+**IMPORTANT - JavaScript/TypeScript Detection Instructions:**
+
+For JavaScript/TypeScript patterns, choose the appropriate provider:
+
+**Option 1: Node.js Provider (for semantic analysis) - For symbol/identifier references**
+Use when you need to find **symbol REFERENCES** (imports, identifiers, type usage) in JavaScript/TypeScript code:
+- Classes and types (e.g., ComponentFactoryResolver, BrowserTransferStateModule, HttpClient)
+- Function/method **imports** (e.g., `import { useEffect } from 'react'`)
+- Function/method **names** as identifiers (e.g., `const x = useEffect`)
+- Interfaces and types
+- Variables/Constants: `const MyComponent = () => {}`
+- Component names (e.g., Button, Modal, Accordion)
+
+**CRITICAL: nodejs.referenced finds SYMBOL REFERENCES, NOT METHOD CALLS**
+- ✅ Use for imports: `import { useEffect } from 'react'` → pattern: "useEffect"
+- ✅ Use for identifier references: `const x = ComponentFactoryResolver` → pattern: "ComponentFactoryResolver"
+- ✅ Use for type usage: `const c: MyComponent` → pattern: "MyComponent"
+- ❌ DO NOT use for method calls: `ReactDOM.render()` (this is a method CALL, use builtin.filecontent)
+- ❌ DO NOT use for function calls: `useEffect(() => {})` (this is a function CALL, use builtin.filecontent)
+
+**When to use builtin vs nodejs:**
+- For METHOD CALLS (e.g., `ReactDOM.render()`, `obj.method()`): Use builtin.filecontent with pattern `ReactDOM\\.render\\(`
+- For SYMBOL REFERENCES (e.g., imports, type usage): Use nodejs.referenced
+- When in doubt: If the pattern includes parentheses `()`, it's a call → use builtin
+
+Fields:
+- **provider_type**: Set to "nodejs"
+- **source_fqn**: Symbol name to find (e.g., "ComponentFactoryResolver", "useEffect", "BrowserTransferStateModule")
+- **file_pattern**: Must be null (nodejs provider doesn't support file filtering)
+- **location_type**: Must be null
+
+Example for Angular class reference:
+```json
+{
+  "source_pattern": "ComponentFactoryResolver",
+  "target_pattern": "removed",
+  "source_fqn": "ComponentFactoryResolver",
+  "provider_type": "nodejs",
+  "file_pattern": null,
+  "location_type": null
+}
+```
+
+Example for React component reference (import/usage):
+```json
+{
+  "source_pattern": "MyComponent",
+  "target_pattern": "NewComponent",
+  "source_fqn": "MyComponent",
+  "provider_type": "nodejs",
+  "file_pattern": null,
+  "location_type": null
+}
+```
+
+Example for React method CALL (use builtin, not nodejs):
+```json
+{
+  "source_pattern": "ReactDOM.render",
+  "target_pattern": "createRoot",
+  "source_fqn": "ReactDOM\\\\.render\\\\(",
+  "provider_type": "builtin",
+  "file_pattern": "\\\\.(j|t)sx?$",
+  "location_type": null
+}
+```
+
+**Option 2: Builtin Provider (for text/regex matching) - For method calls, expressions, and file-specific patterns**
+Use for patterns that require regex matching or file filtering:
+- **METHOD CALLS**: `ReactDOM.render()`, `obj.method()`, function invocations
+- **EXPRESSIONS**: Complex code patterns that aren't simple symbol references
+- Import statement patterns with specific package paths (e.g., `import.*XhrFactory.*from.*@angular/common/http`)
+- CSS patterns in style files (e.g., `--pf-` in .css/.scss files only)
+- Configuration patterns in specific config files (e.g., .json, .xml files)
+- Complex multi-line patterns that need regex matching
+
+**CRITICAL: Use builtin for method calls, nodejs for symbol references**
+- ✅ Use builtin for: `ReactDOM.render()` → pattern: `ReactDOM\\.render\\(`
+- ✅ Use builtin for: `unmountComponentAtNode()` → pattern: `unmountComponentAtNode\\(`
+- ✅ Use builtin for: `obj.method()` → pattern: `obj\\.method\\(`
+- ✅ Use nodejs for: Symbol imports, type usage, identifier references
+- When in doubt: If the code includes `()`, it's likely a call → use builtin
+
+Fields:
+- **provider_type**: Set to "builtin"
+- **source_fqn**: SIMPLE regex pattern. Use `.*` for wildcards, avoid complex escapes like \\s, \\{, \\} (e.g., "componentWillMount")
+  - **IMPORTANT - $  anchor usage**:
+    - **Add $ anchor**: ONLY for COMPLETE import statement patterns (e.g., "import.*XhrFactory.*from.*@angular/common/http$")
+    - **NO $ anchor**: For partial text/package name matching (e.g., "javax\\." to match javax.servlet, javax.persistence, etc.)
+    - The $ anchor means "end of line" - only use it when you're matching a full line, not partial text
+  - **IMPORTANT**: For symbol references (not imports), use the symbol name without anchors (e.g., "RouterEvent", "ComponentFactoryResolver")
+- **file_pattern**: REGEX pattern for file matching (e.g., "\\.tsx$" for .tsx files, "\\.(j|t)sx?$" for .js/.jsx/.ts/.tsx, "\\.(j|t)s$" for .js/.ts)
+- **location_type**: null
+
+Example for pattern in .tsx files only:
+```json
+{
+  "source_pattern": "React.FC",
+  "target_pattern": "function component with explicit props",
+  "source_fqn": "React.FC",
+  "provider_type": "builtin",
+  "file_pattern": "\\.tsx$",
+  "location_type": null
+}
+```
+
+Example for CSS pattern in .css or .scss files:
+```json
+{
+  "source_pattern": "--pf-v5-global",
+  "target_pattern": "--pf-v6-global",
+  "source_fqn": "--pf-v5-global",
+  "provider_type": "builtin",
+  "file_pattern": "\\.(css|scss)$",
+  "location_type": null
+}
+```
+
+IMPORTANT: In JSON, backslashes must be escaped. Use \\\\ for regex backslashes.
+
+**IMPORTANT: Node.js Provider vs Builtin Provider**
+- ✅ Use nodejs provider: Symbol references (classes, types, methods, components) - DEFAULT for Angular/TypeScript
+- ✅ Use builtin provider: ONLY for import path patterns OR file-specific content filtering
+- When in doubt for Angular migrations: Use nodejs provider (it's the default)
+
+**CRITICAL: Component Prop Changes - Use COMBO RULES (nodejs + builtin)**
+
+When a migration involves changing a prop on a SPECIFIC component (e.g., Button's isActive → isPressed), you MUST use a COMBO RULE that combines BOTH nodejs.referenced (for the component) AND builtin.filecontent (for the prop pattern).
+
+**IMPORTANT: Use "when_combo" field for combining conditions**
+
+✅ CORRECT - Combo rule for component-specific prop change:
+```json
+{
+  "source_pattern": "Button isActive",
+  "target_pattern": "Button isPressed",
+  "source_fqn": "Button",
+  "provider_type": "combo",
+  "when_combo": {
+    "nodejs_pattern": "Button",
+    "builtin_pattern": "<Button[^>]*\\bisActive\\b",
+    "file_pattern": "\\.(j|t)sx?$"
+  },
+  "rationale": "Button's isActive prop has been renamed to isPressed",
+  "complexity": "MEDIUM"
+}
+```
+
+This creates a rule with:
+```yaml
+when:
+  and:
+  - nodejs.referenced:
+      pattern: Button
+  - builtin.filecontent:
+      pattern: <Button[^>]*\\bisActive\\b
+      filePattern: \\.(j|t)sx?$
+```
+
+**Benefits of Combo Rules:**
+- ✅ Only matches when BOTH conditions are true
+- ✅ nodejs.referenced ensures the component exists in the file
+- ✅ builtin.filecontent ensures the specific prop usage exists
+- ✅ No false positives from other components with same prop
+- ✅ No false positives from variables with same name
+
+**Pattern Guidelines for Combo Rules:**
+
+1. **nodejs_pattern**: Component name (e.g., "Button", "AccordionContent")
+
+2. **builtin_pattern**: Component + prop regex pattern
+   - Use `<ComponentName[^>]*\\bisActive\\b` format
+   - `[^>]*` matches any content until closing `>`
+   - `\\b` creates word boundaries to avoid partial matches
+   - Escape special regex characters properly
+
+3. **file_pattern**: "\\.(j|t)sx?$" for JSX/TSX files
+
+**Examples:**
+
+Example 1 - Button isActive → isPressed:
+```json
+{
+  "source_pattern": "Button isActive",
+  "target_pattern": "Button isPressed",
+  "source_fqn": "Button",
+  "provider_type": "combo",
+  "when_combo": {
+    "nodejs_pattern": "Button",
+    "builtin_pattern": "<Button[^>]*\\bisActive\\b",
+    "file_pattern": "\\.(j|t)sx?$"
+  },
+  "rationale": "Button's isActive prop renamed to isPressed"
+}
+```
+
+Example 2 - AccordionContent isHidden (removed):
+```json
+{
+  "source_pattern": "AccordionContent isHidden",
+  "target_pattern": "AccordionContent",
+  "source_fqn": "AccordionContent",
+  "provider_type": "combo",
+  "when_combo": {
+    "nodejs_pattern": "AccordionContent",
+    "builtin_pattern": "<AccordionContent[^>]*\\bisHidden\\b",
+    "file_pattern": "\\.(j|t)sx?$"
+  },
+  "rationale": "isHidden prop removed, visibility now automatic"
+}
+```
+
+❌ WRONG - Using single provider for component-specific props:
+```json
+{
+  "source_fqn": "isActive",
+  "provider_type": "builtin"
+}
+```
+This matches isActive on ALL components and ALL variables!
+
+❌ WRONG - Using nodejs.referenced for common prop names:
+```json
+{
+  "source_fqn": "title",
+  "provider_type": "nodejs"
+}
+```
+This matches every occurrence of "title" as an identifier!
+
+**When to Use Combo Rules:**
+
+✅ ALWAYS use combo rules for component-specific prop changes:
+- Button's isActive → isPressed
+- AccordionToggle's isExpanded → move to AccordionItem
+- Modal's title → titleText
+- Any prop change on a specific component
+
+❌ Use single provider for:
+- Component renames (nodejs.referenced for old component name)
+- Import path changes (builtin.filecontent for import statements)
+- CSS variable changes (builtin.filecontent for CSS files)
+- Unique props that only exist on one component (but combo is still safer!)

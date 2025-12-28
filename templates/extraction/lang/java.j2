@@ -1,0 +1,51 @@
+**Java Detection Instructions:**
+For Java code patterns (classes, annotations, imports), use these fields:
+- **provider_type**: Set to "java" (or leave null for auto-detection)
+- **source_fqn**: Fully qualified class name (e.g., "javax.ejb.Stateless")
+- **location_type**: One of:
+  - **IMPORT**: For detecting import statements of specific classes (e.g., "import org.example.ClassName;")
+  - **TYPE**: For detecting when a class is used as a type (field type, parameter type, return type, variable declaration)
+    * Use this when the pattern is a CLASS that appears in code as a type reference
+    * Example: "PathMatchConfigurer" used as parameter type in "void config(PathMatchConfigurer c)"
+  - **METHOD_CALL**: For detecting specific METHOD NAME invocations (pattern should be method name, not class name)
+    * Use this when the pattern is a METHOD that is being called
+    * Example: pattern "getSomething" to find calls to "object.getSomething()"
+    * DO NOT use for detecting usage of a class - use TYPE instead
+  - **ANNOTATION**: For annotation usage (e.g., @Deprecated, @Stateless)
+  - **INHERITANCE**: For detecting class inheritance (extends/implements)
+  - **PACKAGE**: For detecting package references
+- **file_pattern**: Can be null
+
+**Maven Dependency Detection Instructions:**
+For Maven dependency changes (pom.xml), use these fields:
+- **provider_type**: Set to "java" (the java provider handles Maven dependencies)
+- **category**: MUST set to "dependency"
+- **source_fqn**: Maven coordinates in format "groupId:artifactId" (e.g., "mysql:mysql-connector-java" or "org.springframework.boot:spring-boot-starter-web")
+- **alternative_fqns**: CRITICAL - Include Maven relocations! Many Maven artifacts have been relocated:
+  * "mysql:mysql-connector-java" → "com.mysql:mysql-connector-j" (relocated in 8.0+)
+  * If the migration guide mentions a dependency change, check if it's a Maven relocation
+  * Include BOTH the old and relocated coordinates in alternative_fqns (e.g., ["com.mysql:mysql-connector-j"])
+  * Maven automatically resolves relocations, so the analyzer will see the NEW coordinates even if pom.xml has OLD ones
+- **location_type**: null (not needed for dependency detection)
+- **file_pattern**: null
+
+**Configuration File Detection Instructions:**
+For property/configuration file patterns (application.properties, application.yaml), use these fields:
+- **provider_type**: Set to "builtin"
+- **source_fqn**: SIMPLE regex pattern to match the property. Use `.*` for wildcards and escape dots with \\\\ (e.g., "spring\\.data\\.mongodb\\.host")
+- **file_pattern**: Regex pattern to match configuration files (e.g., ".*\\.(properties|yaml|yml)")
+- **location_type**: null (not needed for builtin provider)
+- **category**: "configuration"
+
+Example for Spring Boot property migration:
+```json
+{
+  "source_pattern": "spring.data.mongodb.host",
+  "target_pattern": "spring.mongodb.host",
+  "source_fqn": "spring\\.data\\.mongodb\\.host",
+  "provider_type": "builtin",
+  "file_pattern": ".*\\.(properties|yaml|yml)",
+  "location_type": null,
+  "category": "configuration"
+}
+```

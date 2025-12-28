@@ -1,0 +1,237 @@
+Analyze this migration guide and extract specific code migration patterns for static analysis rule generation.
+
+{{ frameworks }}{{ lang_instructions }}For each pattern you find, identify:
+
+1. **Source Pattern**: The old code/annotation/configuration (e.g., "@Stateless", "Button isActive prop", "@patternfly/react-core/v5 import")
+2. **Target Pattern**: The new replacement (e.g., "@ApplicationScoped", "Button isPressed prop", "@patternfly/react-core import")
+3. **Source FQN**: Fully qualified name for detection (e.g., "javax.ejb.Stateless")
+
+   **CRITICAL ALIGNMENT RULE**: Your source_pattern MUST accurately describe what the detection pattern will actually find:
+   - If detecting an import path change: source_pattern should be the import path (e.g., "@patternfly/react-core/v5")
+   - If detecting a component prop: source_pattern should mention the component AND prop (e.g., "Button isActive prop")
+   - If detecting a class/annotation: source_pattern should be the class/annotation name
+   - NEVER describe one thing (e.g., "import path") when actually detecting something else (e.g., "component usage")
+4. **Location Type**: Where to detect it. Choose from:
+   - ANNOTATION: For annotations like @Stateless, @Autowired
+   - IMPORT: For import statements
+   - METHOD_CALL: For method invocations
+   - TYPE: For class/interface usage
+   - INHERITANCE: For extends/implements
+   - PACKAGE: For package references
+5. **Alternative FQNs**: List any alternative fully qualified names (e.g., ["jakarta.ejb.Stateless"] for javax→jakarta migration)
+6. **Category**: One of: dependency, annotation, api, configuration, other
+7. **Concern**: The specific migration concern/topic this pattern addresses (e.g., "mongodb", "security", "web", "testing", "applet-removal"). This will be used to group related patterns into separate files. Use lowercase-with-hyphens format.
+8. **Complexity**: One of:
+   - TRIVIAL: Mechanical find-replace (e.g., package rename, removing unused imports)
+   - LOW: Straightforward 1:1 API replacement with minimal code changes
+   - MEDIUM: API changes requiring minor refactoring or logic updates
+   - HIGH: Removed APIs requiring significant code restructuring (e.g., replacing framework components)
+   - EXPERT: Architectural changes or patterns requiring deep redesign and human expertise
+
+   Consider these factors:
+   - Removing an unused import = TRIVIAL
+   - Renaming a class/method = LOW
+   - Changing API calls with similar alternatives = MEDIUM
+   - Replacing core component types (e.g., Applet → JFrame) = HIGH
+   - Migrating entire frameworks or patterns = EXPERT
+9. **Rationale**: Clear, comprehensive explanation of why this change is needed. Expand on minimal guide text to provide full context. Include:
+   - What changed and why
+   - Any important behavioral differences
+   - When applicable, explain the recommended approach
+   **IMPORTANT**: Your rationale should be detailed enough to help a developer understand the migration without reading the full guide.
+10. **Documentation URL**: Link to relevant documentation (if available in guide)
+11. **Example Before/After**: High-quality, realistic code examples showing the migration.
+
+   **CRITICAL - Example Quality Guidelines:**
+
+   If the guide provides code examples, use them. If NOT, you MUST create realistic, complete examples that:
+   - Show realistic usage in the target framework/language
+   - Include necessary context (e.g., full method signatures, class constructors, realistic variable names)
+   - Demonstrate the actual change clearly
+   - Use proper language syntax (TypeScript for Angular, proper formatting)
+   - Are complete enough to be actionable (not just fragments)
+
+   **Example Quality Checklist:**
+   - ✅ GOOD: Complete TypeScript method with constructor showing before/after DI patterns
+   - ✅ GOOD: Full import statement showing package change
+   - ✅ GOOD: Realistic component code with props showing migration
+   - ❌ BAD: Generic placeholder code like "router.createComponent(ComponentFactoryResolver)"
+   - ❌ BAD: Incomplete fragments without context
+   - ❌ BAD: Abstract examples that don't show real usage
+
+   For Angular/TypeScript migrations, examples should:
+   - Use TypeScript syntax (types, interfaces, classes)
+   - Show realistic Angular patterns (dependency injection, decorators, component structure)
+   - Include full method signatures or constructors when showing API changes
+   - Use realistic variable names (not "foo", "bar")
+
+   For import path changes:
+   - Show complete import statement
+   - Use realistic imported symbols (not just "Component")
+   - Show actual package paths
+
+**CRITICAL WARNING - Component Prop Detection Strategy:**
+
+For component-specific prop changes (e.g., "Button's isActive → isPressed"):
+
+**REQUIRED: Use COMBO RULES (provider_type: "combo")**
+- Set provider_type to "combo"
+- Include when_combo object with nodejs_pattern, builtin_pattern, and file_pattern
+- This combines nodejs.referenced (for component) + builtin.filecontent (for prop)
+- See the JavaScript/TypeScript instructions above for detailed examples
+
+**NEVER use generic prop detection:**
+- ❌ DON'T set provider_type to "nodejs" and source_fqn to a common prop name
+- ❌ DON'T set provider_type to "builtin" and source_fqn to a common prop name
+- ✅ DO use combo rules for ALL component-specific prop changes
+
+---
+MIGRATION GUIDE CONTENT:
+
+{{ guide_content }}
+
+---
+
+**CRITICAL REMINDER - Component Prop Changes:**
+
+For JavaScript/TypeScript migrations where a prop changes on a SPECIFIC component:
+- ✅ ALWAYS use `"provider_type": "combo"`
+- ✅ ALWAYS include `"when_combo"` with nodejs_pattern (component name), builtin_pattern (component + prop), and file_pattern
+- ❌ NEVER use `"provider_type": "builtin"` with just a prop name
+- ❌ NEVER use `"provider_type": "nodejs"` with just a prop name
+
+Example - Button's isActive → isPressed:
+```json
+{
+  "source_pattern": "Button isActive",
+  "source_fqn": "Button",
+  "provider_type": "combo",
+  "when_combo": {
+    "nodejs_pattern": "Button",
+    "builtin_pattern": "<Button[^>]*\\bisActive\\b",
+    "file_pattern": "\\.(j|t)sx?$"
+  }
+}
+```
+
+**AUTOMATIC VALIDATION - RULES WILL BE ENFORCED:**
+
+Your patterns will be automatically validated. Patterns violating these rules will be REJECTED or AUTO-FIXED:
+
+1. ✅ AUTO-FIX: Component-specific prop changes (e.g., "Button isActive") will be converted to combo rules
+2. ❌ REJECT: Generic prop names as standalone patterns (isActive, title, onClick, alignLeft, etc.)
+3. ❌ REJECT: Source and target must be different (source: "^5", target: "^5" → INVALID)
+4. ❌ REJECT: Overly broad patterns (wildcards like ".*", ".+", etc.)
+
+**FINAL CHECKLIST - Angular/TypeScript Migrations:**
+
+Before returning your JSON, verify each pattern:
+
+1. **Provider Selection:**
+   - ✅ Classes/Types (ComponentFactoryResolver, BrowserTransferStateModule) → nodejs provider
+   - ✅ Methods/Functions → nodejs provider
+   - ✅ Component/Service names → nodejs provider
+   - ✅ Import path changes (import X from 'old-package') → builtin provider with import pattern
+   - ❌ Don't use builtin for simple class/type names
+
+2. **Example Quality:**
+   - ✅ TypeScript syntax with types and interfaces
+   - ✅ Realistic Angular patterns (constructors, dependency injection, decorators)
+   - ✅ Full code context (not just fragments)
+   - ✅ Realistic variable names (MyComponent, not foo/bar)
+   - ❌ Don't create generic placeholders like "router.createComponent(OldClass)"
+
+3. **Rationale Quality:**
+   - ✅ Explain WHY the change is needed
+   - ✅ Explain the recommended approach
+   - ✅ Provide context beyond the minimal guide text
+
+Return your findings as a JSON array. Each pattern should be an object with these fields:
+
+{
+  "source_pattern": "string",
+  "target_pattern": "string",
+  "source_fqn": "string or null",
+  "location_type": "ANNOTATION|IMPORT|METHOD_CALL|TYPE|INHERITANCE|PACKAGE|FIELD|CLASS|METHOD|ALL or null",
+  "alternative_fqns": ["string"] or [],
+  "complexity": "TRIVIAL|LOW|MEDIUM|HIGH|EXPERT",
+  "category": "string",
+  "concern": "string",
+  "provider_type": "java|nodejs|csharp|builtin|combo or null",
+  "file_pattern": "string or null",
+  "when_combo": {
+    "nodejs_pattern": "string",
+    "builtin_pattern": "string",
+    "file_pattern": "string"
+  } or null,
+  "rationale": "string",
+  "example_before": "string or null",
+  "example_after": "string or null",
+  "documentation_url": "string or null"
+}
+
+Note: when_combo is REQUIRED when provider_type is "combo", otherwise it should be null.
+
+Focus on patterns that can be detected via static analysis. Skip general advice or manual migration steps.
+
+**CRITICAL: Pattern Granularity Rules**
+
+When a migration involves MULTIPLE specific value replacements, you MUST create SEPARATE patterns for EACH value pair:
+
+1. ✅ DO: Create individual patterns for each specific value
+   - Example: For pixel→rem conversions, create separate rules:
+     * "576px" → "36rem" (one pattern)
+     * "768px" → "48rem" (another pattern)
+     * "992px" → "62rem" (another pattern)
+   - Example: For enum renames, create separate rules:
+     * "alignLeft" → "alignStart" (one pattern)
+     * "alignRight" → "alignEnd" (another pattern)
+
+2. ❌ DON'T: Create generic catch-all patterns
+   - DON'T: "breakpoint pixel values" → "breakpoint rem values"
+   - DON'T: "alignment values" → "updated alignment values"
+
+3. When you see multiple related changes in the guide, treat each as a separate pattern with:
+   - Exact source value in source_pattern
+   - Exact target value in target_pattern
+   - Specific description (see below)
+
+**Description Format Rules:**
+
+- Use SPECIFIC values, not generic descriptions
+- Format: "{exact_source} should be replaced with {exact_target}"
+- ✅ GOOD: "576px should be replaced with 36rem"
+- ✅ GOOD: "alignLeft should be replaced with alignStart"
+- ✅ GOOD: "variant='button-group' should be replaced with variant='action-group'"
+- ❌ BAD: "pixel values should be replaced with rem values"
+- ❌ BAD: "alignment values should be updated"
+- ❌ BAD: "variant values have changed"
+
+**Example Code Guidelines:**
+
+- Keep examples MINIMAL - show only the code being changed
+- DO NOT include import statements unless the import path itself is changing
+- DO NOT include export/function wrappers
+- ✅ GOOD: "<Button isActive />"
+- ❌ BAD: "import { Button } from '@patternfly/react-core'; export const MyButton = () => <Button isActive />"
+
+**CRITICAL JSON FORMATTING RULES:**
+- You are generating JSON - ALL backslashes in string values MUST be escaped
+- In JSON: `\.` is INVALID, `\\.` is CORRECT (escaped backslash + escaped dot)
+- For regex dot: write `\\.` not `\.`
+- For file patterns: `".*\\.properties"` not `".*\.properties"`
+- ALWAYS double your backslashes in JSON strings!
+
+**IMPORTANT REGEX PATTERN RULES:**
+- For builtin provider: Use SIMPLE regex patterns with `.*` wildcards
+- Avoid complex regex escapes like \\s, \\(, \\) (but \\{ and \\} are OK in non-file-pattern contexts)
+- Example: Use "import.*Component.*from.*library" NOT "import\\s*\\{\\s*Component\\s*\\}"
+- Remember: Escape your backslashes for JSON!
+
+**FILE PATTERN RULES:**
+- For builtin.filecontent provider: Use REGEX patterns for filePattern field
+- Examples: "\\.tsx$" for .tsx files, "\\.(j|t)sx?$" for .js/.jsx/.ts/.tsx files
+- CRITICAL: In JSON, write `\\.` for a literal dot in regex (four backslashes become two in the string, one in the actual regex)
+- For nodejs provider: Do NOT use filePattern (matches all JS/TS files)
+
+Return ONLY the JSON array, no additional commentary.

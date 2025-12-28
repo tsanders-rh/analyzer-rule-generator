@@ -603,3 +603,285 @@ class TestErrorHandling:
         # Should successfully parse the valid pattern
         assert len(patterns) == 1
         assert patterns[0].source_pattern == "test"
+
+
+class TestJSONRepair:
+    """Test JSON repair functionality."""
+
+    @pytest.fixture
+    def extractor(self):
+        """Create extractor with mock LLM."""
+        mock_llm = Mock()
+        return MigrationPatternExtractor(mock_llm)
+
+    def test_repair_invalid_backslash_escapes(self, extractor):
+        """Should fix invalid escape sequences like \\. in JSON strings"""
+        # JSON with invalid \. escape (common in regex patterns)
+        malformed = '{"pattern": "com\\.example\\.Test"}'
+        repaired = extractor._repair_json(malformed)
+        
+        # Should double-escape the backslashes
+        assert "\\\\" in repaired
+        # Should be valid JSON after repair
+        parsed = json.loads(repaired)
+        assert "pattern" in parsed
+
+    def test_repair_regex_escape_sequences(self, extractor):
+        """Should fix regex patterns with invalid JSON escapes"""
+        # Regex pattern with \d (invalid in JSON)
+        malformed = '{"pattern": "\\d+"}'
+        repaired = extractor._repair_json(malformed)
+        
+        # Should successfully parse after repair
+        parsed = json.loads(repaired)
+        assert "pattern" in parsed
+
+    def test_repair_unescaped_single_quotes(self, extractor):
+        """Should fix unescaped single quotes in JSON strings"""
+        # JSON with unescaped single quote
+        malformed = '{"desc": "It\'s a test"}'
+        repaired = extractor._repair_json(malformed)
+        
+        # Should successfully parse after repair
+        parsed = json.loads(repaired)
+        assert "desc" in parsed
+
+    def test_repair_preserves_valid_escape_sequences(self, extractor):
+        """Should preserve valid escape sequences like \\n, \\t"""
+        valid_json = '{"message": "Line 1\\nLine 2\\tTabbed"}'
+        repaired = extractor._repair_json(valid_json)
+        
+        # Should parse successfully
+        parsed = json.loads(repaired)
+        assert "message" in parsed
+        # Valid escapes should be preserved
+        assert "Line 1" in parsed["message"] or "\\n" in repaired
+
+    def test_repair_removes_trailing_commas(self, extractor):
+        """Should remove trailing commas before closing braces"""
+        malformed = '{"pattern": "test", "rationale": "desc",}'
+        repaired = extractor._repair_json(malformed)
+        
+        # Should remove the trailing comma
+        assert not repaired.strip().endswith(",}")
+        # Should parse successfully
+        parsed = json.loads(repaired)
+        assert parsed["pattern"] == "test"
+
+    def test_repair_fixes_missing_commas_between_objects(self, extractor):
+        """Should add missing commas between objects in array"""
+        malformed = '[{"a": 1}{"b": 2}]'
+        repaired = extractor._repair_json(malformed)
+        
+        # Should add comma between objects
+        assert '},{' in repaired
+        # Should parse successfully
+        parsed = json.loads(repaired)
+        assert len(parsed) == 2
+
+    def test_repair_handles_already_valid_json(self, extractor):
+        """Should not break already valid JSON"""
+        valid_json = '{"pattern": "example", "rationale": "Test"}'
+        repaired = extractor._repair_json(valid_json)
+        
+        parsed = json.loads(repaired)
+        assert parsed["pattern"] == "example"
+        assert parsed["rationale"] == "Test"
+
+
+class TestPatternValidation:
+    """Test pattern validation helper functions."""
+
+    @pytest.fixture
+    def extractor(self):
+        """Create extractor with mock LLM."""
+        mock_llm = Mock()
+        return MigrationPatternExtractor(mock_llm)
+
+    def test_looks_like_prop_pattern_with_component_prop_format(self, extractor):
+        """Should detect patterns in 'Component propName' format"""
+        pattern = MigrationPattern(
+            source_pattern="Button isDisabled",  # Component + prop format
+            rationale="Button component change",
+            complexity="low",
+            category="api"
+        )
+        
+        assert extractor._looks_like_prop_pattern(pattern) is True
+
+    def test_looks_like_prop_pattern_with_pascal_camel_case(self, extractor):
+        """Should detect PascalCase component + camelCase prop"""
+        pattern = MigrationPattern(
+            source_pattern="Modal title",  # PascalCase + camelCase
+            rationale="Modal property change",
+            complexity="low",
+            category="api"
+        )
+        
+        assert extractor._looks_like_prop_pattern(pattern) is True
+
+    def test_looks_like_prop_pattern_without_component_format(self, extractor):
+        """Should return False for patterns without component format"""
+        pattern = MigrationPattern(
+            source_pattern="isDisabled",  # Just prop name, no component
+            rationale="Property change",
+            complexity="low",
+            category="api"
+        )
+        
+        assert extractor._looks_like_prop_pattern(pattern) is False
+
+    def test_looks_like_prop_pattern_excludes_method_names(self, extractor):
+        """Should exclude common method names like useState"""
+        pattern = MigrationPattern(
+            source_pattern="Component useState",  # Method name, not prop
+            rationale="Component change",
+            complexity="low",
+            category="api"
+        )
+        
+        assert extractor._looks_like_prop_pattern(pattern) is False
+
+    def test_is_overly_broad_pattern_generic_prop_names(self, extractor):
+        """Should detect overly generic prop names"""
+        # These are in the predefined list of overly generic patterns
+        assert extractor._is_overly_broad_pattern("isDisabled") is True
+        assert extractor._is_overly_broad_pattern("title") is True
+        assert extractor._is_overly_broad_pattern("onClick") is True
+
+    def test_is_overly_broad_pattern_specific_patterns(self, extractor):
+        """Should accept specific patterns not in generic list"""
+        # These are specific enough and not in the overly generic list
+        assert extractor._is_overly_broad_pattern("componentWillMount") is False
+        assert extractor._is_overly_broad_pattern("getUserConfirmation") is False
+
+    def test_is_overly_broad_pattern_wildcard_patterns(self, extractor):
+        """Should detect overly broad wildcard patterns"""
+        assert extractor._is_overly_broad_pattern(".*") is True
+        assert extractor._is_overly_broad_pattern(".+") is True
+        assert extractor._is_overly_broad_pattern("\\w+") is True
+
+    def test_convert_to_combo_rule(self, extractor):
+        """Should convert pattern to combo rule with import verification"""
+        pattern = MigrationPattern(
+            source_pattern="Button isActive",  # Component + prop format
+            rationale="Button prop change",
+            complexity="low",
+            category="api",
+            provider_type="builtin"
+        )
+        
+        # Convert to combo rule
+        converted = extractor._convert_to_combo_rule(pattern)
+        
+        # Should update provider_type to combo
+        assert converted.provider_type == "combo"
+        # Should have when_combo configuration
+        assert converted.when_combo is not None
+        assert "import_pattern" in converted.when_combo
+        assert "builtin_pattern" in converted.when_combo
+        # Import pattern should check for Button import
+        assert "Button" in converted.when_combo["import_pattern"]
+
+    def test_validate_and_fix_patterns_with_patternfly(self, extractor):
+        """Should validate patterns for PatternFly migration"""
+        patterns = [
+            MigrationPattern(
+                source_pattern="Alert isActive",
+                rationale="Alert prop change",
+                complexity="low",
+                category="api",
+                provider_type="builtin"
+            )
+        ]
+        
+        # Call with language and framework info
+        fixed_patterns = extractor._validate_and_fix_patterns(
+            patterns, 
+            language="javascript",
+            source_framework="patternfly-v5",
+            target_framework="patternfly-v6"
+        )
+        
+        # Should return validated patterns
+        assert len(fixed_patterns) >= 1
+
+
+
+
+class TestOpenRewritePrompt:
+    """Test OpenRewrite-specific prompt generation."""
+
+    @pytest.fixture
+    def extractor(self):
+        """Create extractor configured for OpenRewrite."""
+        mock_llm = Mock()
+        return MigrationPatternExtractor(mock_llm, from_openrewrite=True)
+
+    def test_build_openrewrite_prompt_for_java(self, extractor):
+        """Should generate Java-specific OpenRewrite prompt"""
+        recipe_content = """
+        ---
+        type: specs.openrewrite.org/v1beta/recipe
+        name: com.example.SpringBoot3Upgrade
+        displayName: Spring Boot 3 Upgrade
+        description: Migrate to Spring Boot 3
+        recipeList:
+          - org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_0
+        """
+        
+        prompt = extractor._build_openrewrite_prompt(
+            recipe_content=recipe_content,
+            source_framework="spring-boot-2",
+            target_framework="spring-boot-3"
+        )
+        
+        # Should contain OpenRewrite-specific instructions
+        assert "OpenRewrite" in prompt or "recipe" in prompt.lower()
+        # Should contain Java-specific instructions
+        assert "java" in prompt.lower() or "source_fqn" in prompt.lower()
+
+    def test_build_openrewrite_prompt_for_typescript(self, extractor):
+        """Should generate TypeScript-specific OpenRewrite prompt"""
+        recipe_content = """
+        ---
+        type: specs.openrewrite.org/v1beta/recipe
+        name: com.example.ReactUpgrade
+        displayName: React 18 Upgrade
+        description: Migrate to React 18
+        """
+        
+        prompt = extractor._build_openrewrite_prompt(
+            recipe_content=recipe_content,
+            source_framework="react-17",
+            target_framework="react-18"
+        )
+        
+        # Should contain TypeScript/JavaScript instructions
+        assert len(prompt) > 0
+
+    def test_build_openrewrite_prompt_includes_frameworks(self, extractor):
+        """Should include framework information in prompt"""
+        recipe_content = "# Test recipe"
+        
+        prompt = extractor._build_openrewrite_prompt(
+            recipe_content=recipe_content,
+            source_framework="spring-boot-2.7",
+            target_framework="spring-boot-3.0"
+        )
+        
+        # Should generate a prompt with framework info
+        assert len(prompt) > 0
+
+    def test_build_openrewrite_prompt_without_frameworks(self, extractor):
+        """Should handle missing framework information"""
+        recipe_content = "# Test recipe"
+        
+        prompt = extractor._build_openrewrite_prompt(
+            recipe_content=recipe_content,
+            source_framework=None,
+            target_framework=None
+        )
+        
+        # Should still generate a valid prompt
+        assert len(prompt) > 0

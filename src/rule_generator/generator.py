@@ -521,7 +521,7 @@ class AnalyzerRuleGenerator:
         return False
 
     def _is_complete_import_line_pattern(self, pattern: MigrationPattern) -> bool:
-        """
+        r"""
         Determine if pattern is a COMPLETE import line pattern that should have $ anchor.
 
         This is different from _is_import_pattern() which checks if the pattern is ABOUT imports.

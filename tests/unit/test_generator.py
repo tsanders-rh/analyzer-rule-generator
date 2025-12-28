@@ -1617,3 +1617,231 @@ class TestImportPatternRules:
 
         # Message should contain {{ component }} variable
         assert "{{ component }}" in rule.message
+
+
+class TestComboRuleGeneration:
+    """Test combo rule generation with import verification."""
+
+    def test_combo_rule_with_import_pattern(self):
+        """Should generate combo rule with import_pattern + builtin_pattern"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="patternfly-v5",
+            target_framework="patternfly-v6"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="Alert",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Alert component usage",
+            provider_type="combo",
+            when_combo={
+                "import_pattern": "import.*\\{[^}]*\\bAlert\\b[^}]*\\}.*from ['\"']@patternfly/react-",
+                "builtin_pattern": "<Alert[^/>]*(?:/>|>)",
+                "file_pattern": "\\.(j|t)sx?$"
+            }
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert "and" in rule.when
+        conditions = rule.when["and"]
+        
+        # Should have 2 conditions: import + JSX usage
+        assert len(conditions) == 2
+        
+        # First condition should be import verification
+        assert "builtin.filecontent" in conditions[0]
+        assert "import" in conditions[0]["builtin.filecontent"]["pattern"]
+        assert conditions[0]["builtin.filecontent"]["filePattern"] == "\\.(j|t)sx?$"
+        
+        # Second condition should be JSX pattern
+        assert "builtin.filecontent" in conditions[1]
+        assert "<Alert" in conditions[1]["builtin.filecontent"]["pattern"]
+
+    def test_combo_rule_with_nodejs_pattern(self):
+        """Should generate combo rule with nodejs_pattern + builtin_pattern"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="patternfly-v5",
+            target_framework="patternfly-v6"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="Button",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Button component prop change",
+            provider_type="combo",
+            when_combo={
+                "nodejs_pattern": "Button",
+                "builtin_pattern": "<Button.*isDisabled",
+                "file_pattern": "\\.(j|t)sx?$"
+            }
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert "and" in rule.when
+        conditions = rule.when["and"]
+        
+        # Should have 2 conditions: nodejs + builtin
+        assert len(conditions) == 2
+        
+        # First condition should be nodejs.referenced
+        assert "nodejs.referenced" in conditions[0]
+        assert conditions[0]["nodejs.referenced"]["pattern"] == "Button"
+        
+        # Second condition should be builtin pattern
+        assert "builtin.filecontent" in conditions[1]
+        assert "isDisabled" in conditions[1]["builtin.filecontent"]["pattern"]
+
+    def test_combo_rule_without_builtin_pattern_returns_none(self):
+        """Should return None if combo rule missing builtin_pattern"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="test",
+            target_framework="test2"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="Test",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test",
+            provider_type="combo",
+            when_combo={
+                "import_pattern": "import.*Test"
+                # Missing builtin_pattern
+            }
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        # Should return None due to missing builtin_pattern
+        assert rule is None
+
+    def test_combo_rule_without_import_or_nodejs_returns_none(self):
+        """Should return None if combo rule missing both import and nodejs patterns"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="test",
+            target_framework="test2"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="Test",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test",
+            provider_type="combo",
+            when_combo={
+                "builtin_pattern": "<Test"
+                # Missing both import_pattern and nodejs_pattern
+            }
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        # Should return None due to missing import/nodejs pattern
+        assert rule is None
+
+    def test_combo_rule_prefers_import_over_nodejs(self):
+        """Should use import_pattern if both import and nodejs patterns present"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="patternfly-v5",
+            target_framework="patternfly-v6"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="Alert",
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test",
+            provider_type="combo",
+            when_combo={
+                "import_pattern": "import.*Alert",
+                "nodejs_pattern": "Alert",  # Should be ignored
+                "builtin_pattern": "<Alert"
+            }
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        conditions = rule.when["and"]
+        
+        # First condition should use import_pattern, not nodejs
+        assert "builtin.filecontent" in conditions[0]
+        assert "import" in conditions[0]["builtin.filecontent"]["pattern"]
+        # Should NOT have nodejs.referenced
+        assert "nodejs.referenced" not in conditions[0]
+
+
+class TestProviderFallbacks:
+    """Test provider-specific fallback logic."""
+
+    def test_nodejs_provider_uses_source_pattern_fallback(self):
+        """Should use source_pattern as fallback for nodejs provider"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="react-17",
+            target_framework="react-18"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="ComponentWillMount",
+            # No source_fqn provided
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test",
+            provider_type="nodejs"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert "nodejs.referenced" in rule.when
+        assert rule.when["nodejs.referenced"]["pattern"] == "ComponentWillMount"
+
+    def test_csharp_provider_uses_source_pattern_fallback(self):
+        """Should use source_pattern as fallback for csharp provider"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="dotnet-framework",
+            target_framework="dotnet-8"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="System.Web.HttpContext",
+            # No source_fqn provided
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test",
+            provider_type="csharp"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        assert rule is not None
+        assert "c-sharp.referenced" in rule.when
+        assert rule.when["c-sharp.referenced"]["pattern"] == "System.Web.HttpContext"
+
+    def test_java_provider_requires_source_fqn(self):
+        """Should return None if Java provider missing source_fqn"""
+        generator = AnalyzerRuleGenerator(
+            source_framework="spring-boot-2",
+            target_framework="spring-boot-3"
+        )
+
+        pattern = MigrationPattern(
+            source_pattern="SomeClass",
+            # No source_fqn for Java provider
+            complexity="MEDIUM",
+            category="api",
+            rationale="Test",
+            provider_type="java"
+        )
+
+        rule = generator._pattern_to_rule(pattern)
+
+        # Should return None because Java requires source_fqn
+        assert rule is None
+

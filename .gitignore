@@ -51,6 +51,10 @@ examples/output/*.yaml
 # Test files and directories (generated during development/testing)
 test-*.yaml
 test-*/
+TEST_*.md
+*_TEST_*.md
+*_ISSUE.md
+*_BASELINE.md
 
 # Test output directories (generated during testing)
 examples/output/*test*/

@@ -376,7 +376,96 @@ Rules are assigned sequential IDs:
 
 Example: `spring-boot-3-to-spring-boot-4-00001`
 
-The number is zero-padded to 5 digits and increments per rule file.
+The number is zero-padded to 5 digits and increments globally across all concerns (rule IDs are globally unique, not per-concern).
+
+### Post-Generation Validation (Experimental)
+
+After rules are generated, the script automatically runs LLM-based quality validation to detect and fix common issues. This is an experimental feature that may use additional API credits.
+
+**What Gets Validated:**
+
+1. **Import Verification (JavaScript/TypeScript + PatternFly only)**
+   - Adds import verification to rules that reference PatternFly components
+   - Prevents false positives from matching component names in comments or non-PatternFly code
+   - Only runs when both conditions are met:
+     - Language is JavaScript or TypeScript
+     - Source/target frameworks contain "patternfly"
+
+2. **Overly Broad Patterns**
+   - Detects patterns that are too short or generic
+   - Warns about patterns that may match unintended code
+   - Example: Pattern `ab` would match `about`, `table`, `abs()`, etc.
+
+3. **Pattern Quality Review**
+   - Checks if patterns accurately detect what the description claims
+   - Suggests improvements for better specificity
+
+4. **Duplicate Detection**
+   - Identifies rules with identical or very similar patterns
+   - Helps avoid redundant rules in the ruleset
+
+**Example Output:**
+
+```
+================================================================================
+POST-GENERATION VALIDATION
+================================================================================
+
+→ Checking for missing import verification...
+  ! Rule patternfly-v5-to-v6-00010 needs import verification
+  ✓ Applied import verification to patternfly-v5-to-v6-00010
+
+→ Checking for overly broad patterns...
+  ! Rule test-00020 has overly broad pattern
+
+→ Reviewing pattern quality...
+
+→ Checking for duplicates...
+
+✓ Validation complete
+  - 1 rules improved
+  - 1 issues detected
+```
+
+**Import Verification Example:**
+
+Before validation:
+```yaml
+when:
+  nodejs.referenced:
+    pattern: Alert
+```
+
+After validation (import verification added):
+```yaml
+when:
+  and:
+    - builtin.filecontent:
+        pattern: import.*\{[^}]*\bAlert\b[^}]*\}.*from ['"]@patternfly/react-
+        filePattern: \.(j|t)sx?$
+    - builtin.filecontent:
+        pattern: <Alert[^/>]*(?:/>|>)
+        filePattern: \.(j|t)sx?$
+```
+
+**Automatic Improvements:**
+
+The validator can automatically apply certain improvements:
+- **Import verification**: Automatically added to eligible rules
+- **Pattern refinements**: Applied if validation confidence is high
+- **Other issues**: Reported but require manual review
+
+**Cost Considerations:**
+
+This validation step uses the same LLM provider as rule generation. For a typical ruleset:
+- 50 rules: ~$0.10-0.25 in additional API costs
+- 200 rules: ~$0.50-1.00 in additional API costs
+
+The validation is fast (runs in parallel with rule writing) and typically adds less than 10 seconds to total generation time.
+
+**Disabling Validation:**
+
+Currently, post-generation validation always runs during rule generation. To skip it, you would need to modify the `generate_rules.py` script. A future enhancement may add a `--skip-validation` flag.
 
 ## Advanced Usage
 

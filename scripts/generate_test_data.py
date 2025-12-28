@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from rule_generator.llm import get_llm_provider
 from rule_generator.config import config
+from rule_generator.security import validate_path, is_safe_path
 
 
 def detect_language(rules: list) -> str:
@@ -1371,7 +1372,12 @@ Examples:
     print(f"  ✓ Using model: {llm.model if hasattr(llm, 'model') else llm.model_name}")
 
     # Setup output directory structure
-    output_dir = Path(args.output)
+    # Validate output path for security (check for path traversal attacks)
+    if not is_safe_path(args.output):
+        print(f"Error: Output path '{args.output}' contains suspicious patterns", file=sys.stderr)
+        return 1
+
+    output_dir = Path(args.output).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     data_dir = output_dir / 'data'
     data_dir.mkdir(exist_ok=True)

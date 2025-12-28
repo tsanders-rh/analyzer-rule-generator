@@ -18,6 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from rule_generator.ingestion import GuideIngester
+from rule_generator.security import validate_path, is_safe_path
 from rule_generator.extraction import MigrationPatternExtractor, detect_language_from_frameworks
 from rule_generator.generator import AnalyzerRuleGenerator
 from rule_generator.llm import get_llm_provider
@@ -354,7 +355,12 @@ def main():
             print(f"✓ Applied improvements to {len(validation_report.improvements)} rules")
 
     # Write output files (one per concern)
-    output_dir = Path(args.output)
+    # Validate output path for security (check for path traversal attacks)
+    if not is_safe_path(args.output):
+        print(f"Error: Output path '{args.output}' contains suspicious patterns", file=sys.stderr)
+        return 1
+
+    output_dir = Path(args.output).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"\nWriting rules to {output_dir}...")

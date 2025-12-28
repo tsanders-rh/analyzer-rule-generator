@@ -1051,8 +1051,9 @@ def run_kantra_tests(output_dir: Path) -> dict:
 
     # Extract failed rules with debug paths
     # Look for rule IDs (format: source-to-target-NNNNN) followed by 0/1 PASSED and debug path
+    # Use [\w-]+ to match word chars AND hyphens (for multi-part source/target names)
     failures = []
-    for match in re.finditer(r'(\w+-\d{5})\s+0/1\s+PASSED.*?find debug data in (/[^\s]+)', output, re.DOTALL):
+    for match in re.finditer(r'([\w-]+-\d{5})\s+0/1\s+PASSED.*?find debug data in (/[^\s]+)', output, re.DOTALL):
         rule_id = match.group(1)
         debug_path = match.group(2).strip()
         failures.append({

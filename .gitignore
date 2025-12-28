@@ -48,6 +48,10 @@ coverage.xml
 examples/output/*.yaml
 !examples/output/.gitkeep
 
+# Test files and directories (generated during development/testing)
+test-*.yaml
+test-*/
+
 # Test output directories (generated during testing)
 examples/output/*test*/
 examples/output/*-test/

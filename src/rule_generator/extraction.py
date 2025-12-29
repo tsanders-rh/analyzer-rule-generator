@@ -771,7 +771,8 @@ Return ONLY the JSON array, no additional commentary."""
                     log_decision(
                         logger,
                         "Auto-converting to combo rule",
-                        "Component prop patterns require import verification to prevent false positives",
+                        "Component prop patterns require import verification to prevent "
+                        "false positives",
                         pattern=pattern.source_pattern,
                         language=language,
                     )

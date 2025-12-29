@@ -13,7 +13,7 @@ import logging
 import sys
 import time
 from functools import wraps
-from typing import Any, Callable, Dict, Optional
+from typing import Callable
 
 from .config import config
 

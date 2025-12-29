@@ -55,6 +55,29 @@ class LLMProvider(ABC):
         """
         pass
 
+    def __enter__(self):
+        """Enter context manager."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit context manager and cleanup resources."""
+        self.close()
+        return False
+
+    def close(self):
+        """
+        Close and cleanup resources.
+
+        Subclasses should override this if they need cleanup.
+        """
+        # Default implementation: try to close the client if it has a close method
+        if hasattr(self, 'client') and hasattr(self.client, 'close'):
+            try:
+                self.client.close()
+            except Exception:
+                # Ignore errors during cleanup
+                pass
+
 
 class OpenAIProvider(LLMProvider):
     """OpenAI API provider."""

@@ -11,8 +11,13 @@ from collections import deque
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 
+from .logging_setup import get_logger, log_api_call, log_error_with_context
+
 if TYPE_CHECKING:
     from types import TracebackType
+
+# Get module logger
+logger = get_logger(__name__)
 
 
 class LLMError(Exception):
@@ -179,6 +184,9 @@ class OpenAIProvider(LLMProvider):
         temperature = kwargs.get("temperature", 0.0)
         max_tokens = min(kwargs.get("max_tokens", 4096), 4096)
 
+        # Log API call
+        log_api_call("OpenAI", "generate", model=self.model, temperature=temperature, max_tokens=max_tokens)
+
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -186,6 +194,9 @@ class OpenAIProvider(LLMProvider):
                 temperature=temperature,
                 max_tokens=max_tokens,
             )
+
+            # Log successful response with token usage
+            logger.debug(f"OpenAI API success: {response.usage.total_tokens} tokens used")
 
             return {
                 "response": response.choices[0].message.content,
@@ -196,10 +207,13 @@ class OpenAIProvider(LLMProvider):
                 },
             }
         except RateLimitError as e:
+            log_error_with_context(logger, e, "OpenAI API call", model=self.model, operation="generate")
             raise LLMRateLimitError(f"OpenAI rate limit exceeded: {e}") from e
         except AuthenticationError as e:
+            log_error_with_context(logger, e, "OpenAI API call", model=self.model, operation="generate")
             raise LLMAuthenticationError(f"OpenAI authentication failed: {e}") from e
         except APIError as e:
+            log_error_with_context(logger, e, "OpenAI API call", model=self.model, operation="generate")
             raise LLMAPIError(f"OpenAI API error: {e}") from e
 
 
@@ -237,6 +251,9 @@ class AnthropicProvider(LLMProvider):
         temperature = kwargs.get("temperature", 0.0)
         max_tokens = kwargs.get("max_tokens", 16000)
 
+        # Log API call
+        log_api_call("Anthropic", "generate", model=self.model, temperature=temperature, max_tokens=max_tokens)
+
         try:
             response = self.client.messages.create(
                 model=self.model,
@@ -244,6 +261,10 @@ class AnthropicProvider(LLMProvider):
                 temperature=temperature,
                 messages=[{"role": "user", "content": prompt}],
             )
+
+            # Log successful response with token usage
+            total_tokens = response.usage.input_tokens + response.usage.output_tokens
+            logger.debug(f"Anthropic API success: {total_tokens} tokens used")
 
             return {
                 "response": response.content[0].text,
@@ -253,10 +274,13 @@ class AnthropicProvider(LLMProvider):
                 },
             }
         except RateLimitError as e:
+            log_error_with_context(logger, e, "Anthropic API call", model=self.model, operation="generate")
             raise LLMRateLimitError(f"Anthropic rate limit exceeded: {e}") from e
         except AuthenticationError as e:
+            log_error_with_context(logger, e, "Anthropic API call", model=self.model, operation="generate")
             raise LLMAuthenticationError(f"Anthropic authentication failed: {e}") from e
         except APIError as e:
+            log_error_with_context(logger, e, "Anthropic API call", model=self.model, operation="generate")
             raise LLMAPIError(f"Anthropic API error: {e}") from e
 
 
@@ -300,14 +324,21 @@ class GoogleProvider(LLMProvider):
             ResourceExhausted = Unauthenticated = GoogleAPIError = Exception
 
         temperature = kwargs.get("temperature", 0.0)
+        max_tokens = kwargs.get("max_tokens", 8000)
 
         generation_config = {
             "temperature": temperature,
-            "max_output_tokens": kwargs.get("max_tokens", 8000),
+            "max_output_tokens": max_tokens,
         }
+
+        # Log API call
+        log_api_call("Google", "generate", model=self.model_name, temperature=temperature, max_tokens=max_tokens)
 
         try:
             response = self.model.generate_content(prompt, generation_config=generation_config)
+
+            # Log successful response with token usage
+            logger.debug(f"Google API success: {response.usage_metadata.total_token_count} tokens used")
 
             return {
                 "response": response.text,
@@ -318,10 +349,13 @@ class GoogleProvider(LLMProvider):
                 },
             }
         except ResourceExhausted as e:
+            log_error_with_context(logger, e, "Google API call", model=self.model_name, operation="generate")
             raise LLMRateLimitError(f"Google API rate limit exceeded: {e}") from e
         except Unauthenticated as e:
+            log_error_with_context(logger, e, "Google API call", model=self.model_name, operation="generate")
             raise LLMAuthenticationError(f"Google authentication failed: {e}") from e
         except GoogleAPIError as e:
+            log_error_with_context(logger, e, "Google API call", model=self.model_name, operation="generate")
             raise LLMAPIError(f"Google API error: {e}") from e
 
 

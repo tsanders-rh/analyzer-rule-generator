@@ -67,8 +67,12 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .config import config
 from .llm import LLMAPIError, LLMAuthenticationError, LLMProvider, LLMRateLimitError
+from .logging_setup import PerformanceTimer, get_logger, log_decision
 from .schema import CSharpLocationType, LocationType, MigrationPattern
 from .security import validate_complexity, validate_llm_response
+
+# Get module logger
+logger = get_logger(__name__)
 
 # Set up Jinja2 template environment
 TEMPLATE_DIR = Path(__file__).parent.parent.parent / 'templates' / 'extraction'
@@ -233,42 +237,44 @@ class MigrationPatternExtractor:
         target_framework: Optional[str] = None,
     ) -> List[MigrationPattern]:
         """Extract patterns from a single piece of content."""
-        # Build prompt (use OpenRewrite-specific prompt if needed)
-        if self.from_openrewrite:
-            prompt = self._build_openrewrite_prompt(
-                guide_content, source_framework, target_framework
-            )
-        else:
-            prompt = self._build_extraction_prompt(
-                guide_content, source_framework, target_framework
-            )
+        with PerformanceTimer(logger, f"pattern extraction from {len(guide_content)} chars"):
+            # Build prompt (use OpenRewrite-specific prompt if needed)
+            if self.from_openrewrite:
+                prompt = self._build_openrewrite_prompt(
+                    guide_content, source_framework, target_framework
+                )
+            else:
+                prompt = self._build_extraction_prompt(
+                    guide_content, source_framework, target_framework
+                )
 
-        # Generate with LLM
-        try:
-            result = self.model.generate(prompt)
-
-            # Extract text response
-            response_text = result.get("response", "")
-
-            # Validate LLM response structure before parsing
+            # Generate with LLM
             try:
-                response_text = validate_llm_response(response_text, expected_format="json_array")
-            except ValueError as e:
-                print(f"[Extraction] Warning: Invalid LLM response structure: {e}")
-                return []
+                result = self.model.generate(prompt)
 
-            # Parse response
-            patterns = self._parse_extraction_response(response_text)
+                # Extract text response
+                response_text = result.get("response", "")
 
-            # Validate and fix patterns
-            language = detect_language_from_frameworks(
-                source_framework or "", target_framework or ""
-            )
-            patterns = self._validate_and_fix_patterns(
-                patterns, language, source_framework, target_framework
-            )
+                # Validate LLM response structure before parsing
+                try:
+                    response_text = validate_llm_response(response_text, expected_format="json_array")
+                except ValueError as e:
+                    logger.warning(f"Invalid LLM response structure: {e}")
+                    return []
 
-            return patterns
+                # Parse response
+                patterns = self._parse_extraction_response(response_text)
+
+                # Validate and fix patterns
+                language = detect_language_from_frameworks(
+                    source_framework or "", target_framework or ""
+                )
+                patterns = self._validate_and_fix_patterns(
+                    patterns, language, source_framework, target_framework
+                )
+
+                logger.info(f"Extracted {len(patterns)} valid patterns from content")
+                return patterns
 
         except (ValueError, TypeError, KeyError) as e:
             # Handle validation or parsing errors gracefully
@@ -760,18 +766,24 @@ Return ONLY the JSON array, no additional commentary."""
                 is_prop_pattern = self._looks_like_prop_pattern(pattern)
 
                 if is_prop_pattern and pattern.provider_type != "combo":
-                    print(
-                        f"[Extraction] Info: Auto-converting to combo rule: "
-                        f"{pattern.source_pattern}"
+                    log_decision(
+                        logger,
+                        "Auto-converting to combo rule",
+                        "Component prop patterns require import verification to prevent false positives",
+                        pattern=pattern.source_pattern,
+                        language=language
                     )
                     pattern = self._convert_to_combo_rule(pattern)
 
             # RULE 2: Reject overly generic builtin patterns
             if pattern.provider_type == "builtin" and pattern.source_fqn:
                 if self._is_overly_broad_pattern(pattern.source_fqn):
-                    print(
-                        f"[Extraction] Warning: Rejecting overly broad pattern: "
-                        f"{pattern.source_fqn}"
+                    log_decision(
+                        logger,
+                        "Rejecting overly broad pattern",
+                        "Pattern is too generic and would cause false positives",
+                        pattern=pattern.source_fqn,
+                        provider_type="builtin"
                     )
                     continue
 

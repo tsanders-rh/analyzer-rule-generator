@@ -22,6 +22,7 @@ from rule_generator.extraction import MigrationPatternExtractor, detect_language
 from rule_generator.generator import AnalyzerRuleGenerator
 from rule_generator.ingestion import GuideIngester
 from rule_generator.llm import get_llm_provider
+from rule_generator.logging_setup import setup_logging
 from rule_generator.schema import Category, LocationType
 from rule_generator.security import is_safe_path, validate_framework_name
 from rule_generator.validate_rules import RuleValidator as LLMRuleValidator
@@ -177,6 +178,9 @@ def main():
     )
 
     args = parser.parse_args()
+
+    # Setup logging (respects DEBUG and LOG_LEVEL env vars)
+    setup_logging()
 
     # Validate framework names
     try:

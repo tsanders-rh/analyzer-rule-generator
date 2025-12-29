@@ -9,7 +9,7 @@ import time
 from abc import ABC, abstractmethod
 from collections import deque
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 
 if TYPE_CHECKING:
     from types import TracebackType

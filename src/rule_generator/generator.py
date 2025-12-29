@@ -20,10 +20,9 @@ from .condition_builder import (
     build_java_dependency_condition,
     build_java_referenced_condition,
     build_nodejs_condition,
-    build_or_condition_with_alternatives,
 )
 from .config import config
-from .schema import AnalyzerRule, Category, CSharpLocationType, Link, LocationType, MigrationPattern
+from .schema import AnalyzerRule, Category, Link, LocationType, MigrationPattern
 
 
 class AnalyzerRuleGenerator:

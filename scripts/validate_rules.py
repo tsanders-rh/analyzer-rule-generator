@@ -20,14 +20,14 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import yaml
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from rule_generator.llm import LLMProvider, get_llm_provider
+from rule_generator.llm import get_llm_provider
 
 
 class RuleValidator:

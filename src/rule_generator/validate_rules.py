@@ -9,14 +9,11 @@ This module provides automated validation and improvement of generated rules usi
 - Validates rule quality against best practices
 """
 
-import json
-import re
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
 from .condition_builder import build_builtin_condition, build_combo_condition
 from .llm import LLMProvider
-from .schema import AnalyzerRule
 
 
 class ValidationReport:

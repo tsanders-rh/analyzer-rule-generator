@@ -23,7 +23,7 @@ from rule_generator.generator import AnalyzerRuleGenerator
 from rule_generator.ingestion import GuideIngester
 from rule_generator.llm import get_llm_provider
 from rule_generator.schema import Category, LocationType
-from rule_generator.security import is_safe_path, validate_framework_name, validate_path
+from rule_generator.security import is_safe_path, validate_framework_name
 from rule_generator.validate_rules import RuleValidator as LLMRuleValidator
 
 # Import comprehensive validator from scripts for syntactic validation
@@ -98,7 +98,7 @@ def validate_rules_temp_file(rules):
             validator = SyntacticRuleValidator(
                 use_semantic=False
             )  # Don't use LLM for auto-validation
-            result = validator.validate_ruleset(temp_path)
+            validator.validate_ruleset(temp_path)
         finally:
             system.stdout = old_stdout  # Restore stdout
 

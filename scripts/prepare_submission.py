@@ -6,7 +6,6 @@ This script helps prepare generated rules for submission to the Konveyor ruleset
 repository by creating the required directory structure and test templates.
 """
 import argparse
-import os
 import shutil
 import sys
 from pathlib import Path

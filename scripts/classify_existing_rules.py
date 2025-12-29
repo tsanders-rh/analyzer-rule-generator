@@ -37,8 +37,6 @@ import yaml
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from rule_generator.schema import AnalyzerRule
-
 
 class RulesetComplexityClassifier:
     """Classify migration complexity of existing Konveyor analyzer rules."""

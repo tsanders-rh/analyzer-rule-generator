@@ -340,11 +340,6 @@ class GuideIngester:
         Returns:
             List of related URLs to follow
         """
-        try:
-            from bs4 import BeautifulSoup
-        except ImportError:
-            return []
-
         base_domain = urlparse(base_url).netloc
         related_links = []
 

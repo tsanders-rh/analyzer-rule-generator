@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from rule_generator.config import config
 from rule_generator.llm import get_llm_provider
-from rule_generator.security import is_safe_path, validate_framework_name, validate_path
+from rule_generator.security import is_safe_path, validate_framework_name
 
 
 def detect_language(rules: list) -> str:

@@ -34,15 +34,17 @@ from rule_generator.security import is_safe_path
 class RuleValidator:
     """Validates Konveyor analyzer rules for common issues."""
 
-    def __init__(self, use_semantic: bool = False, llm_provider: str = "anthropic"):
+    def __init__(self, use_semantic: bool = False, llm_provider: str = "anthropic", auto_fix: bool = False):
         """
         Initialize validator.
 
         Args:
             use_semantic: Enable LLM-based semantic validation (costs API calls)
             llm_provider: LLM provider to use for semantic validation
+            auto_fix: Automatically fix validation errors when possible
         """
         self.use_semantic = use_semantic
+        self.auto_fix = auto_fix
         self.llm = None
 
         if use_semantic:
@@ -50,6 +52,7 @@ class RuleValidator:
 
         self.issues = []
         self.warnings = []
+        self.fixes_applied = []
 
     def validate_ruleset(self, ruleset_path: Path) -> Dict[str, Any]:
         """
@@ -98,8 +101,14 @@ class RuleValidator:
         # Print summary
         print("\n" + "=" * 80)
         print("Validation Summary:")
+        print(f"  Fixes:    {len(self.fixes_applied)}")
         print(f"  Issues:   {len(self.issues)}")
         print(f"  Warnings: {len(self.warnings)}")
+
+        if self.fixes_applied:
+            print("\n✅ Fixes applied:")
+            for fix in self.fixes_applied:
+                print(f"  - {fix}")
 
         if self.issues:
             print("\n❌ Issues found:")
@@ -111,10 +120,20 @@ class RuleValidator:
             for warning in self.warnings:
                 print(f"  - {warning}")
 
-        if not self.issues and not self.warnings:
+        if not self.issues and not self.warnings and not self.fixes_applied:
             print("\n✅ All rules validated successfully!")
 
-        return {'valid': len(self.issues) == 0, 'issues': self.issues, 'warnings': self.warnings}
+        # Save fixed rules if auto-fix is enabled and fixes were applied
+        if self.auto_fix and self.fixes_applied:
+            self._save_fixed_rules(ruleset_path, data)
+            print(f"\n💾 Saved {len(self.fixes_applied)} fixes to {ruleset_path}")
+
+        return {
+            'valid': len(self.issues) == 0,
+            'issues': self.issues,
+            'warnings': self.warnings,
+            'fixes': self.fixes_applied
+        }
 
     def _validate_required_fields(self, rule: Dict, rule_id: str):
         """Check that all required fields are present."""
@@ -238,6 +257,18 @@ class RuleValidator:
                     break
 
             if not matches:
+                # Pattern doesn't match - try to auto-fix if enabled
+                if self.auto_fix:
+                    fixed_pattern = self._auto_fix_pattern(rule, rule_id, pattern, example_code)
+                    if fixed_pattern:
+                        # Update the rule with the fixed pattern
+                        when['builtin.filecontent']['pattern'] = fixed_pattern
+                        self.fixes_applied.append(
+                            f"{rule_id}: Fixed pattern from '{pattern}' to '{fixed_pattern}'"
+                        )
+                        return  # Skip adding to issues since we fixed it
+
+                # Not fixed or auto-fix disabled - report issue
                 self.issues.append(
                     f"{rule_id}: Pattern '{pattern}' does NOT match example code "
                     "from 'Before:' section"
@@ -247,6 +278,98 @@ class RuleValidator:
                 self.issues.append(f"  Example starts with: {first_line}...")
         except re.error as e:
             self.warnings.append(f"{rule_id}: Invalid regex pattern '{pattern}': {e}")
+
+    def _auto_fix_pattern(self, rule: Dict, rule_id: str, original_pattern: str, example_code: str) -> str:
+        """
+        Attempt to automatically fix a pattern that doesn't match its example.
+
+        Args:
+            rule: The rule being validated
+            rule_id: Rule identifier
+            original_pattern: The pattern that doesn't match
+            example_code: The example code it should match
+
+        Returns:
+            Fixed pattern string, or None if unable to fix
+        """
+        description = rule.get('description', '').lower()
+
+        # Strategy 1: Extract key identifier from description
+        # Look for patterns like "ReactDOM.render", "interface", "hydrate", etc.
+        key_terms = []
+
+        # Common patterns to look for
+        if 'reactdom.render' in description or 'render(' in description:
+            key_terms.append('render\\(')
+        if 'interface' in description:
+            key_terms.append('interface\\s+\\w+')
+        if 'hydrate' in description:
+            key_terms.append('hydrate\\(')
+        if 'unmount' in description:
+            key_terms.append('unmount')
+
+        # Strategy 2: Extract from example code
+        # Find the most distinctive line (longest, or contains keywords)
+        lines = example_code.split('\n')
+        distinctive_lines = []
+
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith('//') or line.startswith('/*'):
+                continue  # Skip comments
+            if len(line) > 10:  # Skip very short lines
+                distinctive_lines.append(line)
+
+        # Try key terms first
+        for term in key_terms:
+            try:
+                # Test if this term matches any line
+                for line in lines:
+                    if re.search(term, line):
+                        # Found a match! Use this as the pattern
+                        return term
+            except re.error:
+                continue
+
+        # Strategy 3: Find the actual content mentioned in description
+        # Extract words from description that might be code identifiers
+        code_words = re.findall(r'\b[A-Z][a-zA-Z]+\b|\b\w+\(\)', description)
+        for word in code_words:
+            # Escape special regex chars and try as pattern
+            escaped = re.escape(word)
+            try:
+                for line in lines:
+                    if re.search(escaped, line):
+                        return escaped
+            except re.error:
+                continue
+
+        # Strategy 4: Use the first distinctive line as a simple substring match
+        if distinctive_lines:
+            first_distinctive = distinctive_lines[0]
+            # Extract the main identifier (function call, class name, etc.)
+            # Match: word followed by ( or word at start of line
+            match = re.search(r'\b(\w+)\s*\(', first_distinctive)
+            if match:
+                identifier = match.group(1)
+                pattern = f'{identifier}\\('
+                try:
+                    for line in lines:
+                        if re.search(pattern, line):
+                            return pattern
+                except re.error:
+                    pass
+
+        # Unable to auto-fix
+        return None
+
+    def _save_fixed_rules(self, ruleset_path: Path, data: Any):
+        """Save the fixed rules back to the YAML file."""
+        try:
+            with open(ruleset_path, 'w') as f:
+                yaml.dump(data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+        except Exception as e:
+            print(f"⚠️  Warning: Could not save fixes: {e}")
 
     def _validate_description_pattern_alignment(self, rule: Dict, rule_id: str):
         """Use LLM to check if description matches what the pattern actually detects."""
@@ -350,6 +473,12 @@ Examples:
         help='LLM provider for semantic validation (default: anthropic)',
     )
 
+    parser.add_argument(
+        '--auto-fix',
+        action='store_true',
+        help='Automatically fix validation errors when possible (modifies rule files)',
+    )
+
     args = parser.parse_args()
 
     # Validate path for security (check for path traversal attacks)
@@ -368,7 +497,11 @@ Examples:
         return 1
 
     # Create validator
-    validator = RuleValidator(use_semantic=args.semantic, llm_provider=args.provider)
+    validator = RuleValidator(
+        use_semantic=args.semantic,
+        llm_provider=args.provider,
+        auto_fix=args.auto_fix
+    )
 
     # Validate all files
     all_valid = True

@@ -782,17 +782,18 @@ Return ONLY the JSON array, no additional commentary."""
                     )
                     pattern = self._convert_to_combo_rule(pattern)
 
-            # RULE 2: Reject overly generic builtin patterns
-            if pattern.provider_type == "builtin" and pattern.source_fqn:
-                if self._is_overly_broad_pattern(pattern.source_fqn):
-                    log_decision(
-                        logger,
-                        "Rejecting overly broad pattern",
-                        "Pattern is too generic and would cause false positives",
-                        pattern=pattern.source_fqn,
-                        provider_type="builtin",
-                    )
-                    continue
+            # RULE 2: Reject overly generic builtin patterns (PatternFly only)
+            if language in ["javascript", "typescript"] and is_patternfly:
+                if pattern.provider_type == "builtin" and pattern.source_fqn:
+                    if self._is_overly_broad_pattern(pattern.source_fqn):
+                        log_decision(
+                            logger,
+                            "Rejecting overly broad pattern",
+                            "Pattern is too generic and would cause false positives",
+                            pattern=pattern.source_fqn,
+                            provider_type="builtin",
+                        )
+                        continue
 
             # RULE 3: Ensure source != target
             if pattern.source_pattern and pattern.target_pattern:

@@ -69,11 +69,17 @@ class CSharpReferenced(BaseModel):
 
     pattern: str = Field(
         ...,
-        description="Pattern to match (FQDN like System.Web.Http or regex like *.Web.Http, System.*.Http)",
+        description=(
+            "Pattern to match (FQDN like System.Web.Http or "
+            "regex like *.Web.Http, System.*.Http)"
+        ),
     )
     location: Optional[CSharpLocationType] = Field(
         None,
-        description="Where to look for the pattern (FIELD, CLASS, METHOD, ALL). Defaults to ALL if not specified.",
+        description=(
+            "Where to look for the pattern (FIELD, CLASS, METHOD, ALL). "
+            "Defaults to ALL if not specified."
+        ),
     )
 
 
@@ -172,7 +178,10 @@ class MigrationPattern(BaseModel):
     # For generating 'when' conditions
     source_fqn: Optional[str] = Field(
         None,
-        description="Fully qualified name (e.g., 'javax.ejb.Stateless' for Java, 'System.Web.Http' for C#)",
+        description=(
+            "Fully qualified name (e.g., 'javax.ejb.Stateless' for Java, "
+            "'System.Web.Http' for C#)"
+        ),
     )
     location_type: Optional[Union[LocationType, CSharpLocationType, str]] = Field(
         None,
@@ -197,17 +206,26 @@ class MigrationPattern(BaseModel):
     # Provider configuration
     provider_type: Optional[str] = Field(
         default=None,
-        description="Provider type: 'java', 'nodejs', 'csharp', 'builtin', or 'combo' (auto-detected if not specified)",
+        description=(
+            "Provider type: 'java', 'nodejs', 'csharp', 'builtin', or 'combo' "
+            "(auto-detected if not specified)"
+        ),
     )
     file_pattern: Optional[str] = Field(
         default=None,
-        description="File pattern for builtin.filecontent provider (regex, e.g., '\\.tsx$' or '\\.(j|t)sx?$')",
+        description=(
+            "File pattern for builtin.filecontent provider "
+            "(regex, e.g., '\\.tsx$' or '\\.(j|t)sx?$')"
+        ),
     )
 
     # Combo rule configuration (when provider_type="combo")
     when_combo: Optional[Dict[str, str]] = Field(
         default=None,
-        description="Combo rule configuration with nodejs_pattern, builtin_pattern, and file_pattern",
+        description=(
+            "Combo rule configuration with nodejs_pattern, "
+            "builtin_pattern, and file_pattern"
+        ),
     )
 
     # Optional context

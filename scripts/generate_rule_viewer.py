@@ -40,7 +40,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }}
 
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                Oxygen, Ubuntu, Cantarell, sans-serif;
             background: #f5f5f5;
             color: #333;
             line-height: 1.6;
@@ -417,7 +418,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div class="controls-row">
                 <div class="control-group">
                     <label for="search">Search</label>
-                    <input type="text" id="search" placeholder="Search rules by ID, description, or pattern...">
+                    <input type="text" id="search"
+                        placeholder="Search rules by ID, description, or pattern...">
                 </div>
                 <div class="control-group">
                     <label for="category-filter">Category</label>
@@ -454,7 +456,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         <footer>
             <a href="https://konveyor.io" target="_blank" style="color: #0066cc;">Konveyor</a> •
-            <a href="https://github.com/konveyor/analyzer-lsp" target="_blank" style="color: #0066cc;">Analyzer LSP</a> •
+            <a href="https://github.com/konveyor/analyzer-lsp" target="_blank"
+                style="color: #0066cc;">Analyzer LSP</a> •
             Open Source Application Modernization
         </footer>
     </div>
@@ -510,7 +513,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const labels = rule.labels || [];
 
             return `
-                <div class="rule" data-rule-id="${{rule.ruleID}}" data-category="${{rule.category}}" data-effort="${{rule.effort}}">
+                <div class="rule" data-rule-id="${{rule.ruleID}}"
+                    data-category="${{rule.category}}" data-effort="${{rule.effort}}">
                     <div class="rule-header" onclick="toggleRule(this)">
                         <span class="expand-icon">▶</span>
                         <div class="rule-title">
@@ -537,7 +541,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                         <div class="detail-section">
                             <div class="detail-label">Labels</div>
                             <div class="labels-list">
-                                ${{labels.map(l => `<span class="label-tag">${{l}}</span>`).join('')}}
+                                ${{labels.map(l =>
+                                    `<span class="label-tag">${{l}}</span>`).join('')}}
                             </div>
                         </div>
                         ` : ''}}
@@ -546,7 +551,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                         <div class="detail-section">
                             <div class="detail-label">Documentation Links</div>
                             <ul class="links-list">
-                                ${{links.map(l => `<li><a href="${{l.url}}" target="_blank">📄 ${{l.title}}</a></li>`).join('')}}
+                                ${{links.map(l =>
+                                    `<li><a href="${{l.url}}" target="_blank">` +
+                                    `📄 ${{l.title}}</a></li>`
+                                ).join('')}}
                             </ul>
                         </div>
                         ` : ''}}
@@ -568,7 +576,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             // Convert code blocks (between ```)
             message = message.replace(/```([\\s\\S]*?)```/g, '<pre class="code-block">$1</pre>');
             // Convert inline code (between `)
-            message = message.replace(/`([^`]+)`/g, '<code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 13px;">$1</code>');
+            const codeStyle = 'background: #f0f0f0; padding: 2px 6px; border-radius: 3px; ' +
+                'font-family: monospace; font-size: 13px;';
+            message = message.replace(/`([^`]+)`/g, `<code style="${{codeStyle}}">$1</code>`);
             // Convert newlines to <br>
             message = message.replace(/\\n/g, '<br>');
             return message;
@@ -637,7 +647,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 <div class="ruleset-section" id="ruleset-${{rulesetId}}">
                     <div class="ruleset-header">
                         <h2 class="ruleset-title">${{escapeHtml(filename)}}</h2>
-                        <span class="ruleset-count">${{ruleCount}} rule${{ruleCount !== 1 ? 's' : ''}}</span>
+                        <span class="ruleset-count">
+                            ${{ruleCount}} rule${{ruleCount !== 1 ? 's' : ''}}
+                        </span>
                     </div>
                     <div class="ruleset-rules">
                         ${{rules.map(renderRule).join('')}}

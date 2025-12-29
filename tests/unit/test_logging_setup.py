@@ -483,13 +483,25 @@ class TestLoggingIntegration:
                 with PerformanceTimer(logger, "test operation"):
                     time.sleep(0.001)
 
+            # Print all logged messages for debugging
+            print("\n=== Captured log records ===")
+            for record in caplog.records:
+                print(f"{record.levelname}: {record.message}")
+            print("=== End of log records ===\n")
+
             # Should have logged all messages
-            assert any("Debug message" in record.message for record in caplog.records)
-            assert any("Info message" in record.message for record in caplog.records)
-            assert any("Warning message" in record.message for record in caplog.records)
-            assert any("Error message" in record.message for record in caplog.records)
-            assert any("Decision" in record.message for record in caplog.records)
-            assert any("ValueError" in record.message for record in caplog.records)
+            assert any("Debug message" in record.message for record in caplog.records), \
+                "Debug message not found in logs"
+            assert any("Info message" in record.message for record in caplog.records), \
+                "Info message not found in logs"
+            assert any("Warning message" in record.message for record in caplog.records), \
+                "Warning message not found in logs"
+            assert any("Error message" in record.message for record in caplog.records), \
+                "Error message not found in logs"
+            assert any("Decision" in record.message for record in caplog.records), \
+                "Decision not found in logs"
+            assert any("ValueError" in record.message for record in caplog.records), \
+                "ValueError not found in logs"
             # Note: PerformanceTimer and log_api_call use config.LOG_PERFORMANCE and
             # config.LOG_API_CALLS which are not properly mocked in this integration context.
             # These are tested separately in their dedicated test methods.

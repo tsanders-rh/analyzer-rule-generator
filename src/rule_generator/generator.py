@@ -116,7 +116,9 @@ class AnalyzerRuleGenerator:
         """
         # Skip if we don't have enough info to create a when condition
         if not pattern.source_fqn and not pattern.source_pattern:
-            print(f"Warning: Skipping pattern without FQN or pattern: {pattern.rationale}")
+            print(
+                f"[Generation] Warning: Skipping pattern without FQN: {pattern.rationale}"
+            )
             return None
 
         # Generate rule ID
@@ -126,7 +128,9 @@ class AnalyzerRuleGenerator:
         when_condition = self._build_when_condition(pattern)
 
         if not when_condition:
-            print(f"Warning: Could not build when condition for: {pattern.rationale}")
+            print(
+                f"[Generation] Warning: Could not build when condition: {pattern.rationale}"
+            )
             return None
 
         # Map complexity to effort (1-10 scale)
@@ -235,12 +239,15 @@ class AnalyzerRuleGenerator:
 
             # Validate: Must have builtin_pattern and either import_pattern OR nodejs_pattern
             if not builtin_pattern:
-                print(f"Warning: Combo rule missing builtin_pattern: {pattern.rationale}")
+                print(
+                    f"[Generation] Warning: Combo rule missing builtin_pattern: "
+                    f"{pattern.rationale}"
+                )
                 return None
 
             if not import_pattern and not nodejs_pattern:
                 print(
-                    f"Warning: Combo rule missing both import_pattern and nodejs_pattern: "
+                    f"[Generation] Warning: Combo rule missing import/nodejs pattern: "
                     f"{pattern.rationale}"
                 )
                 return None

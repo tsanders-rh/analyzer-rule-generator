@@ -95,8 +95,11 @@ class GuideIngester:
                 from bs4 import BeautifulSoup
                 from markdownify import markdownify as md
             except ImportError:
-                print("Warning: beautifulsoup4 and markdownify required for URL ingestion")
-                print("Install with: pip install -r requirements.txt")
+                print(
+                    "[Ingestion] Warning: beautifulsoup4 and markdownify required for "
+                    "URL ingestion"
+                )
+                print("[Ingestion] Info: Install with: pip install -r requirements.txt")
                 return None
 
             # Fetch content
@@ -109,7 +112,7 @@ class GuideIngester:
 
             if 'pdf' in content_type:
                 # PDF handling (future enhancement)
-                print(f"Warning: PDF support not yet implemented for {url}")
+                print(f"[Ingestion] Warning: PDF support not yet implemented: {url}")
                 return None
             else:
                 # Assume HTML
@@ -142,21 +145,21 @@ class GuideIngester:
                 return markdown
 
         except requests.RequestException as e:
-            print(f"Error fetching URL {url}: {e}")
+            print(f"[Ingestion] Error: Failed to fetch URL: {e} (url={url})")
             return None
         except (ValueError, KeyError, AttributeError) as e:
-            print(f"Error parsing HTML content from {url}: {e}")
+            print(f"[Ingestion] Error: Failed to parse HTML content: {e} (url={url})")
             return None
         except (UnicodeDecodeError, LookupError) as e:
-            print(f"Error decoding content from {url}: {e}")
+            print(f"[Ingestion] Error: Failed to decode content: {e} (url={url})")
             return None
         except Exception as e:
             # Last resort: catch truly unexpected errors to prevent crashes
             # This should rarely happen - all expected errors are handled above
-            print(f"⚠ UNEXPECTED ERROR processing {url}")
-            print(f"   Type: {type(e).__name__}")
-            print(f"   Message: {e}")
-            print("   This error was not anticipated - please report it as a bug")
+            print(f"[Ingestion] Error: Unexpected error processing URL (url={url})")
+            print(f"[Ingestion] Debug: Error type: {type(e).__name__}")
+            print(f"[Ingestion] Debug: Error message: {e}")
+            print("[Ingestion] Info: Please report this as a bug")
             import traceback
 
             traceback.print_exc()
@@ -175,7 +178,7 @@ class GuideIngester:
         path = Path(file_path)
 
         if not path.exists():
-            print(f"Error: File not found: {file_path}")
+            print(f"[Ingestion] Error: File not found: {file_path}")
             return None
 
         try:
@@ -184,7 +187,7 @@ class GuideIngester:
 
             if suffix == '.pdf':
                 # PDF handling (future enhancement)
-                print(f"Warning: PDF support not yet implemented for {file_path}")
+                print(f"[Ingestion] Warning: PDF support not yet implemented: {file_path}")
                 return None
             elif suffix in ['.md', '.markdown', '.txt']:
                 # Read as text
@@ -198,18 +201,21 @@ class GuideIngester:
                 return self._clean_text(content)
 
         except (IOError, OSError, PermissionError) as e:
-            print(f"Error reading file {file_path}: {e}")
+            print(f"[Ingestion] Error: Failed to read file: {e} (file={file_path})")
             return None
         except UnicodeDecodeError as e:
-            print(f"Error decoding file {file_path} (not valid UTF-8): {e}")
+            print(
+                f"[Ingestion] Error: Failed to decode file (not valid UTF-8): {e} "
+                f"(file={file_path})"
+            )
             return None
         except Exception as e:
             # Last resort: catch truly unexpected errors to prevent crashes
             # This should rarely happen - all expected errors are handled above
-            print(f"⚠ UNEXPECTED ERROR reading file {file_path}")
-            print(f"   Type: {type(e).__name__}")
-            print(f"   Message: {e}")
-            print("   This error was not anticipated - please report it as a bug")
+            print(f"[Ingestion] Error: Unexpected error reading file (file={file_path})")
+            print(f"[Ingestion] Debug: Error type: {type(e).__name__}")
+            print(f"[Ingestion] Debug: Error message: {e}")
+            print("[Ingestion] Info: Please report this as a bug")
             import traceback
 
             traceback.print_exc()

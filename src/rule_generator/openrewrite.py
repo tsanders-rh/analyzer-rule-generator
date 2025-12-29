@@ -70,7 +70,7 @@ class OpenRewriteRecipeIngester:
                 # Read from file
                 path = Path(source)
                 if not path.exists():
-                    print(f"Error: Recipe file not found: {source}")
+                    print(f"[OpenRewrite] Error: Recipe file not found: {source}")
                     return None
                 with open(path, 'r', encoding='utf-8') as f:
                     content = f.read()
@@ -85,24 +85,24 @@ class OpenRewriteRecipeIngester:
                 return {"multiple_recipes": recipes}
 
         except requests.RequestException as e:
-            print(f"Error fetching recipe from {source}: {e}")
+            print(f"[OpenRewrite] Error: Failed to fetch recipe: {e} (source={source})")
             return None
         except yaml.YAMLError as e:
-            print(f"Error parsing YAML from {source}: {e}")
+            print(f"[OpenRewrite] Error: Failed to parse YAML: {e} (source={source})")
             return None
         except (IOError, OSError, UnicodeDecodeError) as e:
-            print(f"Error reading file from {source}: {e}")
+            print(f"[OpenRewrite] Error: Failed to read file: {e} (source={source})")
             return None
         except (ValueError, KeyError, TypeError) as e:
-            print(f"Error processing recipe data from {source}: {e}")
+            print(f"[OpenRewrite] Error: Failed to process recipe data: {e} (source={source})")
             return None
         except Exception as e:
             # Last resort: catch truly unexpected errors to prevent crashes
             # This should rarely happen - all expected errors are handled above
-            print(f"⚠ UNEXPECTED ERROR loading recipe from {source}")
-            print(f"   Type: {type(e).__name__}")
-            print(f"   Message: {e}")
-            print("   This error was not anticipated - please report it as a bug")
+            print(f"[OpenRewrite] Error: Unexpected error loading recipe (source={source})")
+            print(f"[OpenRewrite] Debug: Error type: {type(e).__name__}")
+            print(f"[OpenRewrite] Debug: Error message: {e}")
+            print("[OpenRewrite] Info: Please report this as a bug")
             import traceback
 
             traceback.print_exc()

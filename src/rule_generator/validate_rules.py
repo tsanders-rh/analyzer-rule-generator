@@ -352,19 +352,23 @@ class RuleValidator:
                     print(f"  ✓ Applied import verification to {rule.ruleID}")
                 except (ValueError, TypeError, KeyError) as e:
                     # Handle validation or data access errors
-                    print(f"  ! Failed to apply improvement to {rule.ruleID}: Invalid data - {e}")
+                    print(
+                        f"[Validation] Warning: Failed to apply improvement: Invalid data - {e} "
+                        f"(rule_id={rule.ruleID})"
+                    )
                     improved_rules.append(rule)
                 except ValidationError as e:
                     # Handle Pydantic validation errors (invalid model state)
                     print(
-                        f"  ! Failed to apply improvement to {rule.ruleID}: Validation failed - {e}"
+                        f"[Validation] Warning: Failed to apply improvement: Validation failed - "
+                        f"{e} (rule_id={rule.ruleID})"
                     )
                     improved_rules.append(rule)
                 except AttributeError as e:
                     # Handle missing attributes on rule object
                     print(
-                        f"  ! Failed to apply improvement to {rule.ruleID}: "
-                        f"Missing attribute - {e}"
+                        f"[Validation] Warning: Failed to apply improvement: Missing attribute - "
+                        f"{e} (rule_id={rule.ruleID})"
                     )
                     improved_rules.append(rule)
             else:

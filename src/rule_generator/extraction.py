@@ -215,34 +215,34 @@ class MigrationPatternExtractor:
 
         except (ValueError, TypeError, KeyError) as e:
             # Handle validation or parsing errors gracefully
-            print(f"Error parsing LLM response: {e}")
+            print(f"[Extraction] Error: Failed to parse LLM response: {e}")
             return []
         except (ConnectionError, TimeoutError, OSError) as e:
             # Handle network-related errors
-            print(f"⚠ Network error communicating with LLM: {e}")
+            print(f"[Extraction] Warning: Network error, skipping chunk: {e}")
             return []
         except LLMRateLimitError as e:
             # Rate limit exceeded - expected error, just log and continue
-            print(f"⚠ Rate limit reached, skipping this chunk: {e}")
+            print(f"[Extraction] Warning: Rate limit exceeded, skipping chunk: {e}")
             return []
         except LLMAuthenticationError as e:
             # Authentication failed - fatal error, raise it
-            print(f"❌ Authentication failed: {e}")
+            print(f"[Extraction] Error: Authentication failed: {e}")
             raise
         except LLMAPIError as e:
             # API error (5xx, temporary failures) - log and continue
-            print(f"⚠ API temporarily unavailable, skipping this chunk: {e}")
+            print(f"[Extraction] Warning: API temporarily unavailable, skipping chunk: {e}")
             return []
         except Exception as e:
             # Fallback for any other exceptions (e.g., from custom providers or during testing)
             # Check if error message indicates specific error types
             error_message = str(e).lower()
             if "rate" in error_message or "429" in error_message:
-                print(f"⚠ Rate limit reached, skipping this chunk: {e}")
+                print(f"[Extraction] Warning: Rate limit exceeded, skipping chunk: {e}")
             elif "api" in error_message or "500" in error_message:
-                print(f"⚠ API error, skipping this chunk: {e}")
+                print(f"[Extraction] Warning: API error, skipping chunk: {e}")
             else:
-                print(f"⚠ Error extracting patterns: {e}")
+                print(f"[Extraction] Warning: Pattern extraction failed, skipping chunk: {e}")
             return []
 
     def _extract_patterns_chunked(
@@ -579,7 +579,7 @@ Return ONLY the JSON array, no additional commentary."""
         json_match = JSON_ARRAY_PATTERN.search(response)
 
         if not json_match:
-            print("Warning: No JSON array found in response")
+            print("[Extraction] Warning: No JSON array found in LLM response")
             return []
 
         json_str = json_match.group(0)
@@ -587,17 +587,17 @@ Return ONLY the JSON array, no additional commentary."""
         try:
             patterns_data = json.loads(json_str)
         except json.JSONDecodeError as e:
-            print(f"Error parsing JSON: {e}")
-            print("Attempting to repair JSON...")
+            print(f"[Extraction] Warning: JSON parsing failed: {e} (attempting repair)")
+            print("[Extraction] Info: Attempting to repair malformed JSON...")
 
             # Try to repair the JSON
             repaired_json = self._repair_json(json_str)
 
             try:
                 patterns_data = json.loads(repaired_json)
-                print("✓ Successfully repaired JSON")
+                print("[Extraction] Info: Successfully repaired JSON")
             except json.JSONDecodeError as e2:
-                print(f"Failed to repair JSON: {e2}")
+                print(f"[Extraction] Warning: JSON repair failed: {e2} (trying aggressive repair)")
                 # Try one more aggressive repair: escape all single backslashes
                 try:
                     # Replace single backslash with double backslash in string values
@@ -607,10 +607,10 @@ Return ONLY the JSON array, no additional commentary."""
                     # But we may have over-escaped, so fix double-double backslashes
                     aggressive_json = aggressive_json.replace('\\\\\\\\', '\\\\')
                     patterns_data = json.loads(aggressive_json)
-                    print("✓ Successfully repaired JSON with aggressive escaping")
+                    print("[Extraction] Info: Successfully repaired JSON with aggressive escaping")
                 except json.JSONDecodeError as e3:
-                    print(f"Final attempt failed: {e3}")
-                    print(f"Response preview: {response[:500]}")
+                    print(f"[Extraction] Error: All JSON repair attempts failed: {e3}")
+                    print(f"[Extraction] Debug: Response preview: {response[:500]}")
                     return []
 
         # Convert to MigrationPattern objects
@@ -628,7 +628,10 @@ Return ONLY the JSON array, no additional commentary."""
                             # Try C# CSharpLocationType
                             location_type = CSharpLocationType(data["location_type"])
                         except ValueError:
-                            print(f"Warning: Unknown location type: {data.get('location_type')}")
+                            print(
+                                f"[Extraction] Warning: Unknown location type, "
+                                f"using None: {data.get('location_type')}"
+                            )
 
                 pattern = MigrationPattern(
                     source_pattern=data["source_pattern"],
@@ -649,8 +652,8 @@ Return ONLY the JSON array, no additional commentary."""
                 )
                 patterns.append(pattern)
             except (KeyError, TypeError) as e:
-                print(f"Warning: Skipping invalid pattern: {e}")
-                print(f"Data: {data}")
+                print(f"[Extraction] Warning: Skipping invalid pattern: {e}")
+                print(f"[Extraction] Debug: Pattern data: {data}")
                 continue
 
         return patterns
@@ -689,20 +692,26 @@ Return ONLY the JSON array, no additional commentary."""
                 is_prop_pattern = self._looks_like_prop_pattern(pattern)
 
                 if is_prop_pattern and pattern.provider_type != "combo":
-                    print(f"  ! Auto-converting to combo rule: {pattern.source_pattern}")
+                    print(
+                        f"[Extraction] Info: Auto-converting to combo rule: "
+                        f"{pattern.source_pattern}"
+                    )
                     pattern = self._convert_to_combo_rule(pattern)
 
             # RULE 2: Reject overly generic builtin patterns
             if pattern.provider_type == "builtin" and pattern.source_fqn:
                 if self._is_overly_broad_pattern(pattern.source_fqn):
-                    print(f"  ! Rejecting overly broad pattern: {pattern.source_fqn}")
+                    print(
+                        f"[Extraction] Warning: Rejecting overly broad pattern: "
+                        f"{pattern.source_fqn}"
+                    )
                     continue
 
             # RULE 3: Ensure source != target
             if pattern.source_pattern and pattern.target_pattern:
                 if pattern.source_pattern.strip() == pattern.target_pattern.strip():
                     print(
-                        f"  ! Rejecting pattern with identical source/target: "
+                        f"[Extraction] Warning: Rejecting pattern with identical source/target: "
                         f"{pattern.source_pattern}"
                     )
                     continue

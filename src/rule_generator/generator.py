@@ -10,6 +10,7 @@ Generates analyzer rules with:
 - Multiple file output grouped by concern
 """
 
+import re
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
@@ -23,6 +24,10 @@ from .condition_builder import (
 )
 from .config import config
 from .schema import AnalyzerRule, Category, Link, LocationType, MigrationPattern
+
+# Compiled regex patterns for performance (used in import extraction and message formatting)
+IMPORT_FROM_PATTERN = re.compile(r"from\s+['\"]([^'\"]+)['\"]")
+IMPORT_COMPONENT_PATTERN = re.compile(r"import\s*\{\s*([A-Z][A-Za-z0-9_]*)\s*\}\s*from")
 
 
 class AnalyzerRuleGenerator:
@@ -594,10 +599,8 @@ class AnalyzerRuleGenerator:
         if not import_statement:
             return None
 
-        import re
-
         # Match pattern: from 'package' or from "package"
-        match = re.search(r"from\s+['\"]([^'\"]+)['\"]", import_statement)
+        match = IMPORT_FROM_PATTERN.search(import_statement)
         if match:
             return match.group(1)
 
@@ -711,14 +714,11 @@ class AnalyzerRuleGenerator:
         Returns:
             Code with component names replaced by variable
         """
-        import re
-
         # Match import statements and replace component names with {{ component }}
         # Pattern: import { ComponentName } from 'package'
-        pattern = r"import\s*\{\s*([A-Z][A-Za-z0-9_]*)\s*\}\s*from"
         replacement = r"import { {{ component }} } from"
 
-        return re.sub(pattern, replacement, code)
+        return IMPORT_COMPONENT_PATTERN.sub(replacement, code)
 
     def _requires_semantic_analysis(self, pattern: MigrationPattern) -> bool:
         """

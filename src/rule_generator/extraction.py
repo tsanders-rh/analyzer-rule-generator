@@ -29,6 +29,16 @@ jinja_env = Environment(
     lstrip_blocks=True,
 )
 
+# Compiled regex patterns for performance (used in JSON repair and parsing)
+JSON_ARRAY_PATTERN = re.compile(r'\[.*\]', re.DOTALL)
+INVALID_ESCAPE_PATTERN = re.compile(r'\\([^"\\/bfnrtu])')
+STRING_VALUE_PATTERN = re.compile(r'"((?:[^"\\]|\\.)*)"')
+TRAILING_COMMA_PATTERN = re.compile(r',(\s*[}\]])')
+OBJECT_SEPARATOR_PATTERN = re.compile(r'\}(\s*)\{')
+ARRAY_SEPARATOR_PATTERN = re.compile(r'\](\s*)\[')
+UNESCAPED_QUOTE_PATTERN = re.compile(r"(?<!\\)'")
+KEY_VALUE_PATTERN = re.compile(r'"([^"]+)":\s*"([^"]*[^\\]"[^"]*)"')
+
 
 def detect_language_from_frameworks(source: str, target: str) -> str:
     """
@@ -519,24 +529,24 @@ Return ONLY the JSON array, no additional commentary."""
             # Double-escape backslashes that aren't followed by valid JSON escape chars
             # Valid JSON escapes: " \ / b f n r t u
             # Replace \X (where X is not a valid escape) with \\X
-            fixed = re.sub(r'\\([^"\\/bfnrtu])', r'\\\\\1', value)
+            fixed = INVALID_ESCAPE_PATTERN.sub(r'\\\\\1', value)
             return f'"{fixed}"'
 
         # Match string values and fix invalid escapes
         # This pattern matches: "..." string values
-        json_str = re.sub(r'"((?:[^"\\]|\\.)*)"', fix_invalid_escapes, json_str)
+        json_str = STRING_VALUE_PATTERN.sub(fix_invalid_escapes, json_str)
 
         # Remove trailing commas before closing brackets/braces
         # e.g., {"key": "value",} -> {"key": "value"}
-        json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
+        json_str = TRAILING_COMMA_PATTERN.sub(r'\1', json_str)
 
         # Fix missing commas between objects in arrays
         # e.g., }{"key" -> },{"key"
-        json_str = re.sub(r'\}(\s*)\{', r'},\1{', json_str)
+        json_str = OBJECT_SEPARATOR_PATTERN.sub(r'},\1{', json_str)
 
         # Fix missing commas between array items
         # e.g., ]["key" -> ],["key"
-        json_str = re.sub(r'\](\s*)\[', r'],\1[', json_str)
+        json_str = ARRAY_SEPARATOR_PATTERN.sub(r'],\1[', json_str)
 
         # Fix unescaped quotes in string values (basic heuristic)
         # This is tricky - only fix obvious cases like: "description": "It's a test"
@@ -546,12 +556,12 @@ Return ONLY the JSON array, no additional commentary."""
             key = match.group(1)
             value = match.group(2)
             # Escape single quotes that aren't already escaped
-            value = re.sub(r"(?<!\\)'", r"\'", value)
+            value = UNESCAPED_QUOTE_PATTERN.sub(r"\'", value)
             return f'"{key}": "{value}"'
 
         # Match "key": "value" pairs and fix unescaped quotes in values
         # This pattern is conservative to avoid breaking valid JSON
-        json_str = re.sub(r'"([^"]+)":\s*"([^"]*[^\\]"[^"]*)"', fix_unescaped_quotes, json_str)
+        json_str = KEY_VALUE_PATTERN.sub(fix_unescaped_quotes, json_str)
 
         return json_str
 
@@ -566,7 +576,7 @@ Return ONLY the JSON array, no additional commentary."""
             List of MigrationPattern objects
         """
         # Try to extract JSON from response
-        json_match = re.search(r'\[.*\]', response, re.DOTALL)
+        json_match = JSON_ARRAY_PATTERN.search(response)
 
         if not json_match:
             print("Warning: No JSON array found in response")

@@ -16,6 +16,12 @@ from urllib.parse import urljoin, urlparse, urlunparse
 
 import requests
 
+# Compiled regex patterns for performance (used in text cleaning)
+EXCESSIVE_NEWLINES_PATTERN = re.compile(r'\n{3,}')
+EXCESSIVE_SPACES_PATTERN = re.compile(r' {2,}')
+SKIP_TO_CONTENT_PATTERN = re.compile(r'Skip to (?:main )?content', re.IGNORECASE)
+TABLE_OF_CONTENTS_PATTERN = re.compile(r'Table of Contents?', re.IGNORECASE)
+
 
 class GuideIngester:
     """Fetch and parse migration guides from various sources."""
@@ -304,12 +310,12 @@ class GuideIngester:
             Cleaned text
         """
         # Remove excessive whitespace
-        text = re.sub(r'\n{3,}', '\n\n', text)
-        text = re.sub(r' {2,}', ' ', text)
+        text = EXCESSIVE_NEWLINES_PATTERN.sub('\n\n', text)
+        text = EXCESSIVE_SPACES_PATTERN.sub(' ', text)
 
         # Remove common navigation/UI elements
-        text = re.sub(r'Skip to (?:main )?content', '', text, flags=re.IGNORECASE)
-        text = re.sub(r'Table of Contents?', '', text, flags=re.IGNORECASE)
+        text = SKIP_TO_CONTENT_PATTERN.sub('', text)
+        text = TABLE_OF_CONTENTS_PATTERN.sub('', text)
 
         return text.strip()
 

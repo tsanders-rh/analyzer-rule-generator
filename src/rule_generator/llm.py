@@ -123,7 +123,8 @@ class GoogleProvider(LLMProvider):
             import google.generativeai as genai
         except ImportError:
             raise ImportError(
-                "google-generativeai package required. Install with: pip install google-generativeai"
+                "google-generativeai package required. "
+                "Install with: pip install google-generativeai"
             )
 
         self.model_name = model

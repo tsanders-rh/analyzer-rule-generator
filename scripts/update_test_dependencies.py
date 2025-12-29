@@ -645,12 +645,18 @@ Examples:
     parser.add_argument(
         '--analysis-dir',
         required=True,
-        help='Path to Kantra analysis output directory (contains dependencies.yaml and output.yaml)',
+        help=(
+            'Path to Kantra analysis output directory '
+            '(contains dependencies.yaml and output.yaml)'
+        ),
     )
 
     parser.add_argument(
         '--normalize-path',
-        help='Normalize incident file paths by replacing local prefix with this value (e.g., "/shared/source/sample")',
+        help=(
+            'Normalize incident file paths by replacing local prefix with this value '
+            '(e.g., "/shared/source/sample")'
+        ),
     )
 
     parser.add_argument('--test-case', help='Path to existing test case file to update')

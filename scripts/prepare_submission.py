@@ -204,7 +204,8 @@ kantra test tests/{rule_file.stem}.test.yaml
 
 1. **Complete test data**
    - Edit `tests/data/*/pom.xml` to add dependencies
-   - Edit `tests/data/*/src/main/java/com/example/Application.java` with code that uses deprecated APIs
+   - Edit `tests/data/*/src/main/java/com/example/Application.java`
+     with code that uses deprecated APIs
    - Ensure each rule has at least one violation in test code
 
 2. **Run tests locally**
@@ -239,7 +240,8 @@ Examples:
     --rules examples/output/spring-boot - 4.0/migration-rules.yaml \\
     --source spring-boot - 3.5 \\
     --target spring-boot - 4.0 \\
-    --guide-url https://github.com/spring-projects/spring-boot/wiki/Spring-Boot - 4.0-Migration-Guide \\
+    --guide-url \\
+      https://github.com/spring-projects/spring-boot/wiki/Spring-Boot - 4.0-Migration-Guide \\
     --output submission/spring-boot - 4.0
         """,
     )

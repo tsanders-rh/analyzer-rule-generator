@@ -172,7 +172,8 @@ class RulesetComplexityClassifier:
         if self.verbose:
             print(f"\n  Rule: {rule.get('ruleID', 'unknown')}")
             print(
-                f"    Scores: Expert={expert_score}, High={high_score}, Medium={medium_score}, Low={low_score}, Trivial={trivial_score}"
+                f"    Scores: Expert={expert_score}, High={high_score}, "
+                f"Medium={medium_score}, Low={low_score}, Trivial={trivial_score}"
             )
             print(f"    Effort: {effort}, When complexity: {when_complexity}")
             print(f"    → Classification: {complexity} ({reason})")
@@ -339,11 +340,13 @@ class RulesetComplexityClassifier:
         print(f"\n{'=' * 80}")
         print("Classification Summary:")
         print(
-            f"  TRIVIAL: {stats['trivial']:3d} rules (95%+ AI success - namespace changes, mechanical fixes)"
+            f"  TRIVIAL: {stats['trivial']:3d} rules "
+            f"(95%+ AI success - namespace changes, mechanical fixes)"
         )
         print(f"  LOW:     {stats['low']:3d} rules (80%+ AI success - simple API equivalents)")
         print(
-            f"  MEDIUM:  {stats['medium']:3d} rules (60%+ AI success - requires context understanding)"
+            f"  MEDIUM:  {stats['medium']:3d} rules "
+            f"(60%+ AI success - requires context understanding)"
         )
         print(f"  HIGH:    {stats['high']:3d} rules (30 - 50% AI success - architectural changes)")
         print(

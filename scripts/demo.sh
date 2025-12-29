@@ -326,15 +326,16 @@ step_validate_rules() {
     echo -e "${YELLOW}Command:${NC}"
     cat <<EOF
 python3 scripts/validate_rules.py \\
-  --rules "${RULES_OUTPUT}"
+  --rules "${RULES_OUTPUT}" \\
+  --auto-fix
 EOF
     echo ""
 
     pause_for_demo
 
     # Run validation (syntactic only by default)
-    print_info "Running syntactic validation (fast, free)..."
-    python3 scripts/validate_rules.py --rules "${RULES_OUTPUT}"
+    print_info "Running syntactic validation with auto-fix (fast, free)..."
+    python3 scripts/validate_rules.py --rules "${RULES_OUTPUT}" --auto-fix
     VALIDATION_RESULT=$?
 
     echo ""
@@ -353,8 +354,8 @@ EOF
         read -r response
         if [[ "$response" =~ ^[Yy]$ ]]; then
             echo ""
-            print_info "Running semantic validation..."
-            python3 scripts/validate_rules.py --rules "${RULES_OUTPUT}" --semantic --provider "${PROVIDER}"
+            print_info "Running semantic validation with auto-fix..."
+            python3 scripts/validate_rules.py --rules "${RULES_OUTPUT}" --semantic --provider "${PROVIDER}" --auto-fix
         fi
     fi
 

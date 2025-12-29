@@ -54,10 +54,10 @@ def load_yaml_file(file_path: Union[str, Path]) -> Any:
 
     except yaml.YAMLError as e:
         logger.error(f"[FileUtils] YAML parsing error in {file_path}: {e}")
-        raise yaml.YAMLError("Failed to parse YAML file")
+        raise RuntimeError("Failed to parse YAML file") from e
     except IOError as e:
         logger.error(f"[FileUtils] Error reading file {file_path}: {e}")
-        raise IOError("Failed to read file")
+        raise RuntimeError("Failed to read file") from e
 
 
 def load_rules_file(file_path: Union[str, Path]) -> List[Dict[str, Any]]:
@@ -148,7 +148,7 @@ def write_yaml_file(
 
     except IOError as e:
         logger.error(f"[FileUtils] Error writing file {file_path}: {e}")
-        raise IOError("Failed to write file")
+        raise RuntimeError("Failed to write file") from e
 
 
 def rule_to_dict(rule: Any) -> Dict[str, Any]:

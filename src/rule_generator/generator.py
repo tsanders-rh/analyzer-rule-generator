@@ -24,6 +24,7 @@ from .condition_builder import (
 )
 from .config import config
 from .schema import AnalyzerRule, Category, Link, LocationType, MigrationPattern
+from .security import validate_rule_id
 
 # Compiled regex patterns for performance (used in import extraction and message formatting)
 IMPORT_FROM_PATTERN = re.compile(r"from\s+['\"]([^'\"]+)['\"]")
@@ -206,6 +207,12 @@ class AnalyzerRuleGenerator:
 
         # Format: prefix-00000 (RULE_ID_PADDING digits, incrementing by RULE_ID_INCREMENT)
         rule_id = f"{prefix}-{rule_number:0{config.RULE_ID_PADDING}d}"
+
+        # Validate rule ID format
+        try:
+            rule_id = validate_rule_id(rule_id, self.source_framework, self.target_framework)
+        except ValueError as e:
+            print(f"[Generation] Warning: Rule ID validation failed: {e} (using anyway)")
 
         return rule_id
 

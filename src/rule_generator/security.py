@@ -295,3 +295,68 @@ def validate_rule_id(rule_id: str, source: str = None, target: str = None) -> st
             )
 
     return rule_id
+
+
+def validate_llm_response(response: str, expected_format: str = "json_array") -> str:
+    """
+    Validate LLM response structure before parsing.
+
+    Args:
+        response: LLM response text
+        expected_format: Expected response format ("json_array", "json_object", "yaml")
+
+    Returns:
+        Validated response text
+
+    Raises:
+        ValueError: If response structure is invalid
+
+    Examples:
+        >>> validate_llm_response('[{"key": "value"}]', "json_array")
+        '[{"key": "value"}]'
+
+        >>> validate_llm_response('invalid', "json_array")
+        ValueError: Invalid LLM response
+    """
+    if not response or not response.strip():
+        raise ValueError("LLM response cannot be empty")
+
+    response = response.strip()
+
+    # Check for minimum length (avoid trivial responses)
+    if len(response) < 2:
+        raise ValueError(f"LLM response too short: {len(response)} chars (expected at least 2)")
+
+    # Validate based on expected format
+    if expected_format == "json_array":
+        if not response.startswith('['):
+            raise ValueError(
+                f"LLM response does not start with '[' (expected JSON array): "
+                f"{response[:50]}..."
+            )
+        if not response.rstrip().endswith(']'):
+            raise ValueError(
+                f"LLM response does not end with ']' (expected JSON array): "
+                f"...{response[-50:]}"
+            )
+
+    elif expected_format == "json_object":
+        if not response.startswith('{'):
+            raise ValueError(
+                f"LLM response does not start with '{{' (expected JSON object): "
+                f"{response[:50]}..."
+            )
+        if not response.rstrip().endswith('}'):
+            raise ValueError(
+                f"LLM response does not end with '}}' (expected JSON object): "
+                f"...{response[-50:]}"
+            )
+
+    elif expected_format == "yaml":
+        # Basic YAML validation - should not be pure JSON
+        if response.startswith(('[', '{')):
+            raise ValueError(
+                f"LLM response looks like JSON, expected YAML: {response[:50]}..."
+            )
+
+    return response

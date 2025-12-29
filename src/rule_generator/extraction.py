@@ -19,6 +19,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .config import config
 from .llm import LLMAPIError, LLMAuthenticationError, LLMProvider, LLMRateLimitError
 from .schema import CSharpLocationType, LocationType, MigrationPattern
+from .security import validate_complexity, validate_llm_response
 
 # Set up Jinja2 template environment
 TEMPLATE_DIR = Path(__file__).parent.parent.parent / 'templates' / 'extraction'
@@ -199,6 +200,13 @@ class MigrationPatternExtractor:
 
             # Extract text response
             response_text = result.get("response", "")
+
+            # Validate LLM response structure before parsing
+            try:
+                response_text = validate_llm_response(response_text, expected_format="json_array")
+            except ValueError as e:
+                print(f"[Extraction] Warning: Invalid LLM response structure: {e}")
+                return []
 
             # Parse response
             patterns = self._parse_extraction_response(response_text)
@@ -633,13 +641,24 @@ Return ONLY the JSON array, no additional commentary."""
                                 f"using None: {data.get('location_type')}"
                             )
 
+                # Validate complexity value
+                complexity = data["complexity"]
+                try:
+                    complexity = validate_complexity(complexity)
+                except ValueError as e:
+                    print(
+                        f"[Extraction] Warning: Invalid complexity '{complexity}', "
+                        f"defaulting to MEDIUM: {e}"
+                    )
+                    complexity = "MEDIUM"
+
                 pattern = MigrationPattern(
                     source_pattern=data["source_pattern"],
                     target_pattern=data["target_pattern"],
                     source_fqn=data.get("source_fqn"),
                     location_type=location_type,
                     alternative_fqns=data.get("alternative_fqns", []),
-                    complexity=data["complexity"],
+                    complexity=complexity,
                     category=data["category"],
                     concern=data.get("concern", "general"),
                     provider_type=data.get("provider_type"),

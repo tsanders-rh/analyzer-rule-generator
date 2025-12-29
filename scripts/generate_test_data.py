@@ -9,19 +9,20 @@ Supports multiple languages: Java, TypeScript, Go, Python, etc.
 """
 import argparse
 import os
-import sys
-from pathlib import Path
-import yaml
-import time
-import shutil
 import re
+import shutil
+import sys
+import time
+from pathlib import Path
+
+import yaml
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from rule_generator.llm import get_llm_provider
 from rule_generator.config import config
-from rule_generator.security import validate_path, is_safe_path, validate_framework_name
+from rule_generator.llm import get_llm_provider
+from rule_generator.security import is_safe_path, validate_framework_name, validate_path
 
 
 def detect_language(rules: list) -> str:
@@ -34,7 +35,7 @@ def detect_language(rules: list) -> str:
     Returns:
         Language name (java, typescript, go, python, etc.)
     """
-    # First, check labels for language hints (e.g., konveyor.io/source=go-1.17)
+    # First, check labels for language hints (e.g., konveyor.io/source=go - 1.17)
     for rule in rules:
         labels = rule.get('labels', [])
         for label in labels:
@@ -45,7 +46,12 @@ def detect_language(rules: list) -> str:
                     return 'go'
                 elif 'java-' in label_lower or '=java' in label_lower or 'spring' in label_lower:
                     return 'java'
-                elif 'node' in label_lower or 'react' in label_lower or 'angular' in label_lower or 'typescript' in label_lower:
+                elif (
+                    'node' in label_lower
+                    or 'react' in label_lower
+                    or 'angular' in label_lower
+                    or 'typescript' in label_lower
+                ):
                     return 'typescript'
                 elif 'python' in label_lower or 'django' in label_lower:
                     return 'python'
@@ -63,7 +69,10 @@ def detect_language(rules: list) -> str:
 
             # Check for JS/TS patterns: .js, .jsx, .ts, .tsx
             # Common patterns: \.(j|t)sx?$, \.tsx?$, \.jsx?$, etc.
-            if any(pattern in file_pattern for pattern in ['.ts', '.tsx', '.js', '.jsx', '(j|t)s', 'jsx?', 'tsx?']):
+            if any(
+                pattern in file_pattern
+                for pattern in ['.ts', '.tsx', '.js', '.jsx', '(j|t)s', 'jsx?', 'tsx?']
+            ):
                 return 'typescript'
             elif '.go' in file_pattern:
                 return 'go'
@@ -118,7 +127,7 @@ def get_language_config(language: str) -> dict:
             'main_file': 'Application.java',
             'main_file_type': 'java',
             'package_manager': 'Maven',
-            'test_instructions': 'Maven project with dependencies'
+            'test_instructions': 'Maven project with dependencies',
         },
         'typescript': {
             'build_file': 'package.json',
@@ -127,7 +136,7 @@ def get_language_config(language: str) -> dict:
             'main_file': 'App.tsx',
             'main_file_type': 'tsx',
             'package_manager': 'npm',
-            'test_instructions': 'npm project with dependencies'
+            'test_instructions': 'npm project with dependencies',
         },
         'go': {
             'build_file': 'go.mod',
@@ -136,7 +145,7 @@ def get_language_config(language: str) -> dict:
             'main_file': 'main.go',
             'main_file_type': 'go',
             'package_manager': 'Go modules',
-            'test_instructions': 'Go module with dependencies'
+            'test_instructions': 'Go module with dependencies',
         },
         'python': {
             'build_file': 'requirements.txt',
@@ -145,8 +154,8 @@ def get_language_config(language: str) -> dict:
             'main_file': 'main.py',
             'main_file_type': 'python',
             'package_manager': 'pip',
-            'test_instructions': 'Python project with requirements.txt'
-        }
+            'test_instructions': 'Python project with requirements.txt',
+        },
     }
 
     return configs.get(language, configs['java'])
@@ -175,7 +184,7 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
             'location': None,
             'provider': None,
             'component': None,
-            'code_hint': None
+            'code_hint': None,
         }
 
         # Check for nodejs.referenced
@@ -188,10 +197,7 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
 
             # Generate code hint for nodejs.referenced patterns
             code_hint = generate_code_hint_from_pattern(
-                pattern_info['pattern'],
-                language,
-                description,
-                message
+                pattern_info['pattern'], language, description, message
             )
             if code_hint:
                 pattern_info['code_hint'] = code_hint
@@ -225,16 +231,23 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
 
             # Check if this is a configuration file pattern
             file_pattern = builtin.get('filePattern', '')
-            if any(ext in file_pattern for ext in ['.properties', '.yaml', '.yml', '.factories', '.xml']):
+            if any(
+                ext in file_pattern
+                for ext in ['.properties', '.yaml', '.yml', '.factories', '.xml']
+            ):
                 pattern_info['is_config_file'] = True
                 # Determine config file type and name
                 if '.properties' in file_pattern and 'spring.factories' not in file_pattern:
                     pattern_info['config_type'] = 'properties'
                     pattern_info['config_file_name'] = 'application.properties'
                 elif 'spring.factories' in file_pattern or '.factories' in file_pattern:
-                    pattern_info['config_type'] = 'properties'  # spring.factories uses properties format
+                    pattern_info['config_type'] = (
+                        'properties'  # spring.factories uses properties format
+                    )
                     pattern_info['config_file_name'] = 'spring.factories'
-                    pattern_info['config_file_path'] = 'META-INF/spring.factories'  # Standard location
+                    pattern_info['config_file_path'] = (
+                        'META-INF/spring.factories'  # Standard location
+                    )
                 elif '.yaml' in file_pattern or '.yml' in file_pattern:
                     pattern_info['config_type'] = 'yaml'
                     pattern_info['config_file_name'] = 'application.yaml'
@@ -249,7 +262,9 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
 
             # Parse JSX/TSX patterns to generate code hints
             jsx_pattern = builtin.get('pattern', '')
-            pattern_info['code_hint'] = generate_code_hint_from_pattern(jsx_pattern, language, description, message)
+            pattern_info['code_hint'] = generate_code_hint_from_pattern(
+                jsx_pattern, language, description, message
+            )
 
         elif 'builtin.file' in cond:
             builtin = cond['builtin.file']
@@ -297,7 +312,7 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
                 'description': description,
                 'patterns': patterns,
                 'component': None,
-                'code_hint': None
+                'code_hint': None,
             }
 
             # Extract component name and code hint
@@ -331,7 +346,9 @@ def extract_java_imports_from_message(message: str) -> list:
 
     # Look for code blocks after "Before:"
     # Handle both actual newlines and literal \n (backslash-n) in the message
-    before_match = re.search(r'Before:(?:\\n|\n)```(?:java)?(?:\\n|\n)(.*?)(?:\\n|\n)```', message, re.DOTALL)
+    before_match = re.search(
+        r'Before:(?:\\n|\n)```(?:java)?(?:\\n|\n)(.*?)(?:\\n|\n)```', message, re.DOTALL
+    )
     if before_match:
         code = before_match.group(1).strip()
         # Replace literal \n with actual newlines if present
@@ -409,7 +426,9 @@ def inject_missing_java_imports(source_code: str, patterns_to_test: list, rules:
     return source_code
 
 
-def generate_code_hint_from_pattern(pattern: str, language: str, description: str = '', message: str = '') -> str:
+def generate_code_hint_from_pattern(
+    pattern: str, language: str, description: str = '', message: str = ''
+) -> str:
     """
     Generate a code example hint from a regex pattern or rule message.
 
@@ -433,7 +452,9 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
         # Look for code blocks after "Before:"
         # Handle both actual newlines and literal \n (backslash-n) in the message
         # Some YAML files have literal \n sequences instead of actual newlines
-        before_match = re.search(r'Before:(?:\\n|\n)```(?:\\n|\n)(.*?)(?:\\n|\n)```', message, re.DOTALL)
+        before_match = re.search(
+            r'Before:(?:\\n|\n)```(?:\\n|\n)(.*?)(?:\\n|\n)```', message, re.DOTALL
+        )
         if before_match:
             code = before_match.group(1).strip()
             # Replace literal \n with actual newlines if present
@@ -484,7 +505,7 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
         # Use old-style function syntax to match pattern [^)]* (no closing parens allowed)
         return "setTimeout(function() { setCount(c + 1); setFlag(!f); }, 1000);"
 
-    # Pattern 4: Interface with Props - interface\s+[A-Za-z0-9_]+Props\s*\{[^}]*\}
+    # Pattern 4: Interface with Props - interface\s+[A-Za-z0 - 9_]+Props\s*\{[^}]*\}
     if 'interface' in pattern and 'Props' in pattern:
         # TypeScript interface (single line for line-by-line matching)
         return "interface ButtonProps { onClick: () => void; disabled?: boolean; }"
@@ -560,7 +581,9 @@ def generate_code_hint_from_pattern(pattern: str, language: str, description: st
     return None
 
 
-def build_test_generation_prompt(rules: list, source: str, target: str, guide_url: str, language: str) -> str:
+def build_test_generation_prompt(
+    rules: list, source: str, target: str, guide_url: str, language: str
+) -> str:
     """
     Build prompt for LLM to generate test application code.
 
@@ -574,7 +597,7 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
     Returns:
         Prompt string
     """
-    config = get_language_config(language)
+    lang_config = get_language_config(language)
     patterns = extract_patterns_from_rules(rules, language)
 
     # Build patterns summary with specific code examples
@@ -594,7 +617,9 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
             if pattern.get('is_config_file'):
                 has_config_files = True
                 config_file_type = pattern.get('config_type', 'properties')
-                config_file_name = pattern.get('config_file_name', f'application.{config_file_type}')
+                config_file_name = pattern.get(
+                    'config_file_name', f'application.{config_file_type}'
+                )
                 config_file_path = pattern.get('config_file_path', '')
                 # Add config file specific instruction
                 pattern_obj = pattern.get('pattern', '')
@@ -604,7 +629,11 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
                     pattern_text += f"\n  **MUST BE IN CONFIG FILE ({config_file_type}) named {config_file_name}:** {pattern_obj}"
 
             # Check for Java imports
-            if pattern.get('provider') == 'java' and pattern.get('location') == 'IMPORT' and pattern.get('code_hint'):
+            if (
+                pattern.get('provider') == 'java'
+                and pattern.get('location') == 'IMPORT'
+                and pattern.get('code_hint')
+            ):
                 has_java_imports = True
                 pattern_text += f"\n\n  **YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS:**\n  ```java\n  // {p['ruleID']}\n  {pattern['code_hint']}\n  ```"
 
@@ -632,7 +661,9 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
             if language == 'typescript':
                 pattern_text += f"\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n  ```tsx\n  // {p['ruleID']}\n  {p['code_hint']}\n  ```"
         elif p.get('component') and not has_nodejs_referenced:
-            pattern_text += f"\n  Component: {p['component']} (MUST be used in JSX, not just imported)"
+            pattern_text += (
+                f"\n  Component: {p['component']} (MUST be used in JSX, not just imported)"
+            )
 
         patterns_list.append(pattern_text)
 
@@ -640,8 +671,12 @@ def build_test_generation_prompt(rules: list, source: str, target: str, guide_ur
 
     # Language-specific instructions
     config_file_instructions = ""
-    final_config_file_name = config_file_name if config_file_name else f'application.{config_file_type}'
-    final_config_file_path = config_file_path if config_file_path else f'src/main/resources/{final_config_file_name}'
+    final_config_file_name = (
+        config_file_name if config_file_name else f'application.{config_file_type}'
+    )
+    final_config_file_path = (
+        config_file_path if config_file_path else f'src/main/resources/{final_config_file_name}'
+    )
     if has_config_files and language == 'java':
         config_file_instructions = f"""
 3. **{final_config_file_name}** - Configuration file with deprecated properties:
@@ -746,15 +781,15 @@ For Python patterns:
 - Import statements for deprecated modules
 - Usage of deprecated functions/classes
 - References to deprecated APIs
-"""
+""",
     }
 
     specific_instructions = lang_instructions.get(language, lang_instructions['java']).format(
-        build_file=config['build_file'],
-        main_file=config['main_file'],
+        build_file=lang_config['build_file'],
+        main_file=lang_config['main_file'],
         source=source,
         target=target,
-        config_file_instructions=config_file_instructions
+        config_file_instructions=config_file_instructions,
     )
 
     prompt = f"""Generate a minimal {language.upper()} test application for Konveyor analyzer rule testing.
@@ -793,12 +828,12 @@ Output files:
 
 Format your response with clear code blocks:
 
-```{config['build_file_type']}
-{config['build_file']}
+```{lang_config['build_file_type']}
+{lang_config['build_file']}
 ```
 
-```{config['main_file_type']}
-{config['main_file']}
+```{lang_config['main_file_type']}
+{lang_config['main_file']}
 ```
 {"" if not has_config_files else f'''
 ```{config_file_type}
@@ -827,7 +862,7 @@ def extract_code_blocks(response: str, language: str) -> dict:
     """
     import re
 
-    config = get_language_config(language)
+    lang_config = get_language_config(language)
     result = {'build_file': None, 'source_file': None, 'config_file': None}
 
     # Try to extract code blocks
@@ -860,16 +895,27 @@ def extract_code_blocks(response: str, language: str) -> dict:
                 result['config_file'] = {
                     'type': block_type.lower(),
                     'content': content,
-                    'filename': filename
+                    'filename': filename,
                 }
         # Match source file types
-        elif block_type.lower() in ['java', 'typescript', 'tsx', 'ts', 'python', 'py', 'go', 'javascript', 'jsx', 'js']:
+        elif block_type.lower() in [
+            'java',
+            'typescript',
+            'tsx',
+            'ts',
+            'python',
+            'py',
+            'go',
+            'javascript',
+            'jsx',
+            'js',
+        ]:
             if not result['source_file']:
                 result['source_file'] = content
 
     # Fallback: try to find files by name/comment
     if not result['build_file']:
-        build_pattern = rf'```\w*\s*(?:<!--\s*)?{re.escape(config["build_file"])}.*?```'
+        build_pattern = rf'```\w*\s*(?:<!--\s*)?{re.escape(lang_config["build_file"])}.*?```'
         build_match = re.search(build_pattern, response, re.DOTALL | re.IGNORECASE)
         if build_match:
             # Extract content between ```
@@ -878,7 +924,7 @@ def extract_code_blocks(response: str, language: str) -> dict:
                 result['build_file'] = content_match.group(1).strip()
 
     if not result['source_file']:
-        source_pattern = rf'```\w*\s*(?://|#)?\s*{re.escape(config["main_file"])}.*?```'
+        source_pattern = rf'```\w*\s*(?://|#)?\s*{re.escape(lang_config["main_file"])}.*?```'
         source_match = re.search(source_pattern, response, re.DOTALL | re.IGNORECASE)
         if source_match:
             content_match = re.search(r'```\w*\s*(.*?)\s*```', source_match.group(0), re.DOTALL)
@@ -896,16 +942,18 @@ def create_directory_structure(output_dir: Path, language: str):
         output_dir: Base output directory
         language: Programming language
     """
-    config = get_language_config(language)
+    lang_config = get_language_config(language)
 
     # Create source directory
-    src_dir = output_dir / config['source_dir']
+    src_dir = output_dir / lang_config['source_dir']
     src_dir.mkdir(parents=True, exist_ok=True)
 
     return src_dir
 
 
-def generate_test_yaml(rule_file_path: Path, data_dir_name: str, rules: list, output_dir: Path) -> Path:
+def generate_test_yaml(
+    rule_file_path: Path, data_dir_name: str, rules: list, output_dir: Path
+) -> Path:
     """
     Generate a Konveyor test YAML file.
 
@@ -942,7 +990,10 @@ def generate_test_yaml(rule_file_path: Path, data_dir_name: str, rules: list, ou
             file_pattern = builtin_cond.get('filePattern', '')
 
             # Add language-specific provider based on filePattern
-            if any(pattern in file_pattern for pattern in ['.ts', '.tsx', '.js', '.jsx', '(j|t)s', 'jsx?', 'tsx?']):
+            if any(
+                pattern in file_pattern
+                for pattern in ['.ts', '.tsx', '.js', '.jsx', '(j|t)s', 'jsx?', 'tsx?']
+            ):
                 found.add('nodejs')
             elif '.java' in file_pattern:
                 found.add('java')
@@ -1006,17 +1057,9 @@ def generate_test_yaml(rule_file_path: Path, data_dir_name: str, rules: list, ou
             for provider in sorted(providers)
         ],
         'tests': [
-            {
-                'ruleID': rule_id,
-                'testCases': [
-                    {
-                        'name': 'tc-1',
-                        'hasIncidents': {'atLeast': 1}
-                    }
-                ]
-            }
+            {'ruleID': rule_id, 'testCases': [{'name': 'tc - 1', 'hasIncidents': {'atLeast': 1}}]}
             for rule_id in rule_ids
-        ]
+        ],
     }
 
     with open(test_file_path, 'w') as f:
@@ -1045,12 +1088,7 @@ def run_kantra_tests(output_dir: Path) -> dict:
     test_files = list(output_dir.glob('*.test.yaml'))
     if not test_files:
         print("No test files found")
-        return {
-            'passed': 0,
-            'total': 0,
-            'failures': [],
-            'exit_code': 1
-        }
+        return {'passed': 0, 'total': 0, 'failures': [], 'exit_code': 1}
 
     # Run kantra test with explicit file list (use just filenames since cwd is set)
     # Validate filenames to prevent injection (though subprocess.run with list is safe)
@@ -1064,19 +1102,14 @@ def run_kantra_tests(output_dir: Path) -> dict:
 
     if not safe_filenames:
         print("No valid test files after validation")
-        return {
-            'passed': 0,
-            'total': 0,
-            'failures': [],
-            'exit_code': 1
-        }
+        return {'passed': 0, 'total': 0, 'failures': [], 'exit_code': 1}
 
     result = subprocess.run(
         ['kantra', 'test'] + safe_filenames,
         cwd=output_dir,
         capture_output=True,
         text=True,
-        timeout=config.KANTRA_TIMEOUT_SECONDS
+        timeout=config.KANTRA_TIMEOUT_SECONDS,
     )
 
     output = result.stdout + result.stderr
@@ -1095,20 +1128,14 @@ def run_kantra_tests(output_dir: Path) -> dict:
     # Look for rule IDs (format: source-to-target-NNNNN) followed by 0/1 PASSED and debug path
     # Use [\w-]+ to match word chars AND hyphens (for multi-part source/target names)
     failures = []
-    for match in re.finditer(r'([\w-]+-\d{5})\s+0/1\s+PASSED.*?find debug data in (/[^\s]+)', output, re.DOTALL):
+    for match in re.finditer(
+        r'([\w-]+-\d{5})\s + 0/1\s+PASSED.*?find debug data in (/[^\s]+)', output, re.DOTALL
+    ):
         rule_id = match.group(1)
         debug_path = match.group(2).strip()
-        failures.append({
-            'rule_id': rule_id,
-            'debug_path': debug_path
-        })
+        failures.append({'rule_id': rule_id, 'debug_path': debug_path})
 
-    return {
-        'passed': passed,
-        'total': total,
-        'failures': failures,
-        'exit_code': result.returncode
-    }
+    return {'passed': passed, 'total': total, 'failures': failures, 'exit_code': result.returncode}
 
 
 def analyze_test_failure(debug_path: str) -> dict:
@@ -1155,8 +1182,8 @@ def analyze_test_failure(debug_path: str) -> dict:
     # Find unmatched rules - kantra output format is:
     # - name: konveyor-analysis
     #   unmatched:
-    #   - rule-id-1
-    #   - rule-id-2
+    #   - rule-id - 1
+    #   - rule-id - 2
     unmatched = []
 
     if isinstance(output_data, list) and len(output_data) > 0:
@@ -1191,11 +1218,7 @@ def analyze_test_failure(debug_path: str) -> dict:
         pattern = when['nodejs.referenced'].get('pattern')
         provider = 'nodejs.referenced'
 
-    return {
-        'rule_id': rule_id,
-        'pattern': pattern,
-        'provider': provider
-    }
+    return {'rule_id': rule_id, 'pattern': pattern, 'provider': provider}
 
 
 def fix_pattern_detection(failure_info: dict, llm) -> str:
@@ -1254,11 +1277,11 @@ def main():
 Examples:
   # Generate Java test data for Spring Boot 4.0 rules
   python scripts/generate_test_data.py \\
-    --rules examples/output/spring-boot-4.0/migration-rules.yaml \\
+    --rules examples/output/spring-boot - 4.0/migration-rules.yaml \\
     --output submission/tests/data/mongodb \\
-    --source spring-boot-3.5 \\
-    --target spring-boot-4.0 \\
-    --guide-url "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
+    --source spring-boot - 3.5 \\
+    --target spring-boot - 4.0 \\
+    --guide-url "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot - 4.0-Migration-Guide"
 
   # Generate TypeScript test data for a directory of rules
   python scripts/generate_test_data.py \\
@@ -1268,75 +1291,51 @@ Examples:
     --target patternfly-v6 \\
     --language typescript \\
     --guide-url "https://www.patternfly.org/get-started/upgrade/"
-        """
+        """,
     )
 
     parser.add_argument(
-        '--rules',
-        required=True,
-        help='Path to rule YAML file or directory containing rule files'
+        '--rules', required=True, help='Path to rule YAML file or directory containing rule files'
     )
-    parser.add_argument(
-        '--output',
-        required=True,
-        help='Output directory for test data'
-    )
-    parser.add_argument(
-        '--source',
-        required=True,
-        help='Source framework/version'
-    )
-    parser.add_argument(
-        '--target',
-        required=True,
-        help='Target framework/version'
-    )
-    parser.add_argument(
-        '--guide-url',
-        required=True,
-        help='URL to migration guide'
-    )
+    parser.add_argument('--output', required=True, help='Output directory for test data')
+    parser.add_argument('--source', required=True, help='Source framework/version')
+    parser.add_argument('--target', required=True, help='Target framework/version')
+    parser.add_argument('--guide-url', required=True, help='URL to migration guide')
     parser.add_argument(
         '--language',
         choices=['java', 'typescript', 'go', 'python'],
-        help='Programming language (auto-detected if not specified)'
+        help='Programming language (auto-detected if not specified)',
     )
     parser.add_argument(
         '--provider',
         default='anthropic',
         choices=['openai', 'anthropic', 'google'],
-        help='LLM provider (default: anthropic)'
+        help='LLM provider (default: anthropic)',
     )
-    parser.add_argument(
-        '--model',
-        help='Model name (uses provider default if not specified)'
-    )
-    parser.add_argument(
-        '--api-key',
-        help='API key (uses environment variable if not specified)'
-    )
+    parser.add_argument('--model', help='Model name (uses provider default if not specified)')
+    parser.add_argument('--api-key', help='API key (uses environment variable if not specified)')
     parser.add_argument(
         '--delay',
         type=float,
         default=config.TEST_GENERATION_DELAY,
-        help=f'Delay in seconds between API calls to avoid rate limits (default: {config.TEST_GENERATION_DELAY})'
+        help=f'Delay in seconds between API calls to avoid rate limits (default: {config.TEST_GENERATION_DELAY})',
     )
     parser.add_argument(
         '--max-retries',
         type=int,
         default=config.MAX_RETRY_ATTEMPTS,
-        help=f'Maximum number of retries for rate limit errors (default: {config.MAX_RETRY_ATTEMPTS})'
+        help=f'Maximum number of retries for rate limit errors (default: {config.MAX_RETRY_ATTEMPTS})',
     )
     parser.add_argument(
         '--skip-existing',
         action='store_true',
-        help='Skip rule files that already have generated test data'
+        help='Skip rule files that already have generated test data',
     )
     parser.add_argument(
         '--max-iterations',
         type=int,
         default=0,
-        help='Run test-fix loop: generate, test, fix failures, repeat (0=disable, default: 0)'
+        help='Run test-fix loop: generate, test, fix failures, repeat (0=disable, default: 0)',
     )
 
     args = parser.parse_args()
@@ -1361,10 +1360,13 @@ Examples:
         rule_files = [rules_path]
     elif rules_path.is_dir():
         # Directory mode - find all YAML files except ruleset.yaml
-        rule_files = sorted([
-            f for f in rules_path.glob('*.yaml')
-            if f.name != 'ruleset.yaml' and not f.name.endswith('.test.yaml')
-        ])
+        rule_files = sorted(
+            [
+                f
+                for f in rules_path.glob('*.yaml')
+                if f.name != 'ruleset.yaml' and not f.name.endswith('.test.yaml')
+            ]
+        )
         if not rule_files:
             print(f"Error: No rule YAML files found in {rules_path}", file=sys.stderr)
             return 1
@@ -1443,7 +1445,7 @@ Examples:
         language = args.language or detect_language(rules)
         print(f"  ✓ Language: {language}")
 
-        config = get_language_config(language)
+        lang_config = get_language_config(language)
 
         # Generate data directory name from rule file
         # e.g., "patternfly-v5-to-patternfly-v6-button.yaml" -> "button"
@@ -1451,7 +1453,9 @@ Examples:
 
         # Build prompt
         print(f"  Generating test data with AI...")
-        prompt = build_test_generation_prompt(rules, args.source, args.target, args.guide_url, language)
+        prompt = build_test_generation_prompt(
+            rules, args.source, args.target, args.guide_url, language
+        )
 
         # Generate with LLM (with retry logic for rate limits)
         response = None
@@ -1464,9 +1468,13 @@ Examples:
                 if 'usage' in result:
                     usage = result['usage']
                     if 'input_tokens' in usage:
-                        print(f"    Input tokens: {usage['input_tokens']}, Output tokens: {usage['output_tokens']}")
+                        print(
+                            f"    Input tokens: {usage['input_tokens']}, Output tokens: {usage['output_tokens']}"
+                        )
                     elif 'prompt_tokens' in usage:
-                        print(f"    Prompt tokens: {usage['prompt_tokens']}, Completion tokens: {usage['completion_tokens']}")
+                        print(
+                            f"    Prompt tokens: {usage['prompt_tokens']}, Completion tokens: {usage['completion_tokens']}"
+                        )
                 break  # Success, exit retry loop
 
             except Exception as e:
@@ -1474,15 +1482,21 @@ Examples:
                 if 'rate_limit' in error_str.lower() or '429' in error_str:
                     if retry < args.max_retries - 1:
                         wait_time = 60 * (retry + 1)  # Exponential backoff: 60s, 120s, 180s
-                        print(f"  ⚠ Rate limit hit, waiting {wait_time}s before retry {retry + 2}/{args.max_retries}...")
+                        print(
+                            f"  ⚠ Rate limit hit, waiting {wait_time}s before retry {retry + 2}/{args.max_retries}..."
+                        )
                         time.sleep(wait_time)
                     else:
-                        print(f"  ✗ Rate limit exceeded after {args.max_retries} retries", file=sys.stderr)
+                        print(
+                            f"  ✗ Rate limit exceeded after {args.max_retries} retries",
+                            file=sys.stderr,
+                        )
                         response = None
                         break
                 else:
                     print(f"  ✗ Error generating test data: {e}", file=sys.stderr)
                     import traceback
+
                     traceback.print_exc()
                     response = None
                     break
@@ -1502,13 +1516,13 @@ Examples:
         src_dir = create_directory_structure(test_data_dir, language)
 
         # Write build file
-        build_file_path = test_data_dir / config['build_file']
+        build_file_path = test_data_dir / lang_config['build_file']
         with open(build_file_path, 'w') as f:
             f.write(code['build_file'])
         print(f"  ✓ {build_file_path.relative_to(output_dir)}")
 
         # Write source file
-        source_file_path = src_dir / config['main_file']
+        source_file_path = src_dir / lang_config['main_file']
         source_content = code['source_file']
 
         # Post-process Java files to inject missing imports
@@ -1526,7 +1540,9 @@ Examples:
 
         # Write config file if present (for Java/Spring Boot projects)
         if code['config_file'] and language == 'java':
-            config_filename = code['config_file'].get('filename', f"application.{code['config_file']['type']}")
+            config_filename = code['config_file'].get(
+                'filename', f"application.{code['config_file']['type']}"
+            )
 
             # Determine the correct directory based on the filename
             if 'spring.factories' in config_filename:
@@ -1618,7 +1634,7 @@ Examples:
                 fixed_patterns[rule_id] = {
                     'pattern': analysis['pattern'],
                     'code_hint': code_hint,
-                    'provider': analysis['provider']
+                    'provider': analysis['provider'],
                 }
 
             # Find which rule files need regeneration
@@ -1690,8 +1706,10 @@ Examples:
                     continue
 
                 language = args.language or detect_language(rules)
-                config = get_language_config(language)
-                prompt = build_test_generation_prompt(rules, args.source, args.target, args.guide_url, language)
+                lang_config = get_language_config(language)
+                prompt = build_test_generation_prompt(
+                    rules, args.source, args.target, args.guide_url, language
+                )
 
                 # Generate with LLM
                 result = llm.generate(prompt)
@@ -1703,16 +1721,18 @@ Examples:
                     src_dir = create_directory_structure(test_data_dir, language)
 
                     # Write build file
-                    with open(test_data_dir / config['build_file'], 'w') as f:
+                    with open(test_data_dir / lang_config['build_file'], 'w') as f:
                         f.write(code['build_file'])
 
                     # Write source file
-                    with open(src_dir / config['main_file'], 'w') as f:
+                    with open(src_dir / lang_config['main_file'], 'w') as f:
                         f.write(code['source_file'])
 
                     # Write config file if present
                     if code['config_file'] and language == 'java':
-                        config_filename = code['config_file'].get('filename', f"application.{code['config_file']['type']}")
+                        config_filename = code['config_file'].get(
+                            'filename', f"application.{code['config_file']['type']}"
+                        )
                         if 'spring.factories' in config_filename:
                             config_dir = test_data_dir / 'src' / 'main' / 'resources' / 'META-INF'
                         else:

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Compare two ruleset directories to identify unique and common rules."""
 
-import yaml
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
+import yaml
+
 
 def extract_rules_from_dir(directory):
     """Extract all rules from YAML files in a directory."""
@@ -19,17 +21,20 @@ def extract_rules_from_dir(directory):
                 data = yaml.safe_load(f)
                 if data:
                     for rule in data:
-                        rules.append({
-                            'file': yaml_file.name,
-                            'description': rule.get('description', ''),
-                            'pattern': rule.get('when', {}),
-                            'category': rule.get('category', ''),
-                            'effort': rule.get('effort', 0)
-                        })
+                        rules.append(
+                            {
+                                'file': yaml_file.name,
+                                'description': rule.get('description', ''),
+                                'pattern': rule.get('when', {}),
+                                'category': rule.get('category', ''),
+                                'effort': rule.get('effort', 0),
+                            }
+                        )
             except Exception as e:
                 print(f"Error loading {yaml_file}: {e}")
 
     return rules
+
 
 def get_pattern_key(rule):
     """Generate a key for pattern matching."""
@@ -44,6 +49,7 @@ def get_pattern_key(rule):
         pattern = str(when)
 
     return (pattern, rule.get('description', '').lower()[:50])
+
 
 def compare_rulesets(dir1, dir2, name1="Directory 1", name2="Directory 2"):
     """Compare two ruleset directories."""
@@ -105,17 +111,18 @@ def compare_rulesets(dir1, dir2, name1="Directory 1", name2="Directory 2"):
     print(f"\n=== Sample Rules Only in {name1} (first 10) ===")
     for i, key in enumerate(sorted(only_in_1)[:10]):
         rule = patterns1[key]
-        print(f"{i+1}. [{rule['file']}] {rule['description'][:80]}")
+        print(f"{i + 1}. [{rule['file']}] {rule['description'][:80]}")
 
     print(f"\n=== Sample Rules Only in {name2} (first 10) ===")
     for i, key in enumerate(sorted(only_in_2)[:10]):
         rule = patterns2[key]
-        print(f"{i+1}. [{rule['file']}] {rule['description'][:80]}")
+        print(f"{i + 1}. [{rule['file']}] {rule['description'][:80]}")
+
 
 if __name__ == "__main__":
     compare_rulesets(
         "examples/output/patternfly-v6/new/",
         "/tmp/patternfly-cleaned/",
         "New Output",
-        "Cleaned Output"
+        "Cleaned Output",
     )

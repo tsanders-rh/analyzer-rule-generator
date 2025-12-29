@@ -10,22 +10,23 @@ Tests cover:
 - Serialization/deserialization
 - Edge cases and boundary conditions
 """
+
 import pytest
 from pydantic import ValidationError
 
 from src.rule_generator.schema import (
-    Category,
-    LocationType,
-    JavaReferenced,
-    JavaDependency,
-    NodejsReferenced,
-    BuiltinFileContent,
-    BuiltinFile,
-    BuiltinXML,
-    Link,
     AnalyzerRule,
     AnalyzerRuleset,
+    BuiltinFile,
+    BuiltinFileContent,
+    BuiltinXML,
+    Category,
+    JavaDependency,
+    JavaReferenced,
+    Link,
+    LocationType,
     MigrationPattern,
+    NodejsReferenced,
 )
 
 
@@ -141,11 +142,7 @@ class TestJavaDependency:
 
     def test_create_with_version_bounds(self):
         """Should create with version bounds"""
-        dep = JavaDependency(
-            name="junit.junit",
-            lowerbound="4.0.0",
-            upperbound="5.0.0"
-        )
+        dep = JavaDependency(name="junit.junit", lowerbound="4.0.0", upperbound="5.0.0")
         assert dep.name == "junit.junit"
         assert dep.lowerbound == "4.0.0"
         assert dep.upperbound == "5.0.0"
@@ -185,10 +182,7 @@ class TestBuiltinFileContent:
 
     def test_create_with_file_pattern(self):
         """Should create with file pattern"""
-        content = BuiltinFileContent(
-            pattern="test",
-            filePattern="*.{tsx,jsx}"
-        )
+        content = BuiltinFileContent(pattern="test", filePattern="*.{tsx,jsx}")
         assert content.pattern == "test"
         assert content.filePattern == "*.{tsx,jsx}"
 
@@ -227,10 +221,7 @@ class TestBuiltinXML:
 
     def test_create_with_filepaths(self):
         """Should create with filepaths"""
-        xml = BuiltinXML(
-            xpath="//configuration",
-            filepaths=["pom.xml", "web.xml"]
-        )
+        xml = BuiltinXML(xpath="//configuration", filepaths=["pom.xml", "web.xml"])
         assert xml.xpath == "//configuration"
         assert xml.filepaths == ["pom.xml", "web.xml"]
 
@@ -247,10 +238,7 @@ class TestLink:
 
     def test_create_link(self):
         """Should create link with url and title"""
-        link = Link(
-            url="https://example.com/docs",
-            title="Migration Guide"
-        )
+        link = Link(url="https://example.com/docs", title="Migration Guide")
         assert link.url == "https://example.com/docs"
         assert link.title == "Migration Guide"
 
@@ -279,7 +267,7 @@ class TestAnalyzerRule:
             description="Test rule",
             effort=5,
             when={"java.referenced": {"pattern": "test"}},
-            message="Test message"
+            message="Test message",
         )
         assert rule.ruleID == "test-00000"
         assert rule.description == "Test rule"
@@ -301,7 +289,7 @@ class TestAnalyzerRule:
             message="Test message",
             links=[Link(url="https://example.com", title="Docs")],
             customVariables=[{"name": "var1", "value": "val1"}],
-            tag=["migration", "security"]
+            tag=["migration", "security"],
         )
         assert rule.ruleID == "test-00000"
         assert rule.category == Category.MANDATORY
@@ -315,11 +303,7 @@ class TestAnalyzerRule:
         # Valid efforts
         for effort in [1, 5, 10]:
             rule = AnalyzerRule(
-                ruleID="test",
-                description="Test",
-                effort=effort,
-                when={},
-                message="Test"
+                ruleID="test", description="Test", effort=effort, when={}, message="Test"
             )
             assert rule.effort == effort
 
@@ -327,63 +311,34 @@ class TestAnalyzerRule:
         for effort in [0, 11, -1, 100]:
             with pytest.raises(ValidationError):
                 AnalyzerRule(
-                    ruleID="test",
-                    description="Test",
-                    effort=effort,
-                    when={},
-                    message="Test"
+                    ruleID="test", description="Test", effort=effort, when={}, message="Test"
                 )
 
     def test_missing_required_fields_raises_error(self):
         """Should raise ValidationError when required fields missing"""
         # Missing ruleID
         with pytest.raises(ValidationError) as exc_info:
-            AnalyzerRule(
-                description="Test",
-                effort=5,
-                when={},
-                message="Test"
-            )
+            AnalyzerRule(description="Test", effort=5, when={}, message="Test")
         assert "ruleID" in str(exc_info.value)
 
         # Missing description
         with pytest.raises(ValidationError) as exc_info:
-            AnalyzerRule(
-                ruleID="test",
-                effort=5,
-                when={},
-                message="Test"
-            )
+            AnalyzerRule(ruleID="test", effort=5, when={}, message="Test")
         assert "description" in str(exc_info.value)
 
         # Missing effort
         with pytest.raises(ValidationError) as exc_info:
-            AnalyzerRule(
-                ruleID="test",
-                description="Test",
-                when={},
-                message="Test"
-            )
+            AnalyzerRule(ruleID="test", description="Test", when={}, message="Test")
         assert "effort" in str(exc_info.value)
 
         # Missing when
         with pytest.raises(ValidationError) as exc_info:
-            AnalyzerRule(
-                ruleID="test",
-                description="Test",
-                effort=5,
-                message="Test"
-            )
+            AnalyzerRule(ruleID="test", description="Test", effort=5, message="Test")
         assert "when" in str(exc_info.value)
 
         # Missing message
         with pytest.raises(ValidationError) as exc_info:
-            AnalyzerRule(
-                ruleID="test",
-                description="Test",
-                effort=5,
-                when={}
-            )
+            AnalyzerRule(ruleID="test", description="Test", effort=5, when={})
         assert "message" in str(exc_info.value)
 
     def test_serialization(self):
@@ -393,7 +348,7 @@ class TestAnalyzerRule:
             description="Test rule",
             effort=5,
             when={"java.referenced": {"pattern": "test"}},
-            message="Test message"
+            message="Test message",
         )
         data = rule.model_dump()
 
@@ -409,7 +364,7 @@ class TestAnalyzerRule:
             "effort": 5,
             "category": "mandatory",
             "when": {"java.referenced": {"pattern": "test"}},
-            "message": "Test message"
+            "message": "Test message",
         }
         rule = AnalyzerRule(**data)
 
@@ -424,7 +379,7 @@ class TestAnalyzerRule:
             description="Test rule",
             effort=5,
             when={"java.referenced": {"pattern": "test"}},
-            message="Test message"
+            message="Test message",
         )
         assert rule.migration_complexity is None
 
@@ -435,7 +390,7 @@ class TestAnalyzerRule:
             effort=5,
             when={"java.referenced": {"pattern": "test"}},
             message="Test message",
-            migration_complexity="medium"
+            migration_complexity="medium",
         )
         assert rule.migration_complexity == "medium"
 
@@ -450,7 +405,7 @@ class TestAnalyzerRule:
                 effort=5,
                 when={"java.referenced": {"pattern": "test"}},
                 message="Test message",
-                migration_complexity=complexity
+                migration_complexity=complexity,
             )
             assert rule.migration_complexity == complexity
 
@@ -462,7 +417,7 @@ class TestAnalyzerRule:
             effort=5,
             when={"java.referenced": {"pattern": "test"}},
             message="Test message",
-            migration_complexity="high"
+            migration_complexity="high",
         )
         data = rule.model_dump()
 
@@ -476,7 +431,7 @@ class TestAnalyzerRule:
             "effort": 5,
             "when": {"java.referenced": {"pattern": "test"}},
             "message": "Test message",
-            "migration_complexity": "expert"
+            "migration_complexity": "expert",
         }
         rule = AnalyzerRule(**data)
 
@@ -489,7 +444,7 @@ class TestAnalyzerRule:
             description="Test rule",
             effort=5,
             when={"java.referenced": {"pattern": "test"}},
-            message="Test message"
+            message="Test message",
         )
         data = rule.model_dump(exclude_none=True)
 
@@ -508,19 +463,11 @@ class TestAnalyzerRuleset:
         """Should create ruleset with rules"""
         rules = [
             AnalyzerRule(
-                ruleID="test-00000",
-                description="Test 1",
-                effort=5,
-                when={},
-                message="Test"
+                ruleID="test-00000", description="Test 1", effort=5, when={}, message="Test"
             ),
             AnalyzerRule(
-                ruleID="test-00010",
-                description="Test 2",
-                effort=7,
-                when={},
-                message="Test"
-            )
+                ruleID="test-00010", description="Test 2", effort=7, when={}, message="Test"
+            ),
         ]
         ruleset = AnalyzerRuleset(rules=rules)
         assert len(ruleset.rules) == 2
@@ -529,13 +476,7 @@ class TestAnalyzerRuleset:
         """Should be able to add rules after creation"""
         ruleset = AnalyzerRuleset()
         ruleset.rules.append(
-            AnalyzerRule(
-                ruleID="test-00000",
-                description="Test",
-                effort=5,
-                when={},
-                message="Test"
-            )
+            AnalyzerRule(ruleID="test-00000", description="Test", effort=5, when={}, message="Test")
         )
         assert len(ruleset.rules) == 1
 
@@ -549,7 +490,7 @@ class TestMigrationPattern:
             source_pattern="OldClass",
             complexity="MEDIUM",
             category="api",
-            rationale="Class renamed"
+            rationale="Class renamed",
         )
         assert pattern.source_pattern == "OldClass"
         assert pattern.complexity == "MEDIUM"
@@ -574,7 +515,7 @@ class TestMigrationPattern:
             rationale="Security improvement",
             example_before="OldClass obj = new OldClass();",
             example_after="NewClass obj = new NewClass();",
-            documentation_url="https://example.com/docs"
+            documentation_url="https://example.com/docs",
         )
         assert pattern.source_pattern == "OldClass"
         assert pattern.target_pattern == "NewClass"
@@ -590,57 +531,35 @@ class TestMigrationPattern:
         """Should raise ValidationError when required fields missing"""
         # Missing source_pattern
         with pytest.raises(ValidationError) as exc_info:
-            MigrationPattern(
-                complexity="MEDIUM",
-                category="api",
-                rationale="Test"
-            )
+            MigrationPattern(complexity="MEDIUM", category="api", rationale="Test")
         assert "source_pattern" in str(exc_info.value)
 
         # Missing complexity
         with pytest.raises(ValidationError) as exc_info:
-            MigrationPattern(
-                source_pattern="test",
-                category="api",
-                rationale="Test"
-            )
+            MigrationPattern(source_pattern="test", category="api", rationale="Test")
         assert "complexity" in str(exc_info.value)
 
         # Missing category
         with pytest.raises(ValidationError) as exc_info:
-            MigrationPattern(
-                source_pattern="test",
-                complexity="MEDIUM",
-                rationale="Test"
-            )
+            MigrationPattern(source_pattern="test", complexity="MEDIUM", rationale="Test")
         assert "category" in str(exc_info.value)
 
         # Missing rationale
         with pytest.raises(ValidationError) as exc_info:
-            MigrationPattern(
-                source_pattern="test",
-                complexity="MEDIUM",
-                category="api"
-            )
+            MigrationPattern(source_pattern="test", complexity="MEDIUM", category="api")
         assert "rationale" in str(exc_info.value)
 
     def test_default_concern(self):
         """Should default concern to 'general'"""
         pattern = MigrationPattern(
-            source_pattern="test",
-            complexity="MEDIUM",
-            category="api",
-            rationale="Test"
+            source_pattern="test", complexity="MEDIUM", category="api", rationale="Test"
         )
         assert pattern.concern == "general"
 
     def test_empty_alternative_fqns_default(self):
         """Should default alternative_fqns to empty list"""
         pattern = MigrationPattern(
-            source_pattern="test",
-            complexity="MEDIUM",
-            category="api",
-            rationale="Test"
+            source_pattern="test", complexity="MEDIUM", category="api", rationale="Test"
         )
         assert pattern.alternative_fqns == []
 
@@ -651,7 +570,7 @@ class TestMigrationPattern:
             target_pattern="NewClass",
             complexity="HIGH",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
         data = pattern.model_dump()
 
@@ -665,7 +584,7 @@ class TestMigrationPattern:
             "source_pattern": "OldClass",
             "complexity": "MEDIUM",
             "category": "api",
-            "rationale": "Test"
+            "rationale": "Test",
         }
         pattern = MigrationPattern(**data)
 
@@ -680,10 +599,7 @@ class TestEdgeCases:
         """Should allow empty string pattern (validation done elsewhere)"""
         # Pydantic allows empty strings unless explicitly forbidden
         pattern = MigrationPattern(
-            source_pattern="",
-            complexity="MEDIUM",
-            category="api",
-            rationale="Test"
+            source_pattern="", complexity="MEDIUM", category="api", rationale="Test"
         )
         assert pattern.source_pattern == ""
 
@@ -694,7 +610,7 @@ class TestEdgeCases:
             target_pattern="TestClass",
             complexity="MEDIUM",
             category="api",
-            rationale="Internationalization"
+            rationale="Internationalization",
         )
         assert pattern.source_pattern == "测试类"
 
@@ -707,44 +623,23 @@ class TestEdgeCases:
         """Should handle very long strings"""
         long_string = "x" * 10000
         pattern = MigrationPattern(
-            source_pattern=long_string,
-            complexity="MEDIUM",
-            category="api",
-            rationale="Test"
+            source_pattern=long_string, complexity="MEDIUM", category="api", rationale="Test"
         )
         assert len(pattern.source_pattern) == 10000
 
     def test_effort_boundary_values(self):
         """Should accept boundary values for effort"""
         # Minimum
-        rule = AnalyzerRule(
-            ruleID="test",
-            description="Test",
-            effort=1,
-            when={},
-            message="Test"
-        )
+        rule = AnalyzerRule(ruleID="test", description="Test", effort=1, when={}, message="Test")
         assert rule.effort == 1
 
         # Maximum
-        rule = AnalyzerRule(
-            ruleID="test",
-            description="Test",
-            effort=10,
-            when={},
-            message="Test"
-        )
+        rule = AnalyzerRule(ruleID="test", description="Test", effort=10, when={}, message="Test")
         assert rule.effort == 10
 
     def test_empty_lists_as_defaults(self):
         """Should handle empty lists correctly"""
-        rule = AnalyzerRule(
-            ruleID="test",
-            description="Test",
-            effort=5,
-            when={},
-            message="Test"
-        )
+        rule = AnalyzerRule(ruleID="test", description="Test", effort=5, when={}, message="Test")
         assert rule.labels == []
         assert rule.customVariables == []
 
@@ -755,7 +650,7 @@ class TestEdgeCases:
             target_pattern="",  # Empty string, not None
             complexity="MEDIUM",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
         assert pattern.target_pattern == ""
         assert pattern.source_fqn is None  # Actually None

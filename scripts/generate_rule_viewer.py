@@ -19,17 +19,17 @@ Use docs/rule-viewer.html when you want:
 - One viewer for all rulesets
 """
 import argparse
-import sys
-from pathlib import Path
-import yaml
 import json
+import sys
 from datetime import datetime
+from pathlib import Path
 
+import yaml
 
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF - 8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rule Viewer: {title}</title>
     <style>
@@ -631,7 +631,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         // Render ruleset section
         function renderRuleset(filename, rules) {{
             const ruleCount = rules.length;
-            const rulesetId = filename.replace(/[^a-zA-Z0-9]/g, '-');
+            const rulesetId = filename.replace(/[^a-zA-Z0 - 9]/g, '-');
 
             return `
                 <div class="ruleset-section" id="ruleset-${{rulesetId}}">
@@ -750,10 +750,7 @@ def generate_html(rules: list, title: str, source_file: str) -> str:
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     html = HTML_TEMPLATE.format(
-        title=title,
-        source_file=source_file,
-        timestamp=timestamp,
-        rules_json=rules_json
+        title=title, source_file=source_file, timestamp=timestamp, rules_json=rules_json
     )
 
     return html
@@ -768,10 +765,7 @@ def generate_html_multi(rules_by_file: dict, title: str, source_dir: str) -> str
     source_info = f"{source_dir} ({len(rules_by_file)} files, {total_rules} rules)"
 
     html = HTML_TEMPLATE.format(
-        title=title,
-        source_file=source_info,
-        timestamp=timestamp,
-        rules_json=rules_json
+        title=title, source_file=source_info, timestamp=timestamp, rules_json=rules_json
     )
 
     return html
@@ -785,8 +779,8 @@ def main():
 Examples:
   # Generate viewer for Spring Boot 4.0 rules
   python scripts/generate_rule_viewer.py \\
-    --rules examples/output/spring-boot-4.0/migration-rules.yaml \\
-    --output examples/output/spring-boot-4.0/viewer.html \\
+    --rules examples/output/spring-boot - 4.0/migration-rules.yaml \\
+    --output examples/output/spring-boot - 4.0/viewer.html \\
     --title "Spring Boot 3.5 → 4.0 Migration Rules"
 
   # Open in browser automatically
@@ -794,28 +788,15 @@ Examples:
     --rules examples/output/jdk21/applet-removal.yaml \\
     --output viewer.html \\
     --open
-        """
+        """,
     )
 
     parser.add_argument(
-        '--rules',
-        required=True,
-        help='Path to rule YAML file or directory containing rule files'
+        '--rules', required=True, help='Path to rule YAML file or directory containing rule files'
     )
-    parser.add_argument(
-        '--output',
-        required=True,
-        help='Output HTML file path'
-    )
-    parser.add_argument(
-        '--title',
-        help='Title for the viewer (auto-generated if not provided)'
-    )
-    parser.add_argument(
-        '--open',
-        action='store_true',
-        help='Open the generated HTML in browser'
-    )
+    parser.add_argument('--output', required=True, help='Output HTML file path')
+    parser.add_argument('--title', help='Title for the viewer (auto-generated if not provided)')
+    parser.add_argument('--open', action='store_true', help='Open the generated HTML in browser')
 
     args = parser.parse_args()
 
@@ -870,7 +851,7 @@ Examples:
     output_file = Path(args.output)
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(output_file, 'w', encoding='utf-8') as f:
+    with open(output_file, 'w', encoding='utf - 8') as f:
         f.write(html)
 
     print(f"  ✓ Generated {output_file}")
@@ -881,6 +862,7 @@ Examples:
     # Open in browser if requested
     if args.open:
         import webbrowser
+
         webbrowser.open(f"file://{output_file.absolute()}")
         print(f"\n✓ Opened in browser")
 

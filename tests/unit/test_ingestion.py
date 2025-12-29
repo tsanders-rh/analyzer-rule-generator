@@ -11,9 +11,11 @@ Tests cover:
 - Caching behavior
 - Error handling
 """
-import pytest
-from unittest.mock import Mock, patch, mock_open
+
 from pathlib import Path
+from unittest.mock import Mock, mock_open, patch
+
+import pytest
 
 from src.rule_generator.ingestion import GuideIngester
 
@@ -161,6 +163,7 @@ class TestURLIngestion:
     def test_ingest_url_network_error(self, mock_get):
         """Should handle network errors gracefully"""
         import requests
+
         ingester = GuideIngester()
 
         mock_get.side_effect = requests.RequestException("Network error")
@@ -544,6 +547,7 @@ class TestErrorHandling:
     def test_handle_connection_timeout(self, mock_get):
         """Should return None on connection timeout"""
         import requests
+
         ingester = GuideIngester()
 
         mock_get.side_effect = requests.Timeout("Connection timed out")
@@ -556,6 +560,7 @@ class TestErrorHandling:
     def test_handle_connection_error(self, mock_get):
         """Should return None on connection error"""
         import requests
+
         ingester = GuideIngester()
 
         mock_get.side_effect = requests.ConnectionError("Failed to connect")
@@ -734,6 +739,7 @@ class TestLinkDiscovery:
         # Need BeautifulSoup for this function
         try:
             from bs4 import BeautifulSoup
+
             soup = BeautifulSoup(html, 'html.parser')
             links = ingester._extract_related_links(soup, "https://example.com/main")
 
@@ -766,6 +772,7 @@ class TestLinkDiscovery:
 
         try:
             from bs4 import BeautifulSoup
+
             soup = BeautifulSoup(html, 'html.parser')
             links = ingester._extract_related_links(soup, "https://example.com/main")
 
@@ -794,6 +801,7 @@ class TestLinkDiscovery:
 
         try:
             from bs4 import BeautifulSoup
+
             soup = BeautifulSoup(html, 'html.parser')
             links = ingester._extract_related_links(soup, "https://example.com/main")
 
@@ -823,6 +831,7 @@ class TestLinkDiscovery:
 
         try:
             from bs4 import BeautifulSoup
+
             soup = BeautifulSoup(html, 'html.parser')
             links = ingester._extract_related_links(soup, "https://example.com/main/")
 

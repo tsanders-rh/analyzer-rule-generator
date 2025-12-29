@@ -9,17 +9,19 @@ Tests cover:
 - Parameter handling
 - API key configuration
 """
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+
 import os
 import sys
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 from src.rule_generator.llm import (
-    LLMProvider,
-    OpenAIProvider,
     AnthropicProvider,
     GoogleProvider,
-    get_llm_provider
+    LLMProvider,
+    OpenAIProvider,
+    get_llm_provider,
 )
 
 
@@ -449,6 +451,7 @@ class TestAbstractBaseClass:
 
     def test_subclass_must_implement_generate(self):
         """Should require subclasses to implement generate method"""
+
         class IncompleteProvider(LLMProvider):
             pass
 

@@ -10,14 +10,16 @@ Tests cover:
 - Label and message building
 - Rules by concern grouping
 """
+
 import pytest
+
 from src.rule_generator.generator import AnalyzerRuleGenerator
 from src.rule_generator.schema import (
-    MigrationPattern,
+    AnalyzerRule,
     Category,
-    LocationType,
     CSharpLocationType,
-    AnalyzerRule
+    LocationType,
+    MigrationPattern,
 )
 
 
@@ -27,8 +29,7 @@ class TestRuleIDGeneration:
     def test_generate_sequential_rule_ids(self):
         """Should generate sequential rule IDs incrementing by 10"""
         generator = AnalyzerRuleGenerator(
-            source_framework="spring-boot-3",
-            target_framework="spring-boot-4"
+            source_framework="spring-boot-3", target_framework="spring-boot-4"
         )
 
         id1 = generator._create_rule_id()
@@ -57,10 +58,7 @@ class TestRuleIDGeneration:
 
     def test_rule_id_has_five_digits(self):
         """Should always use 5-digit numbering"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="a",
-            target_framework="b"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="a", target_framework="b")
 
         # Generate many IDs to test padding
         for i in range(15):
@@ -123,10 +121,7 @@ class TestCategoryDetermination:
         """Should categorize HIGH complexity as mandatory"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
-            source_pattern="test",
-            complexity="HIGH",
-            category="api",
-            rationale="Test change"
+            source_pattern="test", complexity="HIGH", category="api", rationale="Test change"
         )
 
         category = generator._determine_category(pattern)
@@ -139,7 +134,7 @@ class TestCategoryDetermination:
             source_pattern="test",
             complexity="EXPERT",
             category="api",
-            rationale="Complex migration"
+            rationale="Complex migration",
         )
 
         category = generator._determine_category(pattern)
@@ -149,10 +144,7 @@ class TestCategoryDetermination:
         """Should categorize TRIVIAL complexity as mandatory (easy wins)"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
-            source_pattern="test",
-            complexity="TRIVIAL",
-            category="api",
-            rationale="Simple rename"
+            source_pattern="test", complexity="TRIVIAL", category="api", rationale="Simple rename"
         )
 
         category = generator._determine_category(pattern)
@@ -165,7 +157,7 @@ class TestCategoryDetermination:
             source_pattern="test",
             complexity="MEDIUM",
             category="api",
-            rationale="API has been removed in version 2"
+            rationale="API has been removed in version 2",
         )
 
         category = generator._determine_category(pattern)
@@ -178,7 +170,7 @@ class TestCategoryDetermination:
             source_pattern="test",
             complexity="MEDIUM",
             category="api",
-            rationale="Deprecated for removal in next release"
+            rationale="Deprecated for removal in next release",
         )
 
         category = generator._determine_category(pattern)
@@ -192,7 +184,7 @@ class TestCategoryDetermination:
             target_pattern="app.config.newProperty",
             complexity="MEDIUM",
             category="configuration",
-            rationale="Property has been renamed"
+            rationale="Property has been renamed",
         )
 
         category = generator._determine_category(pattern)
@@ -202,10 +194,7 @@ class TestCategoryDetermination:
         """Should categorize MEDIUM complexity as potential by default"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
-            source_pattern="test",
-            complexity="MEDIUM",
-            category="api",
-            rationale="General change"
+            source_pattern="test", complexity="MEDIUM", category="api", rationale="General change"
         )
 
         category = generator._determine_category(pattern)
@@ -218,7 +207,7 @@ class TestCategoryDetermination:
             source_pattern="test",
             complexity="LOW",
             category="api",
-            rationale="Optional improvement"
+            rationale="Optional improvement",
         )
 
         category = generator._determine_category(pattern)
@@ -237,7 +226,7 @@ class TestWhenConditionBuilding:
             location_type=LocationType.TYPE,
             complexity="MEDIUM",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -254,7 +243,7 @@ class TestWhenConditionBuilding:
             source_fqn="com.example.OldClass",
             complexity="MEDIUM",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -271,7 +260,7 @@ class TestWhenConditionBuilding:
             location_type=LocationType.TYPE,
             complexity="MEDIUM",
             category="api",
-            rationale="Package migration"
+            rationale="Package migration",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -291,7 +280,7 @@ class TestWhenConditionBuilding:
             provider_type="builtin",
             complexity="MEDIUM",
             category="api",
-            rationale="Property rename"
+            rationale="Property rename",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -309,7 +298,7 @@ class TestWhenConditionBuilding:
             provider_type="builtin",
             complexity="MEDIUM",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -326,7 +315,7 @@ class TestWhenConditionBuilding:
             provider_type="nodejs",
             complexity="MEDIUM",
             category="api",
-            rationale="Component renamed"
+            rationale="Component renamed",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -342,7 +331,7 @@ class TestWhenConditionBuilding:
             provider_type="nodejs",
             complexity="MEDIUM",
             category="api",
-            rationale="Function renamed"
+            rationale="Function renamed",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -356,10 +345,7 @@ class TestWhenConditionBuilding:
         """Should return None if no source_fqn or pattern"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
-            source_pattern="test",
-            complexity="MEDIUM",
-            category="api",
-            rationale="No FQN specified"
+            source_pattern="test", complexity="MEDIUM", category="api", rationale="No FQN specified"
         )
 
         condition = generator._build_when_condition(pattern)
@@ -375,8 +361,7 @@ class TestLabelBuilding:
     def test_build_labels_with_both_frameworks(self):
         """Should build labels with source and target"""
         generator = AnalyzerRuleGenerator(
-            source_framework="spring-boot-3",
-            target_framework="spring-boot-4"
+            source_framework="spring-boot-3", target_framework="spring-boot-4"
         )
 
         labels = generator._build_labels()
@@ -391,7 +376,7 @@ class TestLabelBuilding:
         labels = generator._build_labels()
 
         assert "konveyor.io/source=jakarta-ee-8" in labels
-        assert len([l for l in labels if "target" in l]) == 0
+        assert len([label for label in labels if "target" in label]) == 0
 
     def test_build_labels_with_only_target(self):
         """Should build label with only target"""
@@ -400,7 +385,7 @@ class TestLabelBuilding:
         labels = generator._build_labels()
 
         assert "konveyor.io/target=jakarta-ee-10" in labels
-        assert len([l for l in labels if "source" in l]) == 0
+        assert len([label for label in labels if "source" in label]) == 0
 
     def test_build_empty_labels(self):
         """Should build empty labels list without frameworks"""
@@ -422,7 +407,7 @@ class TestMessageBuilding:
             target_pattern="NewClass",
             complexity="MEDIUM",
             category="api",
-            rationale="Class has been renamed for clarity"
+            rationale="Class has been renamed for clarity",
         )
 
         message = generator._build_message(pattern)
@@ -437,7 +422,7 @@ class TestMessageBuilding:
             source_pattern="RemovedAPI",
             complexity="HIGH",
             category="api",
-            rationale="API has been removed"
+            rationale="API has been removed",
         )
 
         message = generator._build_message(pattern)
@@ -456,7 +441,7 @@ class TestMessageBuilding:
             category="api",
             rationale="Method renamed",
             example_before="obj.oldMethod();",
-            example_after="obj.newMethod();"
+            example_after="obj.newMethod();",
         )
 
         message = generator._build_message(pattern)
@@ -474,7 +459,7 @@ class TestMessageBuilding:
             target_pattern="NewClass",
             complexity="MEDIUM",
             category="api",
-            rationale="Class renamed"
+            rationale="Class renamed",
         )
 
         message = generator._build_message(pattern)
@@ -494,7 +479,7 @@ class TestLinksBuilding:
             complexity="MEDIUM",
             category="api",
             rationale="Test",
-            documentation_url="https://docs.spring.io/migration"
+            documentation_url="https://docs.spring.io/migration",
         )
 
         links = generator._build_links(pattern)
@@ -508,10 +493,7 @@ class TestLinksBuilding:
         """Should return None when no documentation URL"""
         generator = AnalyzerRuleGenerator()
         pattern = MigrationPattern(
-            source_pattern="test",
-            complexity="MEDIUM",
-            category="api",
-            rationale="Test"
+            source_pattern="test", complexity="MEDIUM", category="api", rationale="Test"
         )
 
         links = generator._build_links(pattern)
@@ -525,8 +507,7 @@ class TestPatternToRule:
     def test_convert_valid_pattern_to_rule(self):
         """Should convert valid pattern to rule successfully"""
         generator = AnalyzerRuleGenerator(
-            source_framework="spring-boot-3",
-            target_framework="spring-boot-4"
+            source_framework="spring-boot-3", target_framework="spring-boot-4"
         )
 
         pattern = MigrationPattern(
@@ -538,7 +519,7 @@ class TestPatternToRule:
             category="api",
             concern="core",
             rationale="Class renamed for clarity",
-            documentation_url="https://example.com/docs"
+            documentation_url="https://example.com/docs",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -564,7 +545,7 @@ class TestPatternToRule:
             source_pattern="",  # Empty pattern should be skipped
             complexity="MEDIUM",
             category="api",
-            rationale="Missing pattern info"
+            rationale="Missing pattern info",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -577,10 +558,7 @@ class TestPatternToRule:
 
         # Pattern with source_pattern but no source_fqn for Java provider
         pattern = MigrationPattern(
-            source_pattern="test",
-            complexity="MEDIUM",
-            category="api",
-            rationale="Test"
+            source_pattern="test", complexity="MEDIUM", category="api", rationale="Test"
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -591,8 +569,7 @@ class TestPatternToRule:
     def test_migration_complexity_passed_to_rule(self):
         """Should pass migration_complexity from pattern to generated rule"""
         generator = AnalyzerRuleGenerator(
-            source_framework="spring-boot-3",
-            target_framework="spring-boot-4"
+            source_framework="spring-boot-3", target_framework="spring-boot-4"
         )
 
         # Test with each complexity level
@@ -605,21 +582,19 @@ class TestPatternToRule:
                 location_type=LocationType.TYPE,
                 complexity=complexity,
                 category="api",
-                rationale="Test pattern"
+                rationale="Test pattern",
             )
 
             rule = generator._pattern_to_rule(pattern)
 
             assert rule is not None
-            assert rule.migration_complexity == complexity, \
-                f"Expected migration_complexity '{complexity}', got '{rule.migration_complexity}'"
+            assert (
+                rule.migration_complexity == complexity
+            ), f"Expected migration_complexity '{complexity}', got '{rule.migration_complexity}'"
 
     def test_migration_complexity_lowercase(self):
         """Should handle lowercase complexity values"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="a",
-            target_framework="b"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="a", target_framework="b")
 
         pattern = MigrationPattern(
             source_pattern="TestClass",
@@ -627,7 +602,7 @@ class TestPatternToRule:
             location_type=LocationType.TYPE,
             complexity="medium",  # lowercase
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -637,10 +612,7 @@ class TestPatternToRule:
 
     def test_migration_complexity_uppercase(self):
         """Should handle uppercase complexity values"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="a",
-            target_framework="b"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="a", target_framework="b")
 
         pattern = MigrationPattern(
             source_pattern="TestClass",
@@ -648,7 +620,7 @@ class TestPatternToRule:
             location_type=LocationType.TYPE,
             complexity="HIGH",  # uppercase
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -662,10 +634,7 @@ class TestGenerateRules:
 
     def test_generate_rules_from_multiple_patterns(self):
         """Should generate multiple rules from patterns"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="a",
-            target_framework="b"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="a", target_framework="b")
 
         patterns = [
             MigrationPattern(
@@ -673,15 +642,15 @@ class TestGenerateRules:
                 source_fqn="com.example.Class1",
                 complexity="MEDIUM",
                 category="api",
-                rationale="Test 1"
+                rationale="Test 1",
             ),
             MigrationPattern(
                 source_pattern="Class2",
                 source_fqn="com.example.Class2",
                 complexity="HIGH",
                 category="api",
-                rationale="Test 2"
-            )
+                rationale="Test 2",
+            ),
         ]
 
         rules = generator.generate_rules(patterns)
@@ -700,14 +669,14 @@ class TestGenerateRules:
                 source_fqn="com.example.Valid",
                 complexity="MEDIUM",
                 category="api",
-                rationale="Valid"
+                rationale="Valid",
             ),
             MigrationPattern(
                 source_pattern="",  # Empty pattern will be skipped
                 complexity="MEDIUM",
                 category="api",
-                rationale="Invalid - no FQN"
-            )
+                rationale="Invalid - no FQN",
+            ),
         ]
 
         rules = generator.generate_rules(patterns)
@@ -730,7 +699,7 @@ class TestGenerateRulesByConcern:
                 complexity="MEDIUM",
                 category="api",
                 concern="security",
-                rationale="Security change 1"
+                rationale="Security change 1",
             ),
             MigrationPattern(
                 source_pattern="Security2",
@@ -738,7 +707,7 @@ class TestGenerateRulesByConcern:
                 complexity="MEDIUM",
                 category="api",
                 concern="security",
-                rationale="Security change 2"
+                rationale="Security change 2",
             ),
             MigrationPattern(
                 source_pattern="Config1",
@@ -746,8 +715,8 @@ class TestGenerateRulesByConcern:
                 complexity="MEDIUM",
                 category="configuration",
                 concern="configuration",
-                rationale="Config change"
-            )
+                rationale="Config change",
+            ),
         ]
 
         rules_by_concern = generator.generate_rules_by_concern(patterns)
@@ -767,7 +736,7 @@ class TestGenerateRulesByConcern:
                 source_fqn="com.example.Test",
                 complexity="MEDIUM",
                 category="api",
-                rationale="No concern specified"
+                rationale="No concern specified",
             )
         ]
 
@@ -778,10 +747,7 @@ class TestGenerateRulesByConcern:
 
     def test_reset_rule_counter_per_concern(self):
         """Should NOT reset rule counter per concern - IDs must be globally unique"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="a",
-            target_framework="b"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="a", target_framework="b")
 
         patterns = [
             MigrationPattern(
@@ -790,7 +756,7 @@ class TestGenerateRulesByConcern:
                 complexity="MEDIUM",
                 category="api",
                 concern="concern-a",
-                rationale="Test"
+                rationale="Test",
             ),
             MigrationPattern(
                 source_pattern="Test2",
@@ -798,7 +764,7 @@ class TestGenerateRulesByConcern:
                 complexity="MEDIUM",
                 category="api",
                 concern="concern-a",
-                rationale="Test"
+                rationale="Test",
             ),
             MigrationPattern(
                 source_pattern="Test3",
@@ -806,8 +772,8 @@ class TestGenerateRulesByConcern:
                 complexity="MEDIUM",
                 category="api",
                 concern="concern-b",
-                rationale="Test"
-            )
+                rationale="Test",
+            ),
         ]
 
         rules_by_concern = generator.generate_rules_by_concern(patterns)
@@ -842,14 +808,14 @@ class TestEdgeCases:
                 source_pattern="",  # Empty pattern will be skipped
                 complexity="MEDIUM",
                 category="api",
-                rationale="No FQN"
+                rationale="No FQN",
             ),
             MigrationPattern(
                 source_pattern="",  # Empty pattern will be skipped
                 complexity="HIGH",
                 category="api",
-                rationale="Also no FQN"
-            )
+                rationale="Also no FQN",
+            ),
         ]
 
         rules = generator.generate_rules(patterns)
@@ -866,7 +832,7 @@ class TestEdgeCases:
             source_fqn="com.example.Old",
             complexity="MEDIUM",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -882,7 +848,7 @@ class TestEdgeCases:
             source_fqn="com.example.Removed",
             complexity="MEDIUM",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -904,7 +870,7 @@ class TestGeneratorErrorHandling:
             provider_type="builtin",
             complexity="MEDIUM",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         # Should return None because builtin needs source_fqn for regex
@@ -913,10 +879,7 @@ class TestGeneratorErrorHandling:
 
     def test_pattern_with_very_long_id(self):
         """Should handle very large rule numbers"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="test",
-            target_framework="test"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="test", target_framework="test")
 
         # Generate many rules to test large numbers
         for i in range(100):
@@ -931,10 +894,7 @@ class TestGeneratorErrorHandling:
         generator = AnalyzerRuleGenerator()
 
         pattern = MigrationPattern(
-            source_pattern="",
-            complexity="MEDIUM",
-            category="api",
-            rationale="Test"
+            source_pattern="", complexity="MEDIUM", category="api", rationale="Test"
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -951,7 +911,7 @@ class TestGeneratorErrorHandling:
             source_fqn="com.example.Test",
             complexity="MEDIUM",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -962,8 +922,7 @@ class TestGeneratorErrorHandling:
     def test_pattern_with_special_characters_in_id(self):
         """Should handle special characters in framework names"""
         generator = AnalyzerRuleGenerator(
-            source_framework="spring-boot@3.0",
-            target_framework="spring-boot@4.0"
+            source_framework="spring-boot@3.0", target_framework="spring-boot@4.0"
         )
 
         rule_id = generator._create_rule_id()
@@ -990,7 +949,7 @@ class TestGeneratorErrorHandling:
                 complexity="MEDIUM",
                 category="api",
                 # concern not specified, will use default "general"
-                rationale="Test"
+                rationale="Test",
             ),
             MigrationPattern(
                 source_pattern="Test2",
@@ -998,8 +957,8 @@ class TestGeneratorErrorHandling:
                 complexity="MEDIUM",
                 category="api",
                 concern="",  # Empty string
-                rationale="Test"
-            )
+                rationale="Test",
+            ),
         ]
 
         rules_by_concern = generator.generate_rules_by_concern(patterns)
@@ -1018,7 +977,7 @@ class TestGeneratorErrorHandling:
             source_fqn="com.example.Test",
             complexity="UNKNOWN_LEVEL",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1038,7 +997,7 @@ class TestGeneratorErrorHandling:
             file_pattern="*.js",
             complexity="MEDIUM",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1056,7 +1015,7 @@ class TestGeneratorErrorHandling:
             alternative_fqns=[],
             complexity="MEDIUM",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1077,7 +1036,7 @@ class TestGeneratorErrorHandling:
             source_fqn="com.example.Test",
             complexity="MEDIUM",
             category="api",
-            rationale=long_rationale
+            rationale=long_rationale,
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1095,7 +1054,7 @@ class TestGeneratorErrorHandling:
             source_fqn="com.测试.测试类",
             complexity="MEDIUM",
             category="api",
-            rationale="Internationalization"
+            rationale="Internationalization",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1113,7 +1072,7 @@ class TestGeneratorErrorHandling:
             complexity="MEDIUM",
             category="api",
             rationale="Test",
-            documentation_url="not-a-valid-url"
+            documentation_url="not-a-valid-url",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1137,7 +1096,7 @@ class TestNodejsReferencedRules:
             provider_type="nodejs",
             complexity="MEDIUM",
             category="api",
-            rationale="The Chip component has been replaced with Label"
+            rationale="The Chip component has been replaced with Label",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1158,7 +1117,7 @@ class TestNodejsReferencedRules:
             provider_type="nodejs",
             complexity="MEDIUM",
             category="api",
-            rationale="The hook has been renamed"
+            rationale="The hook has been renamed",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1178,7 +1137,7 @@ class TestNodejsReferencedRules:
             provider_type="csharp",
             complexity="MEDIUM",
             category="api",
-            rationale="Method renamed in .NET Core"
+            rationale="Method renamed in .NET Core",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1197,7 +1156,7 @@ class TestNodejsReferencedRules:
             provider_type="csharp",
             complexity="HIGH",
             category="api",
-            rationale="Attribute removed in .NET Core"
+            rationale="Attribute removed in .NET Core",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1215,7 +1174,7 @@ class TestNodejsReferencedRules:
             provider_type="csharp",
             complexity="LOW",
             category="api",
-            rationale="Property behavior changed"
+            rationale="Property behavior changed",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1232,7 +1191,7 @@ class TestNodejsReferencedRules:
             provider_type="csharp",
             complexity="HIGH",
             category="api",
-            rationale="API removed"
+            rationale="API removed",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1251,7 +1210,7 @@ class TestNodejsReferencedRules:
             provider_type="csharp",
             complexity="MEDIUM",
             category="api",
-            rationale="Namespace migration"
+            rationale="Namespace migration",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1268,7 +1227,7 @@ class TestNodejsReferencedRules:
             provider_type="csharp",
             complexity="MEDIUM",
             category="api",
-            rationale="Package migration"
+            rationale="Package migration",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1284,7 +1243,7 @@ class TestNodejsReferencedRules:
             provider_type="csharp",
             complexity="MEDIUM",
             category="api",
-            rationale="Control removed"
+            rationale="Control removed",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1299,7 +1258,7 @@ class TestNodejsReferencedRules:
         generator = AnalyzerRuleGenerator(
             source_framework="patternfly-5",
             target_framework="patternfly-6",
-            rule_file_name="patternfly-5-to-patternfly-6-components"
+            rule_file_name="patternfly-5-to-patternfly-6-components",
         )
 
         pattern = MigrationPattern(
@@ -1311,7 +1270,7 @@ class TestNodejsReferencedRules:
             category="api",
             concern="components",
             rationale="The Chip component has been replaced with Label in PatternFly 6",
-            documentation_url="https://www.patternfly.org/get-started/upgrade"
+            documentation_url="https://www.patternfly.org/get-started/upgrade",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1329,8 +1288,7 @@ class TestNodejsReferencedRules:
     def test_rules_for_multiple_components(self):
         """Should generate simple nodejs.referenced rules for multiple component patterns"""
         generator = AnalyzerRuleGenerator(
-            source_framework="patternfly-5",
-            target_framework="patternfly-6"
+            source_framework="patternfly-5", target_framework="patternfly-6"
         )
 
         patterns = [
@@ -1340,7 +1298,7 @@ class TestNodejsReferencedRules:
                 provider_type="nodejs",
                 complexity="MEDIUM",
                 category="api",
-                rationale="The Chip component has been replaced"
+                rationale="The Chip component has been replaced",
             ),
             MigrationPattern(
                 source_pattern="Text",
@@ -1348,7 +1306,7 @@ class TestNodejsReferencedRules:
                 provider_type="nodejs",
                 complexity="MEDIUM",
                 category="api",
-                rationale="The Text component has been renamed"
+                rationale="The Text component has been renamed",
             ),
             MigrationPattern(
                 source_pattern="Tile",
@@ -1356,8 +1314,8 @@ class TestNodejsReferencedRules:
                 provider_type="nodejs",
                 complexity="MEDIUM",
                 category="api",
-                rationale="The Tile component has been replaced"
-            )
+                rationale="The Tile component has been replaced",
+            ),
         ]
 
         rules = generator.generate_rules(patterns)
@@ -1379,7 +1337,7 @@ class TestNodejsReferencedRules:
             provider_type="nodejs",
             complexity="MEDIUM",
             category="api",
-            rationale="This function has been removed"
+            rationale="This function has been removed",
         )
         assert generator._requires_semantic_analysis(pattern) is True
 
@@ -1390,7 +1348,7 @@ class TestNodejsReferencedRules:
             provider_type="nodejs",
             complexity="MEDIUM",
             category="api",
-            rationale="This class has been renamed"
+            rationale="This class has been renamed",
         )
         assert generator._requires_semantic_analysis(pattern) is True
 
@@ -1401,7 +1359,7 @@ class TestNodejsReferencedRules:
             provider_type="nodejs",
             complexity="MEDIUM",
             category="api",
-            rationale="This component has been updated"
+            rationale="This component has been updated",
         )
         assert generator._requires_semantic_analysis(pattern) is True
 
@@ -1415,7 +1373,7 @@ class TestNodejsReferencedRules:
             provider_type="nodejs",
             complexity="MEDIUM",
             category="api",
-            rationale="This value has been deprecated"
+            rationale="This value has been deprecated",
         )
         assert generator._requires_semantic_analysis(pattern) is False
 
@@ -1426,8 +1384,7 @@ class TestImportPatternRules:
     def test_is_import_pattern_detects_import_in_source_fqn(self):
         """Should detect import patterns from source_fqn"""
         generator = AnalyzerRuleGenerator(
-            source_framework="patternfly-5",
-            target_framework="patternfly-6"
+            source_framework="patternfly-5", target_framework="patternfly-6"
         )
 
         pattern = MigrationPattern(
@@ -1437,7 +1394,7 @@ class TestImportPatternRules:
             file_pattern="\\.(j|t)sx?$",
             complexity="LOW",
             category="api",
-            rationale="Victory-based charts have moved to a 'victory' directory"
+            rationale="Victory-based charts have moved to a 'victory' directory",
         )
 
         is_import = generator._is_import_pattern(pattern)
@@ -1453,7 +1410,7 @@ class TestImportPatternRules:
             provider_type="builtin",
             complexity="LOW",
             category="api",
-            rationale="Import statements from @patternfly/react-charts need updating"
+            rationale="Import statements from @patternfly/react-charts need updating",
         )
 
         is_import = generator._is_import_pattern(pattern)
@@ -1469,7 +1426,7 @@ class TestImportPatternRules:
             provider_type="nodejs",
             complexity="LOW",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         is_import = generator._is_import_pattern(pattern)
@@ -1478,8 +1435,7 @@ class TestImportPatternRules:
     def test_build_custom_variables_for_import_pattern(self):
         """Should build custom variables for import patterns"""
         generator = AnalyzerRuleGenerator(
-            source_framework="patternfly-5",
-            target_framework="patternfly-6"
+            source_framework="patternfly-5", target_framework="patternfly-6"
         )
 
         pattern = MigrationPattern(
@@ -1489,7 +1445,7 @@ class TestImportPatternRules:
             file_pattern="\\.(j|t)sx?$",
             complexity="LOW",
             category="api",
-            rationale="Victory-based charts have moved to a 'victory' directory"
+            rationale="Victory-based charts have moved to a 'victory' directory",
         )
 
         custom_vars = generator._build_custom_variables(pattern)
@@ -1512,7 +1468,7 @@ class TestImportPatternRules:
             provider_type="java",
             complexity="MEDIUM",
             category="api",
-            rationale="Class renamed"
+            rationale="Class renamed",
         )
 
         custom_vars = generator._build_custom_variables(pattern)
@@ -1529,7 +1485,7 @@ class TestImportPatternRules:
             file_pattern="\\.(j|t)sx?$",
             complexity="LOW",
             category="api",
-            rationale="Import statements need updating"
+            rationale="Import statements need updating",
         )
 
         condition = generator._build_when_condition(pattern)
@@ -1537,7 +1493,10 @@ class TestImportPatternRules:
         assert "builtin.filecontent" in condition
         # Should have $ anchor added
         assert condition["builtin.filecontent"]["pattern"].endswith("$")
-        assert condition["builtin.filecontent"]["pattern"] == "import.*from '@patternfly/react-charts'$"
+        assert (
+            condition["builtin.filecontent"]["pattern"]
+            == "import.*from '@patternfly/react-charts'$"
+        )
 
     def test_extract_package_name_from_import_statement(self):
         """Should extract package name from import statement"""
@@ -1554,8 +1513,7 @@ class TestImportPatternRules:
     def test_build_description_for_import_pattern_with_custom_variables(self):
         """Should build generic description for import patterns with custom variables"""
         generator = AnalyzerRuleGenerator(
-            source_framework="patternfly-5",
-            target_framework="patternfly-6"
+            source_framework="patternfly-5", target_framework="patternfly-6"
         )
 
         pattern = MigrationPattern(
@@ -1566,7 +1524,7 @@ class TestImportPatternRules:
             file_pattern="\\.(j|t)sx?$",
             complexity="LOW",
             category="api",
-            rationale="Victory-based charts have moved to a 'victory' directory"
+            rationale="Victory-based charts have moved to a 'victory' directory",
         )
 
         description = generator._build_description(pattern, has_custom_variables=True)
@@ -1581,7 +1539,7 @@ class TestImportPatternRules:
         generator = AnalyzerRuleGenerator(
             source_framework="patternfly-5",
             target_framework="patternfly-6",
-            rule_file_name="patternfly-5-to-patternfly-6-charts"
+            rule_file_name="patternfly-5-to-patternfly-6-charts",
         )
 
         pattern = MigrationPattern(
@@ -1596,7 +1554,7 @@ class TestImportPatternRules:
             rationale="Victory-based charts have moved to a 'victory' directory in @patternfly/react-charts to support multiple chart libraries",
             example_before="import { Area } from '@patternfly/react-charts';",
             example_after="import { Area } from '@patternfly/react-charts/victory';",
-            documentation_url="https://www.patternfly.org/get-started/upgrade"
+            documentation_url="https://www.patternfly.org/get-started/upgrade",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1625,8 +1583,7 @@ class TestComboRuleGeneration:
     def test_combo_rule_with_import_pattern(self):
         """Should generate combo rule with import_pattern + builtin_pattern"""
         generator = AnalyzerRuleGenerator(
-            source_framework="patternfly-v5",
-            target_framework="patternfly-v6"
+            source_framework="patternfly-v5", target_framework="patternfly-v6"
         )
 
         pattern = MigrationPattern(
@@ -1638,8 +1595,8 @@ class TestComboRuleGeneration:
             when_combo={
                 "import_pattern": "import.*\\{[^}]*\\bAlert\\b[^}]*\\}.*from ['\"']@patternfly/react-",
                 "builtin_pattern": "<Alert[^/>]*(?:/>|>)",
-                "file_pattern": "\\.(j|t)sx?$"
-            }
+                "file_pattern": "\\.(j|t)sx?$",
+            },
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1647,15 +1604,15 @@ class TestComboRuleGeneration:
         assert rule is not None
         assert "and" in rule.when
         conditions = rule.when["and"]
-        
+
         # Should have 2 conditions: import + JSX usage
         assert len(conditions) == 2
-        
+
         # First condition should be import verification
         assert "builtin.filecontent" in conditions[0]
         assert "import" in conditions[0]["builtin.filecontent"]["pattern"]
         assert conditions[0]["builtin.filecontent"]["filePattern"] == "\\.(j|t)sx?$"
-        
+
         # Second condition should be JSX pattern
         assert "builtin.filecontent" in conditions[1]
         assert "<Alert" in conditions[1]["builtin.filecontent"]["pattern"]
@@ -1663,8 +1620,7 @@ class TestComboRuleGeneration:
     def test_combo_rule_with_nodejs_pattern(self):
         """Should generate combo rule with nodejs_pattern + builtin_pattern"""
         generator = AnalyzerRuleGenerator(
-            source_framework="patternfly-v5",
-            target_framework="patternfly-v6"
+            source_framework="patternfly-v5", target_framework="patternfly-v6"
         )
 
         pattern = MigrationPattern(
@@ -1676,8 +1632,8 @@ class TestComboRuleGeneration:
             when_combo={
                 "nodejs_pattern": "Button",
                 "builtin_pattern": "<Button.*isDisabled",
-                "file_pattern": "\\.(j|t)sx?$"
-            }
+                "file_pattern": "\\.(j|t)sx?$",
+            },
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1685,24 +1641,21 @@ class TestComboRuleGeneration:
         assert rule is not None
         assert "and" in rule.when
         conditions = rule.when["and"]
-        
+
         # Should have 2 conditions: nodejs + builtin
         assert len(conditions) == 2
-        
+
         # First condition should be nodejs.referenced
         assert "nodejs.referenced" in conditions[0]
         assert conditions[0]["nodejs.referenced"]["pattern"] == "Button"
-        
+
         # Second condition should be builtin pattern
         assert "builtin.filecontent" in conditions[1]
         assert "isDisabled" in conditions[1]["builtin.filecontent"]["pattern"]
 
     def test_combo_rule_without_builtin_pattern_returns_none(self):
         """Should return None if combo rule missing builtin_pattern"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="test",
-            target_framework="test2"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="test", target_framework="test2")
 
         pattern = MigrationPattern(
             source_pattern="Test",
@@ -1713,7 +1666,7 @@ class TestComboRuleGeneration:
             when_combo={
                 "import_pattern": "import.*Test"
                 # Missing builtin_pattern
-            }
+            },
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1723,10 +1676,7 @@ class TestComboRuleGeneration:
 
     def test_combo_rule_without_import_or_nodejs_returns_none(self):
         """Should return None if combo rule missing both import and nodejs patterns"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="test",
-            target_framework="test2"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="test", target_framework="test2")
 
         pattern = MigrationPattern(
             source_pattern="Test",
@@ -1737,7 +1687,7 @@ class TestComboRuleGeneration:
             when_combo={
                 "builtin_pattern": "<Test"
                 # Missing both import_pattern and nodejs_pattern
-            }
+            },
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1748,8 +1698,7 @@ class TestComboRuleGeneration:
     def test_combo_rule_prefers_import_over_nodejs(self):
         """Should use import_pattern if both import and nodejs patterns present"""
         generator = AnalyzerRuleGenerator(
-            source_framework="patternfly-v5",
-            target_framework="patternfly-v6"
+            source_framework="patternfly-v5", target_framework="patternfly-v6"
         )
 
         pattern = MigrationPattern(
@@ -1761,15 +1710,15 @@ class TestComboRuleGeneration:
             when_combo={
                 "import_pattern": "import.*Alert",
                 "nodejs_pattern": "Alert",  # Should be ignored
-                "builtin_pattern": "<Alert"
-            }
+                "builtin_pattern": "<Alert",
+            },
         )
 
         rule = generator._pattern_to_rule(pattern)
 
         assert rule is not None
         conditions = rule.when["and"]
-        
+
         # First condition should use import_pattern, not nodejs
         assert "builtin.filecontent" in conditions[0]
         assert "import" in conditions[0]["builtin.filecontent"]["pattern"]
@@ -1782,10 +1731,7 @@ class TestProviderFallbacks:
 
     def test_nodejs_provider_uses_source_pattern_fallback(self):
         """Should use source_pattern as fallback for nodejs provider"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="react-17",
-            target_framework="react-18"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="react-17", target_framework="react-18")
 
         pattern = MigrationPattern(
             source_pattern="ComponentWillMount",
@@ -1793,7 +1739,7 @@ class TestProviderFallbacks:
             complexity="MEDIUM",
             category="api",
             rationale="Test",
-            provider_type="nodejs"
+            provider_type="nodejs",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1805,8 +1751,7 @@ class TestProviderFallbacks:
     def test_csharp_provider_uses_source_pattern_fallback(self):
         """Should use source_pattern as fallback for csharp provider"""
         generator = AnalyzerRuleGenerator(
-            source_framework="dotnet-framework",
-            target_framework="dotnet-8"
+            source_framework="dotnet-framework", target_framework="dotnet-8"
         )
 
         pattern = MigrationPattern(
@@ -1815,7 +1760,7 @@ class TestProviderFallbacks:
             complexity="MEDIUM",
             category="api",
             rationale="Test",
-            provider_type="csharp"
+            provider_type="csharp",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1827,8 +1772,7 @@ class TestProviderFallbacks:
     def test_java_provider_requires_source_fqn(self):
         """Should return None if Java provider missing source_fqn"""
         generator = AnalyzerRuleGenerator(
-            source_framework="spring-boot-2",
-            target_framework="spring-boot-3"
+            source_framework="spring-boot-2", target_framework="spring-boot-3"
         )
 
         pattern = MigrationPattern(
@@ -1837,7 +1781,7 @@ class TestProviderFallbacks:
             complexity="MEDIUM",
             category="api",
             rationale="Test",
-            provider_type="java"
+            provider_type="java",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1846,15 +1790,13 @@ class TestProviderFallbacks:
         assert rule is None
 
 
-
 class TestJavaDependencyPatterns:
     """Test Java dependency pattern generation with alternatives."""
 
     def test_java_dependency_without_alternatives(self):
         """Should generate simple java.dependency condition"""
         generator = AnalyzerRuleGenerator(
-            source_framework="spring-boot-2",
-            target_framework="spring-boot-3"
+            source_framework="spring-boot-2", target_framework="spring-boot-3"
         )
 
         pattern = MigrationPattern(
@@ -1862,7 +1804,7 @@ class TestJavaDependencyPatterns:
             source_fqn="org.springframework:spring-boot-starter-web",
             category="dependency",
             rationale="Dependency update",
-            complexity="MEDIUM"
+            complexity="MEDIUM",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1876,8 +1818,7 @@ class TestJavaDependencyPatterns:
     def test_java_dependency_with_alternative_fqns(self):
         """Should generate OR condition with alternatives"""
         generator = AnalyzerRuleGenerator(
-            source_framework="jakarta-9",
-            target_framework="jakarta-10"
+            source_framework="jakarta-9", target_framework="jakarta-10"
         )
 
         pattern = MigrationPattern(
@@ -1885,25 +1826,25 @@ class TestJavaDependencyPatterns:
             source_fqn="javax.servlet:servlet-api",
             alternative_fqns=[
                 "javax.servlet:javax.servlet-api",
-                "jakarta.servlet:jakarta.servlet-api"
+                "jakarta.servlet:jakarta.servlet-api",
             ],
             category="dependency",
             rationale="Multiple possible dependency names",
-            complexity="MEDIUM"
+            complexity="MEDIUM",
         )
 
         rule = generator._pattern_to_rule(pattern)
 
         assert rule is not None
         assert "or" in rule.when
-        
+
         # Should have 3 conditions (main + 2 alternatives)
         conditions = rule.when["or"]
         assert len(conditions) == 3
-        
+
         # Each condition should be a java.dependency
         assert all("java.dependency" in cond for cond in conditions)
-        
+
         # Check the dependency names are converted correctly (: to .)
         names = [cond["java.dependency"]["name"] for cond in conditions]
         assert "javax.servlet.servlet-api" in names
@@ -1912,17 +1853,14 @@ class TestJavaDependencyPatterns:
 
     def test_java_dependency_converts_colons_to_dots(self):
         """Should convert Maven-style coordinates (colon) to dots"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="test",
-            target_framework="test2"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="test", target_framework="test2")
 
         pattern = MigrationPattern(
             source_pattern="artifact-name",  # Required field
             source_fqn="com.example:artifact-name",
             category="dependency",
             rationale="Test",
-            complexity="MEDIUM"
+            complexity="MEDIUM",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1933,10 +1871,7 @@ class TestJavaDependencyPatterns:
 
     def test_java_dependency_with_empty_alternative_fqns_list(self):
         """Should handle empty alternative_fqns list"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="test",
-            target_framework="test2"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="test", target_framework="test2")
 
         pattern = MigrationPattern(
             source_pattern="library",  # Required field
@@ -1944,7 +1879,7 @@ class TestJavaDependencyPatterns:
             alternative_fqns=[],  # Empty list
             category="dependency",
             rationale="Test",
-            complexity="MEDIUM"
+            complexity="MEDIUM",
         )
 
         rule = generator._pattern_to_rule(pattern)
@@ -1957,17 +1892,14 @@ class TestJavaDependencyPatterns:
 
     def test_java_dependency_sets_lowerbound_zero(self):
         """Should always set lowerbound to 0.0.0 to match any version"""
-        generator = AnalyzerRuleGenerator(
-            source_framework="test",
-            target_framework="test2"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="test", target_framework="test2")
 
         pattern = MigrationPattern(
             source_pattern="lib",  # Required field
             source_fqn="com.example:lib",
             category="dependency",
             rationale="Test",
-            complexity="MEDIUM"
+            complexity="MEDIUM",
         )
 
         rule = generator._pattern_to_rule(pattern)

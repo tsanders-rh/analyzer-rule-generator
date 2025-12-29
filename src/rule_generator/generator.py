@@ -9,20 +9,21 @@ Generates analyzer rules with:
 - Links to documentation
 - Multiple file output grouped by concern
 """
-from typing import List, Optional, Dict, Any
-from collections import defaultdict
 
-from .schema import AnalyzerRule, MigrationPattern, Category, Link, LocationType, CSharpLocationType
-from .config import config
+from collections import defaultdict
+from typing import Any, Dict, List, Optional
+
 from .condition_builder import (
-    build_or_condition_with_alternatives,
     build_builtin_condition,
-    build_nodejs_condition,
+    build_combo_condition,
     build_csharp_condition,
-    build_java_referenced_condition,
     build_java_dependency_condition,
-    build_combo_condition
+    build_java_referenced_condition,
+    build_nodejs_condition,
+    build_or_condition_with_alternatives,
 )
+from .config import config
+from .schema import AnalyzerRule, Category, CSharpLocationType, Link, LocationType, MigrationPattern
 
 
 class AnalyzerRuleGenerator:
@@ -32,7 +33,7 @@ class AnalyzerRuleGenerator:
         self,
         source_framework: Optional[str] = None,
         target_framework: Optional[str] = None,
-        rule_file_name: Optional[str] = None
+        rule_file_name: Optional[str] = None,
     ):
         """
         Initialize rule generator.
@@ -65,7 +66,9 @@ class AnalyzerRuleGenerator:
 
         return rules
 
-    def generate_rules_by_concern(self, patterns: List[MigrationPattern]) -> Dict[str, List[AnalyzerRule]]:
+    def generate_rules_by_concern(
+        self, patterns: List[MigrationPattern]
+    ) -> Dict[str, List[AnalyzerRule]]:
         """
         Generate analyzer rules grouped by concern.
 
@@ -141,7 +144,9 @@ class AnalyzerRuleGenerator:
         links = self._build_links(pattern)
 
         # Create description
-        description = self._build_description(pattern, has_custom_variables=len(custom_variables) > 0)
+        description = self._build_description(
+            pattern, has_custom_variables=len(custom_variables) > 0
+        )
 
         # Create rule
         rule = AnalyzerRule(
@@ -155,7 +160,7 @@ class AnalyzerRuleGenerator:
             links=links if links else None,
             customVariables=custom_variables if custom_variables else [],
             tag=None,
-            migration_complexity=pattern.complexity
+            migration_complexity=pattern.complexity,
         )
 
         return rule
@@ -212,7 +217,9 @@ class AnalyzerRuleGenerator:
         # Handle combo rules (nodejs + builtin OR import + builtin)
         if provider == "combo":
             if not pattern.when_combo:
-                print(f"Warning: Combo provider specified but no when_combo config: {pattern.rationale}")
+                print(
+                    f"Warning: Combo provider specified but no when_combo config: {pattern.rationale}"
+                )
                 return None
 
             # Build combo condition with AND logic
@@ -227,7 +234,9 @@ class AnalyzerRuleGenerator:
                 return None
 
             if not import_pattern and not nodejs_pattern:
-                print(f"Warning: Combo rule missing both import_pattern and nodejs_pattern: {pattern.rationale}")
+                print(
+                    f"Warning: Combo rule missing both import_pattern and nodejs_pattern: {pattern.rationale}"
+                )
                 return None
 
             conditions = []
@@ -259,7 +268,17 @@ class AnalyzerRuleGenerator:
             # Check if this is a configuration file pattern (properties, yaml, etc.)
             is_config_file = False
             if pattern.file_pattern:
-                config_extensions = ['.properties', '.yaml', '.yml', '.xml', '.json', '.conf', '.cfg', '.ini', '.factories']
+                config_extensions = [
+                    '.properties',
+                    '.yaml',
+                    '.yml',
+                    '.xml',
+                    '.json',
+                    '.conf',
+                    '.cfg',
+                    '.ini',
+                    '.factories',
+                ]
                 is_config_file = any(ext in pattern.file_pattern for ext in config_extensions)
 
             # For COMPLETE import line patterns (but NOT config files or partial text patterns),
@@ -268,9 +287,11 @@ class AnalyzerRuleGenerator:
             #   - Config file patterns (property keys have values after them)
             #   - Partial text patterns (e.g., "javax\." which should match anywhere in file)
             # Only add $ to full import statement patterns (e.g., "import.*XhrFactory.*from.*@angular/common/http")
-            if (self._is_complete_import_line_pattern(pattern) and
-                not is_config_file and
-                not regex_pattern.endswith('$')):
+            if (
+                self._is_complete_import_line_pattern(pattern)
+                and not is_config_file
+                and not regex_pattern.endswith('$')
+            ):
                 # Add $ anchor to match end of import statement
                 # This prevents false positives from partial matches
                 regex_pattern = regex_pattern + '$'
@@ -296,9 +317,15 @@ class AnalyzerRuleGenerator:
             location_str = None
             if pattern.location_type:
                 # Convert enum to string if necessary
-                location_str = pattern.location_type.value if hasattr(pattern.location_type, 'value') else str(pattern.location_type)
+                location_str = (
+                    pattern.location_type.value
+                    if hasattr(pattern.location_type, 'value')
+                    else str(pattern.location_type)
+                )
 
-            return build_csharp_condition(pattern.source_fqn or pattern.source_pattern, location_str)
+            return build_csharp_condition(
+                pattern.source_fqn or pattern.source_pattern, location_str
+            )
 
         else:  # Java provider
             # Check if this is a Maven dependency pattern
@@ -310,7 +337,9 @@ class AnalyzerRuleGenerator:
                 # Convert alternative FQNs to alternative names
                 alternative_names = None
                 if pattern.alternative_fqns and len(pattern.alternative_fqns) > 0:
-                    alternative_names = [alt_fqn.replace(':', '.') for alt_fqn in pattern.alternative_fqns]
+                    alternative_names = [
+                        alt_fqn.replace(':', '.') for alt_fqn in pattern.alternative_fqns
+                    ]
 
                 return build_java_dependency_condition(dependency_name, alternative_names)
 
@@ -324,9 +353,7 @@ class AnalyzerRuleGenerator:
                 pattern_str = pattern.source_fqn
 
                 return build_java_referenced_condition(
-                    pattern_str,
-                    location.value,
-                    pattern.alternative_fqns
+                    pattern_str, location.value, pattern.alternative_fqns
                 )
 
     def _map_complexity_to_effort(self, complexity: str) -> int:
@@ -341,13 +368,7 @@ class AnalyzerRuleGenerator:
         """
         complexity = complexity.upper()
 
-        mapping = {
-            'TRIVIAL': 1,
-            'LOW': 3,
-            'MEDIUM': 5,
-            'HIGH': 7,
-            'EXPERT': 10
-        }
+        mapping = {'TRIVIAL': 1, 'LOW': 3, 'MEDIUM': 5, 'HIGH': 7, 'EXPERT': 10}
 
         return mapping.get(complexity, 5)
 
@@ -374,7 +395,13 @@ class AnalyzerRuleGenerator:
         # API removals should be mandatory regardless of complexity
         # Look for keywords in rationale that indicate removal/deprecation
         rationale_lower = pattern.rationale.lower()
-        removal_keywords = ['removed', 'removal', 'deprecated for removal', 'no longer available', 'deleted']
+        removal_keywords = [
+            'removed',
+            'removal',
+            'deprecated for removal',
+            'no longer available',
+            'deleted',
+        ]
         if any(keyword in rationale_lower for keyword in removal_keywords):
             return Category.MANDATORY
 
@@ -387,7 +414,7 @@ class AnalyzerRuleGenerator:
             'property has been updated',
             'should be replaced with',
             'now use',
-            'instead of'
+            'instead of',
         ]
         if any(keyword in rationale_lower for keyword in property_keywords):
             # Check if this looks like a simple property rename (similar structure)
@@ -497,16 +524,20 @@ class AnalyzerRuleGenerator:
         # Check if this is an import pattern
         if self._is_import_pattern(pattern):
             # Add variable to capture imported components
-            custom_vars.append({
-                "pattern": "import {(?P<imports>[A-Za-z,\\s]+)}",
-                "name": "component",
-                "nameOfCaptureGroup": "imports",
-                "defaultValue": "Component"
-            })
+            custom_vars.append(
+                {
+                    "pattern": "import {(?P<imports>[A-Za-z,\\s]+)}",
+                    "name": "component",
+                    "nameOfCaptureGroup": "imports",
+                    "defaultValue": "Component",
+                }
+            )
 
         return custom_vars
 
-    def _build_description(self, pattern: MigrationPattern, has_custom_variables: bool = False) -> str:
+    def _build_description(
+        self, pattern: MigrationPattern, has_custom_variables: bool = False
+    ) -> str:
         """
         Build rule description.
 
@@ -528,13 +559,17 @@ class AnalyzerRuleGenerator:
                 if source_pkg and target_pkg:
                     return f"imports  from '{source_pkg}'; should be replaced with imports from '{target_pkg}';"
                 else:
-                    return f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}"
+                    return (
+                        f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}"
+                    )
             else:
                 return f"{pattern.source_pattern} usage detected (removed API)"
 
         # Default description
         if pattern.target_pattern:
-            description = f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}"
+            description = (
+                f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}"
+            )
         else:
             description = f"{pattern.source_pattern} usage detected (removed API)"
 
@@ -554,6 +589,7 @@ class AnalyzerRuleGenerator:
             return None
 
         import re
+
         # Match pattern: from 'package' or from "package"
         match = re.search(r"from\s+['\"]([^'\"]+)['\"]", import_statement)
         if match:
@@ -577,9 +613,11 @@ class AnalyzerRuleGenerator:
         # Use custom variables in message if available
         if has_custom_variables and self._is_import_pattern(pattern):
             if pattern.target_pattern:
-                message += f"Replace `{pattern.source_pattern.replace(pattern.source_pattern.split('{')[1].split('}')[0], '{{ component }}')}` with `{pattern.target_pattern.replace(pattern.target_pattern.split('{')[1].split('}')[0], '{{ component }}')}`."\
-                    if '{' in pattern.source_pattern and '}' in pattern.source_pattern else \
-                    f"Replace `import {{ {{{{ component }}}} }} from '{self._extract_package_name(pattern.source_pattern) or pattern.source_pattern}'` with `import {{ {{{{ component }}}} }} from '{self._extract_package_name(pattern.target_pattern) or pattern.target_pattern}'`."
+                message += (
+                    f"Replace `{pattern.source_pattern.replace(pattern.source_pattern.split('{')[1].split('}')[0], '{{ component }}')}` with `{pattern.target_pattern.replace(pattern.target_pattern.split('{')[1].split('}')[0], '{{ component }}')}`."
+                    if '{' in pattern.source_pattern and '}' in pattern.source_pattern
+                    else f"Replace `import {{ {{{{ component }}}} }} from '{self._extract_package_name(pattern.source_pattern) or pattern.source_pattern}'` with `import {{ {{{{ component }}}} }} from '{self._extract_package_name(pattern.target_pattern) or pattern.target_pattern}'`."
+                )
             else:
                 message += f"Remove usage of `{pattern.source_pattern}` (API has been removed)."
 
@@ -621,11 +659,24 @@ class AnalyzerRuleGenerator:
         code_lower = code.lower()
 
         # TypeScript indicators
-        if any(indicator in code_lower for indicator in ['interface', 'type ', ': string', ': number', ': boolean', 'constructor(']):
+        if any(
+            indicator in code_lower
+            for indicator in [
+                'interface',
+                'type ',
+                ': string',
+                ': number',
+                ': boolean',
+                'constructor(',
+            ]
+        ):
             return 'typescript'
 
         # JavaScript/JSX indicators
-        if any(indicator in code for indicator in ['import ', 'export ', 'const ', 'let ', 'function', '=>']):
+        if any(
+            indicator in code
+            for indicator in ['import ', 'export ', 'const ', 'let ', 'function', '=>']
+        ):
             return ''  # No language hint for generic JS (could be JS or TS)
 
         return ''
@@ -676,12 +727,11 @@ class AnalyzerRuleGenerator:
             'generic',
             'inheritance',
             'extends',
-            'implements'
+            'implements',
         ]
 
         description = (pattern.rationale or "").lower()
         return any(keyword in description for keyword in semantic_keywords)
-
 
     def _build_links(self, pattern: MigrationPattern) -> Optional[List[Link]]:
         """
@@ -696,7 +746,9 @@ class AnalyzerRuleGenerator:
         if not pattern.documentation_url:
             return None
 
-        return [Link(
-            url=pattern.documentation_url,
-            title=f"{self.target_framework or 'Migration'} Documentation"
-        )]
+        return [
+            Link(
+                url=pattern.documentation_url,
+                title=f"{self.target_framework or 'Migration'} Documentation",
+            )
+        ]

@@ -3,9 +3,11 @@ Unit tests for src/rule_generator/openrewrite.py
 
 Tests OpenRewrite recipe ingestion, parsing, and formatting.
 """
-import pytest
-from unittest.mock import Mock, patch, mock_open
+
 from pathlib import Path
+from unittest.mock import Mock, mock_open, patch
+
+import pytest
 
 from src.rule_generator.openrewrite import OpenRewriteRecipeIngester
 
@@ -73,10 +75,14 @@ displayName: Test Recipe
 
         assert recipe is None
 
-    @patch('builtins.open', new_callable=mock_open, read_data="""
+    @patch(
+        'builtins.open',
+        new_callable=mock_open,
+        read_data="""
 type: specs.openrewrite.org/v1beta/recipe
 name: LocalRecipe
-""")
+""",
+    )
     @patch('pathlib.Path.exists', return_value=True)
     def test_fetch_from_local_file(self, mock_exists, mock_file, ingester):
         """Should fetch recipe from local file"""
@@ -92,14 +98,18 @@ name: LocalRecipe
 
         assert recipe is None
 
-    @patch('builtins.open', new_callable=mock_open, read_data="""
+    @patch(
+        'builtins.open',
+        new_callable=mock_open,
+        read_data="""
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: Recipe1
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: Recipe2
-""")
+""",
+    )
     @patch('pathlib.Path.exists', return_value=True)
     def test_fetch_multiple_recipes(self, mock_exists, mock_file, ingester):
         """Should handle multiple YAML documents"""
@@ -134,7 +144,7 @@ class TestRecipeFormatting:
             "type": "specs.openrewrite.org/v1beta/recipe",
             "name": "TestRecipe",
             "displayName": "Test Recipe",
-            "description": "A test recipe"
+            "description": "A test recipe",
         }
 
         formatted = ingester._format_recipe_for_llm(recipe_data)
@@ -153,10 +163,10 @@ class TestRecipeFormatting:
                 {
                     "org.openrewrite.java.ChangeType": {
                         "oldFullyQualifiedTypeName": "old.Class",
-                        "newFullyQualifiedTypeName": "new.Class"
+                        "newFullyQualifiedTypeName": "new.Class",
                     }
-                }
-            ]
+                },
+            ],
         }
 
         formatted = ingester._format_recipe_for_llm(recipe_data)
@@ -171,9 +181,7 @@ class TestRecipeFormatting:
         """Should format recipe with preconditions"""
         recipe_data = {
             "name": "ConditionalRecipe",
-            "preconditions": [
-                "org.openrewrite.java.search.FindTypes"
-            ]
+            "preconditions": ["org.openrewrite.java.search.FindTypes"],
         }
 
         formatted = ingester._format_recipe_for_llm(recipe_data)
@@ -186,7 +194,7 @@ class TestRecipeFormatting:
         recipe_data = {
             "multiple_recipes": [
                 {"name": "Recipe1", "displayName": "First Recipe"},
-                {"name": "Recipe2", "displayName": "Second Recipe"}
+                {"name": "Recipe2", "displayName": "Second Recipe"},
             ]
         }
 
@@ -198,10 +206,7 @@ class TestRecipeFormatting:
 
     def test_format_recipe_with_tags(self, ingester):
         """Should include tags in formatted output"""
-        recipe_data = {
-            "name": "TaggedRecipe",
-            "tags": ["java", "migration", "security"]
-        }
+        recipe_data = {"name": "TaggedRecipe", "tags": ["java", "migration", "security"]}
 
         formatted = ingester._format_recipe_for_llm(recipe_data)
 
@@ -223,7 +228,7 @@ class TestRecipeFormatting:
         item = {
             "org.openrewrite.java.ChangeType": {
                 "oldFullyQualifiedTypeName": "javax.security.cert.X509Certificate",
-                "newFullyQualifiedTypeName": "java.security.cert.X509Certificate"
+                "newFullyQualifiedTypeName": "java.security.cert.X509Certificate",
             }
         }
         formatted = ingester._format_recipe_item(item)
@@ -249,10 +254,14 @@ class TestIngestionCaching:
         """Create OpenReWriteRecipeIngester instance."""
         return OpenRewriteRecipeIngester()
 
-    @patch('builtins.open', new_callable=mock_open, read_data="""
+    @patch(
+        'builtins.open',
+        new_callable=mock_open,
+        read_data="""
 type: specs.openrewrite.org/v1beta/recipe
 name: CachedRecipe
-""")
+""",
+    )
     @patch('pathlib.Path.exists', return_value=True)
     def test_caching_works(self, mock_exists, mock_file, ingester):
         """Should cache ingested recipes"""
@@ -314,10 +323,14 @@ recipeList:
         assert "Upgrade to Java 17" in content
         assert "JavaVersion17" in content
 
-    @patch('builtins.open', new_callable=mock_open, read_data="""
+    @patch(
+        'builtins.open',
+        new_callable=mock_open,
+        read_data="""
 type: specs.openrewrite.org/v1beta/recipe
 name: LocalTestRecipe
-""")
+""",
+    )
     @patch('pathlib.Path.exists', return_value=True)
     def test_ingest_from_file_complete(self, mock_exists, mock_file, ingester):
         """Should complete full ingestion from file"""
@@ -357,11 +370,11 @@ class TestEdgeCases:
                     "org.openrewrite.Composite": {
                         "recipeList": [
                             "org.openrewrite.java.ChangePackage",
-                            "org.openrewrite.java.ChangeType"
+                            "org.openrewrite.java.ChangeType",
                         ]
                     }
                 }
-            ]
+            ],
         }
 
         formatted = ingester._format_recipe_for_llm(recipe_data)
@@ -378,12 +391,7 @@ class TestEdgeCases:
 
     def test_format_recipe_with_none_values(self, ingester):
         """Should handle None values in recipe data"""
-        recipe_data = {
-            "name": "TestRecipe",
-            "displayName": None,
-            "description": None,
-            "tags": None
-        }
+        recipe_data = {"name": "TestRecipe", "displayName": None, "description": None, "tags": None}
 
         formatted = ingester._format_recipe_for_llm(recipe_data)
         assert formatted is not None

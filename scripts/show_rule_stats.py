@@ -6,13 +6,14 @@ Usage:
     python scripts/show_rule_stats.py <pattern>
 
 Example:
-    python scripts/show_rule_stats.py "spring-boot-3-to-spring-boot-4-*.yaml"
+    python scripts/show_rule_stats.py "spring-boot - 3-to-spring-boot - 4-*.yaml"
 """
 import sys
-import yaml
-from pathlib import Path
-from glob import glob
 from collections import defaultdict
+from glob import glob
+from pathlib import Path
+
+import yaml
 
 
 def count_rules_by_attribute(file_path, attribute):
@@ -44,9 +45,9 @@ def print_table(headers, rows, title=None):
             col_widths[i] = max(col_widths[i], len(str(cell)))
 
     # Print header
-    header_line = "│ " + " │ ".join(
-        str(h).ljust(col_widths[i]) for i, h in enumerate(headers)
-    ) + " │"
+    header_line = (
+        "│ " + " │ ".join(str(h).ljust(col_widths[i]) for i, h in enumerate(headers)) + " │"
+    )
     separator = "├" + "┼".join("─" * (w + 2) for w in col_widths) + "┤"
     top = "┌" + "┬".join("─" * (w + 2) for w in col_widths) + "┐"
     bottom = "└" + "┴".join("─" * (w + 2) for w in col_widths) + "┘"
@@ -57,9 +58,9 @@ def print_table(headers, rows, title=None):
 
     # Print rows
     for row in rows:
-        print("│ " + " │ ".join(
-            str(cell).ljust(col_widths[i]) for i, cell in enumerate(row)
-        ) + " │")
+        print(
+            "│ " + " │ ".join(str(cell).ljust(col_widths[i]) for i, cell in enumerate(row)) + " │"
+        )
 
     print(bottom)
 
@@ -92,11 +93,7 @@ def main():
 
         file_rows.append([concern.title(), rule_count, f"{size:.1f} KB"])
 
-    print_table(
-        ["Concern", "Rules", "Size"],
-        file_rows,
-        title="📋 Generated Files"
-    )
+    print_table(["Concern", "Rules", "Size"], file_rows, title="📋 Generated Files")
 
     # Aggregate statistics across all files
     all_categories = defaultdict(int)
@@ -113,19 +110,11 @@ def main():
 
     # Category breakdown
     cat_rows = [[cat.title(), count, "█" * count] for cat, count in sorted(all_categories.items())]
-    print_table(
-        ["Category", "Count", "Distribution"],
-        cat_rows,
-        title="📊 Rule Categories"
-    )
+    print_table(["Category", "Count", "Distribution"], cat_rows, title="📊 Rule Categories")
 
     # Effort breakdown
     eff_rows = [[f"Effort {eff}", count, "▓" * count] for eff, count in sorted(all_efforts.items())]
-    print_table(
-        ["Effort Level", "Count", "Distribution"],
-        eff_rows,
-        title="⚡ Effort Distribution"
-    )
+    print_table(["Effort Level", "Count", "Distribution"], eff_rows, title="⚡ Effort Distribution")
 
     # Summary
     print(f"\n✅ Total: {total_rules} rules across {len(files)} file(s)\n")

@@ -9,11 +9,13 @@ Tests cover:
 - Ruleset classification (list and dict formats)
 - Classification statistics and change tracking
 """
-import pytest
-import yaml
+
+import sys
 import tempfile
 from pathlib import Path
-import sys
+
+import pytest
+import yaml
 
 # Add scripts to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
@@ -96,11 +98,7 @@ class TestWhenConditionAnalysis:
         """Should classify simple when conditions as low"""
         classifier = RulesetComplexityClassifier()
 
-        when = {
-            "java.referenced": {
-                "pattern": "javax.servlet.*"
-            }
-        }
+        when = {"java.referenced": {"pattern": "javax.servlet.*"}}
 
         complexity = classifier._analyze_when_condition(when)
         assert complexity == "low"
@@ -112,7 +110,7 @@ class TestWhenConditionAnalysis:
         when = {
             "and": [
                 {"java.referenced": {"pattern": "test1"}},
-                {"java.referenced": {"pattern": "test2"}}
+                {"java.referenced": {"pattern": "test2"}},
             ]
         }
 
@@ -126,7 +124,7 @@ class TestWhenConditionAnalysis:
         when = {
             "or": [
                 {"java.referenced": {"pattern": "test1"}},
-                {"java.referenced": {"pattern": "test2"}}
+                {"java.referenced": {"pattern": "test2"}},
             ]
         }
 
@@ -137,9 +135,7 @@ class TestWhenConditionAnalysis:
         """Should classify 'not' conditions as medium"""
         classifier = RulesetComplexityClassifier()
 
-        when = {
-            "not": {"java.referenced": {"pattern": "test"}}
-        }
+        when = {"not": {"java.referenced": {"pattern": "test"}}}
 
         complexity = classifier._analyze_when_condition(when)
         assert complexity == "medium"
@@ -150,7 +146,7 @@ class TestWhenConditionAnalysis:
 
         when = {
             "java.referenced": {"pattern": "test1"},
-            "builtin.filecontent": {"pattern": "test2"}
+            "builtin.filecontent": {"pattern": "test2"},
         }
 
         complexity = classifier._analyze_when_condition(when)
@@ -160,11 +156,7 @@ class TestWhenConditionAnalysis:
         """Should classify XPath conditions as high"""
         classifier = RulesetComplexityClassifier()
 
-        when = {
-            "builtin.xml": {
-                "xpath": "//configuration/property"
-            }
-        }
+        when = {"builtin.xml": {"xpath": "//configuration/property"}}
 
         complexity = classifier._analyze_when_condition(when)
         assert complexity == "high"
@@ -173,11 +165,7 @@ class TestWhenConditionAnalysis:
         """Should classify complex regex patterns as high"""
         classifier = RulesetComplexityClassifier()
 
-        when = {
-            "java.referenced": {
-                "pattern": "(?=test)pattern"  # Lookahead
-            }
-        }
+        when = {"java.referenced": {"pattern": "(?=test)pattern"}}  # Lookahead
 
         complexity = classifier._analyze_when_condition(when)
         assert complexity == "high"
@@ -239,7 +227,7 @@ class TestRuleClassification:
             "description": "Replace javax.servlet with jakarta.servlet",
             "message": "Change import from javax.servlet to jakarta.servlet",
             "effort": 1,
-            "when": {"java.referenced": {"pattern": "javax.servlet.*"}}
+            "when": {"java.referenced": {"pattern": "javax.servlet.*"}},
         }
 
         complexity = classifier.classify_rule(rule)
@@ -256,7 +244,7 @@ class TestRuleClassification:
             "description": "Replace @Stateless with @ApplicationScoped",
             "message": "Simple annotation replacement",
             "effort": 2,
-            "when": {"java.referenced": {"pattern": "javax.ejb.Stateless"}}
+            "when": {"java.referenced": {"pattern": "javax.ejb.Stateless"}},
         }
 
         complexity = classifier.classify_rule(rule)
@@ -271,7 +259,7 @@ class TestRuleClassification:
             "description": "Migrate JMS to Reactive Messaging",
             "message": "Update message-driven beans to use reactive patterns",
             "effort": 5,
-            "when": {"java.referenced": {"pattern": "javax.jms.*"}}
+            "when": {"java.referenced": {"pattern": "javax.jms.*"}},
         }
 
         complexity = classifier.classify_rule(rule)
@@ -286,7 +274,7 @@ class TestRuleClassification:
             "description": "Update Spring Security configuration",
             "message": "Migrate to new security architecture",
             "effort": 7,
-            "when": {"java.referenced": {"pattern": "org.springframework.security.*"}}
+            "when": {"java.referenced": {"pattern": "org.springframework.security.*"}},
         }
 
         complexity = classifier.classify_rule(rule)
@@ -301,7 +289,7 @@ class TestRuleClassification:
             "description": "Complex migration",
             "message": "Requires significant refactoring",
             "effort": 8,
-            "when": {"java.referenced": {"pattern": "test"}}
+            "when": {"java.referenced": {"pattern": "test"}},
         }
 
         complexity = classifier.classify_rule(rule)
@@ -316,7 +304,7 @@ class TestRuleClassification:
             "description": "Custom security realm",
             "message": "Migrate custom security realm implementation",
             "effort": 10,
-            "when": {"java.referenced": {"pattern": "org.wildfly.security.*"}}
+            "when": {"java.referenced": {"pattern": "org.wildfly.security.*"}},
         }
 
         complexity = classifier.classify_rule(rule)
@@ -331,7 +319,7 @@ class TestRuleClassification:
             "description": "Some migration",
             "message": "Update something",
             "effort": 3,
-            "when": {"java.referenced": {"pattern": "test"}}
+            "when": {"java.referenced": {"pattern": "test"}},
         }
 
         complexity = classifier.classify_rule(rule)
@@ -352,15 +340,15 @@ class TestRulesetClassification:
                 "description": "Replace javax.servlet",
                 "message": "Change to jakarta.servlet",
                 "effort": 1,
-                "when": {"java.referenced": {"pattern": "javax.servlet.*"}}
+                "when": {"java.referenced": {"pattern": "javax.servlet.*"}},
             },
             {
                 "ruleID": "test-00010",
                 "description": "Update security config",
                 "message": "Migrate security",
                 "effort": 7,
-                "when": {"java.referenced": {"pattern": "spring.security.*"}}
-            }
+                "when": {"java.referenced": {"pattern": "spring.security.*"}},
+            },
         ]
 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
@@ -393,9 +381,9 @@ class TestRulesetClassification:
                     "description": "Simple annotation swap",
                     "message": "Replace @Stateless",
                     "effort": 2,
-                    "when": {"java.referenced": {"pattern": "test"}}
+                    "when": {"java.referenced": {"pattern": "test"}},
                 }
-            ]
+            ],
         }
 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
@@ -423,7 +411,7 @@ class TestRulesetClassification:
                 "message": "Test",
                 "effort": 1,
                 "when": {},
-                "migration_complexity": "medium"  # Existing, will change to low
+                "migration_complexity": "medium",  # Existing, will change to low
             }
         ]
 
@@ -450,7 +438,7 @@ class TestRulesetClassification:
                 "description": "Test",
                 "message": "Test",
                 "effort": 5,
-                "when": {}
+                "when": {},
             }
         ]
 
@@ -484,7 +472,7 @@ class TestRulesetClassification:
                 "description": "Test",
                 "message": "Test",
                 "effort": 5,
-                "when": {}
+                "when": {},
             }
         ]
 
@@ -535,7 +523,7 @@ class TestVerboseOutput:
             "description": "Security update",
             "message": "Update authentication",
             "effort": 7,
-            "when": {}
+            "when": {},
         }
 
         classifier.classify_rule(rule)
@@ -554,7 +542,7 @@ class TestVerboseOutput:
             "description": "Test",
             "message": "Test",
             "effort": 5,
-            "when": {}
+            "when": {},
         }
 
         classifier.classify_rule(rule)
@@ -596,7 +584,7 @@ class TestEdgeCases:
             "description": "测试规则",  # Chinese
             "message": "テストメッセージ",  # Japanese
             "effort": 5,
-            "when": {}
+            "when": {},
         }
 
         complexity = classifier.classify_rule(rule)

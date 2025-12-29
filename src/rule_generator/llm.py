@@ -3,9 +3,10 @@ Simple LLM adapters for rule generation.
 
 Provides a unified interface for different LLM providers.
 """
+
 import os
-from typing import Dict, Any, Optional
 from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional
 
 
 class LLMProvider(ABC):
@@ -54,7 +55,7 @@ class OpenAIProvider(LLMProvider):
             model=self.model,
             messages=[{"role": "user", "content": prompt}],
             temperature=temperature,
-            max_tokens=max_tokens
+            max_tokens=max_tokens,
         )
 
         return {
@@ -62,8 +63,8 @@ class OpenAIProvider(LLMProvider):
             "usage": {
                 "prompt_tokens": response.usage.prompt_tokens,
                 "completion_tokens": response.usage.completion_tokens,
-                "total_tokens": response.usage.total_tokens
-            }
+                "total_tokens": response.usage.total_tokens,
+            },
         }
 
 
@@ -95,15 +96,15 @@ class AnthropicProvider(LLMProvider):
             model=self.model,
             max_tokens=max_tokens,
             temperature=temperature,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
         )
 
         return {
             "response": response.content[0].text,
             "usage": {
                 "input_tokens": response.usage.input_tokens,
-                "output_tokens": response.usage.output_tokens
-            }
+                "output_tokens": response.usage.output_tokens,
+            },
         }
 
 
@@ -121,7 +122,9 @@ class GoogleProvider(LLMProvider):
         try:
             import google.generativeai as genai
         except ImportError:
-            raise ImportError("google-generativeai package required. Install with: pip install google-generativeai")
+            raise ImportError(
+                "google-generativeai package required. Install with: pip install google-generativeai"
+            )
 
         self.model_name = model
         genai.configure(api_key=api_key or os.getenv("GOOGLE_API_KEY"))
@@ -136,22 +139,21 @@ class GoogleProvider(LLMProvider):
             "max_output_tokens": kwargs.get("max_tokens", 8000),
         }
 
-        response = self.model.generate_content(
-            prompt,
-            generation_config=generation_config
-        )
+        response = self.model.generate_content(prompt, generation_config=generation_config)
 
         return {
             "response": response.text,
             "usage": {
                 "prompt_tokens": response.usage_metadata.prompt_token_count,
                 "completion_tokens": response.usage_metadata.candidates_token_count,
-                "total_tokens": response.usage_metadata.total_token_count
-            }
+                "total_tokens": response.usage_metadata.total_token_count,
+            },
         }
 
 
-def get_llm_provider(provider: str = "openai", model: Optional[str] = None, api_key: Optional[str] = None) -> LLMProvider:
+def get_llm_provider(
+    provider: str = "openai", model: Optional[str] = None, api_key: Optional[str] = None
+) -> LLMProvider:
     """
     Factory function to get LLM provider.
 

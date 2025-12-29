@@ -10,6 +10,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+
 import yaml
 
 
@@ -39,31 +40,24 @@ def create_test_template(rule_file: Path, output_dir: Path, data_dir_name: str) 
     # Create test structure
     test_content = {
         'rulesPath': f'../{rule_file.name}',
-        'providers': [
-            {
-                'name': 'java',
-                'dataPath': f'data/{data_dir_name}'
-            }
-        ],
-        'tests': []
+        'providers': [{'name': 'java', 'dataPath': f'data/{data_dir_name}'}],
+        'tests': [],
     }
 
     # Add test case for each rule
     for rule_id in rule_ids:
-        test_content['tests'].append({
-            'ruleID': rule_id,
-            'testCases': [
-                {
-                    'name': 'tc-1',
-                    'analysisParams': {
-                        'mode': 'source-only'
-                    },
-                    'hasIncidents': {
-                        'atLeast': 1
+        test_content['tests'].append(
+            {
+                'ruleID': rule_id,
+                'testCases': [
+                    {
+                        'name': 'tc - 1',
+                        'analysisParams': {'mode': 'source-only'},
+                        'hasIncidents': {'atLeast': 1},
                     }
-                }
-            ]
-        })
+                ],
+            }
+        )
 
     # Write test file
     test_file_name = rule_file.stem + '.test.yaml'
@@ -75,7 +69,9 @@ def create_test_template(rule_file: Path, output_dir: Path, data_dir_name: str) 
     return test_file_path
 
 
-def create_test_data_structure(output_dir: Path, data_dir_name: str, source: str, version: str) -> Path:
+def create_test_data_structure(
+    output_dir: Path, data_dir_name: str, source: str, version: str
+) -> Path:
     """
     Create skeleton test data directory structure.
 
@@ -96,11 +92,11 @@ def create_test_data_structure(output_dir: Path, data_dir_name: str, source: str
     src_dir.mkdir(parents=True, exist_ok=True)
 
     # Create minimal pom.xml
-    pom_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+    pom_content = f"""<?xml version="1.0" encoding="UTF - 8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         http://maven.apache.org/xsd/maven - 4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
@@ -147,7 +143,9 @@ public class Application {{
     return test_data_dir
 
 
-def create_readme(output_dir: Path, rule_file: Path, source: str, target: str, guide_url: str) -> Path:
+def create_readme(
+    output_dir: Path, rule_file: Path, source: str, target: str, guide_url: str
+) -> Path:
     """
     Create README for the submission package.
 
@@ -238,42 +236,26 @@ def main():
 Examples:
   # Prepare Spring Boot 4.0 rules for submission
   python scripts/prepare_submission.py \\
-    --rules examples/output/spring-boot-4.0/migration-rules.yaml \\
-    --source spring-boot-3.5 \\
-    --target spring-boot-4.0 \\
-    --guide-url https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide \\
-    --output submission/spring-boot-4.0
-        """
+    --rules examples/output/spring-boot - 4.0/migration-rules.yaml \\
+    --source spring-boot - 3.5 \\
+    --target spring-boot - 4.0 \\
+    --guide-url https://github.com/spring-projects/spring-boot/wiki/Spring-Boot - 4.0-Migration-Guide \\
+    --output submission/spring-boot - 4.0
+        """,
     )
 
+    parser.add_argument('--rules', required=True, help='Path to generated rule YAML file')
     parser.add_argument(
-        '--rules',
-        required=True,
-        help='Path to generated rule YAML file'
+        '--source', required=True, help='Source technology/version (e.g., spring-boot - 3.5)'
     )
     parser.add_argument(
-        '--source',
-        required=True,
-        help='Source technology/version (e.g., spring-boot-3.5)'
+        '--target', required=True, help='Target technology/version (e.g., spring-boot - 4.0)'
     )
-    parser.add_argument(
-        '--target',
-        required=True,
-        help='Target technology/version (e.g., spring-boot-4.0)'
-    )
-    parser.add_argument(
-        '--guide-url',
-        required=True,
-        help='URL to migration guide'
-    )
-    parser.add_argument(
-        '--output',
-        required=True,
-        help='Output directory for submission package'
-    )
+    parser.add_argument('--guide-url', required=True, help='URL to migration guide')
+    parser.add_argument('--output', required=True, help='Output directory for submission package')
     parser.add_argument(
         '--data-dir-name',
-        help='Name for test data directory (default: extracted from rule file name)'
+        help='Name for test data directory (default: extracted from rule file name)',
     )
 
     args = parser.parse_args()
@@ -291,7 +273,7 @@ Examples:
     # Determine test data directory name
     data_dir_name = args.data_dir_name
     if not data_dir_name:
-        # Extract from rule file name (e.g., spring-boot-3.5-to-4.0-mongodb.yaml -> mongodb)
+        # Extract from rule file name (e.g., spring-boot - 3.5-to - 4.0-mongodb.yaml -> mongodb)
         parts = rule_file.stem.split('-')
         # Try to find a meaningful suffix after version numbers
         data_dir_name = '-'.join(parts[-2:]) if len(parts) > 2 else 'test'
@@ -319,7 +301,9 @@ Examples:
     print(f"[3/4] Creating test data structure...")
     data_dir = test_dir / 'data'
     data_dir.mkdir(exist_ok=True)
-    test_data_dir = create_test_data_structure(data_dir, data_dir_name, args.source, args.source.split('-')[-1])
+    test_data_dir = create_test_data_structure(
+        data_dir, data_dir_name, args.source, args.source.split('-')[-1]
+    )
     print(f"  ✓ {test_data_dir}")
     print(f"  ✓ {test_data_dir / 'pom.xml'}")
     print(f"  ✓ {test_data_dir / 'src/main/java/com/example/Application.java'}")

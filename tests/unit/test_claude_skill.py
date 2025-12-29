@@ -8,9 +8,11 @@ Tests cover:
 - Documentation completeness
 - Markdown link validation
 """
+
+from pathlib import Path
+
 import pytest
 import yaml
-from pathlib import Path
 
 
 class TestSkillStructure:
@@ -43,11 +45,7 @@ class TestSkillStructure:
 
     def test_demo_files_exist(self, skill_dir):
         """Demo documentation files should exist."""
-        demo_files = [
-            "DEMO.md",
-            "QUICK-DEMO.md",
-            "examples.md"
-        ]
+        demo_files = ["DEMO.md", "QUICK-DEMO.md", "examples.md"]
         for filename in demo_files:
             filepath = skill_dir / filename
             assert filepath.exists(), f"{filename} not found"
@@ -59,7 +57,13 @@ class TestSkillFrontmatter:
     @pytest.fixture
     def skill_content(self):
         """Read SKILL.md content."""
-        skill_file = Path(__file__).parent.parent.parent / ".claude" / "skills" / "konveyor-rules" / "SKILL.md"
+        skill_file = (
+            Path(__file__).parent.parent.parent
+            / ".claude"
+            / "skills"
+            / "konveyor-rules"
+            / "SKILL.md"
+        )
         return skill_file.read_text()
 
     @pytest.fixture
@@ -112,7 +116,13 @@ class TestSkillContent:
     @pytest.fixture
     def skill_content(self):
         """Read SKILL.md content."""
-        skill_file = Path(__file__).parent.parent.parent / ".claude" / "skills" / "konveyor-rules" / "SKILL.md"
+        skill_file = (
+            Path(__file__).parent.parent.parent
+            / ".claude"
+            / "skills"
+            / "konveyor-rules"
+            / "SKILL.md"
+        )
         return skill_file.read_text()
 
     @pytest.fixture
@@ -144,7 +154,9 @@ class TestSkillContent:
     def test_has_examples(self, markdown_content):
         """Should have usage examples."""
         assert "```" in markdown_content, "Missing code examples"
-        assert "python scripts/generate_rules.py" in markdown_content, "Missing script usage example"
+        assert (
+            "python scripts/generate_rules.py" in markdown_content
+        ), "Missing script usage example"
 
 
 class TestDocumentationLinks:
@@ -166,12 +178,13 @@ class TestDocumentationLinks:
         demo_links = {
             "DEMO.md": "DEMO.md",
             "QUICK-DEMO.md": "QUICK-DEMO.md",
-            "examples.md": "examples.md"
+            "examples.md": "examples.md",
         }
 
         for link_text, filename in demo_links.items():
-            assert link_text in readme_content or filename in readme_content, \
-                f"README does not link to {filename}"
+            assert (
+                link_text in readme_content or filename in readme_content
+            ), f"README does not link to {filename}"
 
             # Verify file exists
             filepath = skill_dir / filename
@@ -210,8 +223,9 @@ class TestDocumentationCompleteness:
         """README should document prerequisites."""
         readme = (skill_dir / "README.md").read_text()
         content_lower = readme.lower()
-        assert "prerequisite" in content_lower or "requirement" in content_lower, \
-            "README should document prerequisites"
+        assert (
+            "prerequisite" in content_lower or "requirement" in content_lower
+        ), "README should document prerequisites"
 
     def test_readme_has_usage_instructions(self, skill_dir):
         """README should have usage instructions."""
@@ -228,17 +242,18 @@ class TestDocumentationCompleteness:
         quick_demo = (skill_dir / "QUICK-DEMO.md").read_text()
         content_lower = quick_demo.lower()
         # Should mention minutes or seconds
-        assert "minute" in content_lower or "second" in content_lower, \
-            "Quick demo should include timing information"
+        assert (
+            "minute" in content_lower or "second" in content_lower
+        ), "Quick demo should include timing information"
 
     def test_examples_has_conversations(self, skill_dir):
         """examples.md should have example conversations."""
         examples = (skill_dir / "examples.md").read_text()
         # Should have user/claude conversation markers
-        assert "User:" in examples or "**User:**" in examples, \
-            "examples.md should show user input"
-        assert "Claude:" in examples or "**Claude:**" in examples, \
-            "examples.md should show Claude responses"
+        assert "User:" in examples or "**User:**" in examples, "examples.md should show user input"
+        assert (
+            "Claude:" in examples or "**Claude:**" in examples
+        ), "examples.md should show Claude responses"
 
 
 class TestAPIKeyDocumentation:
@@ -260,5 +275,4 @@ class TestAPIKeyDocumentation:
         """SKILL.md should mention API key requirements."""
         skill_md = (skill_dir / "SKILL.md").read_text()
         content_lower = skill_md.lower()
-        assert "api" in content_lower and "key" in content_lower, \
-            "SKILL.md should mention API keys"
+        assert "api" in content_lower and "key" in content_lower, "SKILL.md should mention API keys"

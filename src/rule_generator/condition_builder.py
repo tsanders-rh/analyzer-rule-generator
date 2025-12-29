@@ -4,7 +4,8 @@ Condition builder utilities for generating analyzer rule conditions.
 This module provides helper functions to build various types of conditions
 for Konveyor analyzer rules, reducing code duplication in the generator.
 """
-from typing import Dict, Any, List, Optional
+
+from typing import Any, Dict, List, Optional
 
 
 def build_or_condition_with_alternatives(
@@ -12,7 +13,7 @@ def build_or_condition_with_alternatives(
     alternative_patterns: List[str],
     condition_key: str,
     pattern_key: str = "pattern",
-    additional_keys: Optional[Dict[str, Any]] = None
+    additional_keys: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Build an OR condition with a base pattern and alternatives.
@@ -50,11 +51,7 @@ def build_or_condition_with_alternatives(
     conditions = [base_condition]
 
     for alt_pattern in alternative_patterns:
-        alt_condition = {
-            condition_key: {
-                pattern_key: alt_pattern
-            }
-        }
+        alt_condition = {condition_key: {pattern_key: alt_pattern}}
 
         # Add any additional keys (like location, lowerbound, etc.)
         if additional_keys:
@@ -65,10 +62,7 @@ def build_or_condition_with_alternatives(
     return {"or": conditions}
 
 
-def build_builtin_condition(
-    pattern: str,
-    file_pattern: Optional[str] = None
-) -> Dict[str, Any]:
+def build_builtin_condition(pattern: str, file_pattern: Optional[str] = None) -> Dict[str, Any]:
     """
     Build a builtin.filecontent condition.
 
@@ -88,11 +82,7 @@ def build_builtin_condition(
             }
         }
     """
-    condition = {
-        "builtin.filecontent": {
-            "pattern": pattern
-        }
-    }
+    condition = {"builtin.filecontent": {"pattern": pattern}}
 
     if file_pattern:
         condition["builtin.filecontent"]["filePattern"] = file_pattern
@@ -114,17 +104,10 @@ def build_nodejs_condition(pattern: str) -> Dict[str, Any]:
         >>> build_nodejs_condition("ComponentFactoryResolver")
         {"nodejs.referenced": {"pattern": "ComponentFactoryResolver"}}
     """
-    return {
-        "nodejs.referenced": {
-            "pattern": pattern
-        }
-    }
+    return {"nodejs.referenced": {"pattern": pattern}}
 
 
-def build_csharp_condition(
-    pattern: str,
-    location: Optional[str] = None
-) -> Dict[str, Any]:
+def build_csharp_condition(pattern: str, location: Optional[str] = None) -> Dict[str, Any]:
     """
     Build a c-sharp.referenced condition.
 
@@ -144,11 +127,7 @@ def build_csharp_condition(
             }
         }
     """
-    condition = {
-        "c-sharp.referenced": {
-            "pattern": pattern
-        }
-    }
+    condition = {"c-sharp.referenced": {"pattern": pattern}}
 
     if location:
         condition["c-sharp.referenced"]["location"] = location
@@ -157,9 +136,7 @@ def build_csharp_condition(
 
 
 def build_java_referenced_condition(
-    pattern: str,
-    location: str,
-    alternative_patterns: Optional[List[str]] = None
+    pattern: str, location: str, alternative_patterns: Optional[List[str]] = None
 ) -> Dict[str, Any]:
     """
     Build a java.referenced condition with optional alternatives.
@@ -185,28 +162,21 @@ def build_java_referenced_condition(
             ]
         }
     """
-    base_condition = {
-        "java.referenced": {
-            "pattern": pattern,
-            "location": location
-        }
-    }
+    base_condition = {"java.referenced": {"pattern": pattern, "location": location}}
 
     if alternative_patterns:
         return build_or_condition_with_alternatives(
             base_condition,
             alternative_patterns,
             "java.referenced",
-            additional_keys={"location": location}
+            additional_keys={"location": location},
         )
 
     return base_condition
 
 
 def build_java_dependency_condition(
-    dependency_name: str,
-    alternative_names: Optional[List[str]] = None,
-    lowerbound: str = "0.0.0"
+    dependency_name: str, alternative_names: Optional[List[str]] = None, lowerbound: str = "0.0.0"
 ) -> Dict[str, Any]:
     """
     Build a java.dependency condition with optional alternatives.
@@ -231,12 +201,7 @@ def build_java_dependency_condition(
             ]
         }
     """
-    base_condition = {
-        "java.dependency": {
-            "name": dependency_name,
-            "lowerbound": lowerbound
-        }
-    }
+    base_condition = {"java.dependency": {"name": dependency_name, "lowerbound": lowerbound}}
 
     if alternative_names:
         return build_or_condition_with_alternatives(
@@ -244,15 +209,13 @@ def build_java_dependency_condition(
             alternative_names,
             "java.dependency",
             pattern_key="name",
-            additional_keys={"lowerbound": lowerbound}
+            additional_keys={"lowerbound": lowerbound},
         )
 
     return base_condition
 
 
-def build_combo_condition(
-    conditions: List[Dict[str, Any]]
-) -> Dict[str, Any]:
+def build_combo_condition(conditions: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Build an AND condition combining multiple conditions.
 

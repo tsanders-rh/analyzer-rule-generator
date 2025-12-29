@@ -3,15 +3,14 @@ Unit tests for src/rule_generator/extraction.py
 
 Tests pattern extraction logic, language detection, and LLM response parsing.
 """
+
 import json
-import pytest
 from unittest.mock import Mock, patch
 
-from src.rule_generator.extraction import (
-    MigrationPatternExtractor,
-    detect_language_from_frameworks
-)
-from src.rule_generator.schema import MigrationPattern, LocationType, CSharpLocationType
+import pytest
+
+from src.rule_generator.extraction import MigrationPatternExtractor, detect_language_from_frameworks
+from src.rule_generator.schema import CSharpLocationType, LocationType, MigrationPattern
 
 
 class TestLanguageDetection:
@@ -229,7 +228,7 @@ class TestPatternParsing:
             "CONSTRUCTOR_CALL",
             "TYPE",
             "INHERITANCE",
-            "PACKAGE"
+            "PACKAGE",
         ]
 
         for loc_type in location_types:
@@ -249,12 +248,7 @@ class TestPatternParsing:
 
     def test_parse_pattern_with_csharp_location_types(self, extractor):
         """Should correctly parse all valid C# location types"""
-        location_types = [
-            "FIELD",
-            "CLASS",
-            "METHOD",
-            "ALL"
-        ]
+        location_types = ["FIELD", "CLASS", "METHOD", "ALL"]
 
         for loc_type in location_types:
             response = f'''[{{
@@ -386,13 +380,7 @@ class TestPatternComplexity:
         mock_llm = Mock()
         return MigrationPatternExtractor(mock_llm)
 
-    @pytest.mark.parametrize("complexity", [
-        "TRIVIAL",
-        "LOW",
-        "MEDIUM",
-        "HIGH",
-        "EXPERT"
-    ])
+    @pytest.mark.parametrize("complexity", ["TRIVIAL", "LOW", "MEDIUM", "HIGH", "EXPERT"])
     def test_parse_all_complexity_levels(self, extractor, complexity):
         """Should parse all valid complexity levels"""
         response = f'''[{{
@@ -418,13 +406,9 @@ class TestPatternCategories:
         mock_llm = Mock()
         return MigrationPatternExtractor(mock_llm)
 
-    @pytest.mark.parametrize("category", [
-        "dependency",
-        "annotation",
-        "api",
-        "configuration",
-        "other"
-    ])
+    @pytest.mark.parametrize(
+        "category", ["dependency", "annotation", "api", "configuration", "other"]
+    )
     def test_parse_all_categories(self, extractor, category):
         """Should parse all valid categories"""
         response = f'''[{{
@@ -544,7 +528,7 @@ class TestErrorHandling:
         mock_llm = Mock()
         mock_llm.generate.return_value = {
             "response": "I cannot extract patterns from this guide.",
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5}
+            "usage": {"prompt_tokens": 10, "completion_tokens": 5},
         }
 
         extractor = MigrationPatternExtractor(mock_llm)
@@ -619,7 +603,7 @@ class TestJSONRepair:
         # JSON with invalid \. escape (common in regex patterns)
         malformed = '{"pattern": "com\\.example\\.Test"}'
         repaired = extractor._repair_json(malformed)
-        
+
         # Should double-escape the backslashes
         assert "\\\\" in repaired
         # Should be valid JSON after repair
@@ -631,7 +615,7 @@ class TestJSONRepair:
         # Regex pattern with \d (invalid in JSON)
         malformed = '{"pattern": "\\d+"}'
         repaired = extractor._repair_json(malformed)
-        
+
         # Should successfully parse after repair
         parsed = json.loads(repaired)
         assert "pattern" in parsed
@@ -641,7 +625,7 @@ class TestJSONRepair:
         # JSON with unescaped single quote
         malformed = '{"desc": "It\'s a test"}'
         repaired = extractor._repair_json(malformed)
-        
+
         # Should successfully parse after repair
         parsed = json.loads(repaired)
         assert "desc" in parsed
@@ -650,7 +634,7 @@ class TestJSONRepair:
         """Should preserve valid escape sequences like \\n, \\t"""
         valid_json = '{"message": "Line 1\\nLine 2\\tTabbed"}'
         repaired = extractor._repair_json(valid_json)
-        
+
         # Should parse successfully
         parsed = json.loads(repaired)
         assert "message" in parsed
@@ -661,7 +645,7 @@ class TestJSONRepair:
         """Should remove trailing commas before closing braces"""
         malformed = '{"pattern": "test", "rationale": "desc",}'
         repaired = extractor._repair_json(malformed)
-        
+
         # Should remove the trailing comma
         assert not repaired.strip().endswith(",}")
         # Should parse successfully
@@ -672,7 +656,7 @@ class TestJSONRepair:
         """Should add missing commas between objects in array"""
         malformed = '[{"a": 1}{"b": 2}]'
         repaired = extractor._repair_json(malformed)
-        
+
         # Should add comma between objects
         assert '},{' in repaired
         # Should parse successfully
@@ -683,7 +667,7 @@ class TestJSONRepair:
         """Should not break already valid JSON"""
         valid_json = '{"pattern": "example", "rationale": "Test"}'
         repaired = extractor._repair_json(valid_json)
-        
+
         parsed = json.loads(repaired)
         assert parsed["pattern"] == "example"
         assert parsed["rationale"] == "Test"
@@ -704,9 +688,9 @@ class TestPatternValidation:
             source_pattern="Button isDisabled",  # Component + prop format
             rationale="Button component change",
             complexity="low",
-            category="api"
+            category="api",
         )
-        
+
         assert extractor._looks_like_prop_pattern(pattern) is True
 
     def test_looks_like_prop_pattern_with_pascal_camel_case(self, extractor):
@@ -715,9 +699,9 @@ class TestPatternValidation:
             source_pattern="Modal title",  # PascalCase + camelCase
             rationale="Modal property change",
             complexity="low",
-            category="api"
+            category="api",
         )
-        
+
         assert extractor._looks_like_prop_pattern(pattern) is True
 
     def test_looks_like_prop_pattern_without_component_format(self, extractor):
@@ -726,9 +710,9 @@ class TestPatternValidation:
             source_pattern="isDisabled",  # Just prop name, no component
             rationale="Property change",
             complexity="low",
-            category="api"
+            category="api",
         )
-        
+
         assert extractor._looks_like_prop_pattern(pattern) is False
 
     def test_looks_like_prop_pattern_excludes_method_names(self, extractor):
@@ -737,9 +721,9 @@ class TestPatternValidation:
             source_pattern="Component useState",  # Method name, not prop
             rationale="Component change",
             complexity="low",
-            category="api"
+            category="api",
         )
-        
+
         assert extractor._looks_like_prop_pattern(pattern) is False
 
     def test_is_overly_broad_pattern_generic_prop_names(self, extractor):
@@ -768,12 +752,12 @@ class TestPatternValidation:
             rationale="Button prop change",
             complexity="low",
             category="api",
-            provider_type="builtin"
+            provider_type="builtin",
         )
-        
+
         # Convert to combo rule
         converted = extractor._convert_to_combo_rule(pattern)
-        
+
         # Should update provider_type to combo
         assert converted.provider_type == "combo"
         # Should have when_combo configuration
@@ -791,22 +775,20 @@ class TestPatternValidation:
                 rationale="Alert prop change",
                 complexity="low",
                 category="api",
-                provider_type="builtin"
+                provider_type="builtin",
             )
         ]
-        
+
         # Call with language and framework info
         fixed_patterns = extractor._validate_and_fix_patterns(
-            patterns, 
+            patterns,
             language="javascript",
             source_framework="patternfly-v5",
-            target_framework="patternfly-v6"
+            target_framework="patternfly-v6",
         )
-        
+
         # Should return validated patterns
         assert len(fixed_patterns) >= 1
-
-
 
 
 class TestOpenRewritePrompt:
@@ -829,13 +811,13 @@ class TestOpenRewritePrompt:
         recipeList:
           - org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_0
         """
-        
+
         prompt = extractor._build_openrewrite_prompt(
             recipe_content=recipe_content,
             source_framework="spring-boot-2",
-            target_framework="spring-boot-3"
+            target_framework="spring-boot-3",
         )
-        
+
         # Should contain OpenRewrite-specific instructions
         assert "OpenRewrite" in prompt or "recipe" in prompt.lower()
         # Should contain Java-specific instructions
@@ -850,39 +832,35 @@ class TestOpenRewritePrompt:
         displayName: React 18 Upgrade
         description: Migrate to React 18
         """
-        
+
         prompt = extractor._build_openrewrite_prompt(
-            recipe_content=recipe_content,
-            source_framework="react-17",
-            target_framework="react-18"
+            recipe_content=recipe_content, source_framework="react-17", target_framework="react-18"
         )
-        
+
         # Should contain TypeScript/JavaScript instructions
         assert len(prompt) > 0
 
     def test_build_openrewrite_prompt_includes_frameworks(self, extractor):
         """Should include framework information in prompt"""
         recipe_content = "# Test recipe"
-        
+
         prompt = extractor._build_openrewrite_prompt(
             recipe_content=recipe_content,
             source_framework="spring-boot-2.7",
-            target_framework="spring-boot-3.0"
+            target_framework="spring-boot-3.0",
         )
-        
+
         # Should generate a prompt with framework info
         assert len(prompt) > 0
 
     def test_build_openrewrite_prompt_without_frameworks(self, extractor):
         """Should handle missing framework information"""
         recipe_content = "# Test recipe"
-        
+
         prompt = extractor._build_openrewrite_prompt(
-            recipe_content=recipe_content,
-            source_framework=None,
-            target_framework=None
+            recipe_content=recipe_content, source_framework=None, target_framework=None
         )
-        
+
         # Should still generate a valid prompt
         assert len(prompt) > 0
 
@@ -900,11 +878,13 @@ class TestAggressiveJSONRepair:
         """Should use aggressive repair when initial repair fails"""
         # JSON that's so broken even initial repair won't fix it
         # Contains both invalid escapes AND other syntax errors
-        badly_malformed = '[{"pattern": "test\\.pattern", "rationale": "desc"}}'  # Missing opening bracket
-        
+        badly_malformed = (
+            '[{"pattern": "test\\.pattern", "rationale": "desc"}}'  # Missing opening bracket
+        )
+
         # This should trigger aggressive repair
         patterns = extractor._parse_extraction_response(badly_malformed)
-        
+
         # May return empty list if too broken, but shouldn't crash
         assert isinstance(patterns, list)
 
@@ -912,9 +892,9 @@ class TestAggressiveJSONRepair:
         """Should handle patterns needing aggressive backslash escaping"""
         # JSON with multiple levels of escaping issues
         response = '[{"source_pattern": "\\w+", "rationale": "test", "complexity": "low", "category": "api"}]'
-        
+
         patterns = extractor._parse_extraction_response(response)
-        
+
         # Should successfully parse with aggressive escaping
         assert len(patterns) >= 0  # May succeed or fail gracefully
 
@@ -922,9 +902,9 @@ class TestAggressiveJSONRepair:
         """Should return empty list when all repair attempts fail"""
         # Completely unparseable input
         garbage = '{"this is not json at all [[[{'
-        
+
         patterns = extractor._parse_extraction_response(garbage)
-        
+
         # Should return empty list, not crash
         assert patterns == []
 
@@ -932,9 +912,9 @@ class TestAggressiveJSONRepair:
         """Should fix over-escaped backslashes from aggressive repair"""
         # After aggressive escaping, we might have \\\\ which needs to become \\
         response = '[{"pattern": "test\\\\pattern", "rationale": "desc", "complexity": "low", "category": "api"}]'
-        
+
         patterns = extractor._parse_extraction_response(response)
-        
+
         # Should parse successfully
         assert isinstance(patterns, list)
 
@@ -952,24 +932,19 @@ class TestChunkedExtraction:
         """Should split large content into chunks and process each"""
         # Create large content that will be chunked
         large_content = "Migration guide:\n" + ("Some content about API changes.\n" * 1000)
-        
+
         # Mock the single extraction to return patterns
         with patch.object(extractor, '_extract_patterns_single') as mock_single:
             mock_single.return_value = [
                 MigrationPattern(
-                    source_pattern="OldAPI",
-                    rationale="Test",
-                    complexity="low",
-                    category="api"
+                    source_pattern="OldAPI", rationale="Test", complexity="low", category="api"
                 )
             ]
-            
+
             patterns = extractor._extract_patterns_chunked(
-                large_content,
-                source_framework="v1",
-                target_framework="v2"
+                large_content, source_framework="v1", target_framework="v2"
             )
-            
+
             # Should have called _extract_patterns_single at least once (probably multiple times for chunks)
             assert mock_single.call_count >= 1
             # Should return patterns
@@ -978,7 +953,7 @@ class TestChunkedExtraction:
     def test_extract_patterns_chunked_deduplicates(self, extractor):
         """Should deduplicate patterns from different chunks"""
         content = "Test content"
-        
+
         # Mock to return duplicate patterns
         duplicate_pattern = MigrationPattern(
             source_pattern="test",
@@ -986,19 +961,17 @@ class TestChunkedExtraction:
             rationale="Test",
             complexity="low",
             category="api",
-            concern="api"
+            concern="api",
         )
-        
+
         with patch.object(extractor, '_extract_patterns_single') as mock_single:
             # Return same pattern twice (simulating duplicates from different chunks)
             mock_single.return_value = [duplicate_pattern, duplicate_pattern]
-            
+
             patterns = extractor._extract_patterns_chunked(
-                content,
-                source_framework="v1",
-                target_framework="v2"
+                content, source_framework="v1", target_framework="v2"
             )
-            
+
             # Should deduplicate based on source_fqn + concern
             # Exact count depends on chunking, but should handle deduplication
             assert isinstance(patterns, list)
@@ -1012,7 +985,7 @@ class TestChunkedExtraction:
                 concern="api",
                 rationale="First",
                 complexity="low",
-                category="api"
+                category="api",
             ),
             MigrationPattern(
                 source_pattern="test2",
@@ -1020,7 +993,7 @@ class TestChunkedExtraction:
                 concern="api",  # Same concern
                 rationale="Duplicate",
                 complexity="low",
-                category="api"
+                category="api",
             ),
             MigrationPattern(
                 source_pattern="test3",
@@ -1028,12 +1001,12 @@ class TestChunkedExtraction:
                 concern="api",
                 rationale="Different",
                 complexity="low",
-                category="api"
-            )
+                category="api",
+            ),
         ]
-        
+
         unique = extractor._deduplicate_patterns(patterns)
-        
+
         # Should keep only 2: one for Test (first occurrence) and one for Other
         assert len(unique) == 2
         assert unique[0].source_fqn == "com.example.Test"
@@ -1048,7 +1021,7 @@ class TestChunkedExtraction:
                 concern="api",
                 rationale="API concern",
                 complexity="low",
-                category="api"
+                category="api",
             ),
             MigrationPattern(
                 source_pattern="test",
@@ -1056,11 +1029,11 @@ class TestChunkedExtraction:
                 concern="configuration",  # Different concern
                 rationale="Config concern",
                 complexity="low",
-                category="api"
-            )
+                category="api",
+            ),
         ]
-        
+
         unique = extractor._deduplicate_patterns(patterns)
-        
+
         # Should keep both (different concerns)
         assert len(unique) == 2

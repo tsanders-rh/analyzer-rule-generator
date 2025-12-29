@@ -3,9 +3,10 @@
 Analyze kantra output to summarize violations by rule.
 """
 
-import sys
 import re
+import sys
 from collections import defaultdict
+
 
 def analyze_kantra_output(filepath):
     """Parse kantra output and count violations by rule."""
@@ -15,7 +16,7 @@ def analyze_kantra_output(filepath):
     with open(filepath, 'r') as f:
         for line in f:
             # Match rule IDs (they appear indented under violations)
-            rule_match = re.match(r'^\s{2,4}(patternfly-5-to-patternfly-6-[^:]+):', line)
+            rule_match = re.match(r'^\s{2,4}(patternfly - 5-to-patternfly - 6-[^:]+):', line)
             if rule_match:
                 current_rule = rule_match.group(1)
 
@@ -25,8 +26,13 @@ def analyze_kantra_output(filepath):
 
     return rule_counts
 
+
 if __name__ == '__main__':
-    filepath = sys.argv[1] if len(sys.argv) > 1 else 'examples/output/patternfly-improved-detection-analysis/output.yaml'
+    filepath = (
+        sys.argv[1]
+        if len(sys.argv) > 1
+        else 'examples/output/patternfly-improved-detection-analysis/output.yaml'
+    )
 
     rule_counts = analyze_kantra_output(filepath)
 

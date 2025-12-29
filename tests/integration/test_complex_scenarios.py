@@ -3,13 +3,15 @@ Integration tests for complex real-world scenarios.
 
 Tests edge cases, large guides, special characters, and advanced features.
 """
-import pytest
+
 from unittest.mock import Mock
 
-from src.rule_generator.ingestion import GuideIngester
+import pytest
+
 from src.rule_generator.extraction import MigrationPatternExtractor
 from src.rule_generator.generator import AnalyzerRuleGenerator
-from src.rule_generator.schema import MigrationPattern, LocationType
+from src.rule_generator.ingestion import GuideIngester
+from src.rule_generator.schema import LocationType, MigrationPattern
 
 
 @pytest.mark.integration
@@ -22,42 +24,46 @@ class TestLargeGuides:
         # Generate a large guide
         guide_sections = []
         for i in range(50):
-            guide_sections.append(f"""
+            guide_sections.append(
+                f"""
 ## Pattern {i}
 The old.package.{i} has been renamed to new.package.{i}.
 Also, the OldClass{i} should be replaced with NewClass{i}.
-""")
+"""
+            )
 
         large_guide = "# Large Migration Guide\n" + "\n".join(guide_sections)
 
         # Mock LLM to return many patterns
         patterns_data = []
         for i in range(100):
-            patterns_data.append({
-                "source_pattern": f"old.package.{i}",
-                "target_pattern": f"new.package.{i}",
-                "source_fqn": f"old.package.{i}.*",
-                "location_type": "TYPE",
-                "complexity": "TRIVIAL",
-                "category": "api",
-                "concern": f"migration-{i % 10}",  # 10 different concerns
-                "rationale": f"Package {i} migration"
-            })
+            patterns_data.append(
+                {
+                    "source_pattern": f"old.package.{i}",
+                    "target_pattern": f"new.package.{i}",
+                    "source_fqn": f"old.package.{i}.*",
+                    "location_type": "TYPE",
+                    "complexity": "TRIVIAL",
+                    "category": "api",
+                    "concern": f"migration-{i % 10}",  # 10 different concerns
+                    "rationale": f"Package {i} migration",
+                }
+            )
 
         import json
+
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": json.dumps(patterns_data),
-            "usage": {"prompt_tokens": 5000, "completion_tokens": 2500, "total_tokens": 7500}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": json.dumps(patterns_data),
+                "usage": {"prompt_tokens": 5000, "completion_tokens": 2500, "total_tokens": 7500},
+            }
+        )
 
         # Process large guide
         ingester = GuideIngester()
         extractor = MigrationPatternExtractor(mock_llm)
-        generator = AnalyzerRuleGenerator(
-            source_framework="old",
-            target_framework="new"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
 
         guide_content = ingester.ingest(large_guide)
         patterns = extractor.extract_patterns(guide_content)
@@ -76,28 +82,41 @@ Also, the OldClass{i} should be replaced with NewClass{i}.
         """Should handle guide with many different concerns."""
         guide = "# Multi-concern guide"
 
-        concerns = ["security", "performance", "compatibility", "maintainability",
-                   "testing", "logging", "error-handling", "configuration"]
+        concerns = [
+            "security",
+            "performance",
+            "compatibility",
+            "maintainability",
+            "testing",
+            "logging",
+            "error-handling",
+            "configuration",
+        ]
 
         patterns_data = []
         for i, concern in enumerate(concerns):
-            patterns_data.append({
-                "source_pattern": f"pattern.{concern}",
-                "target_pattern": f"new.{concern}",
-                "source_fqn": f"pattern.{concern}.*",
-                "location_type": "TYPE",
-                "complexity": "LOW",
-                "category": "api",
-                "concern": concern,
-                "rationale": f"Migration for {concern}"
-            })
+            patterns_data.append(
+                {
+                    "source_pattern": f"pattern.{concern}",
+                    "target_pattern": f"new.{concern}",
+                    "source_fqn": f"pattern.{concern}.*",
+                    "location_type": "TYPE",
+                    "complexity": "LOW",
+                    "category": "api",
+                    "concern": concern,
+                    "rationale": f"Migration for {concern}",
+                }
+            )
 
         import json
+
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": json.dumps(patterns_data),
-            "usage": {"prompt_tokens": 500, "completion_tokens": 250, "total_tokens": 750}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": json.dumps(patterns_data),
+                "usage": {"prompt_tokens": 500, "completion_tokens": 250, "total_tokens": 750},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -125,7 +144,7 @@ class TestLocationTypes:
             location_type=LocationType.TYPE,
             complexity="TRIVIAL",
             category="api",
-            rationale="Class replacement"
+            rationale="Class replacement",
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -143,7 +162,7 @@ class TestLocationTypes:
             location_type=LocationType.PACKAGE,
             complexity="TRIVIAL",
             category="api",
-            rationale="Package renamed"
+            rationale="Package renamed",
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -161,7 +180,7 @@ class TestLocationTypes:
             location_type=LocationType.METHOD_CALL,
             complexity="LOW",
             category="api",
-            rationale="Method replaced"
+            rationale="Method replaced",
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -186,7 +205,7 @@ class TestCustomFilePatterns:
             complexity="TRIVIAL",
             category="api",
             rationale="Custom pattern migration",
-            file_pattern=r".*\.java$"  # Custom Java-only pattern
+            file_pattern=r".*\.java$",  # Custom Java-only pattern
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -206,7 +225,7 @@ class TestCustomFilePatterns:
             location_type=LocationType.TYPE,
             complexity="LOW",
             category="api",
-            rationale="Component migration"
+            rationale="Component migration",
             # No file_pattern specified
         )
 
@@ -222,19 +241,34 @@ class TestCustomFilePatterns:
         """Should handle various file pattern scenarios."""
         patterns = [
             MigrationPattern(
-                source_pattern="P1", target_pattern="N1", source_fqn="p1",
-                location_type=LocationType.TYPE, complexity="TRIVIAL",
-                category="api", rationale="CSS pattern", file_pattern=r"\.css$"
+                source_pattern="P1",
+                target_pattern="N1",
+                source_fqn="p1",
+                location_type=LocationType.TYPE,
+                complexity="TRIVIAL",
+                category="api",
+                rationale="CSS pattern",
+                file_pattern=r"\.css$",
             ),
             MigrationPattern(
-                source_pattern="P2", target_pattern="N2", source_fqn="p2",
-                location_type=LocationType.TYPE, complexity="TRIVIAL",
-                category="api", rationale="SCSS pattern", file_pattern=r"\.(scss|sass)$"
+                source_pattern="P2",
+                target_pattern="N2",
+                source_fqn="p2",
+                location_type=LocationType.TYPE,
+                complexity="TRIVIAL",
+                category="api",
+                rationale="SCSS pattern",
+                file_pattern=r"\.(scss|sass)$",
             ),
             MigrationPattern(
-                source_pattern="P3", target_pattern="N3", source_fqn="p3",
-                location_type=LocationType.TYPE, complexity="TRIVIAL",
-                category="api", rationale="XML pattern", file_pattern=r".*\.xml$"
+                source_pattern="P3",
+                target_pattern="N3",
+                source_fqn="p3",
+                location_type=LocationType.TYPE,
+                complexity="TRIVIAL",
+                category="api",
+                rationale="XML pattern",
+                file_pattern=r".*\.xml$",
             ),
         ]
 
@@ -260,7 +294,7 @@ class TestUnicodeAndSpecialCharacters:
             location_type=LocationType.PACKAGE,
             complexity="TRIVIAL",
             category="api",
-            rationale="日本語パッケージの更新"  # Japanese rationale
+            rationale="日本語パッケージの更新",  # Japanese rationale
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -279,7 +313,7 @@ class TestUnicodeAndSpecialCharacters:
             location_type=LocationType.TYPE,
             complexity="LOW",
             category="api",
-            rationale="Update pattern with special chars: & < > \" ' | @ # $ % ^"
+            rationale="Update pattern with special chars: & < > \" ' | @ # $ % ^",
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -303,7 +337,7 @@ class TestUnicodeAndSpecialCharacters:
 
 It contains multiple paragraphs.
 
-And should be preserved correctly."""
+And should be preserved correctly.""",
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -321,7 +355,7 @@ And should be preserved correctly."""
             location_type=LocationType.TYPE,
             complexity="LOW",
             category="api",
-            rationale="🚀 Upgrade to new feature for better performance ✨"
+            rationale="🚀 Upgrade to new feature for better performance ✨",
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -345,7 +379,7 @@ class TestEdgeCases:
             location_type=LocationType.TYPE,
             complexity="TRIVIAL",
             category="api",
-            rationale="Migration pattern"
+            rationale="Migration pattern",
             # No concern specified
         )
 
@@ -365,7 +399,7 @@ class TestEdgeCases:
             location_type=LocationType.TYPE,
             complexity="LOW",
             category="api",
-            rationale="Long pattern name test"
+            rationale="Long pattern name test",
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -383,7 +417,7 @@ class TestEdgeCases:
             location_type=LocationType.PACKAGE,
             complexity="TRIVIAL",
             category="api",
-            rationale="Wildcard package pattern"
+            rationale="Wildcard package pattern",
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -403,15 +437,9 @@ class TestEdgeCases:
                 location_type=LocationType.TYPE,
                 complexity=complexity,
                 category="api",
-                rationale=f"Pattern {complexity}"
+                rationale=f"Pattern {complexity}",
             )
-            for i, complexity in enumerate([
-                "TRIVIAL",
-                "LOW",
-                "MEDIUM",
-                "HIGH",
-                "VERY_HIGH"
-            ])
+            for i, complexity in enumerate(["TRIVIAL", "LOW", "MEDIUM", "HIGH", "VERY_HIGH"])
         ]
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -443,7 +471,7 @@ class TestPerformance:
                 complexity="LOW",
                 category="api",
                 rationale=f"Class {i} migration",
-                concern=f"module{i % 5}"
+                concern=f"module{i % 5}",
             )
             for i in range(100)
         ]
@@ -471,7 +499,7 @@ class TestPerformance:
                 complexity="TRIVIAL",
                 category="api",
                 rationale=f"Pattern {i} migration",
-                concern=f"concern{i % 20}"  # 20 different concerns
+                concern=f"concern{i % 20}",  # 20 different concerns
             )
             for i in range(200)
         ]

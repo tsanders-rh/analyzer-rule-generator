@@ -26,12 +26,13 @@ Usage:
         --verbose
 """
 
-import sys
-import yaml
 import argparse
-from pathlib import Path
-from typing import List, Dict, Any
 import re
+import sys
+from pathlib import Path
+from typing import Any, Dict, List
+
+import yaml
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -46,11 +47,11 @@ class RulesetComplexityClassifier:
     # These patterns are matched against rule description, message, and when conditions
 
     TRIVIAL_PATTERNS = [
-        r'javax\.',                    # javax to jakarta namespace changes
-        r'package.*rename',            # Simple package renaming
-        r'namespace.*change',          # Namespace changes
-        r'import.*replacement',        # Import statement replacements
-        r'simple.*name.*change',       # Simple naming changes
+        r'javax\.',  # javax to jakarta namespace changes
+        r'package.*rename',  # Simple package renaming
+        r'namespace.*change',  # Namespace changes
+        r'import.*replacement',  # Import statement replacements
+        r'simple.*name.*change',  # Simple naming changes
     ]
 
     LOW_PATTERNS = [
@@ -64,7 +65,7 @@ class RulesetComplexityClassifier:
     ]
 
     MEDIUM_PATTERNS = [
-        r'@MessageDriven',             # JMS to Reactive Messaging
+        r'@MessageDriven',  # JMS to Reactive Messaging
         r'reactive',
         r'@ConfigProperty',
         r'configuration.*migration',
@@ -75,7 +76,7 @@ class RulesetComplexityClassifier:
     ]
 
     HIGH_PATTERNS = [
-        r'security',                   # Security-related changes
+        r'security',  # Security-related changes
         r'authentication',
         r'authorization',
         r'architectural.*change',
@@ -87,7 +88,7 @@ class RulesetComplexityClassifier:
     ]
 
     EXPERT_PATTERNS = [
-        r'custom.*realm',              # Custom security implementations
+        r'custom.*realm',  # Custom security implementations
         r'SecurityDomain',
         r'performance.*critical',
         r'distributed.*transaction',
@@ -144,7 +145,7 @@ class RulesetComplexityClassifier:
         # Analyze when condition complexity
         when_complexity = self._analyze_when_condition(rule.get('when', {}))
 
-        # Analyze effort score (1-10 scale)
+        # Analyze effort score (1 - 10 scale)
         effort = rule.get('effort', 3)
 
         # Decision logic (cascading from highest to lowest complexity)
@@ -170,7 +171,9 @@ class RulesetComplexityClassifier:
 
         if self.verbose:
             print(f"\n  Rule: {rule.get('ruleID', 'unknown')}")
-            print(f"    Scores: Expert={expert_score}, High={high_score}, Medium={medium_score}, Low={low_score}, Trivial={trivial_score}")
+            print(
+                f"    Scores: Expert={expert_score}, High={high_score}, Medium={medium_score}, Low={low_score}, Trivial={trivial_score}"
+            )
             print(f"    Effort: {effort}, When complexity: {when_complexity}")
             print(f"    → Classification: {complexity} ({reason})")
 
@@ -256,16 +259,14 @@ class RulesetComplexityClassifier:
         # Look for direct replacement language
         if re.search(r'replace\s+\S+\s+with\s+\S+', text, re.IGNORECASE):
             # Check if the before/after are simple tokens (not complex descriptions)
-            if not re.search(r'(configuration|security|transaction|architecture)', text, re.IGNORECASE):
+            if not re.search(
+                r'(configuration|security|transaction|architecture)', text, re.IGNORECASE
+            ):
                 return True
 
         return False
 
-    def classify_ruleset(
-        self,
-        ruleset_path: Path,
-        dry_run: bool = False
-    ) -> Dict[str, Any]:
+    def classify_ruleset(self, ruleset_path: Path, dry_run: bool = False) -> Dict[str, Any]:
         """
         Classify all rules in a ruleset file.
 
@@ -320,11 +321,13 @@ class RulesetComplexityClassifier:
             # Track change
             old_complexity = rule.get('migration_complexity')
             if old_complexity != complexity:
-                changes.append({
-                    'rule_id': rule.get('ruleID', f'rule_{i}'),
-                    'old': old_complexity or 'None',
-                    'new': complexity
-                })
+                changes.append(
+                    {
+                        'rule_id': rule.get('ruleID', f'rule_{i}'),
+                        'old': old_complexity or 'None',
+                        'new': complexity,
+                    }
+                )
 
                 # Update in memory
                 rule['migration_complexity'] = complexity
@@ -335,11 +338,17 @@ class RulesetComplexityClassifier:
         # Print statistics
         print(f"\n{'='*80}")
         print("Classification Summary:")
-        print(f"  TRIVIAL: {stats['trivial']:3d} rules (95%+ AI success - namespace changes, mechanical fixes)")
+        print(
+            f"  TRIVIAL: {stats['trivial']:3d} rules (95%+ AI success - namespace changes, mechanical fixes)"
+        )
         print(f"  LOW:     {stats['low']:3d} rules (80%+ AI success - simple API equivalents)")
-        print(f"  MEDIUM:  {stats['medium']:3d} rules (60%+ AI success - requires context understanding)")
-        print(f"  HIGH:    {stats['high']:3d} rules (30-50% AI success - architectural changes)")
-        print(f"  EXPERT:  {stats['expert']:3d} rules (<30% AI success - likely needs human review)")
+        print(
+            f"  MEDIUM:  {stats['medium']:3d} rules (60%+ AI success - requires context understanding)"
+        )
+        print(f"  HIGH:    {stats['high']:3d} rules (30 - 50% AI success - architectural changes)")
+        print(
+            f"  EXPERT:  {stats['expert']:3d} rules (<30% AI success - likely needs human review)"
+        )
         print(f"\nTotal rules: {sum(stats.values())}")
         print(f"Total changes: {len(changes)}")
 
@@ -361,10 +370,7 @@ class RulesetComplexityClassifier:
         elif dry_run:
             print("\n(Dry run - no changes written)")
 
-        return {
-            'stats': stats,
-            'changes': changes
-        }
+        return {'stats': stats, 'changes': changes}
 
 
 def main():
@@ -386,26 +392,19 @@ Examples:
   for file in /path/to/rulesets/**/*.yaml; do
     python scripts/classify_existing_rules.py --ruleset "$file" --verbose
   done
-        """
+        """,
     )
 
     parser.add_argument(
-        '--ruleset',
-        type=Path,
-        required=True,
-        help='Path to Konveyor ruleset YAML file'
+        '--ruleset', type=Path, required=True, help='Path to Konveyor ruleset YAML file'
     )
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Show classifications without updating file'
+        '--dry-run', action='store_true', help='Show classifications without updating file'
     )
 
     parser.add_argument(
-        '--verbose', '-v',
-        action='store_true',
-        help='Show detailed classification reasoning'
+        '--verbose', '-v', action='store_true', help='Show detailed classification reasoning'
     )
 
     args = parser.parse_args()

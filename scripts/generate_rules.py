@@ -9,20 +9,21 @@ Usage:
         --target <framework> \\
         --output <output_directory>
 """
-import sys
 import argparse
-import yaml
+import sys
 from pathlib import Path
+
+import yaml
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from rule_generator.ingestion import GuideIngester
-from rule_generator.security import validate_path, is_safe_path, validate_framework_name
 from rule_generator.extraction import MigrationPatternExtractor, detect_language_from_frameworks
 from rule_generator.generator import AnalyzerRuleGenerator
+from rule_generator.ingestion import GuideIngester
 from rule_generator.llm import get_llm_provider
 from rule_generator.schema import Category, LocationType
+from rule_generator.security import is_safe_path, validate_framework_name, validate_path
 from rule_generator.validate_rules import RuleValidator as LLMRuleValidator
 
 # Import comprehensive validator from scripts for syntactic validation
@@ -69,8 +70,12 @@ def validate_rules_temp_file(rules):
             'effort': rule.effort,
             'category': rule.category.value if hasattr(rule.category, 'value') else rule.category,
             'labels': rule.labels,
-            'links': [{'url': link.url, 'title': link.title} for link in rule.links] if rule.links else [],
-            'customVariables': rule.customVariables if hasattr(rule, 'customVariables') else []
+            'links': (
+                [{'url': link.url, 'title': link.title} for link in rule.links]
+                if rule.links
+                else []
+            ),
+            'customVariables': rule.customVariables if hasattr(rule, 'customVariables') else [],
         }
         if hasattr(rule, 'migration_complexity'):
             rule_dict['migration_complexity'] = rule.migration_complexity
@@ -85,20 +90,20 @@ def validate_rules_temp_file(rules):
         # Run comprehensive validation (suppress verbose output)
         import io
         import sys as system
+
         old_stdout = system.stdout
         system.stdout = io.StringIO()  # Suppress print statements
 
         try:
-            validator = SyntacticRuleValidator(use_semantic=False)  # Don't use LLM for auto-validation
+            validator = SyntacticRuleValidator(
+                use_semantic=False
+            )  # Don't use LLM for auto-validation
             result = validator.validate_ruleset(temp_path)
         finally:
             system.stdout = old_stdout  # Restore stdout
 
         # Combine issues and warnings
-        combined = {
-            'issues': validator.issues,
-            'warnings': validator.warnings
-        }
+        combined = {'issues': validator.issues, 'warnings': validator.warnings}
         return combined
     finally:
         # Clean up temp file
@@ -108,6 +113,7 @@ def validate_rules_temp_file(rules):
 # Create custom dumper with our representers
 class CustomDumper(yaml.Dumper):
     pass
+
 
 # Register representers on custom dumper
 CustomDumper.add_representer(Category, enum_representer)
@@ -123,62 +129,48 @@ def main():
     # Create mutually exclusive group for input source
     input_group = parser.add_mutually_exclusive_group(required=True)
 
-    input_group.add_argument(
-        "--guide",
-        help="Path to migration guide (file or URL)"
-    )
+    input_group.add_argument("--guide", help="Path to migration guide (file or URL)")
 
     input_group.add_argument(
-        "--from-openrewrite",
-        help="Path or URL to OpenRewrite recipe YAML file"
+        "--from-openrewrite", help="Path or URL to OpenRewrite recipe YAML file"
     )
 
     parser.add_argument(
-        "--source",
-        required=True,
-        help="Source framework name (e.g., 'spring-boot')"
+        "--source", required=True, help="Source framework name (e.g., 'spring-boot')"
     )
 
-    parser.add_argument(
-        "--target",
-        required=True,
-        help="Target framework name (e.g., 'quarkus')"
-    )
+    parser.add_argument("--target", required=True, help="Target framework name (e.g., 'quarkus')")
 
     parser.add_argument(
         "--output",
-        help="Output directory for generated YAML files (auto-generated from source/target if not specified)"
+        help="Output directory for generated YAML files (auto-generated from source/target if not specified)",
     )
 
     parser.add_argument(
         "--provider",
         default="openai",
         choices=["openai", "anthropic", "google"],
-        help="LLM provider to use (default: openai)"
+        help="LLM provider to use (default: openai)",
     )
 
     parser.add_argument(
-        "--model",
-        help="Specific model name (uses provider default if not specified)"
+        "--model", help="Specific model name (uses provider default if not specified)"
     )
 
-    parser.add_argument(
-        "--api-key",
-        help="API key (uses environment variable if not specified)"
-    )
+    parser.add_argument("--api-key", help="API key (uses environment variable if not specified)")
 
     parser.add_argument(
         "--follow-links",
         action="store_true",
         default=False,
-        help="Follow related links from migration guides (release notes, breaking changes, etc.)"
+        help="Follow related links from migration guides (release notes, breaking changes, etc.)",
     )
 
     parser.add_argument(
         "--max-depth",
         type=int,
         default=2,
-        help="Maximum depth for recursive link following (default: 2)"
+        help="Maximum depth for recursive link following (default: 2)",
     )
 
     args = parser.parse_args()
@@ -194,7 +186,7 @@ def main():
     # Auto-generate output directory if not specified
     if not args.output:
         # Extract technology name from source (remove version info)
-        # e.g., "patternfly-v5" -> "patternfly", "spring-boot-3" -> "spring-boot"
+        # e.g., "patternfly-v5" -> "patternfly", "spring-boot - 3" -> "spring-boot"
         source_parts = args.source.split('-')
 
         # Find where version info starts (v*, numeric suffix, etc.)
@@ -226,16 +218,14 @@ def main():
     if from_openrewrite:
         print("[1/3] Ingesting OpenRewrite recipe...")
         from rule_generator.openrewrite import OpenRewriteRecipeIngester
+
         ingester = OpenRewriteRecipeIngester()
         guide_content = ingester.ingest(args.from_openrewrite)
     else:
         print("[1/3] Ingesting guide...")
         if args.follow_links:
             print(f"  → Following related links (max depth: {args.max_depth})")
-        ingester = GuideIngester(
-            follow_links=args.follow_links,
-            max_depth=args.max_depth
-        )
+        ingester = GuideIngester(follow_links=args.follow_links, max_depth=args.max_depth)
         guide_content = ingester.ingest(args.guide)
 
     if not guide_content:
@@ -246,17 +236,11 @@ def main():
 
     # Step 2: Extract patterns
     print("[2/3] Extracting patterns with LLM...")
-    llm = get_llm_provider(
-        provider=args.provider,
-        model=args.model,
-        api_key=args.api_key
-    )
+    llm = get_llm_provider(provider=args.provider, model=args.model, api_key=args.api_key)
 
     extractor = MigrationPatternExtractor(llm, from_openrewrite=from_openrewrite)
     patterns = extractor.extract_patterns(
-        guide_content,
-        source_framework=args.source,
-        target_framework=args.target
+        guide_content, source_framework=args.source, target_framework=args.target
     )
 
     if not patterns:
@@ -271,7 +255,7 @@ def main():
     generator = AnalyzerRuleGenerator(
         source_framework=args.source,
         target_framework=args.target,
-        rule_file_name=None  # Will be set per-concern
+        rule_file_name=None,  # Will be set per-concern
     )
 
     rules_by_concern = generator.generate_rules_by_concern(patterns)
@@ -301,7 +285,9 @@ def main():
                 deduplicated_by_concern[concern].append(rule)
             else:
                 duplicate_count += 1
-                print(f"    ! Skipping duplicate: {rule.description[:60]}... (already in {seen_patterns[key]})")
+                print(
+                    f"    ! Skipping duplicate: {rule.description[:60]}... (already in {seen_patterns[key]})"
+                )
 
     rules_by_concern = dict(deduplicated_by_concern)
     print(f"  ✓ Removed {duplicate_count} duplicate rules")
@@ -340,10 +326,14 @@ def main():
             print(f"\n{'='*80}")
             print(f"APPLYING IMPROVEMENTS")
             print(f"{'='*80}")
-            print(f"Auto-applying {len(validation_report.improvements)} import verification improvements...")
+            print(
+                f"Auto-applying {len(validation_report.improvements)} import verification improvements..."
+            )
 
             # Apply improvements to all rules
-            all_generated_rules = validator.apply_improvements(all_generated_rules, validation_report)
+            all_generated_rules = validator.apply_improvements(
+                all_generated_rules, validation_report
+            )
 
             # Update rules in rules_by_concern dictionary
             # Create a mapping of rule IDs to improved rules
@@ -392,7 +382,14 @@ def main():
         rules_data = [rule.model_dump(exclude_none=True) for rule in rules]
 
         with open(concern_output, 'w') as f:
-            yaml.dump(rules_data, f, Dumper=CustomDumper, default_flow_style=False, sort_keys=False, allow_unicode=True)
+            yaml.dump(
+                rules_data,
+                f,
+                Dumper=CustomDumper,
+                default_flow_style=False,
+                sort_keys=False,
+                allow_unicode=True,
+            )
 
         written_files.append(str(concern_output))
         all_rules.extend(rules)
@@ -402,10 +399,17 @@ def main():
     ruleset_file = output_dir / "ruleset.yaml"
     ruleset_data = {
         "name": f"{args.source}/{args.target}",
-        "description": f"This ruleset provides guidance for migrating from {args.source} to {args.target}"
+        "description": f"This ruleset provides guidance for migrating from {args.source} to {args.target}",
     }
     with open(ruleset_file, 'w') as f:
-        yaml.dump(ruleset_data, f, Dumper=CustomDumper, default_flow_style=False, sort_keys=False, allow_unicode=True)
+        yaml.dump(
+            ruleset_data,
+            f,
+            Dumper=CustomDumper,
+            default_flow_style=False,
+            sort_keys=False,
+            allow_unicode=True,
+        )
 
     written_files.append(str(ruleset_file))
     print(f"  ✓ {ruleset_file.name}: ruleset metadata")
@@ -437,9 +441,9 @@ def main():
         print(f"  {eff}: {'▓' * efforts[eff]}")
 
     # Validation Report
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Validation Report")
-    print("="*60)
+    print("=" * 60)
     validation_result = validate_rules_temp_file(all_rules)
 
     has_issues = validation_result['issues'] or validation_result['warnings']
@@ -462,9 +466,9 @@ def main():
         print("  ✓ No validation issues found")
 
     # Show files created
-    print(f"\n" + "="*60)
+    print(f"\n" + "=" * 60)
     print(f"Files Created")
-    print("="*60)
+    print("=" * 60)
     for file in written_files:
         print(f"  {file}")
 

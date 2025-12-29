@@ -6,9 +6,11 @@ This module provides common file operations to reduce code duplication:
 - YAML file writing with consistent formatting
 - Rule file parsing and normalization
 """
-import yaml
+
 from pathlib import Path
-from typing import Union, List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional, Union
+
+import yaml
 
 
 def load_yaml_file(file_path: Union[str, Path]) -> Any:
@@ -91,10 +93,7 @@ def load_rules_file(file_path: Union[str, Path]) -> List[Dict[str, Any]]:
 
 
 def write_yaml_file(
-    file_path: Union[str, Path],
-    data: Any,
-    dumper: Optional[yaml.Dumper] = None,
-    **kwargs
+    file_path: Union[str, Path], data: Any, dumper: Optional[yaml.Dumper] = None, **kwargs
 ) -> None:
     """
     Write data to YAML file with consistent formatting.
@@ -123,7 +122,7 @@ def write_yaml_file(
             default_kwargs = {
                 'default_flow_style': False,
                 'sort_keys': False,
-                'allow_unicode': True
+                'allow_unicode': True,
             }
             # Merge with user-provided kwargs (user kwargs take precedence)
             yaml_kwargs = {**default_kwargs, **kwargs}
@@ -169,6 +168,12 @@ def rule_to_dict(rule: Any) -> Dict[str, Any]:
         'labels': rule.labels,
         'when': rule.when,
         'message': rule.message,
-        'links': [{'url': link.url, 'title': link.title} for link in rule.links] if rule.links else [],
-        'customVariables': rule.customVariables if hasattr(rule, 'customVariables') and rule.customVariables else []
+        'links': (
+            [{'url': link.url, 'title': link.title} for link in rule.links] if rule.links else []
+        ),
+        'customVariables': (
+            rule.customVariables
+            if hasattr(rule, 'customVariables') and rule.customVariables
+            else []
+        ),
     }

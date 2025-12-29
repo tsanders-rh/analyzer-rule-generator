@@ -3,13 +3,15 @@ Integration tests for OpenRewrite recipe conversion.
 
 Tests converting OpenRewrite recipes to Konveyor analyzer rules.
 """
-import pytest
-import yaml
+
 from unittest.mock import Mock
 
-from src.rule_generator.ingestion import GuideIngester
+import pytest
+import yaml
+
 from src.rule_generator.extraction import MigrationPatternExtractor
 from src.rule_generator.generator import AnalyzerRuleGenerator
+from src.rule_generator.ingestion import GuideIngester
 
 
 @pytest.mark.integration
@@ -31,8 +33,9 @@ recipeList:
 
         # Mock LLM response
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": """[{
+        mock_llm.generate = Mock(
+            return_value={
+                "response": """[{
                 "source_pattern": "javax.servlet",
                 "target_pattern": "jakarta.servlet",
                 "source_fqn": "javax.servlet.*",
@@ -44,23 +47,19 @@ recipeList:
                 "example_before": "import javax.servlet.HttpServlet;",
                 "example_after": "import jakarta.servlet.HttpServlet;"
             }]""",
-            "usage": {"prompt_tokens": 150, "completion_tokens": 75, "total_tokens": 225}
-        })
+                "usage": {"prompt_tokens": 150, "completion_tokens": 75, "total_tokens": 225},
+            }
+        )
 
         # Setup components
         ingester = GuideIngester()
         extractor = MigrationPatternExtractor(mock_llm, from_openrewrite=True)
-        generator = AnalyzerRuleGenerator(
-            source_framework="javax",
-            target_framework="jakarta"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="javax", target_framework="jakarta")
 
         # Convert recipe
         recipe_content = ingester.ingest(recipe)
         patterns = extractor.extract_patterns(
-            recipe_content,
-            source_framework="javax",
-            target_framework="jakarta"
+            recipe_content, source_framework="javax", target_framework="jakarta"
         )
         rules = generator.generate_rules(patterns)
 
@@ -82,17 +81,20 @@ recipeList:
         """Should load and convert ChangePackage recipe from YAML file."""
         # Write recipe to file
         recipe_file = tmp_path / "recipe.yml"
-        recipe_file.write_text("""---
+        recipe_file.write_text(
+            """---
 recipeList:
   - org.openrewrite.java.ChangePackage:
       oldPackageName: com.sun.net.ssl
       newPackageName: javax.net.ssl
-""")
+"""
+        )
 
         # Mock LLM
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": """[{
+        mock_llm.generate = Mock(
+            return_value={
+                "response": """[{
                 "source_pattern": "com.sun.net.ssl",
                 "target_pattern": "javax.net.ssl",
                 "source_fqn": "com.sun.net.ssl.*",
@@ -101,8 +103,9 @@ recipeList:
                 "category": "api",
                 "rationale": "Package migrated to javax.net.ssl"
             }]""",
-            "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150}
-        })
+                "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150},
+            }
+        )
 
         # Process
         ingester = GuideIngester()
@@ -134,8 +137,9 @@ recipeList:
 
         # Mock LLM
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": """[{
+        mock_llm.generate = Mock(
+            return_value={
+                "response": """[{
                 "source_pattern": "org.junit.Assert",
                 "target_pattern": "org.junit.jupiter.api.Assertions",
                 "source_fqn": "org.junit.Assert",
@@ -147,16 +151,14 @@ recipeList:
                 "example_before": "import org.junit.Assert;",
                 "example_after": "import org.junit.jupiter.api.Assertions;"
             }]""",
-            "usage": {"prompt_tokens": 120, "completion_tokens": 60, "total_tokens": 180}
-        })
+                "usage": {"prompt_tokens": 120, "completion_tokens": 60, "total_tokens": 180},
+            }
+        )
 
         # Convert
         ingester = GuideIngester()
         extractor = MigrationPatternExtractor(mock_llm, from_openrewrite=True)
-        generator = AnalyzerRuleGenerator(
-            source_framework="junit-4",
-            target_framework="junit-5"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="junit-4", target_framework="junit-5")
 
         recipe_content = ingester.ingest(recipe)
         patterns = extractor.extract_patterns(recipe_content)
@@ -189,8 +191,9 @@ recipeList:
 
         # Mock LLM
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": """[{
+        mock_llm.generate = Mock(
+            return_value={
+                "response": """[{
                 "source_pattern": "junit:junit",
                 "target_pattern": "org.junit.jupiter:junit-jupiter-api:5.9.0",
                 "complexity": "TRIVIAL",
@@ -198,8 +201,9 @@ recipeList:
                 "concern": "testing",
                 "rationale": "Dependency upgraded from JUnit 4 to JUnit 5"
             }]""",
-            "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150}
-        })
+                "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150},
+            }
+        )
 
         # Convert
         extractor = MigrationPatternExtractor(mock_llm, from_openrewrite=True)
@@ -239,8 +243,9 @@ recipeList:
 
         # Mock LLM - returns multiple patterns
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": """[
+        mock_llm.generate = Mock(
+            return_value={
+                "response": """[
                 {
                     "source_pattern": "javax.servlet",
                     "target_pattern": "jakarta.servlet",
@@ -270,15 +275,15 @@ recipeList:
                     "rationale": "Dependency changed"
                 }
             ]""",
-            "usage": {"prompt_tokens": 250, "completion_tokens": 125, "total_tokens": 375}
-        })
+                "usage": {"prompt_tokens": 250, "completion_tokens": 125, "total_tokens": 375},
+            }
+        )
 
         # Convert
         ingester = GuideIngester()
         extractor = MigrationPatternExtractor(mock_llm, from_openrewrite=True)
         generator = AnalyzerRuleGenerator(
-            source_framework="spring-boot-3",
-            target_framework="spring-boot-4"
+            source_framework="spring-boot-3", target_framework="spring-boot-4"
         )
 
         recipe_content = ingester.ingest(recipe)
@@ -309,8 +314,9 @@ recipeList:
 
         # Mock LLM
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": """[
+        mock_llm.generate = Mock(
+            return_value={
+                "response": """[
                 {
                     "source_pattern": "javax.servlet",
                     "target_pattern": "jakarta.servlet",
@@ -332,8 +338,9 @@ recipeList:
                     "rationale": "Security package change"
                 }
             ]""",
-            "usage": {"prompt_tokens": 200, "completion_tokens": 100, "total_tokens": 300}
-        })
+                "usage": {"prompt_tokens": 200, "completion_tokens": 100, "total_tokens": 300},
+            }
+        )
 
         # Convert
         extractor = MigrationPatternExtractor(mock_llm, from_openrewrite=True)
@@ -364,8 +371,9 @@ recipeList:
 
         # Mock LLM
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": """[{
+        mock_llm.generate = Mock(
+            return_value={
+                "response": """[{
                 "source_pattern": "old.package",
                 "target_pattern": "new.package",
                 "source_fqn": "old.package.*",
@@ -374,16 +382,14 @@ recipeList:
                 "category": "api",
                 "rationale": "Package renamed"
             }]""",
-            "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150}
-        })
+                "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150},
+            }
+        )
 
         # Convert
         ingester = GuideIngester()
         extractor = MigrationPatternExtractor(mock_llm, from_openrewrite=True)
-        generator = AnalyzerRuleGenerator(
-            source_framework="test-1",
-            target_framework="test-2"
-        )
+        generator = AnalyzerRuleGenerator(source_framework="test-1", target_framework="test-2")
 
         recipe_content = ingester.ingest(recipe)
         patterns = extractor.extract_patterns(recipe_content)
@@ -391,7 +397,9 @@ recipeList:
 
         # Export to YAML
         output_file = tmp_path / "openrewrite-rules.yaml"
-        ruleset_dict = {"rules": [rule.model_dump(mode='json', exclude_none=True) for rule in rules]}
+        ruleset_dict = {
+            "rules": [rule.model_dump(mode='json', exclude_none=True) for rule in rules]
+        }
 
         with open(output_file, 'w') as f:
             yaml.dump(ruleset_dict, f, default_flow_style=False, sort_keys=False)
@@ -416,10 +424,12 @@ class TestOpenRewriteErrorHandling:
         malformed = "recipeList:\n  - invalid: {{{not valid yaml"
 
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": "[]",
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": "[]",
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+            }
+        )
 
         ingester = GuideIngester()
         extractor = MigrationPatternExtractor(mock_llm, from_openrewrite=True)
@@ -434,10 +444,12 @@ class TestOpenRewriteErrorHandling:
     def test_empty_recipe(self):
         """Should handle empty recipe."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": "[]",
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": "[]",
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm, from_openrewrite=True)
         patterns = extractor.extract_patterns("")
@@ -453,10 +465,12 @@ recipeList:
 """
 
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": "[]",
-            "usage": {"prompt_tokens": 50, "completion_tokens": 10, "total_tokens": 60}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": "[]",
+                "usage": {"prompt_tokens": 50, "completion_tokens": 10, "total_tokens": 60},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm, from_openrewrite=True)
         patterns = extractor.extract_patterns(recipe)

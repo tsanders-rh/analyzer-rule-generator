@@ -3,12 +3,14 @@ Integration tests for the generate_rules.py CLI script.
 
 Tests the main entry point that users interact with.
 """
-import pytest
-import sys
-import yaml
+
 import shutil
+import sys
 from pathlib import Path
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
+
+import pytest
+import yaml
 
 # Add scripts directory to path to import generate_rules
 scripts_dir = Path(__file__).parent.parent.parent / "scripts"
@@ -33,11 +35,13 @@ def test_output_dir(tmp_path):
 def sample_guide(tmp_path):
     """Create sample migration guide file."""
     guide_file = tmp_path / "guide.md"
-    guide_file.write_text("""# Migration Guide
+    guide_file.write_text(
+        """# Migration Guide
 
 ## Package Changes
 The javax.servlet package has been renamed to jakarta.servlet.
-""")
+"""
+    )
     return str(guide_file)
 
 
@@ -45,12 +49,14 @@ The javax.servlet package has been renamed to jakarta.servlet.
 def sample_openrewrite_recipe(tmp_path):
     """Create sample OpenRewrite recipe file."""
     recipe_file = tmp_path / "recipe.yaml"
-    recipe_file.write_text("""---
+    recipe_file.write_text(
+        """---
 recipeList:
   - org.openrewrite.java.ChangePackage:
       oldPackageName: javax.servlet
       newPackageName: jakarta.servlet
-""")
+"""
+    )
     return str(recipe_file)
 
 
@@ -58,8 +64,9 @@ recipeList:
 def mock_llm():
     """Mock LLM provider for CLI tests."""
     mock = Mock()
-    mock.generate = Mock(return_value={
-        "response": """[{
+    mock.generate = Mock(
+        return_value={
+            "response": """[{
             "source_pattern": "javax.servlet",
             "target_pattern": "jakarta.servlet",
             "source_fqn": "javax.servlet.*",
@@ -69,12 +76,9 @@ def mock_llm():
             "concern": "jakarta-migration",
             "rationale": "Package renamed from javax to jakarta"
         }]""",
-        "usage": {
-            "prompt_tokens": 100,
-            "completion_tokens": 50,
-            "total_tokens": 150
+            "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150},
         }
-    })
+    )
     return mock
 
 
@@ -95,12 +99,19 @@ class TestCLIBasicUsage:
 
     def test_cli_with_guide_file(self, sample_guide, test_output_dir, mock_llm, capsys):
         """Should generate rules from guide file via CLI."""
-        run_cli_main([
-            "--guide", sample_guide,
-            "--source", "javax",
-            "--target", "jakarta",
-            "--output", str(test_output_dir)
-        ], mock_llm)
+        run_cli_main(
+            [
+                "--guide",
+                sample_guide,
+                "--source",
+                "javax",
+                "--target",
+                "jakarta",
+                "--output",
+                str(test_output_dir),
+            ],
+            mock_llm,
+        )
 
         captured = capsys.readouterr()
 
@@ -121,14 +132,23 @@ class TestCLIBasicUsage:
             assert "name" in ruleset
             assert "javax/jakarta" in ruleset["name"]
 
-    def test_cli_with_openrewrite_recipe(self, sample_openrewrite_recipe, test_output_dir, mock_llm, capsys):
+    def test_cli_with_openrewrite_recipe(
+        self, sample_openrewrite_recipe, test_output_dir, mock_llm, capsys
+    ):
         """Should generate rules from OpenRewrite recipe via CLI."""
-        run_cli_main([
-            "--from-openrewrite", sample_openrewrite_recipe,
-            "--source", "javax",
-            "--target", "jakarta",
-            "--output", str(test_output_dir)
-        ], mock_llm)
+        run_cli_main(
+            [
+                "--from-openrewrite",
+                sample_openrewrite_recipe,
+                "--source",
+                "javax",
+                "--target",
+                "jakarta",
+                "--output",
+                str(test_output_dir),
+            ],
+            mock_llm,
+        )
 
         captured = capsys.readouterr()
 
@@ -144,15 +164,15 @@ class TestCLIBasicUsage:
     def test_cli_auto_generates_output_directory(self, sample_guide, tmp_path, mock_llm, capsys):
         """Should auto-generate output directory from source framework name."""
         import os
+
         original_cwd = os.getcwd()
         os.chdir(tmp_path)
 
         try:
-            run_cli_main([
-                "--guide", sample_guide,
-                "--source", "spring-boot-3",
-                "--target", "spring-boot-4"
-            ], mock_llm)
+            run_cli_main(
+                ["--guide", sample_guide, "--source", "spring-boot-3", "--target", "spring-boot-4"],
+                mock_llm,
+            )
 
             captured = capsys.readouterr()
             assert "✓ Successfully generated" in captured.out
@@ -167,14 +187,23 @@ class TestCLIBasicUsage:
         """Should accept provider option via CLI."""
         import generate_rules
 
-        with patch.object(sys, 'argv', [
-            "generate_rules.py",
-            "--guide", sample_guide,
-            "--source", "test",
-            "--target", "test2",
-            "--output", str(test_output_dir),
-            "--provider", "openai"
-        ]):
+        with patch.object(
+            sys,
+            'argv',
+            [
+                "generate_rules.py",
+                "--guide",
+                sample_guide,
+                "--source",
+                "test",
+                "--target",
+                "test2",
+                "--output",
+                str(test_output_dir),
+                "--provider",
+                "openai",
+            ],
+        ):
             with patch('generate_rules.get_llm_provider', return_value=mock_llm):
                 generate_rules.main()
 
@@ -188,12 +217,19 @@ class TestCLIOutputGeneration:
 
     def test_cli_creates_valid_yaml_files(self, sample_guide, test_output_dir, mock_llm):
         """Should create valid YAML files that can be loaded."""
-        run_cli_main([
-            "--guide", sample_guide,
-            "--source", "javax",
-            "--target", "jakarta",
-            "--output", str(test_output_dir)
-        ], mock_llm)
+        run_cli_main(
+            [
+                "--guide",
+                sample_guide,
+                "--source",
+                "javax",
+                "--target",
+                "jakarta",
+                "--output",
+                str(test_output_dir),
+            ],
+            mock_llm,
+        )
 
         # Load and validate each YAML file
         for yaml_file in test_output_dir.glob("*.yaml"):
@@ -210,12 +246,19 @@ class TestCLIOutputGeneration:
 
     def test_cli_creates_ruleset_metadata(self, sample_guide, test_output_dir, mock_llm):
         """Should create ruleset.yaml metadata file."""
-        run_cli_main([
-            "--guide", sample_guide,
-            "--source", "source-fw",
-            "--target", "target-fw",
-            "--output", str(test_output_dir)
-        ], mock_llm)
+        run_cli_main(
+            [
+                "--guide",
+                sample_guide,
+                "--source",
+                "source-fw",
+                "--target",
+                "target-fw",
+                "--output",
+                str(test_output_dir),
+            ],
+            mock_llm,
+        )
 
         ruleset_file = test_output_dir / "ruleset.yaml"
         assert ruleset_file.exists()
@@ -234,15 +277,18 @@ class TestCLIOutputGeneration:
 
         # Create guide with content that will generate multiline messages
         guide = tmp_path / "multiline-guide.md"
-        guide.write_text("""# Test Guide
+        guide.write_text(
+            """# Test Guide
 The javax.servlet package has been renamed.
 This requires updating import statements.
-""")
+"""
+        )
 
         # Mock LLM that returns a pattern with multiline message
         mock = Mock()
-        mock.generate = Mock(return_value={
-            "response": """[{
+        mock.generate = Mock(
+            return_value={
+                "response": """[{
                 "source_pattern": "javax.servlet",
                 "target_pattern": "jakarta.servlet",
                 "source_fqn": "javax.servlet.*",
@@ -253,15 +299,23 @@ This requires updating import statements.
                 "example_before": "import javax.servlet.*;",
                 "example_after": "import jakarta.servlet.*;"
             }]""",
-            "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150}
-        })
+                "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150},
+            }
+        )
 
-        run_cli_main([
-            "--guide", str(guide),
-            "--source", "javax",
-            "--target", "jakarta",
-            "--output", str(test_output_dir)
-        ], mock)
+        run_cli_main(
+            [
+                "--guide",
+                str(guide),
+                "--source",
+                "javax",
+                "--target",
+                "jakarta",
+                "--output",
+                str(test_output_dir),
+            ],
+            mock,
+        )
 
         # Find the generated rule file
         rule_files = list(test_output_dir.glob("*.yaml"))
@@ -288,8 +342,9 @@ This requires updating import statements.
 
         # Mock LLM that returns multiple concerns
         mock = Mock()
-        mock.generate = Mock(return_value={
-            "response": """[
+        mock.generate = Mock(
+            return_value={
+                "response": """[
                 {
                     "source_pattern": "pattern1",
                     "target_pattern": "target1",
@@ -309,16 +364,25 @@ This requires updating import statements.
                     "concern": "performance"
                 }
             ]""",
-            "usage": {"prompt_tokens": 200, "completion_tokens": 100, "total_tokens": 300}
-        })
+                "usage": {"prompt_tokens": 200, "completion_tokens": 100, "total_tokens": 300},
+            }
+        )
 
-        with patch.object(sys, 'argv', [
-            "generate_rules.py",
-            "--guide", str(guide),
-            "--source", "old",
-            "--target", "new",
-            "--output", str(test_output_dir)
-        ]):
+        with patch.object(
+            sys,
+            'argv',
+            [
+                "generate_rules.py",
+                "--guide",
+                str(guide),
+                "--source",
+                "old",
+                "--target",
+                "new",
+                "--output",
+                str(test_output_dir),
+            ],
+        ):
             with patch('generate_rules.get_llm_provider', return_value=mock):
                 generate_rules.main()
 
@@ -352,7 +416,9 @@ class TestCLIErrorHandling:
         import generate_rules
 
         with pytest.raises(SystemExit):
-            with patch.object(sys, 'argv', ["generate_rules.py", "--guide", sample_guide, "--target", "jakarta"]):
+            with patch.object(
+                sys, 'argv', ["generate_rules.py", "--guide", sample_guide, "--target", "jakarta"]
+            ):
                 generate_rules.main()
 
     def test_cli_missing_target_arg(self, sample_guide):
@@ -360,7 +426,9 @@ class TestCLIErrorHandling:
         import generate_rules
 
         with pytest.raises(SystemExit):
-            with patch.object(sys, 'argv', ["generate_rules.py", "--guide", sample_guide, "--source", "javax"]):
+            with patch.object(
+                sys, 'argv', ["generate_rules.py", "--guide", sample_guide, "--source", "javax"]
+            ):
                 generate_rules.main()
 
     def test_cli_nonexistent_guide_file(self, test_output_dir, mock_llm):
@@ -368,13 +436,21 @@ class TestCLIErrorHandling:
         import generate_rules
 
         with pytest.raises(SystemExit) as exc_info:
-            with patch.object(sys, 'argv', [
-                "generate_rules.py",
-                "--guide", "/nonexistent/file.md",
-                "--source", "javax",
-                "--target", "jakarta",
-                "--output", str(test_output_dir)
-            ]):
+            with patch.object(
+                sys,
+                'argv',
+                [
+                    "generate_rules.py",
+                    "--guide",
+                    "/nonexistent/file.md",
+                    "--source",
+                    "javax",
+                    "--target",
+                    "jakarta",
+                    "--output",
+                    str(test_output_dir),
+                ],
+            ):
                 with patch('generate_rules.get_llm_provider', return_value=mock_llm):
                     generate_rules.main()
 
@@ -385,13 +461,21 @@ class TestCLIErrorHandling:
         import generate_rules
 
         with pytest.raises(SystemExit):
-            with patch.object(sys, 'argv', [
-                "generate_rules.py",
-                "--guide", sample_guide,
-                "--from-openrewrite", sample_openrewrite_recipe,
-                "--source", "javax",
-                "--target", "jakarta"
-            ]):
+            with patch.object(
+                sys,
+                'argv',
+                [
+                    "generate_rules.py",
+                    "--guide",
+                    sample_guide,
+                    "--from-openrewrite",
+                    sample_openrewrite_recipe,
+                    "--source",
+                    "javax",
+                    "--target",
+                    "jakarta",
+                ],
+            ):
                 generate_rules.main()
 
     @pytest.mark.skip(reason="SystemExit timing issue - tested indirectly by other error tests")
@@ -400,19 +484,29 @@ class TestCLIErrorHandling:
         import generate_rules
 
         mock = Mock()
-        mock.generate = Mock(return_value={
-            "response": "[]",
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-        })
+        mock.generate = Mock(
+            return_value={
+                "response": "[]",
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+            }
+        )
 
         with pytest.raises(SystemExit) as exc_info:
-            with patch.object(sys, 'argv', [
-                "generate_rules.py",
-                "--guide", sample_guide,
-                "--source", "javax",
-                "--target", "jakarta",
-                "--output", str(test_output_dir)
-            ]):
+            with patch.object(
+                sys,
+                'argv',
+                [
+                    "generate_rules.py",
+                    "--guide",
+                    sample_guide,
+                    "--source",
+                    "javax",
+                    "--target",
+                    "jakarta",
+                    "--output",
+                    str(test_output_dir),
+                ],
+            ):
                 with patch('generate_rules.get_llm_provider', return_value=mock):
                     generate_rules.main()
 
@@ -430,16 +524,28 @@ class TestCLIModelOptions:
         """Should accept custom model name."""
         import generate_rules
 
-        with patch.object(sys, 'argv', [
-            "generate_rules.py",
-            "--guide", sample_guide,
-            "--source", "javax",
-            "--target", "jakarta",
-            "--output", str(test_output_dir),
-            "--provider", "openai",
-            "--model", "gpt-4"
-        ]):
-            with patch('generate_rules.get_llm_provider', return_value=mock_llm) as mock_get_provider:
+        with patch.object(
+            sys,
+            'argv',
+            [
+                "generate_rules.py",
+                "--guide",
+                sample_guide,
+                "--source",
+                "javax",
+                "--target",
+                "jakarta",
+                "--output",
+                str(test_output_dir),
+                "--provider",
+                "openai",
+                "--model",
+                "gpt-4",
+            ],
+        ):
+            with patch(
+                'generate_rules.get_llm_provider', return_value=mock_llm
+            ) as mock_get_provider:
                 generate_rules.main()
 
                 # Verify get_llm_provider was called with model parameter
@@ -455,15 +561,26 @@ class TestCLIModelOptions:
         """Should accept API key via command line."""
         import generate_rules
 
-        with patch.object(sys, 'argv', [
-            "generate_rules.py",
-            "--guide", sample_guide,
-            "--source", "javax",
-            "--target", "jakarta",
-            "--output", str(test_output_dir),
-            "--api-key", "test-key-123"
-        ]):
-            with patch('generate_rules.get_llm_provider', return_value=mock_llm) as mock_get_provider:
+        with patch.object(
+            sys,
+            'argv',
+            [
+                "generate_rules.py",
+                "--guide",
+                sample_guide,
+                "--source",
+                "javax",
+                "--target",
+                "jakarta",
+                "--output",
+                str(test_output_dir),
+                "--api-key",
+                "test-key-123",
+            ],
+        ):
+            with patch(
+                'generate_rules.get_llm_provider', return_value=mock_llm
+            ) as mock_get_provider:
                 generate_rules.main()
 
                 # Verify get_llm_provider was called with api_key
@@ -481,12 +598,19 @@ class TestCLIOutputFormatting:
 
     def test_cli_shows_progress_messages(self, sample_guide, test_output_dir, mock_llm, capsys):
         """Should show progress messages during execution."""
-        run_cli_main([
-            "--guide", sample_guide,
-            "--source", "javax",
-            "--target", "jakarta",
-            "--output", str(test_output_dir)
-        ], mock_llm)
+        run_cli_main(
+            [
+                "--guide",
+                sample_guide,
+                "--source",
+                "javax",
+                "--target",
+                "jakarta",
+                "--output",
+                str(test_output_dir),
+            ],
+            mock_llm,
+        )
 
         captured = capsys.readouterr()
 
@@ -500,12 +624,19 @@ class TestCLIOutputFormatting:
 
     def test_cli_shows_summary_statistics(self, sample_guide, test_output_dir, mock_llm, capsys):
         """Should show summary statistics after generation."""
-        run_cli_main([
-            "--guide", sample_guide,
-            "--source", "javax",
-            "--target", "jakarta",
-            "--output", str(test_output_dir)
-        ], mock_llm)
+        run_cli_main(
+            [
+                "--guide",
+                sample_guide,
+                "--source",
+                "javax",
+                "--target",
+                "jakarta",
+                "--output",
+                str(test_output_dir),
+            ],
+            mock_llm,
+        )
 
         captured = capsys.readouterr()
 
@@ -518,12 +649,19 @@ class TestCLIOutputFormatting:
 
     def test_cli_shows_file_paths(self, sample_guide, test_output_dir, mock_llm, capsys):
         """Should show paths of created files."""
-        run_cli_main([
-            "--guide", sample_guide,
-            "--source", "javax",
-            "--target", "jakarta",
-            "--output", str(test_output_dir)
-        ], mock_llm)
+        run_cli_main(
+            [
+                "--guide",
+                sample_guide,
+                "--source",
+                "javax",
+                "--target",
+                "jakarta",
+                "--output",
+                str(test_output_dir),
+            ],
+            mock_llm,
+        )
 
         captured = capsys.readouterr()
 

@@ -16,12 +16,13 @@ Usage:
     python scripts/validate_rules.py --rules examples/output/patternfly-v6/ --semantic
 """
 
-import sys
-import yaml
 import argparse
-from pathlib import Path
-from typing import List, Dict, Any
 import re
+import sys
+from pathlib import Path
+from typing import Any, Dict, List
+
+import yaml
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -71,10 +72,7 @@ class RuleValidator:
         elif isinstance(data, dict) and 'rules' in data:
             rules = data['rules']
         else:
-            return {
-                'valid': False,
-                'issues': ['Unrecognized ruleset format']
-            }
+            return {'valid': False, 'issues': ['Unrecognized ruleset format']}
 
         # Reset counters
         self.issues = []
@@ -115,11 +113,7 @@ class RuleValidator:
         if not self.issues and not self.warnings:
             print(f"\n✅ All rules validated successfully!")
 
-        return {
-            'valid': len(self.issues) == 0,
-            'issues': self.issues,
-            'warnings': self.warnings
-        }
+        return {'valid': len(self.issues) == 0, 'issues': self.issues, 'warnings': self.warnings}
 
     def _validate_required_fields(self, rule: Dict, rule_id: str):
         """Check that all required fields are present."""
@@ -149,7 +143,9 @@ class RuleValidator:
             if 'builtin.filecontent' in when:
                 pattern = when['builtin.filecontent'].get('pattern', '')
                 if len(pattern) < 3:
-                    self.warnings.append(f"{rule_id}: Very short pattern '{pattern}' may cause false positives")
+                    self.warnings.append(
+                        f"{rule_id}: Very short pattern '{pattern}' may cause false positives"
+                    )
 
     def _validate_effort_score(self, rule: Dict, rule_id: str):
         """Validate effort score is in valid range."""
@@ -159,7 +155,7 @@ class RuleValidator:
             if not isinstance(effort, int):
                 self.issues.append(f"{rule_id}: Effort must be an integer, got {type(effort)}")
             elif effort < 1 or effort > 10:
-                self.issues.append(f"{rule_id}: Effort must be 1-10, got {effort}")
+                self.issues.append(f"{rule_id}: Effort must be 1 - 10, got {effort}")
 
     def _validate_pattern_broadness(self, rule: Dict, rule_id: str):
         """Check for overly broad patterns that might cause false positives."""
@@ -218,7 +214,9 @@ class RuleValidator:
 
         # Extract code from "Before:" section
         # Handle both actual newlines and literal \n in messages
-        before_match = re.search(r'Before:(?:\\n|\n)```(?:\w*)?(?:\\n|\n)(.*?)(?:\\n|\n)```', message, re.DOTALL)
+        before_match = re.search(
+            r'Before:(?:\\n|\n)```(?:\w*)?(?:\\n|\n)(.*?)(?:\\n|\n)```', message, re.DOTALL
+        )
         if not before_match:
             return  # No example code found, skip validation
 
@@ -243,13 +241,9 @@ class RuleValidator:
                 )
                 # Show first line of example for context
                 first_line = example_code.split('\n')[0][:80]
-                self.issues.append(
-                    f"  Example starts with: {first_line}..."
-                )
+                self.issues.append(f"  Example starts with: {first_line}...")
         except re.error as e:
-            self.warnings.append(
-                f"{rule_id}: Invalid regex pattern '{pattern}': {e}"
-            )
+            self.warnings.append(f"{rule_id}: Invalid regex pattern '{pattern}': {e}")
 
     def _validate_description_pattern_alignment(self, rule: Dict, rule_id: str):
         """Use LLM to check if description matches what the pattern actually detects."""
@@ -328,27 +322,27 @@ Examples:
 
   # Validate all rulesets in a directory
   python scripts/validate_rules.py --rules examples/output/patternfly-v6/ --semantic
-        """
+        """,
     )
 
     parser.add_argument(
         '--rules',
         type=Path,
         required=True,
-        help='Path to rule YAML file or directory containing rule files'
+        help='Path to rule YAML file or directory containing rule files',
     )
 
     parser.add_argument(
         '--semantic',
         action='store_true',
-        help='Enable LLM-based semantic validation (costs API calls)'
+        help='Enable LLM-based semantic validation (costs API calls)',
     )
 
     parser.add_argument(
         '--provider',
         default='anthropic',
         choices=['openai', 'anthropic', 'google'],
-        help='LLM provider for semantic validation (default: anthropic)'
+        help='LLM provider for semantic validation (default: anthropic)',
     )
 
     args = parser.parse_args()
@@ -364,10 +358,7 @@ Examples:
         return 1
 
     # Create validator
-    validator = RuleValidator(
-        use_semantic=args.semantic,
-        llm_provider=args.provider
-    )
+    validator = RuleValidator(use_semantic=args.semantic, llm_provider=args.provider)
 
     # Validate all files
     all_valid = True

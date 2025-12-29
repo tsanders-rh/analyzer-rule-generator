@@ -1,12 +1,14 @@
 """
 Integration tests for complete pipeline workflows.
 """
-import pytest
+
 from unittest.mock import patch
 
-from src.rule_generator.ingestion import GuideIngester
+import pytest
+
 from src.rule_generator.extraction import MigrationPatternExtractor
 from src.rule_generator.generator import AnalyzerRuleGenerator
+from src.rule_generator.ingestion import GuideIngester
 
 
 @pytest.mark.integration
@@ -26,8 +28,7 @@ The javax.servlet package has been renamed to jakarta.servlet.
         ingester = GuideIngester()
         extractor = MigrationPatternExtractor(mock_llm_provider)
         generator = AnalyzerRuleGenerator(
-            source_framework="spring-boot-3",
-            target_framework="spring-boot-4"
+            source_framework="spring-boot-3", target_framework="spring-boot-4"
         )
 
         # Step 1: Ingest guide
@@ -72,7 +73,7 @@ The javax.servlet package has been renamed to jakarta.servlet.
     def test_pipeline_with_url_input(self, mock_get, mock_llm_provider):
         """Should process migration guide from URL."""
         from unittest.mock import Mock
-        
+
         # Mock HTTP response
         mock_response = Mock()
         mock_response.headers = {'content-type': 'text/html'}
@@ -95,7 +96,7 @@ The javax.servlet package has been renamed to jakarta.servlet.
     def test_llm_error_handling(self):
         """Should handle LLM errors gracefully."""
         from unittest.mock import Mock
-        
+
         # Mock LLM that raises error
         mock_llm = Mock()
         mock_llm.generate = Mock(side_effect=Exception("API error"))

@@ -8,6 +8,7 @@ Extracts patterns with enough detail to generate Konveyor analyzer rules includi
 - Location types (ANNOTATION, IMPORT, etc.)
 - Rationale and complexity
 """
+
 import json
 import re
 from pathlib import Path
@@ -15,10 +16,9 @@ from typing import List, Optional
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from .schema import MigrationPattern, LocationType, CSharpLocationType
-from .llm import LLMProvider
 from .config import config
-
+from .llm import LLMProvider
+from .schema import CSharpLocationType, LocationType, MigrationPattern
 
 # Set up Jinja2 template environment
 TEMPLATE_DIR = Path(__file__).parent.parent.parent / 'templates' / 'extraction'
@@ -26,7 +26,7 @@ jinja_env = Environment(
     loader=FileSystemLoader(str(TEMPLATE_DIR)),
     autoescape=select_autoescape(),
     trim_blocks=True,
-    lstrip_blocks=True
+    lstrip_blocks=True,
 )
 
 
@@ -46,23 +46,65 @@ def detect_language_from_frameworks(source: str, target: str) -> str:
 
     # JavaScript/TypeScript frameworks
     js_ts_keywords = [
-        'react', 'angular', 'vue', 'node', 'npm', 'typescript', 'javascript',
-        'patternfly', 'next', 'nuxt', 'svelte', 'ember', 'webpack', 'vite',
-        'express', 'nestjs', 'gatsby', 'redux'
+        'react',
+        'angular',
+        'vue',
+        'node',
+        'npm',
+        'typescript',
+        'javascript',
+        'patternfly',
+        'next',
+        'nuxt',
+        'svelte',
+        'ember',
+        'webpack',
+        'vite',
+        'express',
+        'nestjs',
+        'gatsby',
+        'redux',
     ]
 
     # Java frameworks
     java_keywords = [
-        'spring', 'jakarta', 'javax', 'jboss', 'wildfly', 'tomcat',
-        'hibernate', 'jpa', 'ejb', 'servlet', 'jdk', 'openjdk',
-        'quarkus', 'micronaut', 'maven', 'gradle'
+        'spring',
+        'jakarta',
+        'javax',
+        'jboss',
+        'wildfly',
+        'tomcat',
+        'hibernate',
+        'jpa',
+        'ejb',
+        'servlet',
+        'jdk',
+        'openjdk',
+        'quarkus',
+        'micronaut',
+        'maven',
+        'gradle',
     ]
 
     # C# / .NET frameworks
     csharp_keywords = [
-        'dotnet', '.net', 'csharp', 'c#', 'asp.net', 'aspnet', 'entityframework',
-        'ef', 'mvc', 'webapi', 'blazor', 'xamarin', 'maui', 'nuget',
-        'dotnetcore', 'netcore', 'netframework'
+        'dotnet',
+        '.net',
+        'csharp',
+        'c#',
+        'asp.net',
+        'aspnet',
+        'entityframework',
+        'ef',
+        'mvc',
+        'webapi',
+        'blazor',
+        'xamarin',
+        'maui',
+        'nuget',
+        'dotnetcore',
+        'netcore',
+        'netframework',
     ]
 
     # Check for JS/TS patterns
@@ -101,7 +143,7 @@ class MigrationPatternExtractor:
         self,
         guide_content: str,
         source_framework: Optional[str] = None,
-        target_framework: Optional[str] = None
+        target_framework: Optional[str] = None,
     ) -> List[MigrationPattern]:
         """
         Extract migration patterns from guide content.
@@ -117,38 +159,26 @@ class MigrationPatternExtractor:
         # Check if content needs chunking (>40KB)
         if guide_content and len(guide_content) > config.MAX_CONTENT_SIZE:
             print(f"  → Content is large ({len(guide_content):,} chars), using chunked extraction")
-            return self._extract_patterns_chunked(
-                guide_content,
-                source_framework,
-                target_framework
-            )
+            return self._extract_patterns_chunked(guide_content, source_framework, target_framework)
 
         # Single extraction for smaller content
-        return self._extract_patterns_single(
-            guide_content,
-            source_framework,
-            target_framework
-        )
+        return self._extract_patterns_single(guide_content, source_framework, target_framework)
 
     def _extract_patterns_single(
         self,
         guide_content: str,
         source_framework: Optional[str] = None,
-        target_framework: Optional[str] = None
+        target_framework: Optional[str] = None,
     ) -> List[MigrationPattern]:
         """Extract patterns from a single piece of content."""
         # Build prompt (use OpenRewrite-specific prompt if needed)
         if self.from_openrewrite:
             prompt = self._build_openrewrite_prompt(
-                guide_content,
-                source_framework,
-                target_framework
+                guide_content, source_framework, target_framework
             )
         else:
             prompt = self._build_extraction_prompt(
-                guide_content,
-                source_framework,
-                target_framework
+                guide_content, source_framework, target_framework
             )
 
         # Generate with LLM
@@ -162,8 +192,12 @@ class MigrationPatternExtractor:
             patterns = self._parse_extraction_response(response_text)
 
             # Validate and fix patterns
-            language = detect_language_from_frameworks(source_framework or "", target_framework or "")
-            patterns = self._validate_and_fix_patterns(patterns, language, source_framework, target_framework)
+            language = detect_language_from_frameworks(
+                source_framework or "", target_framework or ""
+            )
+            patterns = self._validate_and_fix_patterns(
+                patterns, language, source_framework, target_framework
+            )
 
             return patterns
 
@@ -180,13 +214,16 @@ class MigrationPatternExtractor:
 
             # Check for specific API errors by message content
             if "500" in error_message or "api_error" in error_message.lower():
-                print(f"⚠ API temporarily unavailable, skipping this chunk (will continue with others)")
+                print(
+                    f"⚠ API temporarily unavailable, skipping this chunk (will continue with others)"
+                )
             elif "rate_limit" in error_message.lower() or "429" in error_message:
                 print(f"⚠ Rate limit reached, skipping this chunk")
             else:
                 # For unexpected errors, show more detail
                 print(f"Error extracting patterns: {e}")
                 import traceback
+
                 traceback.print_exc()
 
             return []
@@ -195,7 +232,7 @@ class MigrationPatternExtractor:
         self,
         guide_content: str,
         source_framework: Optional[str] = None,
-        target_framework: Optional[str] = None
+        target_framework: Optional[str] = None,
     ) -> List[MigrationPattern]:
         """Extract patterns from large content by chunking."""
         from .ingestion import GuideIngester
@@ -211,11 +248,7 @@ class MigrationPatternExtractor:
             print(f"  → Processing chunk {i}/{len(chunks)} ({len(chunk):,} chars)")
 
             # Extract from this chunk
-            patterns = self._extract_patterns_single(
-                chunk,
-                source_framework,
-                target_framework
-            )
+            patterns = self._extract_patterns_single(chunk, source_framework, target_framework)
 
             if patterns:
                 print(f"    ✓ Extracted {len(patterns)} patterns from chunk {i}")
@@ -244,10 +277,7 @@ class MigrationPatternExtractor:
         return unique
 
     def _build_extraction_prompt(
-        self,
-        guide_content: str,
-        source_framework: Optional[str],
-        target_framework: Optional[str]
+        self, guide_content: str, source_framework: Optional[str], target_framework: Optional[str]
     ) -> str:
         """Build LLM prompt for pattern extraction using templates."""
 
@@ -277,19 +307,13 @@ class MigrationPatternExtractor:
         # Render main prompt template
         main_template = jinja_env.get_template('main.j2')
         prompt = main_template.render(
-            frameworks=frameworks,
-            lang_instructions=lang_instructions,
-            guide_content=guide_content
+            frameworks=frameworks, lang_instructions=lang_instructions, guide_content=guide_content
         )
 
         return prompt
 
-
     def _build_openrewrite_prompt(
-        self,
-        recipe_content: str,
-        source_framework: Optional[str],
-        target_framework: Optional[str]
+        self, recipe_content: str, source_framework: Optional[str], target_framework: Optional[str]
     ) -> str:
         """Build LLM prompt for OpenRewrite recipe conversion."""
 
@@ -467,6 +491,7 @@ Return ONLY the JSON array, no additional commentary."""
         Returns:
             Repaired JSON string
         """
+
         # Fix invalid escape sequences in string values FIRST
         # JSON only allows: \" \\ \/ \b \f \n \r \t \uXXXX
         # Regex patterns often have: \. \d \w \s etc. which are invalid in JSON
@@ -591,7 +616,7 @@ Return ONLY the JSON array, no additional commentary."""
                     rationale=data["rationale"],
                     example_before=data.get("example_before"),
                     example_after=data.get("example_after"),
-                    documentation_url=data.get("documentation_url")
+                    documentation_url=data.get("documentation_url"),
                 )
                 patterns.append(pattern)
             except (KeyError, TypeError) as e:
@@ -606,7 +631,7 @@ Return ONLY the JSON array, no additional commentary."""
         patterns: List[MigrationPattern],
         language: str,
         source_framework: Optional[str] = None,
-        target_framework: Optional[str] = None
+        target_framework: Optional[str] = None,
     ) -> List[MigrationPattern]:
         """
         Validate patterns and auto-fix common issues.
@@ -647,7 +672,9 @@ Return ONLY the JSON array, no additional commentary."""
             # RULE 3: Ensure source != target
             if pattern.source_pattern and pattern.target_pattern:
                 if pattern.source_pattern.strip() == pattern.target_pattern.strip():
-                    print(f"  ! Rejecting pattern with identical source/target: {pattern.source_pattern}")
+                    print(
+                        f"  ! Rejecting pattern with identical source/target: {pattern.source_pattern}"
+                    )
                     continue
 
             validated.append(pattern)
@@ -667,7 +694,15 @@ Return ONLY the JSON array, no additional commentary."""
             if parts[0] and parts[0][0].isupper() and parts[1] and parts[1][0].islower():
                 # Exclude common method names that look like props but aren't
                 # These are method calls, not component props
-                method_names = ["render", "mount", "unmount", "update", "setState", "useState", "useEffect"]
+                method_names = [
+                    "render",
+                    "mount",
+                    "unmount",
+                    "update",
+                    "setState",
+                    "useState",
+                    "useEffect",
+                ]
                 if parts[1] in method_names:
                     return False
                 return True
@@ -700,7 +735,7 @@ Return ONLY the JSON array, no additional commentary."""
             pattern.when_combo = {
                 "import_pattern": import_pattern,
                 "builtin_pattern": f"<{component}[^>]*\\\\b{prop}\\\\b",
-                "file_pattern": "\\\\.(j|t)sx?$"
+                "file_pattern": "\\\\.(j|t)sx?$",
             }
 
         return pattern
@@ -709,11 +744,27 @@ Return ONLY the JSON array, no additional commentary."""
         """Check if builtin pattern is too broad."""
         # Common prop names that should never be standalone patterns
         overly_generic = [
-            "isActive", "isDisabled", "isOpen", "isClosed", "isExpanded",
-            "title", "name", "id", "className", "style",
-            "onClick", "onChange", "onSubmit", "onClose",
-            "alignLeft", "alignRight", "alignCenter",
-            "variant", "size", "color", "type"
+            "isActive",
+            "isDisabled",
+            "isOpen",
+            "isClosed",
+            "isExpanded",
+            "title",
+            "name",
+            "id",
+            "className",
+            "style",
+            "onClick",
+            "onChange",
+            "onSubmit",
+            "onClose",
+            "alignLeft",
+            "alignRight",
+            "alignCenter",
+            "variant",
+            "size",
+            "color",
+            "type",
         ]
 
         # If pattern is just one of these words, it's too broad

@@ -8,11 +8,13 @@ Supports:
 - PDF files (future enhancement)
 - Recursive link following for related documentation
 """
+
 import re
-import requests
-from typing import Optional, List, Set
 from pathlib import Path
-from urllib.parse import urlparse, urljoin, urlunparse
+from typing import List, Optional, Set
+from urllib.parse import urljoin, urlparse, urlunparse
+
+import requests
 
 
 class GuideIngester:
@@ -146,6 +148,7 @@ class GuideIngester:
             # Catch any truly unexpected errors
             print(f"Unexpected error processing {url}: {e}")
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -194,6 +197,7 @@ class GuideIngester:
             # Catch any truly unexpected errors
             print(f"Unexpected error reading file {file_path}: {e}")
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -242,7 +246,7 @@ class GuideIngester:
 
                         # Split oversized paragraph into max_chars pieces
                         for i in range(0, len(para), max_chars):
-                            para_piece = para[i:i + max_chars]
+                            para_piece = para[i : i + max_chars]
                             chunks.append(para_piece.strip())
                     elif len(temp_chunk) + len(para) + 2 <= max_chars:
                         temp_chunk += "\n\n" + para if temp_chunk else para
@@ -271,7 +275,7 @@ class GuideIngester:
         try:
             result = urlparse(source)
             return all([result.scheme, result.netloc])
-        except:
+        except (ValueError, TypeError, AttributeError):
             return False
 
     def _is_file_path(self, source: str) -> bool:
@@ -313,14 +317,16 @@ class GuideIngester:
         """
         parsed = urlparse(url)
         # Remove fragment (# anchor)
-        normalized = urlunparse((
-            parsed.scheme,
-            parsed.netloc,
-            parsed.path.rstrip('/'),
-            parsed.params,
-            parsed.query,
-            ''  # Remove fragment
-        ))
+        normalized = urlunparse(
+            (
+                parsed.scheme,
+                parsed.netloc,
+                parsed.path.rstrip('/'),
+                parsed.params,
+                parsed.query,
+                '',  # Remove fragment
+            )
+        )
         return normalized
 
     def _extract_related_links(self, soup, base_url: str) -> List[str]:
@@ -344,11 +350,22 @@ class GuideIngester:
 
         # Keywords that indicate migration-related documentation
         migration_keywords = [
-            'release-notes', 'release_notes', 'releasenotes',
-            'breaking-changes', 'breaking_changes', 'breakingchanges',
-            'migration', 'migrate', 'upgrade', 'changelog',
-            'whats-new', 'whats_new', 'whatsnew',
-            'v6', 'version-6', 'version_6'
+            'release-notes',
+            'release_notes',
+            'releasenotes',
+            'breaking-changes',
+            'breaking_changes',
+            'breakingchanges',
+            'migration',
+            'migrate',
+            'upgrade',
+            'changelog',
+            'whats-new',
+            'whats_new',
+            'whatsnew',
+            'v6',
+            'version-6',
+            'version_6',
         ]
 
         # Find all links
@@ -375,8 +392,7 @@ class GuideIngester:
             link_text = link.get_text().lower()
 
             is_migration_related = any(
-                keyword in url_path or keyword in link_text
-                for keyword in migration_keywords
+                keyword in url_path or keyword in link_text for keyword in migration_keywords
             )
 
             if is_migration_related:

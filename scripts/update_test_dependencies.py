@@ -42,12 +42,13 @@ Example analyzer output formats supported:
           provider: "java"
 """
 import argparse
-import sys
 import json
-import yaml
-from pathlib import Path
-from typing import List, Dict, Any
 import re
+import sys
+from pathlib import Path
+from typing import Any, Dict, List
+
+import yaml
 
 
 class Incident:
@@ -69,8 +70,15 @@ class Incident:
 class Insight:
     """Represents an analysis insight (rule violation with incidents)."""
 
-    def __init__(self, category: str, description: str, effort: int,
-                 ruleset: str, rule: str, incidents: List['Incident']):
+    def __init__(
+        self,
+        category: str,
+        description: str,
+        effort: int,
+        ruleset: str,
+        rule: str,
+        incidents: List['Incident'],
+    ):
         self.category = category
         self.description = description
         self.effort = effort
@@ -171,7 +179,9 @@ def parse_analyzer_output(file_path: Path) -> List[Dependency]:
             deps_data = data['techDependencies']
         # Format 3: Top-level keys are dependency names
         else:
-            print(f"Warning: Unrecognized format, attempting to extract dependencies", file=sys.stderr)
+            print(
+                f"Warning: Unrecognized format, attempting to extract dependencies", file=sys.stderr
+            )
             deps_data = []
     elif isinstance(data, list):
         # Format 4: Kantra dependencies.yaml format - list of file objects
@@ -241,13 +251,13 @@ def normalize_incident_path(file_path: str, target_prefix: str) -> str:
         # Look for patterns with hyphens that indicate project modules
         # Must start with a letter and contain hyphens (typical Maven/Gradle project structure)
         if '-' in part and (
-            part.endswith('-web') or
-            part.endswith('-ejb') or
-            part.endswith('-ear') or
-            part.endswith('-war') or
-            '-ee7-' in part or
-            '-ee8-' in part or
-            '-ee9-' in part
+            part.endswith('-web')
+            or part.endswith('-ejb')
+            or part.endswith('-ear')
+            or part.endswith('-war')
+            or '-ee7-' in part
+            or '-ee8-' in part
+            or '-ee9-' in part
         ):
             project_root_idx = i
             break
@@ -263,10 +273,14 @@ def normalize_incident_path(file_path: str, target_prefix: str) -> str:
             # Check if this is a root pom.xml (no module before it)
             # Look back to see if there's a module directory
             has_module = False
-            for j in range(i-1, -1, -1):
+            for j in range(i - 1, -1, -1):
                 prev_part = parts[j]
-                if '-' in prev_part and (prev_part.endswith('-web') or prev_part.endswith('-ejb') or
-                                        prev_part.endswith('-ear') or '-ee' in prev_part):
+                if '-' in prev_part and (
+                    prev_part.endswith('-web')
+                    or prev_part.endswith('-ejb')
+                    or prev_part.endswith('-ear')
+                    or '-ee' in prev_part
+                ):
                     has_module = True
                     break
 
@@ -275,19 +289,21 @@ def normalize_incident_path(file_path: str, target_prefix: str) -> str:
                 return target_prefix.rstrip('/') + '/' + part
             elif i > 0:
                 # Module pom.xml - include the module directory
-                relative_parts = parts[i-1:]
+                relative_parts = parts[i - 1 :]
                 return target_prefix.rstrip('/') + '/' + '/'.join(relative_parts)
 
         if part == 'src' and i > 0:
             # Go back one level to get the module directory
-            relative_parts = parts[i-1:]
+            relative_parts = parts[i - 1 :]
             return target_prefix.rstrip('/') + '/' + '/'.join(relative_parts)
 
     # Last resort: just prepend target prefix to basename
     return target_prefix.rstrip('/') + '/' + file_path.split('/')[-1]
 
 
-def parse_violations(file_path: Path, normalize_path: str = None) -> tuple[List[Insight], int, List[Tag]]:
+def parse_violations(
+    file_path: Path, normalize_path: str = None
+) -> tuple[List[Insight], int, List[Tag]]:
     """
     Parse output.yaml file and extract violations/insights, effort, and tags.
 
@@ -364,7 +380,7 @@ def parse_violations(file_path: Path, normalize_path: str = None) -> tuple[List[
                     effort=effort,
                     ruleset=ruleset_name,
                     rule=rule_id,
-                    incidents=incidents
+                    incidents=incidents,
                 )
                 insights.append(insight)
                 total_effort += effort * len(incidents)  # Multiply effort by incident count
@@ -445,8 +461,13 @@ def generate_go_tags(tags: List[Tag]) -> str:
     return tags_code
 
 
-def update_test_case_file(file_path: Path, insights: List[Insight], effort: int,
-                          dependencies: List[Dependency], tags: List[Tag]) -> None:
+def update_test_case_file(
+    file_path: Path,
+    insights: List[Insight],
+    effort: int,
+    dependencies: List[Dependency],
+    tags: List[Tag],
+) -> None:
     """
     Update existing test case file with new analysis results.
 
@@ -484,11 +505,7 @@ def update_test_case_file(file_path: Path, insights: List[Insight], effort: int,
         content = re.sub(effort_pattern, rf'\1Effort: {effort},', content, count=1)
     else:
         # Add Effort before Insights (or after Analysis{ if no Insights)
-        content = re.sub(
-            r'(Analysis:\s+api\.Analysis\{)',
-            rf'\1\n\t\tEffort: {effort},',
-            content
-        )
+        content = re.sub(r'(Analysis:\s+api\.Analysis\{)', rf'\1\n\t\tEffort: {effort},', content)
 
     # Update Insights section
     # Match from "Insights: []api.Insight{" to the closing "}," at the same indentation level
@@ -501,7 +518,7 @@ def update_test_case_file(file_path: Path, insights: List[Insight], effort: int,
             r'\1\n' + insights_code + r'\n\t\t},\n',
             content,
             count=1,  # Only replace the first occurrence
-            flags=re.DOTALL
+            flags=re.DOTALL,
         )
     else:
         print("  → Adding new Insights section")
@@ -510,7 +527,7 @@ def update_test_case_file(file_path: Path, insights: List[Insight], effort: int,
             r'(Analysis:\s+api\.Analysis\{\s*\n\s*Effort:\s+\d+,)',
             rf'\1\n{insights_code}',
             content,
-            count=1  # Only replace the first occurrence
+            count=1,  # Only replace the first occurrence
         )
 
     # Update Dependencies section
@@ -521,7 +538,7 @@ def update_test_case_file(file_path: Path, insights: List[Insight], effort: int,
             r'\1\n' + deps_code + r'\n\t\t},\n',
             content,
             count=1,  # Only replace the first occurrence
-            flags=re.DOTALL
+            flags=re.DOTALL,
         )
 
     # Update AnalysisTags section
@@ -532,15 +549,11 @@ def update_test_case_file(file_path: Path, insights: List[Insight], effort: int,
             r'\1\n' + tags_code + r'\n\t},\n',
             content,
             count=1,  # Only replace the first occurrence
-            flags=re.DOTALL
+            flags=re.DOTALL,
         )
     else:
         # Add AnalysisTags after closing Analysis brace
-        content = re.sub(
-            r'(\s+\},\n)(\})',
-            rf'\1{tags_code}\n\2',
-            content
-        )
+        content = re.sub(r'(\s+\},\n)(\})', rf'\1{tags_code}\n\2', content)
 
     # Write back
     with open(file_path, 'w') as f:
@@ -555,7 +568,7 @@ def generate_test_case_template(
     dependencies: List[Dependency],
     insights: List[Insight] = None,
     effort: int = 0,
-    tags: List[Tag] = None
+    tags: List[Tag] = None,
 ) -> str:
     """
     Generate a complete test case file template.
@@ -578,7 +591,7 @@ def generate_test_case_template(
     tags_code = generate_go_tags(tags or []).rstrip()
 
     # Sanitize names for Go variable naming
-    var_name = re.sub(r'[^a-zA-Z0-9]', '', test_name.title())
+    var_name = re.sub(r'[^a-zA-Z0 - 9]', '', test_name.title())
 
     template = f'''package analysis
 
@@ -626,44 +639,30 @@ Examples:
       --output tc_newapp_deps.go \\
       --test-name "NewApp Analysis" \\
       --app-name "NewApp"
-        """
+        """,
     )
 
     parser.add_argument(
         '--analysis-dir',
         required=True,
-        help='Path to Kantra analysis output directory (contains dependencies.yaml and output.yaml)'
+        help='Path to Kantra analysis output directory (contains dependencies.yaml and output.yaml)',
     )
 
     parser.add_argument(
         '--normalize-path',
-        help='Normalize incident file paths by replacing local prefix with this value (e.g., "/shared/source/sample")'
+        help='Normalize incident file paths by replacing local prefix with this value (e.g., "/shared/source/sample")',
     )
 
-    parser.add_argument(
-        '--test-case',
-        help='Path to existing test case file to update'
-    )
+    parser.add_argument('--test-case', help='Path to existing test case file to update')
+
+    parser.add_argument('--output', help='Path for new test case file (if creating new)')
+
+    parser.add_argument('--test-name', help='Test case name (required for new files)')
+
+    parser.add_argument('--app-name', help='Application name (required for new files)')
 
     parser.add_argument(
-        '--output',
-        help='Path for new test case file (if creating new)'
-    )
-
-    parser.add_argument(
-        '--test-name',
-        help='Test case name (required for new files)'
-    )
-
-    parser.add_argument(
-        '--app-name',
-        help='Application name (required for new files)'
-    )
-
-    parser.add_argument(
-        '--print-only',
-        action='store_true',
-        help='Print generated code without writing files'
+        '--print-only', action='store_true', help='Print generated code without writing files'
     )
 
     args = parser.parse_args()
@@ -674,7 +673,9 @@ Examples:
         sys.exit(1)
 
     if args.output and (not args.test_name or not args.app_name):
-        print("Error: --test-name and --app-name are required when creating new file", file=sys.stderr)
+        print(
+            "Error: --test-name and --app-name are required when creating new file", file=sys.stderr
+        )
         sys.exit(1)
 
     # Find analysis files in directory
@@ -718,12 +719,7 @@ Examples:
     else:
         # Generate new file
         content = generate_test_case_template(
-            args.test_name,
-            args.app_name,
-            dependencies,
-            insights,
-            effort,
-            tags
+            args.test_name, args.app_name, dependencies, insights, effort, tags
         )
 
         if args.print_only:

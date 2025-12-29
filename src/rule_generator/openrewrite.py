@@ -6,11 +6,13 @@ Supports:
 - Local YAML files
 - Recursive recipe expansion
 """
-import yaml
-import requests
-from typing import Optional, Dict, Any, List
+
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
+
+import requests
+import yaml
 
 
 class OpenRewriteRecipeIngester:
@@ -98,6 +100,7 @@ class OpenRewriteRecipeIngester:
             # Catch any truly unexpected errors
             print(f"Unexpected error loading recipe from {source}: {e}")
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -199,5 +202,5 @@ class OpenRewriteRecipeIngester:
         try:
             result = urlparse(source)
             return all([result.scheme, result.netloc])
-        except:
+        except (ValueError, TypeError, AttributeError):
             return False

@@ -1,11 +1,14 @@
 """
 Tests for rule_generator.validate_rules module.
 """
+
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
-from src.rule_generator.validate_rules import ValidationReport, RuleValidator
-from src.rule_generator.schema import AnalyzerRule, Category
+
 from src.rule_generator.llm import LLMProvider
+from src.rule_generator.schema import AnalyzerRule, Category
+from src.rule_generator.validate_rules import RuleValidator, ValidationReport
 
 
 class TestValidationReport:
@@ -34,7 +37,7 @@ class TestValidationReport:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "test"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
         improved = {"when": {"builtin.filecontent": {"pattern": "improved"}}}
 
@@ -58,7 +61,7 @@ class TestValidationReport:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "ab"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
         details = {"reason": "Pattern too short"}
 
@@ -83,7 +86,7 @@ class TestValidationReport:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "test"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
         improved = {"when": {"builtin.filecontent": {"pattern": "improved"}}}
         report.add_improvement('import_verification', rule, improved)
@@ -109,7 +112,7 @@ class TestValidationReport:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "ab"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
         details = {"reason": "Pattern too short"}
         report.add_issue('overly_broad', rule, details)
@@ -158,11 +161,11 @@ class TestRuleValidator:
             when={
                 "and": [
                     {"nodejs.referenced": {"pattern": "MyComponent"}},
-                    {"builtin.filecontent": {"pattern": "<MyComponent"}}
+                    {"builtin.filecontent": {"pattern": "<MyComponent"}},
                 ]
             },
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         assert validator._needs_import_verification(rule) is True
@@ -182,11 +185,11 @@ class TestRuleValidator:
                 "and": [
                     {"builtin.filecontent": {"pattern": "import.*MyComponent.*from.*@patternfly"}},
                     {"nodejs.referenced": {"pattern": "MyComponent"}},
-                    {"builtin.filecontent": {"pattern": "<MyComponent"}}
+                    {"builtin.filecontent": {"pattern": "<MyComponent"}},
                 ]
             },
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         assert validator._needs_import_verification(rule) is False
@@ -204,7 +207,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"nodejs.referenced": {"pattern": "Button"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         assert validator._needs_import_verification(rule) is True
@@ -222,7 +225,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"nodejs.referenced": {"pattern": "myFunction"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         assert validator._needs_import_verification(rule) is False
@@ -241,11 +244,11 @@ class TestRuleValidator:
             when={
                 "and": [
                     {"nodejs.referenced": {"pattern": "Alert"}},
-                    {"builtin.filecontent": {"pattern": "<Alert"}}
+                    {"builtin.filecontent": {"pattern": "<Alert"}},
                 ]
             },
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         component = validator._extract_component_name(rule)
@@ -264,7 +267,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"nodejs.referenced": {"pattern": "Card"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         component = validator._extract_component_name(rule)
@@ -283,7 +286,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"java.referenced": {"pattern": "org.example.MyClass", "location": "TYPE"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         component = validator._extract_component_name(rule)
@@ -303,11 +306,11 @@ class TestRuleValidator:
             when={
                 "and": [
                     {"nodejs.referenced": {"pattern": "Alert"}},
-                    {"builtin.filecontent": {"pattern": "<Alert", "filePattern": "\\.(j|t)sx?$"}}
+                    {"builtin.filecontent": {"pattern": "<Alert", "filePattern": "\\.(j|t)sx?$"}},
                 ]
             },
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         improved = validator._add_import_verification(rule)
@@ -336,7 +339,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"nodejs.referenced": {"pattern": "Button"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         improved = validator._add_import_verification(rule)
@@ -365,7 +368,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"java.referenced": {"pattern": "org.example.Class", "location": "TYPE"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         improved = validator._add_import_verification(rule)
@@ -384,7 +387,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "abc"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         analysis = validator._check_pattern_breadth(rule)
@@ -407,7 +410,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "import.*Component.*from"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         analysis = validator._check_pattern_breadth(rule)
@@ -426,7 +429,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"nodejs.referenced": {"pattern": "x"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         analysis = validator._check_pattern_breadth(rule)
@@ -445,7 +448,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "test"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         result = validator._review_pattern_quality(rule)
@@ -464,7 +467,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "test"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         rule2 = AnalyzerRule(
@@ -475,7 +478,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "test"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         rule3 = AnalyzerRule(
@@ -486,7 +489,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "different"}},
             message="Different message",
-            customVariables=[]
+            customVariables=[],
         )
 
         duplicates = validator._find_duplicates([rule1, rule2, rule3])
@@ -508,7 +511,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "test1"}},
             message="Test message 1",
-            customVariables=[]
+            customVariables=[],
         )
 
         rule2 = AnalyzerRule(
@@ -519,7 +522,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "test2"}},
             message="Test message 2",
-            customVariables=[]
+            customVariables=[],
         )
 
         duplicates = validator._find_duplicates([rule1, rule2])
@@ -538,7 +541,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"nodejs.referenced": {"pattern": "Alert"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         rule2 = AnalyzerRule(
@@ -549,7 +552,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "ab"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         report = validator.validate_rules([rule1, rule2])
@@ -576,7 +579,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"java.referenced": {"pattern": "org.example.MyClass", "location": "TYPE"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         report = validator.validate_rules([rule])
@@ -603,15 +606,20 @@ class TestRuleValidator:
             labels=["test"],
             when={"nodejs.referenced": {"pattern": "Button"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         # Create report with improvement
         report = ValidationReport()
         improved_when = {
             "and": [
-                {"builtin.filecontent": {"pattern": "import.*Button", "filePattern": "\\.(j|t)sx?$"}},
-                {"builtin.filecontent": {"pattern": "<Button", "filePattern": "\\.(j|t)sx?$"}}
+                {
+                    "builtin.filecontent": {
+                        "pattern": "import.*Button",
+                        "filePattern": "\\.(j|t)sx?$",
+                    }
+                },
+                {"builtin.filecontent": {"pattern": "<Button", "filePattern": "\\.(j|t)sx?$"}},
             ]
         }
         report.add_improvement('import_verification', rule, {'when': improved_when})
@@ -639,15 +647,20 @@ class TestRuleValidator:
             labels=["test"],
             when={"nodejs.referenced": {"pattern": "Button"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         # Create report with valid improvement that will succeed
         report = ValidationReport()
         valid_when = {
             "and": [
-                {"builtin.filecontent": {"pattern": "import.*Button", "filePattern": "\\.(j|t)sx?$"}},
-                {"builtin.filecontent": {"pattern": "<Button", "filePattern": "\\.(j|t)sx?$"}}
+                {
+                    "builtin.filecontent": {
+                        "pattern": "import.*Button",
+                        "filePattern": "\\.(j|t)sx?$",
+                    }
+                },
+                {"builtin.filecontent": {"pattern": "<Button", "filePattern": "\\.(j|t)sx?$"}},
             ]
         }
         valid_improvement = {'when': valid_when}
@@ -676,7 +689,7 @@ class TestRuleValidator:
             labels=["test"],
             when={"builtin.filecontent": {"pattern": "test"}},
             message="Test message",
-            customVariables=[]
+            customVariables=[],
         )
 
         yaml_str = validator._rule_to_yaml_string(rule)

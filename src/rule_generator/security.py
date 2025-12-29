@@ -4,10 +4,10 @@ Security utilities for path validation and sanitization.
 Provides functions to prevent path traversal attacks and ensure
 safe file operations, plus input validation utilities.
 """
+
 import re
 from pathlib import Path
-from typing import Union, Literal
-
+from typing import Literal, Union
 
 # Valid complexity values
 VALID_COMPLEXITIES = Literal["TRIVIAL", "LOW", "MEDIUM", "HIGH", "EXPERT"]
@@ -153,10 +153,10 @@ def is_safe_path(path: Union[str, Path]) -> bool:
 
     # Check for suspicious patterns
     suspicious_patterns = [
-        '../',      # Parent directory traversal
-        '..\\',     # Windows parent directory traversal
-        '/..',      # Absolute path parent traversal
-        '\\..',     # Windows absolute path parent traversal
+        '../',  # Parent directory traversal
+        '..\\',  # Windows parent directory traversal
+        '/..',  # Absolute path parent traversal
+        '\\..',  # Windows absolute path parent traversal
     ]
 
     for pattern in suspicious_patterns:
@@ -238,8 +238,7 @@ def validate_complexity(complexity: str) -> str:
 
     if normalized not in COMPLEXITY_VALUES:
         raise ValueError(
-            f"Invalid complexity: {complexity}. "
-            f"Must be one of: {', '.join(COMPLEXITY_VALUES)}"
+            f"Invalid complexity: {complexity}. " f"Must be one of: {', '.join(COMPLEXITY_VALUES)}"
         )
 
     return normalized
@@ -280,8 +279,7 @@ def validate_rule_id(rule_id: str, source: str = None, target: str = None) -> st
     # Check basic format: {prefix}-{number}
     if not re.match(r'^[a-z0-9\-]+-\d{5}$', rule_id, re.IGNORECASE):
         raise ValueError(
-            f"Invalid rule ID format: {rule_id}. "
-            f"Expected format: prefix-00000 (5-digit number)"
+            f"Invalid rule ID format: {rule_id}. " f"Expected format: prefix-00000 (5-digit number)"
         )
 
     # If source/target provided, verify they're in the rule ID

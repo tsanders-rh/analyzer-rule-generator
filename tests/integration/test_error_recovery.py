@@ -3,14 +3,16 @@ Integration tests for error recovery and failure handling.
 
 Tests that the system handles errors gracefully and provides useful feedback.
 """
-import pytest
-import json
-from unittest.mock import Mock, patch, MagicMock
-from pathlib import Path
 
-from src.rule_generator.ingestion import GuideIngester
+import json
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
+
 from src.rule_generator.extraction import MigrationPatternExtractor
 from src.rule_generator.generator import AnalyzerRuleGenerator
+from src.rule_generator.ingestion import GuideIngester
 from src.rule_generator.llm import get_llm_provider
 
 
@@ -123,10 +125,12 @@ class TestMalformedJSON:
     def test_invalid_json_response(self):
         """Should handle invalid JSON gracefully and return empty list."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": "This is not valid JSON {{{",
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": "This is not valid JSON {{{",
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         patterns = extractor.extract_patterns("test guide")
@@ -137,18 +141,22 @@ class TestMalformedJSON:
     def test_json_with_missing_required_fields(self):
         """Should skip patterns with missing required fields."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": json.dumps([
-                {
-                    "source_pattern": "Old",
-                    # Missing rationale (required field)
-                    "target_pattern": "New",
-                    "complexity": "TRIVIAL",
-                    "category": "api"
-                }
-            ]),
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": json.dumps(
+                    [
+                        {
+                            "source_pattern": "Old",
+                            # Missing rationale (required field)
+                            "target_pattern": "New",
+                            "complexity": "TRIVIAL",
+                            "category": "api",
+                        }
+                    ]
+                ),
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         patterns = extractor.extract_patterns("test guide")
@@ -159,30 +167,34 @@ class TestMalformedJSON:
     def test_partial_valid_json(self):
         """Should extract valid patterns and skip invalid ones."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": json.dumps([
-                {
-                    "source_pattern": "Valid1",
-                    "target_pattern": "New1",
-                    "rationale": "Valid pattern",
-                    "complexity": "TRIVIAL",
-                    "category": "api"
-                },
-                {
-                    "source_pattern": "Invalid",
-                    # Missing rationale
-                    "complexity": "LOW"
-                },
-                {
-                    "source_pattern": "Valid2",
-                    "target_pattern": "New2",
-                    "rationale": "Another valid pattern",
-                    "complexity": "LOW",
-                    "category": "api"
-                }
-            ]),
-            "usage": {"prompt_tokens": 50, "completion_tokens": 25, "total_tokens": 75}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": json.dumps(
+                    [
+                        {
+                            "source_pattern": "Valid1",
+                            "target_pattern": "New1",
+                            "rationale": "Valid pattern",
+                            "complexity": "TRIVIAL",
+                            "category": "api",
+                        },
+                        {
+                            "source_pattern": "Invalid",
+                            # Missing rationale
+                            "complexity": "LOW",
+                        },
+                        {
+                            "source_pattern": "Valid2",
+                            "target_pattern": "New2",
+                            "rationale": "Another valid pattern",
+                            "complexity": "LOW",
+                            "category": "api",
+                        },
+                    ]
+                ),
+                "usage": {"prompt_tokens": 50, "completion_tokens": 25, "total_tokens": 75},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         patterns = extractor.extract_patterns("test guide")
@@ -195,10 +207,12 @@ class TestMalformedJSON:
     def test_empty_json_array(self):
         """Should handle empty JSON array gracefully."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": "[]",
-            "usage": {"prompt_tokens": 10, "completion_tokens": 2, "total_tokens": 12}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": "[]",
+                "usage": {"prompt_tokens": 10, "completion_tokens": 2, "total_tokens": 12},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         patterns = extractor.extract_patterns("test guide")
@@ -208,10 +222,12 @@ class TestMalformedJSON:
     def test_json_not_an_array(self):
         """Should handle JSON that's not an array."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": json.dumps({"error": "Invalid format"}),
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": json.dumps({"error": "Invalid format"}),
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         patterns = extractor.extract_patterns("test guide")
@@ -248,10 +264,12 @@ class TestLLMErrors:
     def test_llm_missing_response_field(self):
         """Should handle LLM response missing 'response' field."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-            # Missing 'response' field
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
+                # Missing 'response' field
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         patterns = extractor.extract_patterns("test guide")
@@ -261,10 +279,12 @@ class TestLLMErrors:
     def test_llm_response_is_none(self):
         """Should handle LLM response field being None."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": None,
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": None,
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         patterns = extractor.extract_patterns("test guide")
@@ -341,36 +361,40 @@ class TestPartialFailures:
     def test_some_patterns_fail_validation(self):
         """Should continue processing when some patterns fail validation."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": json.dumps([
-                {
-                    "source_pattern": "Good1",
-                    "target_pattern": "New1",
-                    "source_fqn": "com.example.Good1",
-                    "location_type": "TYPE",
-                    "rationale": "Valid",
-                    "complexity": "TRIVIAL",
-                    "category": "api"
-                },
-                {
-                    "source_pattern": "",  # Invalid - empty
-                    "target_pattern": "New2",
-                    "rationale": "Invalid",
-                    "complexity": "LOW",
-                    "category": "api"
-                },
-                {
-                    "source_pattern": "Good2",
-                    "target_pattern": "New2",
-                    "source_fqn": "com.example.Good2",
-                    "location_type": "TYPE",
-                    "rationale": "Valid",
-                    "complexity": "LOW",
-                    "category": "api"
-                }
-            ]),
-            "usage": {"prompt_tokens": 50, "completion_tokens": 25, "total_tokens": 75}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": json.dumps(
+                    [
+                        {
+                            "source_pattern": "Good1",
+                            "target_pattern": "New1",
+                            "source_fqn": "com.example.Good1",
+                            "location_type": "TYPE",
+                            "rationale": "Valid",
+                            "complexity": "TRIVIAL",
+                            "category": "api",
+                        },
+                        {
+                            "source_pattern": "",  # Invalid - empty
+                            "target_pattern": "New2",
+                            "rationale": "Invalid",
+                            "complexity": "LOW",
+                            "category": "api",
+                        },
+                        {
+                            "source_pattern": "Good2",
+                            "target_pattern": "New2",
+                            "source_fqn": "com.example.Good2",
+                            "location_type": "TYPE",
+                            "rationale": "Valid",
+                            "complexity": "LOW",
+                            "category": "api",
+                        },
+                    ]
+                ),
+                "usage": {"prompt_tokens": 50, "completion_tokens": 25, "total_tokens": 75},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")
@@ -384,7 +408,7 @@ class TestPartialFailures:
 
     def test_rule_generation_continues_on_error(self):
         """Should continue generating rules even if one fails."""
-        from src.rule_generator.schema import MigrationPattern, LocationType
+        from src.rule_generator.schema import LocationType, MigrationPattern
 
         patterns = [
             MigrationPattern(
@@ -394,7 +418,7 @@ class TestPartialFailures:
                 location_type=LocationType.TYPE,
                 complexity="TRIVIAL",
                 category="api",
-                rationale="Valid pattern"
+                rationale="Valid pattern",
             ),
             MigrationPattern(
                 source_pattern="Good2",
@@ -403,7 +427,7 @@ class TestPartialFailures:
                 location_type=LocationType.TYPE,
                 complexity="LOW",
                 category="api",
-                rationale="Another valid pattern"
+                rationale="Another valid pattern",
             ),
         ]
 
@@ -429,10 +453,12 @@ class TestInputValidation:
     def test_empty_string_guide(self):
         """Should handle empty string guide."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": "[]",
-            "usage": {"prompt_tokens": 5, "completion_tokens": 2, "total_tokens": 7}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": "[]",
+                "usage": {"prompt_tokens": 5, "completion_tokens": 2, "total_tokens": 7},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         patterns = extractor.extract_patterns("")
@@ -445,16 +471,22 @@ class TestInputValidation:
         large_guide = "# Large Guide\n" + ("Test pattern migration.\n" * 10000)
 
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": json.dumps([{
-                "source_pattern": "Test",
-                "target_pattern": "New",
-                "rationale": "Migration",
-                "complexity": "TRIVIAL",
-                "category": "api"
-            }]),
-            "usage": {"prompt_tokens": 100000, "completion_tokens": 50, "total_tokens": 100050}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": json.dumps(
+                    [
+                        {
+                            "source_pattern": "Test",
+                            "target_pattern": "New",
+                            "rationale": "Migration",
+                            "complexity": "TRIVIAL",
+                            "category": "api",
+                        }
+                    ]
+                ),
+                "usage": {"prompt_tokens": 100000, "completion_tokens": 50, "total_tokens": 100050},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         patterns = extractor.extract_patterns(large_guide)
@@ -473,7 +505,11 @@ class TestInputValidation:
         # Should return None and print error for binary files
         assert result is None
         captured = capsys.readouterr()
-        assert "utf-8" in captured.out.lower() or "decode" in captured.out.lower() or "error" in captured.out.lower()
+        assert (
+            "utf-8" in captured.out.lower()
+            or "decode" in captured.out.lower()
+            or "error" in captured.out.lower()
+        )
 
 
 @pytest.mark.integration
@@ -503,10 +539,12 @@ class TestEdgeCasesInErrorHandling:
     def test_unicode_errors_in_json(self):
         """Should handle Unicode errors in JSON responses."""
         mock_llm = Mock()
-        mock_llm.generate = Mock(return_value={
-            "response": '{"source_pattern": "Test\udcff"}',  # Invalid surrogate
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-        })
+        mock_llm.generate = Mock(
+            return_value={
+                "response": '{"source_pattern": "Test\udcff"}',  # Invalid surrogate
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+            }
+        )
 
         extractor = MigrationPatternExtractor(mock_llm)
         patterns = extractor.extract_patterns("test")
@@ -517,7 +555,7 @@ class TestEdgeCasesInErrorHandling:
     def test_circular_reference_in_data(self):
         """Should handle circular references gracefully."""
         # This tests that we don't have issues with serialization
-        from src.rule_generator.schema import MigrationPattern, LocationType
+        from src.rule_generator.schema import LocationType, MigrationPattern
 
         pattern = MigrationPattern(
             source_pattern="Test",
@@ -526,7 +564,7 @@ class TestEdgeCasesInErrorHandling:
             location_type=LocationType.TYPE,
             complexity="TRIVIAL",
             category="api",
-            rationale="Test"
+            rationale="Test",
         )
 
         generator = AnalyzerRuleGenerator(source_framework="old", target_framework="new")

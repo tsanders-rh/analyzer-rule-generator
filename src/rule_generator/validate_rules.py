@@ -8,14 +8,15 @@ This module provides automated validation and improvement of generated rules usi
 - Flags duplicate or conflicting rules
 - Validates rule quality against best practices
 """
-import re
-import json
-from typing import List, Dict, Any, Optional
-from collections import defaultdict
 
-from .schema import AnalyzerRule
-from .llm import LLMProvider
+import json
+import re
+from collections import defaultdict
+from typing import Any, Dict, List, Optional
+
 from .condition_builder import build_builtin_condition, build_combo_condition
+from .llm import LLMProvider
+from .schema import AnalyzerRule
 
 
 class ValidationReport:
@@ -31,10 +32,12 @@ class ValidationReport:
             'import_verification_added': 0,
             'overly_broad_detected': 0,
             'quality_issues_fixed': 0,
-            'duplicates_found': 0
+            'duplicates_found': 0,
         }
 
-    def add_improvement(self, improvement_type: str, original: AnalyzerRule, improved: Dict[str, Any]):
+    def add_improvement(
+        self, improvement_type: str, original: AnalyzerRule, improved: Dict[str, Any]
+    ):
         """
         Add an improvement to the report.
 
@@ -43,11 +46,9 @@ class ValidationReport:
             original: Original rule
             improved: Improved rule data (dict from LLM or AnalyzerRule)
         """
-        self.improvements.append({
-            'type': improvement_type,
-            'original': original,
-            'improved': improved
-        })
+        self.improvements.append(
+            {'type': improvement_type, 'original': original, 'improved': improved}
+        )
         self.statistics['rules_improved'] += 1
         if f'{improvement_type}_added' in self.statistics:
             self.statistics[f'{improvement_type}_added'] += 1
@@ -61,11 +62,7 @@ class ValidationReport:
             rule: Rule with the issue
             details: Issue details
         """
-        self.issues.append({
-            'type': issue_type,
-            'rule': rule,
-            'details': details
-        })
+        self.issues.append({'type': issue_type, 'rule': rule, 'details': details})
         if f'{issue_type}_detected' in self.statistics:
             self.statistics[f'{issue_type}_detected'] += 1
 
@@ -120,7 +117,7 @@ class RuleValidator:
         llm_provider: LLMProvider,
         language: str,
         source_framework: Optional[str] = None,
-        target_framework: Optional[str] = None
+        target_framework: Optional[str] = None,
     ):
         """
         Initialize rule validator.
@@ -214,8 +211,7 @@ class RuleValidator:
         if isinstance(when, dict) and 'and' in when:
             has_nodejs = any('nodejs.referenced' in str(c) for c in when['and'])
             has_import_check = any(
-                '@patternfly' in str(c) or 'import' in str(c).lower()
-                for c in when['and']
+                '@patternfly' in str(c) or 'import' in str(c).lower() for c in when['and']
             )
 
             # For JS/TS, component patterns should verify imports
@@ -257,7 +253,9 @@ class RuleValidator:
             return None
 
         # Build import verification pattern
-        import_pattern = f"import.*\\{{{{[^}}}}]*\\b{component}\\b[^}}}}]*\\}}}}.*from ['\"]@patternfly/react-"
+        import_pattern = (
+            f"import.*\\{{{{[^}}}}]*\\b{component}\\b[^}}}}]*\\}}}}.*from ['\"]@patternfly/react-"
+        )
 
         # Get the current when condition
         when = rule.when
@@ -279,10 +277,12 @@ class RuleValidator:
                 return None
 
             # Create new combo rule with import verification
-            new_when = build_combo_condition([
-                build_builtin_condition(import_pattern, file_pattern),
-                build_builtin_condition(jsx_condition['pattern'], file_pattern)
-            ])
+            new_when = build_combo_condition(
+                [
+                    build_builtin_condition(import_pattern, file_pattern),
+                    build_builtin_condition(jsx_condition['pattern'], file_pattern),
+                ]
+            )
 
         # Case 2: Simple nodejs.referenced rule (component rename)
         elif isinstance(when, dict) and 'nodejs.referenced' in when:
@@ -290,10 +290,12 @@ class RuleValidator:
             # Use a generic JSX pattern to match any usage of the component
             jsx_pattern = f"<{component}[^/>]*(?:/>|>)"
 
-            new_when = build_combo_condition([
-                build_builtin_condition(import_pattern, file_pattern),
-                build_builtin_condition(jsx_pattern, file_pattern)
-            ])
+            new_when = build_combo_condition(
+                [
+                    build_builtin_condition(import_pattern, file_pattern),
+                    build_builtin_condition(jsx_pattern, file_pattern),
+                ]
+            )
 
         else:
             return None
@@ -307,11 +309,17 @@ class RuleValidator:
             'labels': rule.labels,
             'when': new_when,
             'message': rule.message,
-            'links': [{'url': link.url, 'title': link.title} for link in rule.links] if rule.links else [],
-            'customVariables': rule.customVariables if rule.customVariables else []
+            'links': (
+                [{'url': link.url, 'title': link.title} for link in rule.links]
+                if rule.links
+                else []
+            ),
+            'customVariables': rule.customVariables if rule.customVariables else [],
         }
 
-    def apply_improvements(self, rules: List[AnalyzerRule], report: 'ValidationReport') -> List[AnalyzerRule]:
+    def apply_improvements(
+        self, rules: List[AnalyzerRule], report: 'ValidationReport'
+    ) -> List[AnalyzerRule]:
         """
         Apply validated improvements to rules.
 
@@ -379,7 +387,7 @@ class RuleValidator:
                     'is_overly_broad': True,
                     'risk_level': 'HIGH',
                     'reason': f'Pattern too short ({len(pattern)} chars): {pattern}',
-                    'estimated_false_positive_rate': '>50%'
+                    'estimated_false_positive_rate': '>50%',
                 }
 
         return None
@@ -456,11 +464,12 @@ class RuleValidator:
             YAML-formatted string
         """
         import yaml
+
         # Convert to dict
         rule_dict = {
             'ruleID': rule.ruleID,
             'description': rule.description,
             'when': rule.when,
-            'message': rule.message
+            'message': rule.message,
         }
         return yaml.dump([rule_dict], default_flow_style=False)

@@ -12,6 +12,11 @@ from pathlib import Path
 
 import yaml
 
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from rule_generator.security import is_safe_path
+
 
 def create_test_template(rule_file: Path, output_dir: Path, data_dir_name: str) -> Path:
     """
@@ -260,6 +265,14 @@ Examples:
     )
 
     args = parser.parse_args()
+
+    # Validate paths for security (check for path traversal attacks)
+    if not is_safe_path(args.rules):
+        print(f"Error: Rules path '{args.rules}' contains suspicious patterns", file=sys.stderr)
+        return 1
+    if not is_safe_path(args.output):
+        print(f"Error: Output path '{args.output}' contains suspicious patterns", file=sys.stderr)
+        return 1
 
     # Validate inputs
     rule_file = Path(args.rules)

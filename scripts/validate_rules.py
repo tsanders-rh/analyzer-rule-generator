@@ -28,6 +28,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from rule_generator.llm import get_llm_provider
+from rule_generator.security import is_safe_path
 
 
 class RuleValidator:
@@ -350,6 +351,11 @@ Examples:
     )
 
     args = parser.parse_args()
+
+    # Validate path for security (check for path traversal attacks)
+    if not is_safe_path(args.rules):
+        print(f"Error: Rules path '{args.rules}' contains suspicious patterns", file=sys.stderr)
+        return 1
 
     # Find rule files
     rules_path = args.rules

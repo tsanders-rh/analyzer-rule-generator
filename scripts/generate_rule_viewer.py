@@ -840,7 +840,7 @@ Examples:
             title = f"Rules: {rules_path.name}"
 
         # Generate HTML
-        print(f"Generating HTML viewer...")
+        print("Generating HTML viewer...")
         html = generate_html_multi(rules_by_file, title, rules_path.name)
     else:
         # Load single file (legacy mode)
@@ -856,7 +856,7 @@ Examples:
             title = rules_path.stem.replace('-', ' ').replace('_', ' ').title()
 
         # Generate HTML
-        print(f"Generating HTML viewer...")
+        print("Generating HTML viewer...")
         html = generate_html(rules, title, rules_path.name)
 
     # Write output
@@ -867,8 +867,8 @@ Examples:
         f.write(html)
 
     print(f"  ✓ Generated {output_file}")
-    print(f"\n✓ Rule viewer created successfully!")
-    print(f"\nTo view:")
+    print("\n✓ Rule viewer created successfully!")
+    print("\nTo view:")
     print(f"  open {output_file}")
 
     # Open in browser if requested
@@ -876,7 +876,7 @@ Examples:
         import webbrowser
 
         webbrowser.open(f"file://{output_file.absolute()}")
-        print(f"\n✓ Opened in browser")
+        print("\n✓ Opened in browser")
 
     return 0
 

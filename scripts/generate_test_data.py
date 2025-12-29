@@ -525,11 +525,11 @@ def generate_code_hint_from_pattern(
 
         # Generate appropriate code based on the pattern
         if 'ReactDOM' in obj_name and method_name == 'render':
-            return f"ReactDOM.render(<App />, container);"
+            return "ReactDOM.render(<App />, container);"
         elif 'ReactDOM' in obj_name and method_name == 'hydrate':
-            return f"ReactDOM.hydrate(<App />, container);"
+            return "ReactDOM.hydrate(<App />, container);"
         elif method_name == 'unmountComponentAtNode':
-            return f"ReactDOM.unmountComponentAtNode(container);"
+            return "ReactDOM.unmountComponentAtNode(container);"
         else:
             # Generic method call
             return f"{obj_name}.{method_name}();"
@@ -643,7 +643,7 @@ def build_test_generation_prompt(
             ):
                 has_java_imports = True
                 pattern_text += (
-                    f"\n\n  **YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS:**\n"
+                    "\n\n  **YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS:**\n"
                     f"  ```java\n  // {p['ruleID']}\n  {pattern['code_hint']}\n  ```"
                 )
 
@@ -665,7 +665,7 @@ def build_test_generation_prompt(
                     import_statement = f"import {{ {api_name} }} from 'react';"
 
                 pattern_text += (
-                    f"\n\n  **CRITICAL - nodejs.referenced pattern:**\n"
+                    "\n\n  **CRITICAL - nodejs.referenced pattern:**\n"
                     f"  You MUST import AND use `{api_name}` in your code.\n"
                     f"  ```tsx\n  // {p['ruleID']}\n  {import_statement}\n  \n"
                     f"  // Then CALL or USE {api_name} somewhere in your component code\n"
@@ -676,7 +676,7 @@ def build_test_generation_prompt(
         if p.get('code_hint') and not has_java_imports and not has_nodejs_referenced:
             if language == 'typescript':
                 pattern_text += (
-                    f"\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n"
+                    "\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n"
                     f"  ```tsx\n  // {p['ruleID']}\n  {p['code_hint']}\n  ```"
                 )
         elif p.get('component') and not has_nodejs_referenced:
@@ -697,7 +697,7 @@ def build_test_generation_prompt(
         config_file_path if config_file_path else f'src/main/resources/{final_config_file_name}'
     )
     if has_config_files and language == 'java':
-        config_file_instructions = f"""
+        config_file_instructions = """
 3. **{final_config_file_name}** - Configuration file with deprecated properties:
    - Location: {final_config_file_path}
    - CRITICAL: The deprecated property patterns marked as "MUST BE IN CONFIG FILE"
@@ -817,7 +817,7 @@ For Python patterns:
         config_file_instructions=config_file_instructions,
     )
 
-    prompt = f"""Generate a minimal {language.upper()} test application
+    prompt = """Generate a minimal {language.upper()} test application
 for Konveyor analyzer rule testing.
 
 Migration: {source} → {target}
@@ -863,7 +863,7 @@ Format your response with clear code blocks:
 ```{lang_config['main_file_type']}
 {lang_config['main_file']}
 ```
-{"" if not has_config_files else f'''
+{"" if not has_config_files else '''
 ```{config_file_type}
 {final_config_file_name}
 ```
@@ -1265,7 +1265,7 @@ def fix_pattern_detection(failure_info: dict, llm) -> str:
     provider = failure_info['provider']
     rule_id = failure_info['rule_id']
 
-    prompt = f"""Generate a single-line code snippet that matches this
+    prompt = """Generate a single-line code snippet that matches this
 Konveyor analyzer rule pattern.
 
 Rule ID: {rule_id}
@@ -1350,7 +1350,7 @@ Examples:
         type=float,
         default=config.TEST_GENERATION_DELAY,
         help=(
-            f'Delay in seconds between API calls to avoid rate limits '
+            'Delay in seconds between API calls to avoid rate limits '
             f'(default: {config.TEST_GENERATION_DELAY})'
         ),
     )
@@ -1359,7 +1359,7 @@ Examples:
         type=int,
         default=config.MAX_RETRY_ATTEMPTS,
         help=(
-            f'Maximum number of retries for rate limit errors '
+            'Maximum number of retries for rate limit errors '
             f'(default: {config.MAX_RETRY_ATTEMPTS})'
         ),
     )
@@ -1441,7 +1441,7 @@ Examples:
         test_file_name = rule_file.stem + '.test.yaml'
         test_file_path = output_dir / test_file_name
         if args.skip_existing and test_file_path.exists():
-            print(f"  ⊘ Skipping (test already exists)")
+            print("  ⊘ Skipping (test already exists)")
             skipped_count += 1
             continue
 
@@ -1489,7 +1489,7 @@ Examples:
         data_dir_name = rule_file.stem.replace(f'{args.source}-to-{args.target}-', '')
 
         # Build prompt
-        print(f"  Generating test data with AI...")
+        print("  Generating test data with AI...")
         prompt = build_test_generation_prompt(
             rules, args.source, args.target, args.guide_url, language
         )
@@ -1548,7 +1548,7 @@ Examples:
         code = extract_code_blocks(response, language)
 
         if not code['build_file'] or not code['source_file']:
-            print(f"  ✗ Could not extract required files from response", file=sys.stderr)
+            print("  ✗ Could not extract required files from response", file=sys.stderr)
             continue  # Skip to next file
 
         # Create test data directory
@@ -1572,7 +1572,7 @@ Examples:
             original_content = source_content
             source_content = inject_missing_java_imports(source_content, patterns_to_test, rules)
             if source_content != original_content:
-                print(f"  → Auto-injected missing import statements for IMPORT location rules")
+                print("  → Auto-injected missing import statements for IMPORT location rules")
 
         with open(source_file_path, 'w') as f:
             f.write(source_content)
@@ -1618,7 +1618,7 @@ Examples:
     print(f"  - Test YAML files: {len(list(output_dir.glob('*.test.yaml')))} files")
     if data_dir.exists():
         print(f"  - Test data directories: {len(list(data_dir.iterdir()))} directories")
-    print(f"\nNext steps:")
+    print("\nNext steps:")
     print(f"  1. Review generated files in: {output_dir}")
     print(f"  2. Run tests: kantra test {output_dir}/*.test.yaml")
 
@@ -1666,7 +1666,7 @@ Examples:
                 print(f"  Provider: {analysis['provider']}")
 
                 # Generate fixed code hint
-                print(f"  Generating code hint...")
+                print("  Generating code hint...")
                 code_hint = fix_pattern_detection(analysis, llm)
                 print(f"  Code hint: {code_hint}")
 
@@ -1781,9 +1781,9 @@ Examples:
                         with open(config_dir / config_filename, 'w') as f:
                             f.write(code['config_file']['content'])
 
-                    print(f"    ✓ Regenerated test data")
+                    print("    ✓ Regenerated test data")
                 else:
-                    print(f"    ✗ Could not extract code")
+                    print("    ✗ Could not extract code")
 
             # Restore original function
             generate_code_hint_from_pattern = original_func

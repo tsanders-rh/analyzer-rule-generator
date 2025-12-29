@@ -91,7 +91,7 @@ def create_test_data_structure(
     src_dir.mkdir(parents=True, exist_ok=True)
 
     # Create minimal pom.xml
-    pom_content = f"""<?xml version="1.0" encoding="UTF - 8"?>
+    pom_content = """<?xml version="1.0" encoding="UTF - 8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
@@ -120,7 +120,7 @@ def create_test_data_structure(
         f.write(pom_content)
 
     # Create placeholder Java file
-    java_content = f"""package com.example;
+    java_content = """package com.example;
 
 /**
  * Test application for {source} migration rules.
@@ -158,7 +158,7 @@ def create_readme(
     Returns:
         Path to created README
     """
-    readme_content = f"""# {source} to {target} Migration Rules
+    readme_content = """# {source} to {target} Migration Rules
 
 ## Overview
 
@@ -284,7 +284,7 @@ Examples:
     print()
 
     # Copy rule file
-    print(f"[1/4] Copying rule file...")
+    print("[1/4] Copying rule file...")
     rule_dest = output_dir / rule_file.name
     shutil.copy2(rule_file, rule_dest)
     print(f"  ✓ {rule_dest}")
@@ -294,12 +294,12 @@ Examples:
     test_dir.mkdir(exist_ok=True)
 
     # Create test template
-    print(f"[2/4] Creating test template...")
+    print("[2/4] Creating test template...")
     test_file = create_test_template(rule_file, test_dir, data_dir_name)
     print(f"  ✓ {test_file}")
 
     # Create test data structure
-    print(f"[3/4] Creating test data structure...")
+    print("[3/4] Creating test data structure...")
     data_dir = test_dir / 'data'
     data_dir.mkdir(exist_ok=True)
     test_data_dir = create_test_data_structure(
@@ -310,7 +310,7 @@ Examples:
     print(f"  ✓ {test_data_dir / 'src/main/java/com/example/Application.java'}")
 
     # Create README
-    print(f"[4/4] Creating README...")
+    print("[4/4] Creating README...")
     readme_file = create_readme(output_dir, rule_file, args.source, args.target, args.guide_url)
     print(f"  ✓ {readme_file}")
 
@@ -319,19 +319,19 @@ Examples:
     print()
     print("Next steps:")
     print(f"  1. Complete test data in: {test_data_dir}")
-    print(f"  2. Install Kantra: https://github.com/konveyor/kantra")
+    print("  2. Install Kantra: https://github.com/konveyor/kantra")
     print(f"  3. Run tests: kantra test {test_file}")
     print(f"  4. See {readme_file} for submission instructions")
     print()
-    print(f"Package structure:")
+    print("Package structure:")
     print(f"  {output_dir}/")
     print(f"  ├── {rule_file.name}")
-    print(f"  ├── README.md")
-    print(f"  └── tests/")
+    print("  ├── README.md")
+    print("  └── tests/")
     print(f"      ├── {rule_file.stem}.test.yaml")
     print(f"      └── data/{data_dir_name}/")
-    print(f"          ├── pom.xml")
-    print(f"          └── src/main/java/...")
+    print("          ├── pom.xml")
+    print("          └── src/main/java/...")
 
     return 0
 

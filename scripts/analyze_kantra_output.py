@@ -42,17 +42,17 @@ if __name__ == '__main__':
     total_rules = len(rule_counts)
     total_incidents = sum(rule_counts.values())
 
-    print(f"Analysis Results")
-    print(f"=" * 80)
+    print("Analysis Results")
+    print("=" * 80)
     print(f"Total Rules Fired: {total_rules}")
     print(f"Total Incidents: {total_incidents}")
-    print(f"\nViolations by Rule:")
-    print(f"-" * 80)
+    print("\nViolations by Rule:")
+    print("-" * 80)
 
     for rule_id, count in sorted_rules:
         print(f"{count:5d}  {rule_id}")
 
-    print(f"\nTop 10 Rules:")
-    print(f"-" * 80)
+    print("\nTop 10 Rules:")
+    print("-" * 80)
     for rule_id, count in sorted_rules[:10]:
         print(f"{count:5d}  {rule_id}")

@@ -96,22 +96,22 @@ class RuleValidator:
 
         # Print summary
         print("\n" + "=" * 80)
-        print(f"Validation Summary:")
+        print("Validation Summary:")
         print(f"  Issues:   {len(self.issues)}")
         print(f"  Warnings: {len(self.warnings)}")
 
         if self.issues:
-            print(f"\n❌ Issues found:")
+            print("\n❌ Issues found:")
             for issue in self.issues:
                 print(f"  - {issue}")
 
         if self.warnings:
-            print(f"\n⚠️  Warnings:")
+            print("\n⚠️  Warnings:")
             for warning in self.warnings:
                 print(f"  - {warning}")
 
         if not self.issues and not self.warnings:
-            print(f"\n✅ All rules validated successfully!")
+            print("\n✅ All rules validated successfully!")
 
         return {'valid': len(self.issues) == 0, 'issues': self.issues, 'warnings': self.warnings}
 
@@ -177,7 +177,7 @@ class RuleValidator:
                 if 'EmptyStateHeader' not in pattern:
                     self.warnings.append(
                         f"{rule_id}: Description mentions EmptyStateHeader "
-                        f"but pattern doesn't check for it"
+                        "but pattern doesn't check for it"
                     )
 
         # Check combo rules
@@ -239,7 +239,7 @@ class RuleValidator:
             if not matches:
                 self.issues.append(
                     f"{rule_id}: Pattern '{pattern}' does NOT match example code "
-                    f"from 'Before:' section"
+                    "from 'Before:' section"
                 )
                 # Show first line of example for context
                 first_line = example_code.split('\n')[0][:80]
@@ -256,7 +256,7 @@ class RuleValidator:
         when = rule.get('when', {})
         message = rule.get('message', '')
 
-        prompt = f"""You are validating a Konveyor analyzer rule for consistency.
+        prompt = """You are validating a Konveyor analyzer rule for consistency.
 
 Rule ID: {rule_id}
 Description: {description}
@@ -306,7 +306,7 @@ SUGGESTION: none
                     f"    Suggestion: {suggestion}"
                 )
             else:
-                print(f"    ✓ Description aligns with pattern")
+                print("    ✓ Description aligns with pattern")
 
         except Exception as e:
             self.warnings.append(f"{rule_id}: Semantic validation failed: {e}")

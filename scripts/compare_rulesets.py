@@ -76,7 +76,7 @@ def compare_rulesets(dir1, dir2, name1="Directory 1", name2="Directory 2"):
     print(f"Only in {name2}: {len(only_in_2)}\n")
 
     # Show category distribution
-    print(f"\n=== Category Distribution ===")
+    print("\n=== Category Distribution ===")
     print(f"\n{name1}:")
     cat1 = defaultdict(int)
     for r in rules1:
@@ -92,7 +92,7 @@ def compare_rulesets(dir1, dir2, name1="Directory 1", name2="Directory 2"):
         print(f"  {cat}: {count}")
 
     # Show effort distribution
-    print(f"\n=== Effort Distribution ===")
+    print("\n=== Effort Distribution ===")
     print(f"\n{name1}:")
     eff1 = defaultdict(int)
     for r in rules1:

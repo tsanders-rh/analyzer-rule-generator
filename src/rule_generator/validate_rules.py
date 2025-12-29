@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional
 
 from .condition_builder import build_builtin_condition, build_combo_condition
 from .llm import LLMProvider
+from .schema import AnalyzerRule
 
 
 class ValidationReport:
@@ -327,8 +328,6 @@ class RuleValidator:
         Returns:
             Updated list of rules with improvements applied
         """
-        from .schema import AnalyzerRule
-
         # Create a mapping of rule IDs to improvements
         improvements_by_id = defaultdict(list)
         for improvement in report.improvements:

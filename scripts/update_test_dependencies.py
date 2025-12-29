@@ -61,7 +61,7 @@ class Incident:
 
     def to_go_struct(self) -> str:
         """Convert to Go api.Incident struct."""
-        return f'''{{
+        return '''{{
 \t\t\t\t\tFile: "{self.file}",
 \t\t\t\t\tLine: {self.line},
 \t\t\t\t}}'''
@@ -100,7 +100,7 @@ class Insight:
         # Escape double quotes in description
         desc_escaped = self.description.replace('"', '\\"').replace('\n', ' ')
 
-        return f'''{{
+        return '''{{
 \t\t\tCategory:    "{self.category}",
 \t\t\tDescription: "{desc_escaped}",
 \t\t\tEffort:      {self.effort},
@@ -119,7 +119,7 @@ class Tag:
 
     def to_go_struct(self) -> str:
         """Convert to Go api.Tag struct."""
-        return f'''{{
+        return '''{{
 \t\t\tName:     "{self.name}",
 \t\t\tCategory: api.Ref{{Name: "{self.category}"}},
 \t\t}}'''
@@ -135,7 +135,7 @@ class Dependency:
 
     def to_go_struct(self) -> str:
         """Convert to Go api.TechDependency struct."""
-        return f'''{{
+        return '''{{
 \t\t\t\tName:     "{self.name}",
 \t\t\t\tVersion:  "{self.version}",
 \t\t\t\tProvider: "{self.provider}",
@@ -180,7 +180,7 @@ def parse_analyzer_output(file_path: Path) -> List[Dependency]:
         # Format 3: Top-level keys are dependency names
         else:
             print(
-                f"Warning: Unrecognized format, attempting to extract dependencies", file=sys.stderr
+                "Warning: Unrecognized format, attempting to extract dependencies", file=sys.stderr
             )
             deps_data = []
     elif isinstance(data, list):
@@ -201,7 +201,7 @@ def parse_analyzer_output(file_path: Path) -> List[Dependency]:
         if not deps_data:
             deps_data = data
     else:
-        print(f"Error: Unexpected data format", file=sys.stderr)
+        print("Error: Unexpected data format", file=sys.stderr)
         sys.exit(1)
 
     # Parse dependency objects
@@ -328,7 +328,7 @@ def parse_violations(
 
     # data is a list of rulesets
     if not isinstance(data, list):
-        print(f"Error: Expected output.yaml to contain a list of rulesets", file=sys.stderr)
+        print("Error: Expected output.yaml to contain a list of rulesets", file=sys.stderr)
         sys.exit(1)
 
     for ruleset in data:
@@ -593,7 +593,7 @@ def generate_test_case_template(
     # Sanitize names for Go variable naming
     var_name = re.sub(r'[^a-zA-Z0 - 9]', '', test_name.title())
 
-    template = f'''package analysis
+    template = '''package analysis
 
 import (
 \t"github.com/konveyor/go-konveyor-tests/data"

@@ -328,11 +328,11 @@ def main():
         # Auto-apply import verification improvements
         if validation_report.improvements:
             print(f"\n{'=' * 80}")
-            print(f"APPLYING IMPROVEMENTS")
+            print("APPLYING IMPROVEMENTS")
             print(f"{'=' * 80}")
             print(
                 f"Auto-applying {len(validation_report.improvements)} "
-                f"import verification improvements..."
+                "import verification improvements..."
             )
 
             # Apply improvements to all rules
@@ -405,7 +405,7 @@ def main():
     ruleset_data = {
         "name": f"{args.source}/{args.target}",
         "description": (
-            f"This ruleset provides guidance for migrating from " f"{args.source} to {args.target}"
+            "This ruleset provides guidance for migrating from " f"{args.source} to {args.target}"
         ),
     }
     with open(ruleset_file, 'w') as f:
@@ -443,7 +443,7 @@ def main():
         eff = rule.effort
         efforts[eff] = efforts.get(eff, 0) + 1
 
-    print(f"\nEffort Distribution:")
+    print("\nEffort Distribution:")
     for eff in sorted(efforts.keys()):
         print(f"  {eff}: {'▓' * efforts[eff]}")
 
@@ -473,8 +473,8 @@ def main():
         print("  ✓ No validation issues found")
 
     # Show files created
-    print(f"\n" + "=" * 60)
-    print(f"Files Created")
+    print("\n" + "=" * 60)
+    print("Files Created")
     print("=" * 60)
     for file in written_files:
         print(f"  {file}")

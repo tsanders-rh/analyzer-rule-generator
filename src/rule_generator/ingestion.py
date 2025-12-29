@@ -340,6 +340,10 @@ class GuideIngester:
         Returns:
             List of related URLs to follow
         """
+        # Return empty list if soup is None (BeautifulSoup not available)
+        if soup is None:
+            return []
+
         base_domain = urlparse(base_url).netloc
         related_links = []
 

@@ -276,37 +276,37 @@ class MigrationPatternExtractor:
                 logger.info(f"Extracted {len(patterns)} valid patterns from content")
                 return patterns
 
-        except (ValueError, TypeError, KeyError) as e:
-            # Handle validation or parsing errors gracefully
-            print(f"[Extraction] Error: Failed to parse LLM response: {e}")
-            return []
-        except (ConnectionError, TimeoutError, OSError) as e:
-            # Handle network-related errors
-            print(f"[Extraction] Warning: Network error, skipping chunk: {e}")
-            return []
-        except LLMRateLimitError as e:
-            # Rate limit exceeded - expected error, just log and continue
-            print(f"[Extraction] Warning: Rate limit exceeded, skipping chunk: {e}")
-            return []
-        except LLMAuthenticationError as e:
-            # Authentication failed - fatal error, raise it
-            print(f"[Extraction] Error: Authentication failed: {e}")
-            raise
-        except LLMAPIError as e:
-            # API error (5xx, temporary failures) - log and continue
-            print(f"[Extraction] Warning: API temporarily unavailable, skipping chunk: {e}")
-            return []
-        except Exception as e:
-            # Fallback for any other exceptions (e.g., from custom providers or during testing)
-            # Check if error message indicates specific error types
-            error_message = str(e).lower()
-            if "rate" in error_message or "429" in error_message:
+            except (ValueError, TypeError, KeyError) as e:
+                # Handle validation or parsing errors gracefully
+                print(f"[Extraction] Error: Failed to parse LLM response: {e}")
+                return []
+            except (ConnectionError, TimeoutError, OSError) as e:
+                # Handle network-related errors
+                print(f"[Extraction] Warning: Network error, skipping chunk: {e}")
+                return []
+            except LLMRateLimitError as e:
+                # Rate limit exceeded - expected error, just log and continue
                 print(f"[Extraction] Warning: Rate limit exceeded, skipping chunk: {e}")
-            elif "api" in error_message or "500" in error_message:
-                print(f"[Extraction] Warning: API error, skipping chunk: {e}")
-            else:
-                print(f"[Extraction] Warning: Pattern extraction failed, skipping chunk: {e}")
-            return []
+                return []
+            except LLMAuthenticationError as e:
+                # Authentication failed - fatal error, raise it
+                print(f"[Extraction] Error: Authentication failed: {e}")
+                raise
+            except LLMAPIError as e:
+                # API error (5xx, temporary failures) - log and continue
+                print(f"[Extraction] Warning: API temporarily unavailable, skipping chunk: {e}")
+                return []
+            except Exception as e:
+                # Fallback for any other exceptions (e.g., from custom providers or during testing)
+                # Check if error message indicates specific error types
+                error_message = str(e).lower()
+                if "rate" in error_message or "429" in error_message:
+                    print(f"[Extraction] Warning: Rate limit exceeded, skipping chunk: {e}")
+                elif "api" in error_message or "500" in error_message:
+                    print(f"[Extraction] Warning: API error, skipping chunk: {e}")
+                else:
+                    print(f"[Extraction] Warning: Pattern extraction failed, skipping chunk: {e}")
+                return []
 
     def _extract_patterns_chunked(
         self,

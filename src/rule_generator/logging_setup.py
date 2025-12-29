@@ -19,12 +19,12 @@ from .config import config
 
 # ANSI color codes for terminal output
 COLORS = {
-    'DEBUG': '\033[36m',     # Cyan
-    'INFO': '\033[32m',      # Green
-    'WARNING': '\033[33m',   # Yellow
-    'ERROR': '\033[31m',     # Red
+    'DEBUG': '\033[36m',  # Cyan
+    'INFO': '\033[32m',  # Green
+    'WARNING': '\033[33m',  # Yellow
+    'ERROR': '\033[31m',  # Red
     'CRITICAL': '\033[35m',  # Magenta
-    'RESET': '\033[0m',      # Reset
+    'RESET': '\033[0m',  # Reset
 }
 
 
@@ -70,13 +70,12 @@ def setup_logging() -> None:
         # More verbose format in debug mode
         formatter = ColoredFormatter(
             '[%(asctime)s] %(levelname)s [%(name)s:%(funcName)s:%(lineno)d] %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
+            datefmt='%Y-%m-%d %H:%M:%S',
         )
     else:
         # Simpler format for normal operation
         formatter = ColoredFormatter(
-            '[%(asctime)s] %(levelname)s [%(name)s] %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
+            '[%(asctime)s] %(levelname)s [%(name)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
         )
 
     console_handler.setFormatter(formatter)
@@ -119,6 +118,7 @@ def log_performance(func: Callable) -> Callable:
     Returns:
         Wrapped function with performance logging
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not config.LOG_PERFORMANCE:
@@ -188,10 +188,7 @@ def log_decision(logger: logging.Logger, decision: str, rationale: str, **contex
 
 
 def log_error_with_context(
-    logger: logging.Logger,
-    error: Exception,
-    operation: str,
-    **context
+    logger: logging.Logger, error: Exception, operation: str, **context
 ) -> None:
     """
     Log an error with rich context for debugging.
@@ -218,8 +215,9 @@ def log_error_with_context(
     """
     context_str = ', '.join(f"{k}={v}" for k, v in context.items())
     logger.error(
-        f"Error during {operation}: {type(error).__name__}: {error} "
-        f"(context: {context_str})" if context_str else f"Error during {operation}: {type(error).__name__}: {error}"
+        f"Error during {operation}: {type(error).__name__}: {error} " f"(context: {context_str})"
+        if context_str
+        else f"Error during {operation}: {type(error).__name__}: {error}"
     )
 
     # Log stack trace in debug mode

@@ -14,10 +14,16 @@ class Config:
     """Application configuration constants."""
 
     # Logging settings
-    DEBUG_MODE: bool = field(default_factory=lambda: os.getenv("DEBUG", "").lower() in ("1", "true", "yes"))
+    DEBUG_MODE: bool = field(
+        default_factory=lambda: os.getenv("DEBUG", "").lower() in ("1", "true", "yes")
+    )
     LOG_LEVEL: str = field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO"))
-    LOG_PERFORMANCE: bool = field(default_factory=lambda: os.getenv("LOG_PERFORMANCE", "").lower() in ("1", "true", "yes"))
-    LOG_API_CALLS: bool = field(default_factory=lambda: os.getenv("LOG_API_CALLS", "").lower() in ("1", "true", "yes"))
+    LOG_PERFORMANCE: bool = field(
+        default_factory=lambda: os.getenv("LOG_PERFORMANCE", "").lower() in ("1", "true", "yes")
+    )
+    LOG_API_CALLS: bool = field(
+        default_factory=lambda: os.getenv("LOG_API_CALLS", "").lower() in ("1", "true", "yes")
+    )
 
     # Extraction settings
     EXTRACTION_CHUNK_SIZE: int = 40000  # Characters per chunk for large guides

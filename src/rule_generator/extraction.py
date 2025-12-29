@@ -158,7 +158,10 @@ class MigrationPatternExtractor:
         """
         # Check if content needs chunking (>40KB)
         if guide_content and len(guide_content) > config.MAX_CONTENT_SIZE:
-            print(f"  → Content is large ({len(guide_content):,} chars), using chunked extraction")
+            print(
+                f"  → Content is large ({len(guide_content):,} chars), "
+                f"using chunked extraction"
+            )
             return self._extract_patterns_chunked(guide_content, source_framework, target_framework)
 
         # Single extraction for smaller content
@@ -215,10 +218,11 @@ class MigrationPatternExtractor:
             # Check for specific API errors by message content
             if "500" in error_message or "api_error" in error_message.lower():
                 print(
-                    f"⚠ API temporarily unavailable, skipping this chunk (will continue with others)"
+                    "⚠ API temporarily unavailable, skipping this chunk "
+                    "(will continue with others)"
                 )
             elif "rate_limit" in error_message.lower() or "429" in error_message:
-                print(f"⚠ Rate limit reached, skipping this chunk")
+                print("⚠ Rate limit reached, skipping this chunk")
             else:
                 # For unexpected errors, show more detail
                 print(f"Error extracting patterns: {e}")
@@ -336,8 +340,10 @@ For Java code patterns (classes, annotations, imports), use these fields:
 - **provider_type**: Set to "java" (or leave null for auto-detection)
 - **source_fqn**: Fully qualified class name (e.g., "javax.ejb.Stateless")
 - **location_type**: Choose based on what you're detecting:
-  - **TYPE**: For package changes with wildcards (e.g., "com.sun.net.ssl.*") - PREFERRED for ChangePackage
-  - **IMPORT**: For specific class imports only (no wildcards, exact FQN required like "org.springframework.boot.actuate.trace.http.HttpTraceRepository")
+  - **TYPE**: For package changes with wildcards (e.g., "com.sun.net.ssl.*")
+    - PREFERRED for ChangePackage
+  - **IMPORT**: For specific class imports only (no wildcards, exact FQN required
+    like "org.springframework.boot.actuate.trace.http.HttpTraceRepository")
   - **METHOD_CALL**: For method invocations
   - **ANNOTATION**: For annotation usage
   - **INHERITANCE**: For class inheritance
@@ -348,26 +354,33 @@ For Java code patterns (classes, annotations, imports), use these fields:
 For Maven dependency changes (pom.xml), use these fields:
 - **provider_type**: Set to "java" (the java provider handles Maven dependencies)
 - **category**: MUST set to "dependency"
-- **source_fqn**: Maven coordinates in format "groupId:artifactId" (e.g., "mysql:mysql-connector-java" or "org.springframework.boot:spring-boot-starter-web")
-- **alternative_fqns**: CRITICAL - Include Maven relocations! Many Maven artifacts have been relocated:
+- **source_fqn**: Maven coordinates in format "groupId:artifactId"
+  (e.g., "mysql:mysql-connector-java" or "org.springframework.boot:spring-boot-starter-web")
+- **alternative_fqns**: CRITICAL - Include Maven relocations!
+  Many Maven artifacts have been relocated:
   * "mysql:mysql-connector-java" → "com.mysql:mysql-connector-j" (relocated in 8.0+)
   * If the migration guide mentions a dependency change, check if it's a Maven relocation
-  * Include BOTH the old and relocated coordinates in alternative_fqns (e.g., ["com.mysql:mysql-connector-j"])
-  * Maven automatically resolves relocations, so the analyzer will see the NEW coordinates even if pom.xml has OLD ones
+  * Include BOTH the old and relocated coordinates in alternative_fqns
+    (e.g., ["com.mysql:mysql-connector-j"])
+  * Maven automatically resolves relocations, so the analyzer will see the NEW coordinates
+    even if pom.xml has OLD ones
 - **location_type**: null (not needed for dependency detection)
 - **file_pattern**: null
 
 **Configuration File Detection Instructions:**
-For property/configuration file patterns (application.properties, application.yaml), use these fields:
+For property/configuration file patterns (application.properties, application.yaml),
+use these fields:
 - **provider_type**: Set to "builtin"
-- **source_fqn**: SIMPLE regex pattern to match the property. Use `.*` for wildcards and escape dots with \\\\ (e.g., "spring\\.data\\.mongodb\\.host")
+- **source_fqn**: SIMPLE regex pattern to match the property. Use `.*` for wildcards
+  and escape dots with \\\\ (e.g., "spring\\.data\\.mongodb\\.host")
 - **file_pattern**: Regex pattern to match configuration files (e.g., ".*\\.(properties|yaml|yml)")
 - **location_type**: null (not needed for builtin provider)
 - **category**: "configuration"
 
 """
 
-        prompt = f"""You are converting OpenRewrite recipes into Konveyor analyzer detection patterns.
+        prompt = f"""You are converting OpenRewrite recipes into Konveyor analyzer
+detection patterns.
 
 {frameworks}**IMPORTANT: OpenRewrite vs Konveyor**
 
@@ -428,7 +441,8 @@ Konveyor Detection Pattern:
    - Create separate patterns for each meaningful sub-recipe
 
 **Location Type Selection:**
-- **TYPE**: For package-level changes with wildcards (e.g., "javax.security.cert.*") - USE THIS FOR ChangePackage
+- **TYPE**: For package-level changes with wildcards (e.g., "javax.security.cert.*")
+  - USE THIS FOR ChangePackage
 - **IMPORT**: For specific class imports (requires exact FQN, no wildcards)
 - **METHOD_CALL**: For detecting method invocations
 - **ANNOTATION**: For detecting annotation usage
@@ -449,7 +463,8 @@ OPENREWRITE RECIPE CONTENT:
 2. For simple transformations (ChangePackage, ChangeType), directly map to detection patterns
 3. For complex transformations, infer what code patterns are being changed
 4. Skip recipe references that are too generic (e.g., "UpgradeToJava17" without parameters)
-5. For composite recipes with sub-recipes, expand and extract patterns from each meaningful transformation
+5. For composite recipes with sub-recipes, expand and extract patterns from each
+   meaningful transformation
 
 Return your findings as a JSON array with these fields:
 
@@ -457,7 +472,8 @@ Return your findings as a JSON array with these fields:
   "source_pattern": "string",
   "target_pattern": "string",
   "source_fqn": "string or null",
-  "location_type": "ANNOTATION|IMPORT|METHOD_CALL|TYPE|INHERITANCE|PACKAGE|FIELD|CLASS|METHOD|ALL or null",
+  "location_type": "ANNOTATION|IMPORT|METHOD_CALL|TYPE|INHERITANCE|PACKAGE|FIELD|
+                    CLASS|METHOD|ALL or null",
   "alternative_fqns": ["string"] or [],
   "complexity": "TRIVIAL|LOW|MEDIUM|HIGH|EXPERT",
   "category": "dependency|annotation|api|configuration|other",
@@ -673,7 +689,8 @@ Return ONLY the JSON array, no additional commentary."""
             if pattern.source_pattern and pattern.target_pattern:
                 if pattern.source_pattern.strip() == pattern.target_pattern.strip():
                     print(
-                        f"  ! Rejecting pattern with identical source/target: {pattern.source_pattern}"
+                        f"  ! Rejecting pattern with identical source/target: "
+                        f"{pattern.source_pattern}"
                     )
                     continue
 
@@ -728,7 +745,10 @@ Return ONLY the JSON array, no additional commentary."""
             # Create import verification pattern for PatternFly
             # This matches: import { Component } from '@patternfly/react-core'
             # or: import { Component } from '@patternfly/react-core/deprecated'
-            import_pattern = f"import.*\\{{{{[^}}}}]*\\\\b{component}\\\\b[^}}}}]*\\}}}}.*from ['\"]@patternfly/react-"
+            import_pattern = (
+                f"import.*\\{{{{[^}}}}]*\\\\b{component}\\\\b[^}}}}]*\\}}}}"
+                f".*from ['\"]@patternfly/react-"
+            )
 
             # Use 2-condition combo rule (import verification + JSX pattern)
             # This is simpler and more effective than 3-condition with nodejs.referenced

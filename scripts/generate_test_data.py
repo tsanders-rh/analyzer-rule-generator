@@ -510,7 +510,8 @@ def generate_code_hint_from_pattern(
         # TypeScript interface (single line for line-by-line matching)
         return "interface ButtonProps { onClick: () => void; disabled?: boolean; }"
 
-    # Pattern 5: IS_REACT_ACT_ENVIRONMENT - needs to be referenced as an identifier, not property access
+    # Pattern 5: IS_REACT_ACT_ENVIRONMENT - needs to be referenced as an identifier,
+    # not property access
     if pattern == 'IS_REACT_ACT_ENVIRONMENT':
         # Use as identifier, not global.IS_REACT_ACT_ENVIRONMENT (which is property access)
         return "const testEnv = IS_REACT_ACT_ENVIRONMENT;"
@@ -624,9 +625,15 @@ def build_test_generation_prompt(
                 # Add config file specific instruction
                 pattern_obj = pattern.get('pattern', '')
                 if config_file_path:
-                    pattern_text += f"\n  **MUST BE IN CONFIG FILE ({config_file_type}) at {config_file_path}:** {pattern_obj}"
+                    pattern_text += (
+                        f"\n  **MUST BE IN CONFIG FILE ({config_file_type}) "
+                        f"at {config_file_path}:** {pattern_obj}"
+                    )
                 else:
-                    pattern_text += f"\n  **MUST BE IN CONFIG FILE ({config_file_type}) named {config_file_name}:** {pattern_obj}"
+                    pattern_text += (
+                        f"\n  **MUST BE IN CONFIG FILE ({config_file_type}) "
+                        f"named {config_file_name}:** {pattern_obj}"
+                    )
 
             # Check for Java imports
             if (
@@ -635,7 +642,10 @@ def build_test_generation_prompt(
                 and pattern.get('code_hint')
             ):
                 has_java_imports = True
-                pattern_text += f"\n\n  **YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS:**\n  ```java\n  // {p['ruleID']}\n  {pattern['code_hint']}\n  ```"
+                pattern_text += (
+                    f"\n\n  **YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS:**\n"
+                    f"  ```java\n  // {p['ruleID']}\n  {pattern['code_hint']}\n  ```"
+                )
 
             # Check for nodejs.referenced (TypeScript/JavaScript)
             if pattern.get('provider') == 'nodejs' and language == 'typescript':
@@ -654,12 +664,21 @@ def build_test_generation_prompt(
                     # Default to react
                     import_statement = f"import {{ {api_name} }} from 'react';"
 
-                pattern_text += f"\n\n  **CRITICAL - nodejs.referenced pattern:**\n  You MUST import AND use `{api_name}` in your code.\n  ```tsx\n  // {p['ruleID']}\n  {import_statement}\n  \n  // Then CALL or USE {api_name} somewhere in your component code\n  // Example: const result = {api_name}(...);\n  ```"
+                pattern_text += (
+                    f"\n\n  **CRITICAL - nodejs.referenced pattern:**\n"
+                    f"  You MUST import AND use `{api_name}` in your code.\n"
+                    f"  ```tsx\n  // {p['ruleID']}\n  {import_statement}\n  \n"
+                    f"  // Then CALL or USE {api_name} somewhere in your component code\n"
+                    f"  // Example: const result = {api_name}(...);\n  ```"
+                )
 
         # Add code hint if available (for code-based rules)
         if p.get('code_hint') and not has_java_imports and not has_nodejs_referenced:
             if language == 'typescript':
-                pattern_text += f"\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n  ```tsx\n  // {p['ruleID']}\n  {p['code_hint']}\n  ```"
+                pattern_text += (
+                    f"\n\n  **YOU MUST GENERATE THIS EXACT JSX CODE:**\n"
+                    f"  ```tsx\n  // {p['ruleID']}\n  {p['code_hint']}\n  ```"
+                )
         elif p.get('component') and not has_nodejs_referenced:
             pattern_text += (
                 f"\n  Component: {p['component']} (MUST be used in JSX, not just imported)"
@@ -681,9 +700,11 @@ def build_test_generation_prompt(
         config_file_instructions = f"""
 3. **{final_config_file_name}** - Configuration file with deprecated properties:
    - Location: {final_config_file_path}
-   - CRITICAL: The deprecated property patterns marked as "MUST BE IN CONFIG FILE" below MUST appear in this file
+   - CRITICAL: The deprecated property patterns marked as "MUST BE IN CONFIG FILE"
+     below MUST appear in this file
    - Do NOT use @Value annotations in Java code for these patterns
-   - Include the EXACT deprecated property names from the "Before:" examples in the rule messages
+   - Include the EXACT deprecated property names from the "Before:" examples
+     in the rule messages
    - Format the properties correctly for {config_file_type} format
    - Include actual values for each deprecated property
    - Example: If pattern is spring\\.data\\.cassandra\\., include properties like:
@@ -698,7 +719,8 @@ def build_test_generation_prompt(
    - Minimal dependencies needed for the patterns
    - Java version (11 or 17)
    - CRITICAL: All <dependency> entries MUST include a <version> tag
-   - Exception: Only omit <version> for spring-boot-starter-* dependencies (they inherit from parent)
+   - Exception: Only omit <version> for spring-boot-starter-* dependencies
+     (they inherit from parent)
    - For all other dependencies (mysql-connector-java, etc.), explicitly specify a version
 
 2. **{main_file}** - Main application with:
@@ -709,8 +731,10 @@ def build_test_generation_prompt(
 {config_file_instructions}
 
 For Java patterns:
-- IMPORT location: Add actual import statements at the top of the file (e.g., import org.example.ClassName;)
-- METHOD_CALL location: Call a method on the specified class instance (e.g., configurer.setUseTrailingSlashMatch(false);)
+- IMPORT location: Add actual import statements at the top of the file
+  (e.g., import org.example.ClassName;)
+- METHOD_CALL location: Call a method on the specified class instance
+  (e.g., configurer.setUseTrailingSlashMatch(false);)
   * You MUST include an actual method invocation like object.methodName()
   * Just importing or declaring the type is NOT enough - you must CALL a method on it
 - PACKAGE location: Use @Value("${{property}}") or @ConfigurationProperties
@@ -719,8 +743,9 @@ For Java patterns:
 - DEPENDENCY location: Include in pom.xml dependencies with explicit <version> tags
 - CONFIG FILE patterns: Add actual property in application.properties or application.yaml
 
-CRITICAL: When import statements are shown above with "YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS",
-add them EXACTLY as shown at the top of your Java file, after the package declaration.
+CRITICAL: When import statements are shown above with
+"YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS", add them EXACTLY as shown
+at the top of your Java file, after the package declaration.
 
 CRITICAL FOR MAVEN DEPENDENCIES:
 - spring-boot-starter-web: no version needed (managed by parent)
@@ -792,7 +817,8 @@ For Python patterns:
         config_file_instructions=config_file_instructions,
     )
 
-    prompt = f"""Generate a minimal {language.upper()} test application for Konveyor analyzer rule testing.
+    prompt = f"""Generate a minimal {language.upper()} test application
+for Konveyor analyzer rule testing.
 
 Migration: {source} → {target}
 Guide: {guide_url}
@@ -812,10 +838,12 @@ REQUIREMENTS:
 6. Ensure static analysis can detect each pattern
 
 CRITICAL FOR CONFIGURATION FILES:
-- If a rule says "MUST BE IN CONFIG FILE", create the configuration file (application.properties or application.yaml)
+- If a rule says "MUST BE IN CONFIG FILE", create the configuration file
+  (application.properties or application.yaml)
 - Extract the EXACT deprecated property names from the rule's "Before:" code example
 - Include those deprecated properties with realistic values in your configuration file
-- Do NOT use @Value annotations in Java code for config file patterns - put them in the actual config file
+- Do NOT use @Value annotations in Java code for config file patterns -
+  put them in the actual config file
 
 CRITICAL FOR TSX/JSX FILES:
 - Components must be USED in JSX, not just imported
@@ -842,7 +870,8 @@ Format your response with clear code blocks:
 '''}
 Generate ONLY the file contents. Do not include explanations before or after the code blocks.
 
-IMPORTANT: If generating a config file other than application.properties/yaml, include the FULL filename in the code block header.
+IMPORTANT: If generating a config file other than application.properties/yaml,
+include the FULL filename in the code block header.
 For example: ```properties spring.factories``` or ```yaml application-dev.yaml```
 """
 
@@ -1080,9 +1109,9 @@ def run_kantra_tests(output_dir: Path) -> dict:
     """
     import subprocess
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print("Running kantra tests...")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
 
     # Find all test files
     test_files = list(output_dir.glob('*.test.yaml'))
@@ -1125,11 +1154,11 @@ def run_kantra_tests(output_dir: Path) -> dict:
         total = 0
 
     # Extract failed rules with debug paths
-    # Look for rule IDs (format: source-to-target-NNNNN) followed by 0/1 PASSED and debug path
+    # Look for rule IDs (format: source-to-target-NNNNN) followed by 0 / 1 PASSED and debug path
     # Use [\w-]+ to match word chars AND hyphens (for multi-part source/target names)
     failures = []
     for match in re.finditer(
-        r'([\w-]+-\d{5})\s + 0/1\s+PASSED.*?find debug data in (/[^\s]+)', output, re.DOTALL
+        r'([\w-]+-\d{5})\s + 0 / 1\s+PASSED.*?find debug data in (/[^\s]+)', output, re.DOTALL
     ):
         rule_id = match.group(1)
         debug_path = match.group(2).strip()
@@ -1236,7 +1265,8 @@ def fix_pattern_detection(failure_info: dict, llm) -> str:
     provider = failure_info['provider']
     rule_id = failure_info['rule_id']
 
-    prompt = f"""Generate a single-line code snippet that matches this Konveyor analyzer rule pattern.
+    prompt = f"""Generate a single-line code snippet that matches this
+Konveyor analyzer rule pattern.
 
 Rule ID: {rule_id}
 Provider: {provider}
@@ -1281,7 +1311,8 @@ Examples:
     --output submission/tests/data/mongodb \\
     --source spring-boot - 3.5 \\
     --target spring-boot - 4.0 \\
-    --guide-url "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot - 4.0-Migration-Guide"
+    --guide-url \\
+      "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot - 4.0-Migration-Guide"
 
   # Generate TypeScript test data for a directory of rules
   python scripts/generate_test_data.py \\
@@ -1318,13 +1349,19 @@ Examples:
         '--delay',
         type=float,
         default=config.TEST_GENERATION_DELAY,
-        help=f'Delay in seconds between API calls to avoid rate limits (default: {config.TEST_GENERATION_DELAY})',
+        help=(
+            f'Delay in seconds between API calls to avoid rate limits '
+            f'(default: {config.TEST_GENERATION_DELAY})'
+        ),
     )
     parser.add_argument(
         '--max-retries',
         type=int,
         default=config.MAX_RETRY_ATTEMPTS,
-        help=f'Maximum number of retries for rate limit errors (default: {config.MAX_RETRY_ATTEMPTS})',
+        help=(
+            f'Maximum number of retries for rate limit errors '
+            f'(default: {config.MAX_RETRY_ATTEMPTS})'
+        ),
     )
     parser.add_argument(
         '--skip-existing',
@@ -1396,9 +1433,9 @@ Examples:
     total_files = len(rule_files)
     skipped_count = 0
     for idx, rule_file in enumerate(rule_files, 1):
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print(f"Processing {idx}/{total_files}: {rule_file.name}")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
 
         # Check if test already exists
         test_file_name = rule_file.stem + '.test.yaml'
@@ -1469,11 +1506,13 @@ Examples:
                     usage = result['usage']
                     if 'input_tokens' in usage:
                         print(
-                            f"    Input tokens: {usage['input_tokens']}, Output tokens: {usage['output_tokens']}"
+                            f"    Input tokens: {usage['input_tokens']}, "
+                            f"Output tokens: {usage['output_tokens']}"
                         )
                     elif 'prompt_tokens' in usage:
                         print(
-                            f"    Prompt tokens: {usage['prompt_tokens']}, Completion tokens: {usage['completion_tokens']}"
+                            f"    Prompt tokens: {usage['prompt_tokens']}, "
+                            f"Completion tokens: {usage['completion_tokens']}"
                         )
                 break  # Success, exit retry loop
 
@@ -1483,7 +1522,8 @@ Examples:
                     if retry < args.max_retries - 1:
                         wait_time = 60 * (retry + 1)  # Exponential backoff: 60s, 120s, 180s
                         print(
-                            f"  ⚠ Rate limit hit, waiting {wait_time}s before retry {retry + 2}/{args.max_retries}..."
+                            f"  ⚠ Rate limit hit, waiting {wait_time}s before retry "
+                            f"{retry + 2}/{args.max_retries}..."
                         )
                         time.sleep(wait_time)
                     else:
@@ -1568,7 +1608,7 @@ Examples:
             print(f"  Waiting {args.delay}s before next file...")
             time.sleep(args.delay)
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     generated_count = total_files - skipped_count
     print(f"✓ Processed {total_files} rule file(s)")
     if skipped_count > 0:
@@ -1584,22 +1624,22 @@ Examples:
 
     # Test-fix loop if enabled
     if args.max_iterations > 0:
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print(f"TEST-FIX LOOP ENABLED (max {args.max_iterations} iterations)")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
 
         for iteration in range(1, args.max_iterations + 1):
-            print(f"\n{'='*70}")
+            print(f"\n{'=' * 70}")
             print(f"ITERATION {iteration}/{args.max_iterations}")
-            print(f"{'='*70}")
+            print(f"{'=' * 70}")
 
             # Run tests
             test_results = run_kantra_tests(output_dir)
 
             if test_results['exit_code'] == 0:
-                print(f"\n{'='*70}")
+                print(f"\n{'=' * 70}")
                 print(f"🎉 SUCCESS! All {test_results['total']} tests passing!")
-                print(f"{'='*70}")
+                print(f"{'=' * 70}")
                 return 0
 
             print(f"\nTests: {test_results['passed']}/{test_results['total']} passing")
@@ -1752,11 +1792,11 @@ Examples:
             time.sleep(args.delay)
 
         # Max iterations reached
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print(f"⚠ Maximum iterations ({args.max_iterations}) reached")
         final_results = run_kantra_tests(output_dir)
         print(f"Final: {final_results['passed']}/{final_results['total']} tests passing")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
 
     return 0
 

@@ -216,13 +216,13 @@ def main():
 
     # Step 1: Ingest content
     if from_openrewrite:
-        print("[1/3] Ingesting OpenRewrite recipe...")
+        print("[1 / 3] Ingesting OpenRewrite recipe...")
         from rule_generator.openrewrite import OpenRewriteRecipeIngester
 
         ingester = OpenRewriteRecipeIngester()
         guide_content = ingester.ingest(args.from_openrewrite)
     else:
-        print("[1/3] Ingesting guide...")
+        print("[1 / 3] Ingesting guide...")
         if args.follow_links:
             print(f"  → Following related links (max depth: {args.max_depth})")
         ingester = GuideIngester(follow_links=args.follow_links, max_depth=args.max_depth)
@@ -235,7 +235,7 @@ def main():
     print(f"  ✓ Ingested {len(guide_content)} characters")
 
     # Step 2: Extract patterns
-    print("[2/3] Extracting patterns with LLM...")
+    print("[2 / 3] Extracting patterns with LLM...")
     llm = get_llm_provider(provider=args.provider, model=args.model, api_key=args.api_key)
 
     extractor = MigrationPatternExtractor(llm, from_openrewrite=from_openrewrite)
@@ -250,7 +250,7 @@ def main():
     print(f"  ✓ Extracted {len(patterns)} patterns")
 
     # Step 3: Generate rules (grouped by concern)
-    print("[3/3] Generating analyzer rules...")
+    print("[3 / 3] Generating analyzer rules...")
 
     generator = AnalyzerRuleGenerator(
         source_framework=args.source,
@@ -323,9 +323,9 @@ def main():
 
         # Auto-apply import verification improvements
         if validation_report.improvements:
-            print(f"\n{'='*80}")
+            print(f"\n{'=' * 80}")
             print(f"APPLYING IMPROVEMENTS")
-            print(f"{'='*80}")
+            print(f"{'=' * 80}")
             print(
                 f"Auto-applying {len(validation_report.improvements)} import verification improvements..."
             )

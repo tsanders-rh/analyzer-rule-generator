@@ -278,7 +278,7 @@ class RulesetComplexityClassifier:
             Statistics dictionary with counts and changes
         """
         print(f"Classifying ruleset: {ruleset_path}")
-        print(f"{'='*80}\n")
+        print(f"{'=' * 80}\n")
 
         # Load ruleset
         with open(ruleset_path, 'r') as f:
@@ -336,7 +336,7 @@ class RulesetComplexityClassifier:
                 print(f"  {rule.get('ruleID', f'rule_{i}')}: {complexity} (unchanged)")
 
         # Print statistics
-        print(f"\n{'='*80}")
+        print(f"\n{'=' * 80}")
         print("Classification Summary:")
         print(
             f"  TRIVIAL: {stats['trivial']:3d} rules (95%+ AI success - namespace changes, mechanical fixes)"

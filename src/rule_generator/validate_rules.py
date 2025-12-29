@@ -189,7 +189,7 @@ class RuleValidator:
             print(f"  ! Duplicate found: {dup_pair[0].ruleID} and {dup_pair[1].ruleID}")
             report.add_issue('duplicate', dup_pair[0], {'duplicate_of': dup_pair[1].ruleID})
 
-        print(f"\n✓ Validation complete")
+        print("\n✓ Validation complete")
         print(f"  - {report.statistics['rules_improved']} rules improved")
         print(f"  - {len(report.issues)} issues detected")
 

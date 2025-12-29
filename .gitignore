@@ -56,6 +56,9 @@ TEST_*.md
 *_ISSUE.md
 *_BASELINE.md
 
+# Development reports and analysis
+CODE_REVIEW_REPORT.md
+
 # Test output directories (generated during testing)
 examples/output/*test*/
 examples/output/*-test/

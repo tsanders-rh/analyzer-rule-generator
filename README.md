@@ -2,6 +2,8 @@
 
 [![Tests](https://github.com/tsanders-rh/analyzer-rule-generator/workflows/Tests/badge.svg)](https://github.com/tsanders-rh/analyzer-rule-generator/actions)
 [![codecov](https://codecov.io/gh/tsanders-rh/analyzer-rule-generator/branch/main/graph/badge.svg)](https://codecov.io/gh/tsanders-rh/analyzer-rule-generator)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/github/license/tsanders-rh/analyzer-rule-generator)](LICENSE)
 
@@ -260,6 +262,37 @@ Generated rules and tests integrate with:
 
 - Python 3.9+
 - LLM API access (OpenAI, Anthropic, or Google)
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Code Quality Standards
+
+This project enforces code quality through automated tooling:
+
+- **Black** for code formatting
+- **isort** for import sorting
+- **flake8** for linting
+- **pytest** for testing (80%+ coverage required)
+
+### Quick Setup for Contributors
+
+```bash
+# Install dev dependencies
+pip install black isort flake8 pre-commit
+
+# Install pre-commit hooks (runs checks automatically)
+pre-commit install
+
+# Run checks manually
+black src/ scripts/ tests/
+isort src/ scripts/ tests/
+flake8 src/ scripts/ tests/
+pytest
+```
+
+All pull requests are automatically checked by GitHub Actions for code quality and test coverage.
 
 ## License
 

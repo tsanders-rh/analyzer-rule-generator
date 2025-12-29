@@ -712,7 +712,28 @@ Return ONLY the JSON array, no additional commentary."""
         return validated
 
     def _looks_like_prop_pattern(self, pattern: MigrationPattern) -> bool:
-        """Check if pattern appears to be a component prop change."""
+        """
+        Check if pattern appears to be a component prop change.
+
+        Detects patterns following the format "ComponentName propName" where ComponentName
+        starts with uppercase (PascalCase) and propName starts with lowercase (camelCase).
+        Excludes common method names that match this pattern but aren't component props.
+
+        Args:
+            pattern: Migration pattern to analyze
+
+        Returns:
+            True if pattern looks like a component prop change (e.g., "Button isActive"),
+            False otherwise (including method calls like "Component render")
+
+        Examples:
+            >>> pattern = MigrationPattern(source_pattern="Button isActive", ...)
+            >>> self._looks_like_prop_pattern(pattern)
+            True
+            >>> pattern = MigrationPattern(source_pattern="Component render", ...)
+            >>> self._looks_like_prop_pattern(pattern)  # render is a method
+            False
+        """
         # Look for patterns like "Button isActive" or "Modal title"
         if not pattern.source_pattern:
             return False
@@ -746,6 +767,20 @@ Return ONLY the JSON array, no additional commentary."""
         For JavaScript/TypeScript component patterns, this adds import verification
         to ensure the component is from the target library (e.g., @patternfly/react-core).
         This prevents false positives from components with the same name in other libraries.
+
+        Args:
+            pattern: Migration pattern to convert (expects source_pattern like "Component propName")
+
+        Returns:
+            Modified pattern with provider_type set to "combo" and when_combo conditions added
+
+        Example:
+            >>> pattern = MigrationPattern(source_pattern="Button isActive", ...)
+            >>> converted = self._convert_to_combo_rule(pattern)
+            >>> converted.provider_type
+            'combo'
+            >>> 'import_pattern' in converted.when_combo
+            True
         """
         parts = pattern.source_pattern.split()
         if len(parts) >= 2:
@@ -774,7 +809,26 @@ Return ONLY the JSON array, no additional commentary."""
         return pattern
 
     def _is_overly_broad_pattern(self, pattern: str) -> bool:
-        """Check if builtin pattern is too broad."""
+        """
+        Check if builtin pattern is too broad and would cause false positives.
+
+        Rejects patterns that are overly generic (common prop names, wildcard patterns)
+        that would match too many unrelated code instances, leading to false positives.
+
+        Args:
+            pattern: Pattern string to check (typically from source_fqn)
+
+        Returns:
+            True if pattern is too broad and should be rejected, False if acceptable
+
+        Examples:
+            >>> self._is_overly_broad_pattern("isActive")  # Too generic
+            True
+            >>> self._is_overly_broad_pattern(".*")  # Pure wildcard
+            True
+            >>> self._is_overly_broad_pattern("Button")  # Specific component
+            False
+        """
         # Common prop names that should never be standalone patterns
         overly_generic = [
             "isActive",

@@ -212,7 +212,11 @@ class GoogleProvider(LLMProvider):
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using Google Gemini API."""
         try:
-            from google.api_core.exceptions import ResourceExhausted, Unauthenticated, GoogleAPIError
+            from google.api_core.exceptions import (
+                ResourceExhausted,
+                Unauthenticated,
+                GoogleAPIError,
+            )
         except ImportError:
             # Fallback if exception types not available
             ResourceExhausted = Unauthenticated = GoogleAPIError = Exception
@@ -225,9 +229,7 @@ class GoogleProvider(LLMProvider):
         }
 
         try:
-            response = self.model.generate_content(
-                prompt, generation_config=generation_config
-            )
+            response = self.model.generate_content(prompt, generation_config=generation_config)
 
             return {
                 "response": response.text,

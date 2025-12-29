@@ -356,7 +356,9 @@ class RuleValidator:
                     improved_rules.append(rule)
                 except ValidationError as e:
                     # Handle Pydantic validation errors (invalid model state)
-                    print(f"  ! Failed to apply improvement to {rule.ruleID}: Validation failed - {e}")
+                    print(
+                        f"  ! Failed to apply improvement to {rule.ruleID}: Validation failed - {e}"
+                    )
                     improved_rules.append(rule)
                 except AttributeError as e:
                     # Handle missing attributes on rule object

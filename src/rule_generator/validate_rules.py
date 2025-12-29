@@ -15,6 +15,7 @@ from collections import defaultdict
 
 from .schema import AnalyzerRule
 from .llm import LLMProvider
+from .condition_builder import build_builtin_condition, build_combo_condition
 
 
 class ValidationReport:
@@ -278,22 +279,10 @@ class RuleValidator:
                 return None
 
             # Create new combo rule with import verification
-            new_when = {
-                'and': [
-                    {
-                        'builtin.filecontent': {
-                            'pattern': import_pattern,
-                            'filePattern': file_pattern
-                        }
-                    },
-                    {
-                        'builtin.filecontent': {
-                            'pattern': jsx_condition['pattern'],
-                            'filePattern': file_pattern
-                        }
-                    }
-                ]
-            }
+            new_when = build_combo_condition([
+                build_builtin_condition(import_pattern, file_pattern),
+                build_builtin_condition(jsx_condition['pattern'], file_pattern)
+            ])
 
         # Case 2: Simple nodejs.referenced rule (component rename)
         elif isinstance(when, dict) and 'nodejs.referenced' in when:
@@ -301,22 +290,10 @@ class RuleValidator:
             # Use a generic JSX pattern to match any usage of the component
             jsx_pattern = f"<{component}[^/>]*(?:/>|>)"
 
-            new_when = {
-                'and': [
-                    {
-                        'builtin.filecontent': {
-                            'pattern': import_pattern,
-                            'filePattern': file_pattern
-                        }
-                    },
-                    {
-                        'builtin.filecontent': {
-                            'pattern': jsx_pattern,
-                            'filePattern': file_pattern
-                        }
-                    }
-                ]
-            }
+            new_when = build_combo_condition([
+                build_builtin_condition(import_pattern, file_pattern),
+                build_builtin_condition(jsx_pattern, file_pattern)
+            ])
 
         else:
             return None

@@ -14,6 +14,15 @@ from collections import defaultdict
 
 from .schema import AnalyzerRule, MigrationPattern, Category, Link, LocationType, CSharpLocationType
 from .config import config
+from .condition_builder import (
+    build_or_condition_with_alternatives,
+    build_builtin_condition,
+    build_nodejs_condition,
+    build_csharp_condition,
+    build_java_referenced_condition,
+    build_java_dependency_condition,
+    build_combo_condition
+)
 
 
 class AnalyzerRuleGenerator:
@@ -225,35 +234,17 @@ class AnalyzerRuleGenerator:
 
             # Add import verification condition if present (preferred over nodejs.referenced)
             if import_pattern:
-                import_condition = {
-                    "builtin.filecontent": {
-                        "pattern": import_pattern
-                    }
-                }
-                if file_pattern:
-                    import_condition["builtin.filecontent"]["filePattern"] = file_pattern
-                conditions.append(import_condition)
+                conditions.append(build_builtin_condition(import_pattern, file_pattern))
 
             # Add nodejs.referenced condition if present and no import pattern
             # (for backward compatibility with existing combo rules)
             elif nodejs_pattern:
-                conditions.append({
-                    "nodejs.referenced": {
-                        "pattern": nodejs_pattern
-                    }
-                })
+                conditions.append(build_nodejs_condition(nodejs_pattern))
 
             # Add main builtin.filecontent condition for JSX pattern
-            jsx_condition = {
-                "builtin.filecontent": {
-                    "pattern": builtin_pattern
-                }
-            }
-            if file_pattern:
-                jsx_condition["builtin.filecontent"]["filePattern"] = file_pattern
-            conditions.append(jsx_condition)
+            conditions.append(build_builtin_condition(builtin_pattern, file_pattern))
 
-            return {"and": conditions}
+            return build_combo_condition(conditions)
 
         # Nodejs and csharp providers can use source_pattern as fallback
         # Other providers require source_fqn
@@ -284,17 +275,7 @@ class AnalyzerRuleGenerator:
                 # This prevents false positives from partial matches
                 regex_pattern = regex_pattern + '$'
 
-            condition = {
-                "builtin.filecontent": {
-                    "pattern": regex_pattern
-                }
-            }
-
-            # Add file pattern if specified
-            if pattern.file_pattern:
-                condition["builtin.filecontent"]["filePattern"] = pattern.file_pattern
-
-            return condition
+            return build_builtin_condition(regex_pattern, pattern.file_pattern)
 
         elif provider == "nodejs":
             # Use nodejs.referenced for semantic symbol analysis in JavaScript/TypeScript
@@ -304,34 +285,20 @@ class AnalyzerRuleGenerator:
             # The nodejs provider now uses import-based search with multiline import support,
             # so we no longer need the builtin.filecontent workaround for React components.
 
-            # Build nodejs.referenced condition
-            condition = {
-                "nodejs.referenced": {
-                    "pattern": pattern.source_fqn or pattern.source_pattern
-                }
-            }
-
-            return condition
+            return build_nodejs_condition(pattern.source_fqn or pattern.source_pattern)
 
         elif provider == "csharp":
             # Use c-sharp.referenced for semantic symbol analysis in C# code
             # The c-sharp provider finds references to types, methods, fields, etc.
 
-            # Build c-sharp.referenced condition
-            condition = {
-                "c-sharp.referenced": {
-                    "pattern": pattern.source_fqn or pattern.source_pattern
-                }
-            }
-
             # Add location if specified (FIELD, CLASS, METHOD, ALL)
             # Note: If location is not specified, defaults to ALL
+            location_str = None
             if pattern.location_type:
                 # Convert enum to string if necessary
                 location_str = pattern.location_type.value if hasattr(pattern.location_type, 'value') else str(pattern.location_type)
-                condition["c-sharp.referenced"]["location"] = location_str
 
-            return condition
+            return build_csharp_condition(pattern.source_fqn or pattern.source_pattern, location_str)
 
         else:  # Java provider
             # Check if this is a Maven dependency pattern
@@ -340,29 +307,12 @@ class AnalyzerRuleGenerator:
                 # Convert Maven coordinates from groupId:artifactId to groupId.artifactId
                 dependency_name = pattern.source_fqn.replace(':', '.')
 
-                java_dependency = {
-                    "name": dependency_name,
-                    "lowerbound": "0.0.0"  # Match any version
-                }
-
-                # If there are alternative dependencies, use OR condition
+                # Convert alternative FQNs to alternative names
+                alternative_names = None
                 if pattern.alternative_fqns and len(pattern.alternative_fqns) > 0:
-                    conditions = [
-                        {"java.dependency": java_dependency}
-                    ]
+                    alternative_names = [alt_fqn.replace(':', '.') for alt_fqn in pattern.alternative_fqns]
 
-                    for alt_fqn in pattern.alternative_fqns:
-                        alt_name = alt_fqn.replace(':', '.')
-                        conditions.append({
-                            "java.dependency": {
-                                "name": alt_name,
-                                "lowerbound": "0.0.0"
-                            }
-                        })
-
-                    return {"or": conditions}
-                else:
-                    return {"java.dependency": java_dependency}
+                return build_java_dependency_condition(dependency_name, alternative_names)
 
             else:
                 # Use java.referenced for code patterns
@@ -373,32 +323,11 @@ class AnalyzerRuleGenerator:
                 # The pattern should already be a fully qualified class name from extraction
                 pattern_str = pattern.source_fqn
 
-                # Build java.referenced condition
-                java_referenced = {
-                    "pattern": pattern_str,
-                    "location": location.value
-                }
-
-                # If there are alternative FQNs (e.g., javax vs jakarta), use OR condition
-                if pattern.alternative_fqns and len(pattern.alternative_fqns) > 0:
-                    conditions = [
-                        {"java.referenced": {
-                            "pattern": pattern_str,
-                            "location": location.value
-                        }}
-                    ]
-
-                    for alt_fqn in pattern.alternative_fqns:
-                        conditions.append({
-                            "java.referenced": {
-                                "pattern": alt_fqn,
-                                "location": location.value
-                            }
-                        })
-
-                    return {"or": conditions}
-                else:
-                    return {"java.referenced": java_referenced}
+                return build_java_referenced_condition(
+                    pattern_str,
+                    location.value,
+                    pattern.alternative_fqns
+                )
 
     def _map_complexity_to_effort(self, complexity: str) -> int:
         """

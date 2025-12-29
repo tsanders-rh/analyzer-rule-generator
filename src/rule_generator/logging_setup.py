@@ -235,30 +235,34 @@ class PerformanceTimer:
             # ... expensive operation
     """
 
-    def __init__(self, logger: logging.Logger, operation: str):
+    def __init__(self, logger: logging.Logger = None, operation: str = None):
         """
         Initialize performance timer.
 
         Args:
-            logger: Logger to use for output
-            operation: Description of the operation being timed
+            logger: Logger to use for output (optional)
+            operation: Description of the operation being timed (optional)
         """
         self.logger = logger
         self.operation = operation
         self.start_time = None
+        self.end_time = None
+        self.elapsed = None
 
     def __enter__(self):
         """Start timing."""
-        if config.LOG_PERFORMANCE:
-            self.start_time = time.time()
+        self.start_time = time.time()
+        if config.LOG_PERFORMANCE and self.logger and self.operation:
             self.logger.debug(f"Starting: {self.operation}")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Stop timing and log result."""
-        if config.LOG_PERFORMANCE and self.start_time:
-            elapsed = time.time() - self.start_time
+        self.end_time = time.time()
+        self.elapsed = self.end_time - self.start_time
+
+        if config.LOG_PERFORMANCE and self.logger and self.operation:
             if exc_type:
-                self.logger.warning(f"Failed: {self.operation} after {elapsed:.2f}s")
+                self.logger.warning(f"Failed: {self.operation} after {self.elapsed:.2f}s")
             else:
-                self.logger.info(f"Completed: {self.operation} in {elapsed:.2f}s")
+                self.logger.info(f"Completed: {self.operation} in {self.elapsed:.2f}s")

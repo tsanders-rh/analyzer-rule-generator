@@ -223,8 +223,7 @@ class MigrationPattern(BaseModel):
     when_combo: Optional[Dict[str, str]] = Field(
         default=None,
         description=(
-            "Combo rule configuration with nodejs_pattern, "
-            "builtin_pattern, and file_pattern"
+            "Combo rule configuration with nodejs_pattern, " "builtin_pattern, and file_pattern"
         ),
     )
 

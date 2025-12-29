@@ -58,9 +58,8 @@ def print_table(headers, rows, title=None):
 
     # Print rows
     for row in rows:
-        print(
-            "│ " + " │ ".join(str(cell).ljust(col_widths[i]) for i, cell in enumerate(row)) + " │"
-        )
+        cells = " │ ".join(str(cell).ljust(col_widths[i]) for i, cell in enumerate(row))
+        print(f"│ {cells} │")
 
     print(bottom)
 

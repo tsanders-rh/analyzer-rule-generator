@@ -630,12 +630,10 @@ class AnalyzerRuleGenerator:
                     message += f"Replace `{source_repl}` with `{target_repl}`."
                 else:
                     source_pkg = (
-                        self._extract_package_name(pattern.source_pattern)
-                        or pattern.source_pattern
+                        self._extract_package_name(pattern.source_pattern) or pattern.source_pattern
                     )
                     target_pkg = (
-                        self._extract_package_name(pattern.target_pattern)
-                        or pattern.target_pattern
+                        self._extract_package_name(pattern.target_pattern) or pattern.target_pattern
                     )
                     message += (
                         f"Replace `import {{ {{{{ component }}}} }} from '{source_pkg}'` "

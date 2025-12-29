@@ -159,8 +159,7 @@ class MigrationPatternExtractor:
         # Check if content needs chunking (>40KB)
         if guide_content and len(guide_content) > config.MAX_CONTENT_SIZE:
             print(
-                f"  → Content is large ({len(guide_content):,} chars), "
-                f"using chunked extraction"
+                f"  → Content is large ({len(guide_content):,} chars), " f"using chunked extraction"
             )
             return self._extract_patterns_chunked(guide_content, source_framework, target_framework)
 

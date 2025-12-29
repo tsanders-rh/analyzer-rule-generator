@@ -143,7 +143,10 @@ def main():
 
     parser.add_argument(
         "--output",
-        help="Output directory for generated YAML files (auto-generated from source/target if not specified)",
+        help=(
+            "Output directory for generated YAML files "
+            "(auto-generated from source/target if not specified)"
+        ),
     )
 
     parser.add_argument(
@@ -286,7 +289,8 @@ def main():
             else:
                 duplicate_count += 1
                 print(
-                    f"    ! Skipping duplicate: {rule.description[:60]}... (already in {seen_patterns[key]})"
+                    f"    ! Skipping duplicate: {rule.description[:60]}... "
+                    f"(already in {seen_patterns[key]})"
                 )
 
     rules_by_concern = dict(deduplicated_by_concern)
@@ -327,7 +331,8 @@ def main():
             print(f"APPLYING IMPROVEMENTS")
             print(f"{'=' * 80}")
             print(
-                f"Auto-applying {len(validation_report.improvements)} import verification improvements..."
+                f"Auto-applying {len(validation_report.improvements)} "
+                f"import verification improvements..."
             )
 
             # Apply improvements to all rules
@@ -399,7 +404,9 @@ def main():
     ruleset_file = output_dir / "ruleset.yaml"
     ruleset_data = {
         "name": f"{args.source}/{args.target}",
-        "description": f"This ruleset provides guidance for migrating from {args.source} to {args.target}",
+        "description": (
+            f"This ruleset provides guidance for migrating from " f"{args.source} to {args.target}"
+        ),
     }
     with open(ruleset_file, 'w') as f:
         yaml.dump(

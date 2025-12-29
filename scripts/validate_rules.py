@@ -176,7 +176,8 @@ class RuleValidator:
             if 'EmptyStateHeader' in description:
                 if 'EmptyStateHeader' not in pattern:
                     self.warnings.append(
-                        f"{rule_id}: Description mentions EmptyStateHeader but pattern doesn't check for it"
+                        f"{rule_id}: Description mentions EmptyStateHeader "
+                        f"but pattern doesn't check for it"
                     )
 
         # Check combo rules
@@ -237,7 +238,8 @@ class RuleValidator:
 
             if not matches:
                 self.issues.append(
-                    f"{rule_id}: Pattern '{pattern}' does NOT match example code from 'Before:' section"
+                    f"{rule_id}: Pattern '{pattern}' does NOT match example code "
+                    f"from 'Before:' section"
                 )
                 # Show first line of example for context
                 first_line = example_code.split('\n')[0][:80]
@@ -276,8 +278,10 @@ SUGGESTION: <suggested fix if not aligned, or 'none' if aligned>
 
 Example responses:
 ALIGNED: no
-REASON: Description says "import path change" but when condition detects EmptyStateHeader component usage
-SUGGESTION: Change description to "EmptyStateHeader component usage" or change when condition to detect import paths
+REASON: Description says "import path change" but when condition detects EmptyStateHeader
+        component usage
+SUGGESTION: Change description to "EmptyStateHeader component usage" or change when
+            condition to detect import paths
 
 ALIGNED: yes
 REASON: Description accurately describes the button prop change that the pattern detects

@@ -218,7 +218,8 @@ class AnalyzerRuleGenerator:
         if provider == "combo":
             if not pattern.when_combo:
                 print(
-                    f"Warning: Combo provider specified but no when_combo config: {pattern.rationale}"
+                    f"Warning: Combo provider specified but no when_combo config: "
+                    f"{pattern.rationale}"
                 )
                 return None
 
@@ -235,7 +236,8 @@ class AnalyzerRuleGenerator:
 
             if not import_pattern and not nodejs_pattern:
                 print(
-                    f"Warning: Combo rule missing both import_pattern and nodejs_pattern: {pattern.rationale}"
+                    f"Warning: Combo rule missing both import_pattern and nodejs_pattern: "
+                    f"{pattern.rationale}"
                 )
                 return None
 
@@ -286,7 +288,8 @@ class AnalyzerRuleGenerator:
             # Don't add $ to:
             #   - Config file patterns (property keys have values after them)
             #   - Partial text patterns (e.g., "javax\." which should match anywhere in file)
-            # Only add $ to full import statement patterns (e.g., "import.*XhrFactory.*from.*@angular/common/http")
+            # Only add $ to full import statement patterns
+            # (e.g., "import.*XhrFactory.*from.*@angular/common/http")
             if (
                 self._is_complete_import_line_pattern(pattern)
                 and not is_config_file
@@ -552,12 +555,16 @@ class AnalyzerRuleGenerator:
         if has_custom_variables and self._is_import_pattern(pattern):
             if pattern.target_pattern:
                 # Extract package name from patterns
-                # e.g., "import { Area } from '@patternfly/react-charts'" -> "@patternfly/react-charts"
+                # e.g., "import { Area } from '@patternfly/react-charts'"
+                # -> "@patternfly/react-charts"
                 source_pkg = self._extract_package_name(pattern.source_pattern)
                 target_pkg = self._extract_package_name(pattern.target_pattern)
 
                 if source_pkg and target_pkg:
-                    return f"imports  from '{source_pkg}'; should be replaced with imports from '{target_pkg}';"
+                    return (
+                        f"imports  from '{source_pkg}'; should be replaced with "
+                        f"imports from '{target_pkg}';"
+                    )
                 else:
                     return (
                         f"{pattern.source_pattern} should be replaced with {pattern.target_pattern}"
@@ -613,11 +620,27 @@ class AnalyzerRuleGenerator:
         # Use custom variables in message if available
         if has_custom_variables and self._is_import_pattern(pattern):
             if pattern.target_pattern:
-                message += (
-                    f"Replace `{pattern.source_pattern.replace(pattern.source_pattern.split('{')[1].split('}')[0], '{{ component }}')}` with `{pattern.target_pattern.replace(pattern.target_pattern.split('{')[1].split('}')[0], '{{ component }}')}`."
-                    if '{' in pattern.source_pattern and '}' in pattern.source_pattern
-                    else f"Replace `import {{ {{{{ component }}}} }} from '{self._extract_package_name(pattern.source_pattern) or pattern.source_pattern}'` with `import {{ {{{{ component }}}} }} from '{self._extract_package_name(pattern.target_pattern) or pattern.target_pattern}'`."
-                )
+                if '{' in pattern.source_pattern and '}' in pattern.source_pattern:
+                    source_repl = pattern.source_pattern.replace(
+                        pattern.source_pattern.split('{')[1].split('}')[0], '{{ component }}'
+                    )
+                    target_repl = pattern.target_pattern.replace(
+                        pattern.target_pattern.split('{')[1].split('}')[0], '{{ component }}'
+                    )
+                    message += f"Replace `{source_repl}` with `{target_repl}`."
+                else:
+                    source_pkg = (
+                        self._extract_package_name(pattern.source_pattern)
+                        or pattern.source_pattern
+                    )
+                    target_pkg = (
+                        self._extract_package_name(pattern.target_pattern)
+                        or pattern.target_pattern
+                    )
+                    message += (
+                        f"Replace `import {{ {{{{ component }}}} }} from '{source_pkg}'` "
+                        f"with `import {{ {{{{ component }}}} }} from '{target_pkg}'`."
+                    )
             else:
                 message += f"Remove usage of `{pattern.source_pattern}` (API has been removed)."
 
@@ -702,16 +725,19 @@ class AnalyzerRuleGenerator:
 
     def _requires_semantic_analysis(self, pattern: MigrationPattern) -> bool:
         """
-        Determine if pattern needs Node.js (TypeScript/JavaScript) language server semantic analysis.
+        Determine if pattern needs Node.js (TypeScript/JavaScript) language server
+        semantic analysis.
 
-        Use nodejs.referenced when you need to find actual symbol references (functions, classes,
-        variables, types, interfaces) in the code. Use builtin.filecontent for simple text/regex matching.
+        Use nodejs.referenced when you need to find actual symbol references
+        (functions, classes, variables, types, interfaces) in the code.
+        Use builtin.filecontent for simple text/regex matching.
 
         Args:
             pattern: Migration pattern
 
         Returns:
-            True if semantic analysis is required (nodejs.referenced), False for text matching (builtin.filecontent)
+            True if semantic analysis is required (nodejs.referenced),
+            False for text matching (builtin.filecontent)
         """
         semantic_keywords = [
             'function',

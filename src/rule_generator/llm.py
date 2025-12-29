@@ -6,7 +6,10 @@ Provides a unified interface for different LLM providers.
 
 import os
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from types import TracebackType
 
 
 class LLMError(Exception):
@@ -55,16 +58,21 @@ class LLMProvider(ABC):
         """
         pass
 
-    def __enter__(self):
+    def __enter__(self) -> 'LLMProvider':
         """Enter context manager."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional['TracebackType'],
+    ) -> bool:
         """Exit context manager and cleanup resources."""
         self.close()
         return False
 
-    def close(self):
+    def close(self) -> None:
         """
         Close and cleanup resources.
 

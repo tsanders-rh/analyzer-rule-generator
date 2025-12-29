@@ -37,7 +37,7 @@ class ValidationReport:
 
     def add_improvement(
         self, improvement_type: str, original: AnalyzerRule, improved: Dict[str, Any]
-    ):
+    ) -> None:
         """
         Add an improvement to the report.
 
@@ -53,7 +53,7 @@ class ValidationReport:
         if f'{improvement_type}_added' in self.statistics:
             self.statistics[f'{improvement_type}_added'] += 1
 
-    def add_issue(self, issue_type: str, rule: AnalyzerRule, details: Dict[str, Any]):
+    def add_issue(self, issue_type: str, rule: AnalyzerRule, details: Dict[str, Any]) -> None:
         """
         Add an issue to the report.
 

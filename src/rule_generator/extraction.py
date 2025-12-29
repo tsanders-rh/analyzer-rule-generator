@@ -17,7 +17,7 @@ from typing import List, Optional
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .config import config
-from .llm import LLMProvider
+from .llm import LLMProvider, LLMAPIError, LLMRateLimitError, LLMAuthenticationError
 from .schema import CSharpLocationType, LocationType, MigrationPattern
 
 # Set up Jinja2 template environment
@@ -211,24 +211,28 @@ class MigrationPatternExtractor:
             # Handle network-related errors
             print(f"⚠ Network error communicating with LLM: {e}")
             return []
+        except LLMRateLimitError as e:
+            # Rate limit exceeded - expected error, just log and continue
+            print(f"⚠ Rate limit reached, skipping this chunk: {e}")
+            return []
+        except LLMAuthenticationError as e:
+            # Authentication failed - fatal error, raise it
+            print(f"❌ Authentication failed: {e}")
+            raise
+        except LLMAPIError as e:
+            # API error (5xx, temporary failures) - log and continue
+            print(f"⚠ API temporarily unavailable, skipping this chunk: {e}")
+            return []
         except Exception as e:
-            error_message = str(e)
-
-            # Check for specific API errors by message content
-            if "500" in error_message or "api_error" in error_message.lower():
-                print(
-                    "⚠ API temporarily unavailable, skipping this chunk "
-                    "(will continue with others)"
-                )
-            elif "rate_limit" in error_message.lower() or "429" in error_message:
-                print("⚠ Rate limit reached, skipping this chunk")
+            # Fallback for any other exceptions (e.g., from custom providers or during testing)
+            # Check if error message indicates specific error types
+            error_message = str(e).lower()
+            if "rate" in error_message or "429" in error_message:
+                print(f"⚠ Rate limit reached, skipping this chunk: {e}")
+            elif "api" in error_message or "500" in error_message:
+                print(f"⚠ API error, skipping this chunk: {e}")
             else:
-                # For unexpected errors, show more detail
-                print(f"Error extracting patterns: {e}")
-                import traceback
-
-                traceback.print_exc()
-
+                print(f"⚠ Error extracting patterns: {e}")
             return []
 
     def _extract_patterns_chunked(

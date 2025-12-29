@@ -9,6 +9,30 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
 
+class LLMError(Exception):
+    """Base exception for LLM provider errors."""
+
+    pass
+
+
+class LLMAPIError(LLMError):
+    """API-level error (5xx, temporary failures)."""
+
+    pass
+
+
+class LLMRateLimitError(LLMError):
+    """Rate limit exceeded (429)."""
+
+    pass
+
+
+class LLMAuthenticationError(LLMError):
+    """Authentication failed (invalid API key)."""
+
+    pass
+
+
 class LLMProvider(ABC):
     """Abstract base class for LLM providers."""
 
@@ -23,6 +47,11 @@ class LLMProvider(ABC):
 
         Returns:
             Dict with 'response' key containing the generated text
+
+        Raises:
+            LLMAPIError: For API-level errors (5xx, temporary failures)
+            LLMRateLimitError: For rate limit errors (429)
+            LLMAuthenticationError: For authentication failures
         """
         pass
 
@@ -48,24 +77,37 @@ class OpenAIProvider(LLMProvider):
 
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using OpenAI API."""
+        try:
+            from openai import RateLimitError, APIError, AuthenticationError
+        except ImportError:
+            # Fallback if exception types not available
+            RateLimitError = APIError = AuthenticationError = Exception
+
         temperature = kwargs.get("temperature", 0.0)
         max_tokens = min(kwargs.get("max_tokens", 4096), 4096)
 
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
 
-        return {
-            "response": response.choices[0].message.content,
-            "usage": {
-                "prompt_tokens": response.usage.prompt_tokens,
-                "completion_tokens": response.usage.completion_tokens,
-                "total_tokens": response.usage.total_tokens,
-            },
-        }
+            return {
+                "response": response.choices[0].message.content,
+                "usage": {
+                    "prompt_tokens": response.usage.prompt_tokens,
+                    "completion_tokens": response.usage.completion_tokens,
+                    "total_tokens": response.usage.total_tokens,
+                },
+            }
+        except RateLimitError as e:
+            raise LLMRateLimitError(f"OpenAI rate limit exceeded: {e}") from e
+        except AuthenticationError as e:
+            raise LLMAuthenticationError(f"OpenAI authentication failed: {e}") from e
+        except APIError as e:
+            raise LLMAPIError(f"OpenAI API error: {e}") from e
 
 
 class AnthropicProvider(LLMProvider):
@@ -89,23 +131,36 @@ class AnthropicProvider(LLMProvider):
 
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using Anthropic API."""
+        try:
+            from anthropic import RateLimitError, APIError, AuthenticationError
+        except ImportError:
+            # Fallback if exception types not available
+            RateLimitError = APIError = AuthenticationError = Exception
+
         temperature = kwargs.get("temperature", 0.0)
         max_tokens = kwargs.get("max_tokens", 16000)
 
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                messages=[{"role": "user", "content": prompt}],
+            )
 
-        return {
-            "response": response.content[0].text,
-            "usage": {
-                "input_tokens": response.usage.input_tokens,
-                "output_tokens": response.usage.output_tokens,
-            },
-        }
+            return {
+                "response": response.content[0].text,
+                "usage": {
+                    "input_tokens": response.usage.input_tokens,
+                    "output_tokens": response.usage.output_tokens,
+                },
+            }
+        except RateLimitError as e:
+            raise LLMRateLimitError(f"Anthropic rate limit exceeded: {e}") from e
+        except AuthenticationError as e:
+            raise LLMAuthenticationError(f"Anthropic authentication failed: {e}") from e
+        except APIError as e:
+            raise LLMAPIError(f"Anthropic API error: {e}") from e
 
 
 class GoogleProvider(LLMProvider):
@@ -133,6 +188,12 @@ class GoogleProvider(LLMProvider):
 
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using Google Gemini API."""
+        try:
+            from google.api_core.exceptions import ResourceExhausted, Unauthenticated, GoogleAPIError
+        except ImportError:
+            # Fallback if exception types not available
+            ResourceExhausted = Unauthenticated = GoogleAPIError = Exception
+
         temperature = kwargs.get("temperature", 0.0)
 
         generation_config = {
@@ -140,16 +201,25 @@ class GoogleProvider(LLMProvider):
             "max_output_tokens": kwargs.get("max_tokens", 8000),
         }
 
-        response = self.model.generate_content(prompt, generation_config=generation_config)
+        try:
+            response = self.model.generate_content(
+                prompt, generation_config=generation_config
+            )
 
-        return {
-            "response": response.text,
-            "usage": {
-                "prompt_tokens": response.usage_metadata.prompt_token_count,
-                "completion_tokens": response.usage_metadata.candidates_token_count,
-                "total_tokens": response.usage_metadata.total_token_count,
-            },
-        }
+            return {
+                "response": response.text,
+                "usage": {
+                    "prompt_tokens": response.usage_metadata.prompt_token_count,
+                    "completion_tokens": response.usage_metadata.candidates_token_count,
+                    "total_tokens": response.usage_metadata.total_token_count,
+                },
+            }
+        except ResourceExhausted as e:
+            raise LLMRateLimitError(f"Google API rate limit exceeded: {e}") from e
+        except Unauthenticated as e:
+            raise LLMAuthenticationError(f"Google authentication failed: {e}") from e
+        except GoogleAPIError as e:
+            raise LLMAPIError(f"Google API error: {e}") from e
 
 
 def get_llm_provider(

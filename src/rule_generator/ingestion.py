@@ -145,8 +145,12 @@ class GuideIngester:
             print(f"Error decoding content from {url}: {e}")
             return None
         except Exception as e:
-            # Catch any truly unexpected errors
-            print(f"Unexpected error processing {url}: {e}")
+            # Last resort: catch truly unexpected errors to prevent crashes
+            # This should rarely happen - all expected errors are handled above
+            print(f"⚠ UNEXPECTED ERROR processing {url}")
+            print(f"   Type: {type(e).__name__}")
+            print(f"   Message: {e}")
+            print("   This error was not anticipated - please report it as a bug")
             import traceback
 
             traceback.print_exc()
@@ -194,8 +198,12 @@ class GuideIngester:
             print(f"Error decoding file {file_path} (not valid UTF-8): {e}")
             return None
         except Exception as e:
-            # Catch any truly unexpected errors
-            print(f"Unexpected error reading file {file_path}: {e}")
+            # Last resort: catch truly unexpected errors to prevent crashes
+            # This should rarely happen - all expected errors are handled above
+            print(f"⚠ UNEXPECTED ERROR reading file {file_path}")
+            print(f"   Type: {type(e).__name__}")
+            print(f"   Message: {e}")
+            print("   This error was not anticipated - please report it as a bug")
             import traceback
 
             traceback.print_exc()

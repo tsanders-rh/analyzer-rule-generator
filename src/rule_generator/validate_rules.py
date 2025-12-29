@@ -12,6 +12,8 @@ This module provides automated validation and improvement of generated rules usi
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
+from pydantic import ValidationError
+
 from .condition_builder import build_builtin_condition, build_combo_condition
 from .llm import LLMProvider
 from .schema import AnalyzerRule
@@ -352,9 +354,16 @@ class RuleValidator:
                     # Handle validation or data access errors
                     print(f"  ! Failed to apply improvement to {rule.ruleID}: Invalid data - {e}")
                     improved_rules.append(rule)
-                except Exception as e:
-                    # Catch any unexpected errors to avoid breaking the entire batch
-                    print(f"  ! Unexpected error applying improvement to {rule.ruleID}: {e}")
+                except ValidationError as e:
+                    # Handle Pydantic validation errors (invalid model state)
+                    print(f"  ! Failed to apply improvement to {rule.ruleID}: Validation failed - {e}")
+                    improved_rules.append(rule)
+                except AttributeError as e:
+                    # Handle missing attributes on rule object
+                    print(
+                        f"  ! Failed to apply improvement to {rule.ruleID}: "
+                        f"Missing attribute - {e}"
+                    )
                     improved_rules.append(rule)
             else:
                 improved_rules.append(rule)

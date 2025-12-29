@@ -97,8 +97,12 @@ class OpenRewriteRecipeIngester:
             print(f"Error processing recipe data from {source}: {e}")
             return None
         except Exception as e:
-            # Catch any truly unexpected errors
-            print(f"Unexpected error loading recipe from {source}: {e}")
+            # Last resort: catch truly unexpected errors to prevent crashes
+            # This should rarely happen - all expected errors are handled above
+            print(f"⚠ UNEXPECTED ERROR loading recipe from {source}")
+            print(f"   Type: {type(e).__name__}")
+            print(f"   Message: {e}")
+            print("   This error was not anticipated - please report it as a bug")
             import traceback
 
             traceback.print_exc()

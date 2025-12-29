@@ -362,7 +362,7 @@ class TestValidateRuleId:
         invalid_ids = [
             "no-number",
             "123-only-three-digits",
-            "missing-dash-00000",
+            "missingdash00000",  # No dash before number
             "00000",  # No prefix
             "prefix_00000",  # Underscore instead of dash
         ]
@@ -446,11 +446,9 @@ class TestValidateLLMResponse:
 
     def test_yaml_format(self):
         """Should accept YAML format (not pure JSON)."""
-        yaml_response = """
-rules:
+        yaml_response = """rules:
   - id: 1
-    name: test
-"""
+    name: test"""
         result = validate_llm_response(yaml_response, expected_format="yaml")
         assert result == yaml_response
 

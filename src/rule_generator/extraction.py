@@ -220,8 +220,12 @@ class MigrationPatternExtractor:
         Returns:
             List of extracted migration patterns
         """
+        # Handle None or empty content
+        if not guide_content:
+            return []
+
         # Check if content needs chunking (>40KB)
-        if guide_content and len(guide_content) > config.MAX_CONTENT_SIZE:
+        if len(guide_content) > config.MAX_CONTENT_SIZE:
             print(
                 f"  → Content is large ({len(guide_content):,} chars), " f"using chunked extraction"
             )

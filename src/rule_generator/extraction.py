@@ -257,7 +257,9 @@ class MigrationPatternExtractor:
 
                 # Validate LLM response structure before parsing
                 try:
-                    response_text = validate_llm_response(response_text, expected_format="json_array")
+                    response_text = validate_llm_response(
+                        response_text, expected_format="json_array"
+                    )
                 except ValueError as e:
                     logger.warning(f"Invalid LLM response structure: {e}")
                     return []
@@ -771,7 +773,7 @@ Return ONLY the JSON array, no additional commentary."""
                         "Auto-converting to combo rule",
                         "Component prop patterns require import verification to prevent false positives",
                         pattern=pattern.source_pattern,
-                        language=language
+                        language=language,
                     )
                     pattern = self._convert_to_combo_rule(pattern)
 
@@ -783,7 +785,7 @@ Return ONLY the JSON array, no additional commentary."""
                         "Rejecting overly broad pattern",
                         "Pattern is too generic and would cause false positives",
                         pattern=pattern.source_fqn,
-                        provider_type="builtin"
+                        provider_type="builtin",
                     )
                     continue
 

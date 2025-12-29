@@ -101,7 +101,7 @@ class OpenAIProvider(LLMProvider):
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using OpenAI API."""
         try:
-            from openai import RateLimitError, APIError, AuthenticationError
+            from openai import APIError, AuthenticationError, RateLimitError
         except ImportError:
             # Fallback if exception types not available
             RateLimitError = APIError = AuthenticationError = Exception
@@ -155,7 +155,7 @@ class AnthropicProvider(LLMProvider):
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using Anthropic API."""
         try:
-            from anthropic import RateLimitError, APIError, AuthenticationError
+            from anthropic import APIError, AuthenticationError, RateLimitError
         except ImportError:
             # Fallback if exception types not available
             RateLimitError = APIError = AuthenticationError = Exception
@@ -213,9 +213,9 @@ class GoogleProvider(LLMProvider):
         """Generate response using Google Gemini API."""
         try:
             from google.api_core.exceptions import (
+                GoogleAPIError,
                 ResourceExhausted,
                 Unauthenticated,
-                GoogleAPIError,
             )
         except ImportError:
             # Fallback if exception types not available

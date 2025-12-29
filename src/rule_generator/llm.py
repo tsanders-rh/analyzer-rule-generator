@@ -5,8 +5,11 @@ Provides a unified interface for different LLM providers.
 """
 
 import os
+import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from collections import deque
+from functools import wraps
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -34,6 +37,53 @@ class LLMAuthenticationError(LLMError):
     """Authentication failed (invalid API key)."""
 
     pass
+
+
+class RateLimiter:
+    """
+    Simple rate limiter to prevent exceeding API rate limits.
+
+    Tracks API calls in a sliding window and enforces limits.
+    """
+
+    def __init__(self, calls: int, period: int):
+        """
+        Initialize rate limiter.
+
+        Args:
+            calls: Maximum number of calls allowed
+            period: Time period in seconds
+        """
+        self.calls = calls
+        self.period = period
+        self.call_times: deque = deque()
+
+    def __call__(self, func: Callable) -> Callable:
+        """Decorator to apply rate limiting to a function."""
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            now = time.time()
+
+            # Remove calls outside the current window
+            while self.call_times and self.call_times[0] < now - self.period:
+                self.call_times.popleft()
+
+            # Check if we're at the limit
+            if len(self.call_times) >= self.calls:
+                # Calculate sleep time needed
+                sleep_time = self.period - (now - self.call_times[0])
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
+                # Remove the oldest call after sleeping
+                self.call_times.popleft()
+
+            # Record this call
+            self.call_times.append(time.time())
+
+            return func(*args, **kwargs)
+
+        return wrapper
 
 
 class LLMProvider(ABC):
@@ -90,6 +140,9 @@ class LLMProvider(ABC):
 class OpenAIProvider(LLMProvider):
     """OpenAI API provider."""
 
+    # Rate limiter: 60 calls per minute (conservative limit)
+    _rate_limiter = RateLimiter(calls=60, period=60)
+
     def __init__(self, model: str = "gpt-4-turbo", api_key: Optional[str] = None):
         """
         Initialize OpenAI provider.
@@ -106,6 +159,7 @@ class OpenAIProvider(LLMProvider):
         self.model = model
         self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
 
+    @_rate_limiter
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using OpenAI API."""
         try:
@@ -144,6 +198,9 @@ class OpenAIProvider(LLMProvider):
 class AnthropicProvider(LLMProvider):
     """Anthropic Claude API provider."""
 
+    # Rate limiter: 50 calls per minute (conservative limit)
+    _rate_limiter = RateLimiter(calls=50, period=60)
+
     def __init__(self, model: str = "claude-3-7-sonnet-latest", api_key: Optional[str] = None):
         """
         Initialize Anthropic provider.
@@ -160,6 +217,7 @@ class AnthropicProvider(LLMProvider):
         self.model = model
         self.client = Anthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
 
+    @_rate_limiter
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using Anthropic API."""
         try:
@@ -197,6 +255,9 @@ class AnthropicProvider(LLMProvider):
 class GoogleProvider(LLMProvider):
     """Google Gemini API provider."""
 
+    # Rate limiter: 60 calls per minute (conservative limit)
+    _rate_limiter = RateLimiter(calls=60, period=60)
+
     def __init__(self, model: str = "gemini-1.5-pro", api_key: Optional[str] = None):
         """
         Initialize Google provider.
@@ -217,6 +278,7 @@ class GoogleProvider(LLMProvider):
         genai.configure(api_key=api_key or os.getenv("GOOGLE_API_KEY"))
         self.model = genai.GenerativeModel(model)
 
+    @_rate_limiter
     def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response using Google Gemini API."""
         try:

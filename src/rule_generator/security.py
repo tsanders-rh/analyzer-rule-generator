@@ -5,9 +5,13 @@ Provides functions to prevent path traversal attacks and ensure
 safe file operations, plus input validation utilities.
 """
 
+import logging
 import re
 from pathlib import Path
 from typing import Literal, Union
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Valid complexity values
 VALID_COMPLEXITIES = Literal["TRIVIAL", "LOW", "MEDIUM", "HIGH", "EXPERT"]
@@ -50,26 +54,29 @@ def validate_path(path: Union[str, Path], base_dir: Union[str, Path]) -> Path:
         resolved_path = path_obj.resolve()
         resolved_base = base_obj.resolve()
     except (OSError, RuntimeError) as e:
-        raise ValueError(f"Cannot resolve path {path}: {e}")
+        logger.error(f"[Security] Cannot resolve path {path}: {e}")
+        raise ValueError("Invalid or inaccessible path")
 
     # Check if resolved path is within base directory
     # Use is_relative_to() if Python 3.9+, otherwise use manual check
     try:
         # Python 3.9+ method
         if not resolved_path.is_relative_to(resolved_base):
-            raise ValueError(
-                f"Path {path} resolves to {resolved_path} which is outside "
-                f"base directory {base_dir} ({resolved_base})"
+            logger.error(
+                f"[Security] Path traversal attempt: {path} resolves to {resolved_path} "
+                f"which is outside base directory {base_dir} ({resolved_base})"
             )
+            raise ValueError("Path is outside allowed directory")
     except AttributeError:
         # Fallback for Python < 3.9
         try:
             resolved_path.relative_to(resolved_base)
         except ValueError:
-            raise ValueError(
-                f"Path {path} resolves to {resolved_path} which is outside "
-                f"base directory {base_dir} ({resolved_base})"
+            logger.error(
+                f"[Security] Path traversal attempt: {path} resolves to {resolved_path} "
+                f"which is outside base directory {base_dir} ({resolved_base})"
             )
+            raise ValueError("Path is outside allowed directory")
 
     return resolved_path
 

@@ -7,10 +7,14 @@ This module provides common file operations to reduce code duplication:
 - Rule file parsing and normalization
 """
 
+import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import yaml
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 def load_yaml_file(file_path: Union[str, Path]) -> Any:
@@ -35,21 +39,25 @@ def load_yaml_file(file_path: Union[str, Path]) -> Any:
     path = Path(file_path)
 
     if not path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
+        logger.error(f"[FileUtils] File not found: {file_path}")
+        raise FileNotFoundError("The requested file could not be found")
 
     try:
         with open(path, 'r', encoding='utf-8') as f:
             data = yaml.safe_load(f)
 
         if data is None:
-            raise ValueError(f"Empty or invalid YAML file: {file_path}")
+            logger.error(f"[FileUtils] Empty or invalid YAML file: {file_path}")
+            raise ValueError("YAML file is empty or invalid")
 
         return data
 
     except yaml.YAMLError as e:
-        raise yaml.YAMLError(f"YAML parsing error in {file_path}: {e}")
+        logger.error(f"[FileUtils] YAML parsing error in {file_path}: {e}")
+        raise yaml.YAMLError("Failed to parse YAML file")
     except IOError as e:
-        raise IOError(f"Error reading file {file_path}: {e}")
+        logger.error(f"[FileUtils] Error reading file {file_path}: {e}")
+        raise IOError("Failed to read file")
 
 
 def load_rules_file(file_path: Union[str, Path]) -> List[Dict[str, Any]]:
@@ -83,11 +91,13 @@ def load_rules_file(file_path: Union[str, Path]) -> List[Dict[str, Any]]:
     elif isinstance(data, dict):
         rules = [data]
     else:
-        raise ValueError(f"Invalid rule file format in {file_path}: expected list or dict")
+        logger.error(f"[FileUtils] Invalid rule file format in {file_path}: expected list or dict")
+        raise ValueError("Invalid rule file format: expected list or dict")
 
     # Validate that rules have required fields
     if not rules or not all(isinstance(r, dict) for r in rules):
-        raise ValueError(f"Invalid rule structure in {file_path}: rules must be dictionaries")
+        logger.error(f"[FileUtils] Invalid rule structure in {file_path}: rules must be dictionaries")
+        raise ValueError("Invalid rule structure: rules must be dictionaries")
 
     return rules
 
@@ -133,7 +143,8 @@ def write_yaml_file(
                 yaml.dump(data, f, **yaml_kwargs)
 
     except IOError as e:
-        raise IOError(f"Error writing file {file_path}: {e}")
+        logger.error(f"[FileUtils] Error writing file {file_path}: {e}")
+        raise IOError("Failed to write file")
 
 
 def rule_to_dict(rule: Any) -> Dict[str, Any]:

@@ -117,9 +117,7 @@ class AnalyzerRuleGenerator:
         """
         # Skip if we don't have enough info to create a when condition
         if not pattern.source_fqn and not pattern.source_pattern:
-            print(
-                f"[Generation] Warning: Skipping pattern without FQN: {pattern.rationale}"
-            )
+            print(f"[Generation] Warning: Skipping pattern without FQN: {pattern.rationale}")
             return None
 
         # Generate rule ID
@@ -129,9 +127,7 @@ class AnalyzerRuleGenerator:
         when_condition = self._build_when_condition(pattern)
 
         if not when_condition:
-            print(
-                f"[Generation] Warning: Could not build when condition: {pattern.rationale}"
-            )
+            print(f"[Generation] Warning: Could not build when condition: {pattern.rationale}")
             return None
 
         # Map complexity to effort (1-10 scale)

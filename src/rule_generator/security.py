@@ -343,8 +343,7 @@ def validate_llm_response(response: str, expected_format: str = "json_array") ->
             )
         if not response.rstrip().endswith(']'):
             raise ValueError(
-                f"LLM response does not end with ']' (expected JSON array): "
-                f"...{response[-50:]}"
+                f"LLM response does not end with ']' (expected JSON array): " f"...{response[-50:]}"
             )
 
     elif expected_format == "json_object":
@@ -362,8 +361,6 @@ def validate_llm_response(response: str, expected_format: str = "json_array") ->
     elif expected_format == "yaml":
         # Basic YAML validation - should not be pure JSON
         if response.startswith(('[', '{')):
-            raise ValueError(
-                f"LLM response looks like JSON, expected YAML: {response[:50]}..."
-            )
+            raise ValueError(f"LLM response looks like JSON, expected YAML: {response[:50]}...")
 
     return response

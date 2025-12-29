@@ -88,7 +88,7 @@ def validate_rules_temp_file(rules):
         temp_path = Path(f.name)
 
     try:
-        # Run comprehensive validation (suppress verbose output)
+        # Run comprehensive validation with auto-fix (suppress verbose output)
         import io
         import sys as system
 
@@ -97,14 +97,30 @@ def validate_rules_temp_file(rules):
 
         try:
             validator = SyntacticRuleValidator(
-                use_semantic=False
-            )  # Don't use LLM for auto-validation
+                use_semantic=False,
+                auto_fix=True  # Enable auto-fix for pattern errors
+            )
             validator.validate_ruleset(temp_path)
         finally:
             system.stdout = old_stdout  # Restore stdout
 
-        # Combine issues and warnings
-        combined = {'issues': validator.issues, 'warnings': validator.warnings}
+        # If fixes were applied, reload the fixed rules and update the originals
+        if validator.fixes_applied:
+            with open(temp_path, 'r') as f:
+                fixed_rules_data = yaml.safe_load(f)
+
+            # Update the 'when' conditions in the original rules with fixed patterns
+            for i, fixed_rule in enumerate(fixed_rules_data):
+                if i < len(rules):
+                    # Update the when condition with the fixed pattern
+                    rules[i].when = fixed_rule['when']
+
+        # Combine issues, warnings, and fixes
+        combined = {
+            'issues': validator.issues,
+            'warnings': validator.warnings,
+            'fixes': validator.fixes_applied
+        }
         return combined
     finally:
         # Clean up temp file
@@ -361,7 +377,56 @@ def main():
 
             print(f"✓ Applied improvements to {len(validation_report.improvements)} rules")
 
-    # Write output files (one per concern)
+    # Collect all rules for validation BEFORE writing files
+    all_rules = []
+    for concern, rules in sorted(rules_by_concern.items()):
+        all_rules.extend(rules)
+
+    # Run validation with auto-fix BEFORE writing files
+    print("\n" + "=" * 60)
+    print("Validation Report")
+    print("=" * 60)
+    validation_result = validate_rules_temp_file(all_rules)
+
+    has_issues = validation_result['issues'] or validation_result['warnings']
+    has_fixes = validation_result.get('fixes', [])
+
+    if has_fixes:
+        print(f"\n  ✅ Auto-fixes applied ({len(has_fixes)} fixes):")
+        for fix in has_fixes[:10]:  # Show first 10
+            print(f"    - {fix}")
+        if len(has_fixes) > 10:
+            print(f"    ... and {len(has_fixes) - 10} more")
+
+        # Update rules_by_concern with fixed rules
+        # The fixes have already been applied to all_rules by validate_rules_temp_file
+        # Now we need to update rules_by_concern with the fixed rules
+        rule_idx = 0
+        for concern, rules in sorted(rules_by_concern.items()):
+            for i in range(len(rules)):
+                if rule_idx < len(all_rules):
+                    # Update the rule in rules_by_concern with the fixed rule
+                    rules_by_concern[concern][i] = all_rules[rule_idx]
+                    rule_idx += 1
+
+    if validation_result['issues']:
+        print(f"\n  ❌ Issues ({len(validation_result['issues'])} found):")
+        for issue in validation_result['issues'][:10]:  # Show first 10
+            print(f"    - {issue}")
+        if len(validation_result['issues']) > 10:
+            print(f"    ... and {len(validation_result['issues']) - 10} more")
+
+    if validation_result['warnings']:
+        print(f"\n  ⚠ Warnings ({len(validation_result['warnings'])} found):")
+        for warning in validation_result['warnings'][:10]:  # Show first 10
+            print(f"    - {warning}")
+        if len(validation_result['warnings']) > 10:
+            print(f"    ... and {len(validation_result['warnings']) - 10} more")
+
+    if not has_issues and not has_fixes:
+        print("  ✓ No validation issues found")
+
+    # Write output files (one per concern) - NOW with fixed rules
     # Validate output path for security (check for path traversal attacks)
     if not is_safe_path(args.output):
         print(f"Error: Output path '{args.output}' contains suspicious patterns", file=sys.stderr)
@@ -373,7 +438,6 @@ def main():
     print(f"\nWriting rules to {output_dir}...")
 
     written_files = []
-    all_rules = []
 
     for concern, rules in sorted(rules_by_concern.items()):
         # Generate filename: {source}-to-{target}-{concern}.yaml
@@ -384,7 +448,7 @@ def main():
             # Multiple concerns - add concern suffix
             concern_output = output_dir / f"{args.source}-to-{args.target}-{concern}.yaml"
 
-        # Use the rules from rules_by_concern (which includes any validation improvements)
+        # Use the rules from rules_by_concern (which includes any validation fixes)
         # instead of regenerating from patterns (which would lose improvements)
 
         # Convert rules to dicts for YAML serialization
@@ -401,7 +465,6 @@ def main():
             )
 
         written_files.append(str(concern_output))
-        all_rules.extend(rules)
         print(f"  ✓ {concern_output.name}: {len(rules)} rules")
 
     # Create ruleset.yaml metadata file (required by Konveyor analyzer)
@@ -450,31 +513,6 @@ def main():
     print("\nEffort Distribution:")
     for eff in sorted(efforts.keys()):
         print(f"  {eff}: {'▓' * efforts[eff]}")
-
-    # Validation Report
-    print("\n" + "=" * 60)
-    print("Validation Report")
-    print("=" * 60)
-    validation_result = validate_rules_temp_file(all_rules)
-
-    has_issues = validation_result['issues'] or validation_result['warnings']
-
-    if validation_result['issues']:
-        print(f"\n  ❌ Issues ({len(validation_result['issues'])} found):")
-        for issue in validation_result['issues'][:10]:  # Show first 10
-            print(f"    - {issue}")
-        if len(validation_result['issues']) > 10:
-            print(f"    ... and {len(validation_result['issues']) - 10} more")
-
-    if validation_result['warnings']:
-        print(f"\n  ⚠ Warnings ({len(validation_result['warnings'])} found):")
-        for warning in validation_result['warnings'][:10]:  # Show first 10
-            print(f"    - {warning}")
-        if len(validation_result['warnings']) > 10:
-            print(f"    ... and {len(validation_result['warnings']) - 10} more")
-
-    if not has_issues:
-        print("  ✓ No validation issues found")
 
     # Show files created
     print("\n" + "=" * 60)

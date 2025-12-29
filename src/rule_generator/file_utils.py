@@ -96,7 +96,9 @@ def load_rules_file(file_path: Union[str, Path]) -> List[Dict[str, Any]]:
 
     # Validate that rules have required fields
     if not rules or not all(isinstance(r, dict) for r in rules):
-        logger.error(f"[FileUtils] Invalid rule structure in {file_path}: rules must be dictionaries")
+        logger.error(
+            f"[FileUtils] Invalid rule structure in {file_path}: rules must be dictionaries"
+        )
         raise ValueError("Invalid rule structure: rules must be dictionaries")
 
     return rules

@@ -91,7 +91,9 @@ def load_rules_file(file_path: Union[str, Path]) -> List[Dict[str, Any]]:
     elif isinstance(data, dict):
         rules = [data]
     else:
-        logger.error(f"[FileUtils] Invalid rule file format in {file_path}: expected list or dict")
+        logger.error(
+            f"[FileUtils] Invalid rule file format in {file_path}: expected list or dict"
+        )
         raise ValueError("Invalid rule file format: expected list or dict")
 
     # Validate that rules have required fields

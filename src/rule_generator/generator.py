@@ -1,13 +1,56 @@
 """
-Rule generation - Convert migration patterns to Konveyor analyzer rule format.
+Rule Generation Module
 
-Generates analyzer rules with:
-- Rule ID (auto-generated)
-- When conditions (pattern matching)
-- Effort scoring
-- Messages with migration guidance
-- Links to documentation
-- Multiple file output grouped by concern
+Converts migration patterns into Konveyor analyzer rules with full support for
+multiple programming languages and rule providers.
+
+Key Components:
+    - AnalyzerRuleGenerator: Main class for rule generation
+    - Rule ID Management: Sequential ID generation with configurable prefix
+    - When Condition Building: Provider-specific pattern matching
+    - Category Determination: Automatic categorization based on complexity/rationale
+    - Message Generation: Migration guidance with code examples
+
+Supported Rule Providers:
+    - java: Java-based rules using java.referenced or java.dependency
+    - nodejs: JavaScript/TypeScript rules using nodejs.referenced
+    - builtin: Text/regex-based rules using builtin.filecontent
+    - csharp: C# rules using c-sharp.referenced
+    - combo: Multi-condition rules (import verification + pattern matching)
+
+Generated Rules Include:
+    - Rule ID (auto-generated, incremented by 10)
+    - When conditions (pattern matching logic)
+    - Effort scoring (1-10 scale from complexity)
+    - Category (mandatory/potential based on impact)
+    - Messages with migration guidance and code examples
+    - Links to documentation
+    - Labels for source/target frameworks
+    - Custom variables for dynamic pattern capture
+
+Multi-File Output:
+    Rules can be grouped by concern and written to separate files for better
+    organization. Each concern gets its own YAML file with related rules.
+
+Usage:
+    >>> generator = AnalyzerRuleGenerator(
+    ...     source_framework="spring-boot-2",
+    ...     target_framework="spring-boot-3",
+    ...     rule_file_name="spring-migration"
+    ... )
+    >>> patterns = [MigrationPattern(...)]
+    >>> rules = generator.generate_rules(patterns)
+
+    # Or generate with grouping by concern
+    >>> rules_by_concern = generator.generate_rules_by_concern(patterns)
+    >>> for concern, rules in rules_by_concern.items():
+    ...     print(f"{concern}: {len(rules)} rules")
+
+See Also:
+    - MigrationPattern: Schema for input patterns (schema.py)
+    - AnalyzerRule: Schema for generated rules (schema.py)
+    - condition_builder: Helper functions for building when conditions
+    - Konveyor analyzer documentation: https://konveyor.io/docs/
 """
 
 import re

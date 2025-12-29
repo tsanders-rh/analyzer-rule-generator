@@ -1,12 +1,54 @@
 #!/usr/bin/env python3
 """
-Display rule statistics in a nice table format for demos.
+Display rule statistics in a formatted table for analysis and demos.
+
+This script analyzes Konveyor analyzer rule files and generates summary
+statistics grouped by various attributes (category, effort, complexity, etc.).
+Useful for:
+- Understanding rule distribution and coverage
+- Identifying complexity patterns
+- Generating metrics for documentation
+- Creating demo data for presentations
+
+Features:
+    - Groups rules by category, effort, or custom attributes
+    - Displays results in a formatted table
+    - Supports glob patterns for analyzing multiple files
+    - Calculates totals and percentages
 
 Usage:
-    python scripts/show_rule_stats.py <pattern>
+    # Analyze all rules matching a pattern
+    python scripts/show_rule_stats.py "examples/output/spring-boot-*.yaml"
 
-Example:
-    python scripts/show_rule_stats.py "spring-boot - 3-to-spring-boot - 4-*.yaml"
+    # Analyze rules in a directory
+    python scripts/show_rule_stats.py "examples/output/patternfly-v6/*.yaml"
+
+    # Show effort distribution
+    python scripts/show_rule_stats.py "rules/*.yaml" --attribute effort
+
+Example Output:
+    Rule Statistics for: spring-boot-3-to-spring-boot-4-*.yaml
+
+    Total rules: 42
+
+    By Category:
+    mandatory:  28 (67%)
+    potential:  14 (33%)
+
+    By Effort:
+    1 (TRIVIAL):  12 (29%)
+    3 (LOW):      18 (43%)
+    5 (MEDIUM):   10 (24%)
+    7 (HIGH):      2 (5%)
+
+Arguments:
+    pattern: Glob pattern matching rule YAML files (required)
+    --attribute: Attribute to group by (default: category)
+                 Options: category, effort, migration_complexity, labels
+
+Note:
+    The script expects YAML files containing arrays of analyzer rules.
+    Each rule should have the attributes being analyzed.
 """
 import sys
 from collections import defaultdict

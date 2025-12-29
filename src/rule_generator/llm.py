@@ -65,22 +65,30 @@ class RateLimiter:
         def wrapper(*args, **kwargs):
             now = time.time()
 
-            # Remove calls outside the current window
+            # Sliding window algorithm: Remove calls older than the time window
+            # This maintains a deque of call timestamps within the current period
+            # Example: With calls=60, period=60, we allow 60 calls per 60 seconds
             while self.call_times and self.call_times[0] < now - self.period:
                 self.call_times.popleft()
 
-            # Check if we're at the limit
+            # Check if we've hit the rate limit
             if len(self.call_times) >= self.calls:
-                # Calculate sleep time needed
-                sleep_time = self.period - (now - self.call_times[0])
+                # We're at the limit - calculate how long to wait
+                # Wait until the oldest call falls outside the window
+                oldest_call = self.call_times[0]
+                sleep_time = self.period - (now - oldest_call)
+
                 if sleep_time > 0:
+                    # Sleep to enforce the rate limit
                     time.sleep(sleep_time)
-                # Remove the oldest call after sleeping
+
+                # After sleeping, remove the oldest call (it's now outside the window)
                 self.call_times.popleft()
 
-            # Record this call
+            # Record this call's timestamp
             self.call_times.append(time.time())
 
+            # Execute the actual function
             return func(*args, **kwargs)
 
         return wrapper

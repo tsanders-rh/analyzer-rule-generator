@@ -1,12 +1,61 @@
 """
-Pattern extraction - Use LLM to extract migration patterns from guides.
+Pattern Extraction Module
 
-Extracts patterns with enough detail to generate Konveyor analyzer rules including:
-- Source pattern (old code/annotation/config)
-- Target pattern (new replacement)
-- Fully qualified names for detection
-- Location types (ANNOTATION, IMPORT, etc.)
-- Rationale and complexity
+Uses Large Language Models (LLMs) to extract migration patterns from documentation
+and migration guides, converting unstructured text into structured patterns for
+rule generation.
+
+Key Components:
+    - MigrationPatternExtractor: Main class for LLM-based extraction
+    - Prompt Building: Language-specific Jinja2 templates for LLM prompts
+    - JSON Repair: Automatic fixing of malformed LLM responses
+    - Pattern Validation: Auto-detection and fixing of common pattern issues
+    - Chunking Support: Handles large documents via automatic chunking
+
+Extracted Pattern Data:
+    - Source pattern (old code/annotation/config to find)
+    - Target pattern (new replacement to suggest)
+    - Fully qualified names (FQNs) for semantic detection
+    - Location types (ANNOTATION, IMPORT, TYPE, METHOD_CALL, etc.)
+    - Provider types (java, nodejs, builtin, csharp, combo)
+    - Rationale and migration complexity (TRIVIAL to EXPERT)
+    - Code examples (before/after)
+    - Documentation links
+
+Language Support:
+    - Java: Detects packages, classes, annotations, dependencies
+    - JavaScript/TypeScript: Components, hooks, imports, JSX patterns
+    - C#: Classes, methods, fields, namespaces
+    - Configuration: Properties, YAML, XML patterns
+
+Pattern Auto-Fixing:
+    For JavaScript/TypeScript PatternFly migrations:
+    - Detects component prop changes (e.g., "Button isActive")
+    - Automatically converts to combo rules with import verification
+    - Prevents false positives from identically-named components
+    - Rejects overly broad patterns (common prop names)
+
+Usage:
+    >>> from rule_generator.llm import get_llm_provider
+    >>> llm = get_llm_provider("anthropic", model="claude-3-7-sonnet-latest")
+    >>> extractor = MigrationPatternExtractor(llm)
+    >>> patterns = extractor.extract_patterns(
+    ...     guide_content="Migration guide text...",
+    ...     source_framework="patternfly-v5",
+    ...     target_framework="patternfly-v6"
+    ... )
+    >>> print(f"Extracted {len(patterns)} patterns")
+
+Large Document Handling:
+    >>> # Documents > 40KB are automatically chunked
+    >>> large_guide = load_large_migration_guide()
+    >>> patterns = extractor.extract_patterns(large_guide, "v1", "v2")
+    >>> # Patterns are automatically deduplicated across chunks
+
+See Also:
+    - MigrationPattern: Schema for extracted patterns (schema.py)
+    - llm: LLM provider interface (llm.py)
+    - Template files: templates/extraction/*.j2
 """
 
 import json

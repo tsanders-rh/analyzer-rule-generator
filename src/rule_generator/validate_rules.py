@@ -1,12 +1,78 @@
 """
-Post-generation LLM-based rule validation and improvement.
+Rule Validation and Improvement Module
 
-This module provides automated validation and improvement of generated rules using LLM analysis:
-- Adds import verification where missing
-- Detects overly broad patterns that would cause false positives
-- Suggests pattern improvements for better accuracy
-- Flags duplicate or conflicting rules
-- Validates rule quality against best practices
+Provides post-generation validation and improvement of analyzer rules to ensure
+high quality and reduce false positives.
+
+Key Components:
+    - RuleValidator: Main validation class with LLM-powered analysis
+    - ValidationReport: Structured reporting of improvements and issues
+    - Import Verification: Auto-adds import checks for component patterns
+    - Pattern Analysis: Detects overly broad or problematic patterns
+    - Duplicate Detection: Identifies and flags duplicate rules
+
+Validation Checks:
+    1. Import Verification (JavaScript/TypeScript PatternFly only):
+       - Detects component patterns without import verification
+       - Automatically adds import checks to prevent false positives
+       - Ensures components are from the correct library (e.g., @patternfly/react-*)
+
+    2. Pattern Breadth Analysis:
+       - Detects overly broad patterns (e.g., short strings)
+       - Estimates false positive rates
+       - Suggests more specific patterns
+
+    3. Pattern Quality Review:
+       - Validates regex patterns against examples
+       - Checks for common pattern mistakes
+       - Suggests improvements for better accuracy
+
+    4. Duplicate Detection:
+       - Finds rules with identical when conditions
+       - Identifies conflicting descriptions
+       - Helps consolidate redundant rules
+
+Rule Improvements Applied:
+    - Import verification for JavaScript/TypeScript component patterns
+    - Pattern specificity enhancements
+    - Regex validation and correction
+    - Consolidation of duplicates
+
+Usage:
+    >>> from rule_generator.llm import get_llm_provider
+    >>> llm = get_llm_provider("anthropic")
+    >>> validator = RuleValidator(
+    ...     llm_provider=llm,
+    ...     language="javascript",
+    ...     source_framework="patternfly-v5",
+    ...     target_framework="patternfly-v6"
+    ... )
+    >>> rules = generator.generate_rules(patterns)
+    >>> report = validator.validate_rules(rules)
+    >>> print(report.generate_report())
+    >>> improved_rules = validator.apply_improvements(rules, report)
+
+Example Output:
+    >>> print(report.generate_report())
+    ================================================================================
+    POST-GENERATION VALIDATION REPORT
+    ================================================================================
+
+    Total rules validated: 42
+    Rules improved: 15
+
+    ────────────────────────────────────────────────────────────────────────────
+    IMPROVEMENTS APPLIED
+    ────────────────────────────────────────────────────────────────────────────
+
+    IMPORT_VERIFICATION:
+      Rule: patternfly-v5-to-patternfly-v6-00030
+      Description: Button isActive should be replaced with isDisabled...
+
+See Also:
+    - AnalyzerRule: Rule schema (schema.py)
+    - RuleGenerator: Rule generation (generator.py)
+    - LLMProvider: LLM interface (llm.py)
 """
 
 from collections import defaultdict

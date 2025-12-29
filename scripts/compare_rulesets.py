@@ -1,5 +1,45 @@
 #!/usr/bin/env python3
-"""Compare two ruleset directories to identify unique and common rules."""
+"""
+Compare two ruleset directories to identify unique and common rules.
+
+This script analyzes differences between two sets of Konveyor analyzer rules,
+helping identify rules that exist in one set but not the other. Useful for:
+- Tracking rule coverage improvements between versions
+- Identifying gaps when migrating from manual to generated rules
+- Understanding differences between multiple rule generation approaches
+
+Features:
+    - Identifies rules unique to each ruleset
+    - Finds common rules (same pattern, different metadata)
+    - Compares rule descriptions and categories
+    - Generates summary statistics
+
+Usage:
+    # Compare two rule directories
+    python scripts/compare_rulesets.py \\
+        --dir1 examples/output/v1/rules \\
+        --dir2 examples/output/v2/rules
+
+    # Compare with detailed output
+    python scripts/compare_rulesets.py \\
+        --dir1 manual_rules/ \\
+        --dir2 generated_rules/ \\
+        --verbose
+
+Example Output:
+    Ruleset 1: 42 rules
+    Ruleset 2: 38 rules
+
+    Unique to Ruleset 1: 8 rules
+    Unique to Ruleset 2: 4 rules
+    Common rules: 34
+
+    [Detailed rule-by-rule comparison...]
+
+Note:
+    Rules are compared based on their 'when' conditions (pattern matching).
+    Different descriptions or categories for the same pattern are reported.
+"""
 
 from collections import defaultdict
 from pathlib import Path

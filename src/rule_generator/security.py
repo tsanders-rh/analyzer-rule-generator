@@ -330,6 +330,21 @@ def validate_llm_response(response: str, expected_format: str = "json_array") ->
 
     response = response.strip()
 
+    # Strip markdown code blocks if present (common LLM behavior)
+    # Handles: ```json ... ```, ```javascript ... ```, etc.
+    if response.startswith('```'):
+        # Find the end of the opening fence (first newline after ```)
+        first_newline = response.find('\n')
+        if first_newline != -1:
+            # Remove opening fence line
+            response = response[first_newline + 1 :]
+
+        # Remove closing fence (```)
+        if response.rstrip().endswith('```'):
+            response = response.rstrip()[:-3].rstrip()
+
+    response = response.strip()
+
     # Check for minimum length (avoid trivial responses)
     if len(response) < 2:
         raise ValueError(f"LLM response too short: {len(response)} chars (expected at least 2)")

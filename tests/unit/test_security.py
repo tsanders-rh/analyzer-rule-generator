@@ -400,6 +400,23 @@ class TestValidateLLMResponse:
             result = validate_llm_response(response, expected_format="json_array")
             assert result == response
 
+    def test_strips_markdown_code_blocks(self):
+        """Should strip markdown code blocks from LLM responses."""
+        # Test with ```json ... ```
+        markdown_response = '```json\n[{"key": "value"}]\n```'
+        result = validate_llm_response(markdown_response, expected_format="json_array")
+        assert result == '[{"key": "value"}]'
+
+        # Test with ```javascript ... ```
+        markdown_response = '```javascript\n{"key": "value"}\n```'
+        result = validate_llm_response(markdown_response, expected_format="json_object")
+        assert result == '{"key": "value"}'
+
+        # Test with ``` ... ``` (no language specified)
+        markdown_response = '```\n[1, 2, 3]\n```'
+        result = validate_llm_response(markdown_response, expected_format="json_array")
+        assert result == '[1, 2, 3]'
+
     def test_valid_json_object(self):
         """Should accept valid JSON objects."""
         valid_responses = [

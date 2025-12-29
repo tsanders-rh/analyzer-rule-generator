@@ -6,18 +6,19 @@ Tests structured logging, formatters, and logging utilities.
 
 import logging
 import time
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
 
 from rule_generator.logging_setup import (
     ColoredFormatter,
-    setup_logging,
+    PerformanceTimer,
     get_logger,
-    log_performance,
     log_api_call,
     log_decision,
     log_error_with_context,
-    PerformanceTimer,
+    log_performance,
+    setup_logging,
 )
 
 

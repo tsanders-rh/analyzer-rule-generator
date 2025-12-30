@@ -822,7 +822,41 @@ for Konveyor analyzer rule testing.
 
 Migration: {source} → {target}
 Guide: {guide_url}
-Language: {language}
+
+========================================================================
+CRITICAL LANGUAGE REQUIREMENT - READ THIS FIRST:
+========================================================================
+TARGET LANGUAGE: {language.upper()}
+
+YOU MUST GENERATE {language.upper()} CODE ONLY.
+DO NOT GENERATE JAVA CODE.
+DO NOT GENERATE SPRING BOOT CODE.
+DO NOT USE JAVA SYNTAX, IMPORTS, OR ANNOTATIONS.
+
+If the language is "typescript", you MUST generate:
+- TypeScript/React code (.tsx files)
+- package.json (NOT pom.xml)
+- React components with JSX syntax
+- JavaScript/TypeScript imports (NOT Java imports)
+
+WRONG (DO NOT DO THIS):
+```java
+package com.example;
+import org.springframework.boot.SpringApplication;
+@SpringBootApplication
+public class Application {{
+```
+
+CORRECT (DO THIS):
+```tsx
+import React from 'react';
+import {{ createRoot }} from 'react-dom/client';
+
+export default function App() {{
+  return <div>Hello</div>;
+}}
+```
+========================================================================
 
 CRITICAL: You MUST create code that triggers these SPECIFIC analyzer rules.
 Each rule looks for EXACT patterns in the code. You MUST include the EXACT code shown below.
@@ -830,12 +864,13 @@ Each rule looks for EXACT patterns in the code. You MUST include the EXACT code 
 {patterns_summary}
 
 REQUIREMENTS:
-1. Create a complete, compilable {language} project structure
+1. Create a complete, compilable {language} project structure (NOT Java, NOT Spring Boot)
 2. For EACH rule above, include the EXACT code/configuration pattern specified
 3. If a code example is shown with "YOU MUST GENERATE THIS EXACT JSX CODE", copy it EXACTLY
 4. Add comment before each pattern: // Rule ID (or # Rule ID for properties/yaml files)
 5. Keep the code minimal - one example per rule
 6. Ensure static analysis can detect each pattern
+7. VERIFY your output is {language.upper()} code, NOT Java code
 
 CRITICAL FOR CONFIGURATION FILES:
 - If a rule says "MUST BE IN CONFIG FILE", create the configuration file
@@ -873,6 +908,17 @@ Generate ONLY the file contents. Do not include explanations before or after the
 IMPORTANT: If generating a config file other than application.properties/yaml,
 include the FULL filename in the code block header.
 For example: ```properties spring.factories``` or ```yaml application-dev.yaml```
+
+========================================================================
+FINAL VERIFICATION BEFORE RESPONDING:
+========================================================================
+✓ Check 1: Am I generating {language.upper()} code? (NOT Java)
+✓ Check 2: For TypeScript: Do I have React/JSX syntax? (NOT @SpringBootApplication)
+✓ Check 3: For TypeScript: Is my build file package.json? (NOT pom.xml)
+✓ Check 4: Does my code match the language requirement at the top?
+
+If you generated Java code when {language} was requested, START OVER and generate {language.upper()} code.
+========================================================================
 """
 
     return prompt
@@ -961,6 +1007,94 @@ def extract_code_blocks(response: str, language: str) -> dict:
                 result['source_file'] = content_match.group(1).strip()
 
     return result
+
+
+def validate_generated_language(code_blocks: dict, expected_language: str) -> tuple[bool, str]:
+    """
+    Validate that generated code matches the expected language.
+
+    Args:
+        code_blocks: Dict with 'build_file' and 'source_file' keys
+        expected_language: Expected language (e.g., 'typescript', 'java')
+
+    Returns:
+        Tuple of (is_valid, error_message)
+    """
+    source_file = code_blocks.get('source_file', '')
+    build_file = code_blocks.get('build_file', '')
+
+    if not source_file:
+        return False, "No source file generated"
+
+    # Check for Java code when TypeScript was requested
+    if expected_language == 'typescript':
+        java_indicators = [
+            'package com.',
+            'import org.springframework',
+            '@SpringBootApplication',
+            '@RestController',
+            '@Controller',
+            'public class',
+            'public static void main',
+            'import javax.',
+            'import jakarta.',
+        ]
+
+        for indicator in java_indicators:
+            if indicator in source_file:
+                return False, (
+                    f"LANGUAGE MISMATCH: Generated Java code (found '{indicator}') "
+                    f"when {expected_language} was requested. "
+                    f"Source file starts with: {source_file[:200]}"
+                )
+
+        # Check for TypeScript/React indicators
+        typescript_indicators = [
+            'import React',
+            'import {',
+            'from \'react\'',
+            'from "react"',
+            'export default',
+            'export function',
+            'export const',
+            '=>',
+            '<div',
+            '<App',
+        ]
+
+        has_typescript = any(indicator in source_file for indicator in typescript_indicators)
+        if not has_typescript:
+            return False, (
+                f"Generated code doesn't look like {expected_language}. "
+                f"Source file starts with: {source_file[:200]}"
+            )
+
+        # Check build file for package.json content
+        if build_file and '<project' in build_file:
+            return False, (
+                "LANGUAGE MISMATCH: Generated pom.xml (Maven/Java build file) "
+                f"when package.json was expected for {expected_language}"
+            )
+
+    # Check for TypeScript code when Java was requested
+    elif expected_language == 'java':
+        typescript_indicators = [
+            'import React',
+            'from \'react\'',
+            'from "react"',
+            'export default',
+            'const ',
+            'let ',
+        ]
+
+        for indicator in typescript_indicators:
+            if indicator in source_file:
+                return False, (
+                    f"LANGUAGE MISMATCH: Generated TypeScript/JavaScript code "
+                    f"(found '{indicator}') when {expected_language} was requested"
+                )
+
+    return True, ""
 
 
 def create_directory_structure(output_dir: Path, language: str):
@@ -1551,6 +1685,12 @@ Examples:
             print("  ✗ Could not extract required files from response", file=sys.stderr)
             continue  # Skip to next file
 
+        # Validate generated code is in the correct language
+        is_valid, error_msg = validate_generated_language(code, language)
+        if not is_valid:
+            print(f"  ✗ {error_msg}", file=sys.stderr)
+            continue  # Skip to next file
+
         # Create test data directory
         test_data_dir = data_dir / data_dir_name
         src_dir = create_directory_structure(test_data_dir, language)
@@ -1758,6 +1898,13 @@ Examples:
                 # Extract and write files
                 code = extract_code_blocks(response, language)
                 if code['build_file'] and code['source_file']:
+                    # Validate generated code is in the correct language
+                    is_valid, error_msg = validate_generated_language(code, language)
+                    if not is_valid:
+                        print(f"    ✗ {error_msg}", file=sys.stderr)
+                        print(f"    ↻ Regenerating with stronger language constraints...", file=sys.stderr)
+                        continue  # Will retry in next iteration
+
                     src_dir = create_directory_structure(test_data_dir, language)
 
                     # Write build file

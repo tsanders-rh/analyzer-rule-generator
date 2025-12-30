@@ -1582,7 +1582,8 @@ Examples:
         if not code['build_file'] or not code['source_file']:
             print("  ✗ Could not extract required files from response", file=sys.stderr)
             print(
-                f"    Debug: build_file={bool(code['build_file'])}, source_file={bool(code['source_file'])}",
+                f"    Debug: build_file={bool(code['build_file'])}, "
+                f"source_file={bool(code['source_file'])}",
                 file=sys.stderr,
             )
             if os.environ.get('DEBUG_EXTRACTION'):

@@ -593,7 +593,9 @@ def generate_code_hint_from_pattern(
             and 'Object.assign' in alternatives
         ):
             # Modern browser features - use all in one statement
-            return "new Promise((resolve) => { Symbol('id'); Object.assign({}, {}); resolve(true); });"
+            return (
+                "new Promise((resolve) => { Symbol('id'); Object.assign({}, {}); resolve(true); });"
+            )
         elif 'Promise' in alternatives:
             return "new Promise((resolve) => resolve('data'));"
         elif 'Symbol' in alternatives:

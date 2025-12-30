@@ -441,10 +441,11 @@ def generate_code_hint_from_pattern(
     Returns:
         Code example string
     """
-    if language != 'typescript':
-        return None
-
     import re
+
+    # For languages other than TypeScript/Go, don't generate hints
+    if language not in ['typescript', 'go']:
+        return None
 
     # FIRST: Try to extract code from the message's "Before:" section
     # This is the most reliable source of correct JSX
@@ -606,6 +607,28 @@ def generate_code_hint_from_pattern(
             # Use the first alternative generically
             first_alt = alternatives[0]
             return f"const result = {first_alt};"
+
+    # Go-specific patterns
+    if language == 'go':
+        # Pattern 1: interface{} - the empty interface
+        if pattern == r'interface{}' or pattern == 'interface{}':
+            return "func PrintAny(v interface{}) { fmt.Println(v) }"
+
+        # Pattern 2: Build constraints //+build
+        if pattern == r'//\+build' or '//+build' in pattern:
+            return "//+build linux darwin"
+
+        # Pattern 3: Simple literal patterns - just use them as-is in a function
+        # For Go, many patterns are simple literals that should appear in the code
+        if not re.search(r'[\\()\[\]{}|+*?]', pattern):
+            # This is a simple literal string (no regex special chars)
+            # Generate a comment or code that contains this literal
+            if '//' in pattern:
+                # It's a comment pattern
+                return pattern
+            else:
+                # It's a code pattern - use it in a variable or function
+                return f"var example = {pattern}"
 
     return None
 

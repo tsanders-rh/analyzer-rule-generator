@@ -773,7 +773,12 @@ def build_test_generation_prompt(
 """
 
     # Load language-specific instructions template
-    lang_template = jinja_env.get_template(f'lang/{language}.j2')
+    # Map language to template file (javascript and typescript use same template)
+    template_name = language
+    if language in ['javascript', 'typescript']:
+        template_name = 'typescript'
+
+    lang_template = jinja_env.get_template(f'lang/{template_name}.j2')
     lang_instructions = lang_template.render(
         build_file=lang_config['build_file'],
         main_file=lang_config['main_file'],

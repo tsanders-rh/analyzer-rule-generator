@@ -917,7 +917,8 @@ FINAL VERIFICATION BEFORE RESPONDING:
 ✓ Check 3: For TypeScript: Is my build file package.json? (NOT pom.xml)
 ✓ Check 4: Does my code match the language requirement at the top?
 
-If you generated Java code when {language} was requested, START OVER and generate {language.upper()} code.
+If you generated Java code when {language} was requested, START OVER and
+generate {language.upper()} code.
 ========================================================================
 """
 
@@ -1657,8 +1658,6 @@ Examples:
         )
 
         # Debug: Save prompt to file for inspection (only if debug environment variable is set)
-        import os
-
         if os.environ.get('DEBUG_PROMPTS'):
             debug_dir = output_dir / 'debug'
             debug_dir.mkdir(exist_ok=True)
@@ -1951,7 +1950,7 @@ Examples:
                     if not is_valid:
                         print(f"    ✗ {error_msg}", file=sys.stderr)
                         print(
-                            f"    ↻ Regenerating with stronger language constraints...",
+                            "    ↻ Regenerating with stronger language constraints...",
                             file=sys.stderr,
                         )
                         continue  # Will retry in next iteration

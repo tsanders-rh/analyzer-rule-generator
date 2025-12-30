@@ -1,0 +1,20 @@
+1. **{{ build_file }}** - package.json with:
+   - Dependencies at SOURCE version (e.g., "@patternfly/react-core": "^5.0.0")
+   - React and TypeScript dependencies
+   - Minimal required packages
+
+2. **{{ main_file }}** - React/TypeScript component (.tsx file) with:
+   - Import statements for EACH component specified in the rules
+   - ACTUAL JSX CODE using each component with the exact deprecated patterns
+   - Comments before each pattern: // Rule {{ source }}-to-{{ target }}-XXXXX
+   - Export a React component
+
+CRITICAL REQUIREMENTS FOR REACT/JSX:
+- File MUST be valid TSX (TypeScript + JSX) - NO syntax errors
+- All import statements MUST be at the TOP of the file, NOT inside functions or useEffect
+- Components MUST be used in JSX, not just imported
+- JSX code MUST match the exact patterns shown above (attributes, props, children)
+- Each deprecated pattern MUST appear at least once in the JSX
+- Do NOT generate generic examples - use the EXACT code patterns specified above
+- For method call patterns like "ReactDOM.render()", use the EXACT syntax shown in the code hint
+- NEVER put import statements inside functions, useEffect hooks, or any other code blocks

@@ -1,0 +1,12 @@
+1. **{{ build_file }}** - requirements.txt with:
+   - Dependencies at SOURCE version
+   - Minimal required packages
+
+2. **{{ main_file }}** - Main application with:
+   - Imports using each deprecated pattern
+   - Comments: # Rule {{ source }}-to-{{ target }}-00001
+
+For Python patterns:
+- Import statements for deprecated modules
+- Usage of deprecated functions/classes
+- References to deprecated APIs

@@ -1,0 +1,40 @@
+1. **{{ build_file }}** - Maven project file with:
+   - Parent: Spring Boot or appropriate framework at SOURCE version
+   - Minimal dependencies needed for the patterns
+   - Java version (11 or 17)
+   - CRITICAL: All <dependency> entries MUST include a <version> tag
+   - Exception: Only omit <version> for spring-boot-starter-* dependencies
+     (they inherit from parent)
+   - For all other dependencies (mysql-connector-java, etc.), explicitly specify a version
+
+2. **{{ main_file }}** - Main application with:
+   - Package: com.example
+   - Code using each deprecated pattern
+   - Comments: // Rule {{ source }}-to-{{ target }}-00001
+
+{% if config_file_instructions %}{{ config_file_instructions }}{% endif %}
+
+For Java patterns:
+- IMPORT location: Add actual import statements at the top of the file
+  (e.g., import org.example.ClassName;)
+- METHOD_CALL location: Call a method on the specified class instance
+  (e.g., configurer.setUseTrailingSlashMatch(false);)
+  * You MUST include an actual method invocation like object.methodName()
+  * Just importing or declaring the type is NOT enough - you must CALL a method on it
+- PACKAGE location: Use @Value("${{ '{{property}}' }}") or @ConfigurationProperties
+- TYPE location: Use class/interface in field declarations or method signatures
+- ANNOTATION location: Use @Annotation on classes/methods
+- DEPENDENCY location: Include in pom.xml dependencies with explicit <version> tags
+- CONFIG FILE patterns: Add actual property in application.properties or application.yaml
+
+CRITICAL: When import statements are shown above with
+"YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS", add them EXACTLY as shown
+at the top of your Java file, after the package declaration.
+
+CRITICAL FOR MAVEN DEPENDENCIES:
+- spring-boot-starter-web: no version needed (managed by parent)
+- spring-boot-starter-data-jpa: no version needed (managed by parent)
+- spring-boot-starter-test: no version needed (managed by parent)
+- mysql-connector-java: MUST include <version>8.0.33</version>
+- postgresql: MUST include <version>42.6.0</version>
+- Any non-Spring Boot dependency: MUST include explicit <version> tag

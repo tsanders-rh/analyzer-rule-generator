@@ -1,0 +1,14 @@
+1. **{{ build_file }}** - Go module file with:
+   - Module name
+   - Go version at SOURCE
+   - Required dependencies
+
+2. **{{ main_file }}** - Main application with:
+   - Package main
+   - Imports using each deprecated pattern
+   - Comments: // Rule {{ source }}-to-{{ target }}-00001
+
+For Go patterns:
+- Import deprecated packages
+- Use deprecated functions/types
+- Reference deprecated APIs

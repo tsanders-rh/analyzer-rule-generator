@@ -1,0 +1,104 @@
+Generate a minimal {{ language|upper }} test application for Konveyor analyzer rule testing.
+
+Migration: {{ source }} → {{ target }}
+Guide: {{ guide_url }}
+
+========================================================================
+CRITICAL LANGUAGE REQUIREMENT - READ THIS FIRST:
+========================================================================
+TARGET LANGUAGE: {{ language|upper }}
+
+YOU MUST GENERATE {{ language|upper }} CODE ONLY.
+DO NOT GENERATE JAVA CODE.
+DO NOT GENERATE SPRING BOOT CODE.
+DO NOT USE JAVA SYNTAX, IMPORTS, OR ANNOTATIONS.
+
+If the language is "typescript", you MUST generate:
+- TypeScript/React code (.tsx files)
+- package.json (NOT pom.xml)
+- React components with JSX syntax
+- JavaScript/TypeScript imports (NOT Java imports)
+
+WRONG (DO NOT DO THIS):
+```java
+package com.example;
+import org.springframework.boot.SpringApplication;
+@SpringBootApplication
+public class Application {
+```
+
+CORRECT (DO THIS):
+```tsx
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+
+export default function App() {
+  return <div>Hello</div>;
+}
+```
+========================================================================
+
+CRITICAL: You MUST create code that triggers these SPECIFIC analyzer rules.
+Each rule looks for EXACT patterns in the code. You MUST include the EXACT code shown below.
+
+{{ patterns_summary }}
+
+REQUIREMENTS:
+1. Create a complete, compilable {{ language }} project structure (NOT Java, NOT Spring Boot)
+2. For EACH rule above, include the EXACT code/configuration pattern specified
+3. If a code example is shown with "YOU MUST GENERATE THIS EXACT JSX CODE", copy it EXACTLY
+4. Add comment before each pattern: // Rule ID (or # Rule ID for properties/yaml files)
+5. Keep the code minimal - one example per rule
+6. Ensure static analysis can detect each pattern
+7. VERIFY your output is {{ language|upper }} code, NOT Java code
+
+CRITICAL FOR CONFIGURATION FILES:
+- If a rule says "MUST BE IN CONFIG FILE", create the configuration file
+  (application.properties or application.yaml)
+- Extract the EXACT deprecated property names from the rule's "Before:" code example
+- Include those deprecated properties with realistic values in your configuration file
+- Do NOT use @Value annotations in Java code for config file patterns -
+  put them in the actual config file
+
+CRITICAL FOR TSX/JSX FILES:
+- Components must be USED in JSX, not just imported
+- Match the EXACT JSX syntax: attributes, props, children
+- Do not improvise - use the patterns shown above
+
+Output files:
+
+{{ lang_instructions }}
+
+Format your response with EXACTLY TWO code blocks (no more, no less):
+
+FIRST code block - {{ build_file }} contents:
+```{{ build_file_type }}
+... actual {{ build_file }} file content here ...
+```
+
+SECOND code block - {{ main_file }} contents:
+```{{ main_file_type }}
+... actual {{ main_file }} file content here ...
+```
+{% if has_config_files %}
+```{{ config_file_type }}
+{{ config_file_name }}
+```
+{% endif %}
+Generate ONLY the file contents. Do not include explanations before or after the code blocks.
+
+IMPORTANT: If generating a config file other than application.properties/yaml,
+include the FULL filename in the code block header.
+For example: ```properties spring.factories``` or ```yaml application-dev.yaml```
+
+========================================================================
+FINAL VERIFICATION BEFORE RESPONDING:
+========================================================================
+✓ Check 1: Am I generating {{ language|upper }} code? (NOT Java)
+✓ Check 2: For TypeScript: Do I have React/JSX syntax? (NOT @SpringBootApplication)
+✓ Check 3: For TypeScript: Is my build file package.json? (NOT pom.xml)
+✓ Check 4: Does my code match the language requirement at the top?
+
+If you generated Java code when {{ language }} was requested, START OVER and
+generate {{ language|upper }} code.
+========================================================================

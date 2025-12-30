@@ -16,6 +16,7 @@ import time
 from pathlib import Path
 
 import yaml
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
@@ -23,6 +24,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 from rule_generator.config import config
 from rule_generator.llm import get_llm_provider
 from rule_generator.security import is_safe_path, validate_framework_name
+
+# Set up Jinja2 template environment for test generation
+TEMPLATE_DIR = Path(__file__).parent.parent / 'templates' / 'test_generation'
+jinja_env = Environment(
+    loader=FileSystemLoader(str(TEMPLATE_DIR)),
+    autoescape=select_autoescape(),
+    trim_blocks=True,
+    lstrip_blocks=True,
+)
 
 
 def detect_language(rules: list) -> str:
@@ -739,18 +749,17 @@ def build_test_generation_prompt(
 
     patterns_summary = "\n\n".join(patterns_list)
 
-    # Language-specific instructions
+    # Build config file instructions for Java
     config_file_instructions = ""
-    final_config_file_name = (
-        config_file_name if config_file_name else f'application.{config_file_type}'
+    config_file_name = config_file_name if config_file_name else f'application.{config_file_type}'
+    config_file_path = (
+        config_file_path if config_file_path else f'src/main/resources/{config_file_name}'
     )
-    final_config_file_path = (
-        config_file_path if config_file_path else f'src/main/resources/{final_config_file_name}'
-    )
+
     if has_config_files and language == 'java':
-        config_file_instructions = """
-3. **{final_config_file_name}** - Configuration file with deprecated properties:
-   - Location: {final_config_file_path}
+        config_file_instructions = f"""
+3. **{config_file_name}** - Configuration file with deprecated properties:
+   - Location: {config_file_path}
    - CRITICAL: The deprecated property patterns marked as "MUST BE IN CONFIG FILE"
      below MUST appear in this file
    - Do NOT use @Value annotations in Java code for these patterns
@@ -763,104 +772,9 @@ def build_test_generation_prompt(
      spring.data.cassandra.port=9042
 """
 
-    lang_instructions = {
-        'java': """
-1. **{build_file}** - Maven project file with:
-   - Parent: Spring Boot or appropriate framework at SOURCE version
-   - Minimal dependencies needed for the patterns
-   - Java version (11 or 17)
-   - CRITICAL: All <dependency> entries MUST include a <version> tag
-   - Exception: Only omit <version> for spring-boot-starter-* dependencies
-     (they inherit from parent)
-   - For all other dependencies (mysql-connector-java, etc.), explicitly specify a version
-
-2. **{main_file}** - Main application with:
-   - Package: com.example
-   - Code using each deprecated pattern
-   - Comments: // Rule {source}-to-{target}-00001
-
-{config_file_instructions}
-
-For Java patterns:
-- IMPORT location: Add actual import statements at the top of the file
-  (e.g., import org.example.ClassName;)
-- METHOD_CALL location: Call a method on the specified class instance
-  (e.g., configurer.setUseTrailingSlashMatch(false);)
-  * You MUST include an actual method invocation like object.methodName()
-  * Just importing or declaring the type is NOT enough - you must CALL a method on it
-- PACKAGE location: Use @Value("${{property}}") or @ConfigurationProperties
-- TYPE location: Use class/interface in field declarations or method signatures
-- ANNOTATION location: Use @Annotation on classes/methods
-- DEPENDENCY location: Include in pom.xml dependencies with explicit <version> tags
-- CONFIG FILE patterns: Add actual property in application.properties or application.yaml
-
-CRITICAL: When import statements are shown above with
-"YOU MUST INCLUDE THESE EXACT IMPORT STATEMENTS", add them EXACTLY as shown
-at the top of your Java file, after the package declaration.
-
-CRITICAL FOR MAVEN DEPENDENCIES:
-- spring-boot-starter-web: no version needed (managed by parent)
-- spring-boot-starter-data-jpa: no version needed (managed by parent)
-- spring-boot-starter-test: no version needed (managed by parent)
-- mysql-connector-java: MUST include <version>8.0.33</version>
-- postgresql: MUST include <version>42.6.0</version>
-- Any non-Spring Boot dependency: MUST include explicit <version> tag
-""",
-        'typescript': """
-1. **{build_file}** - package.json with:
-   - Dependencies at SOURCE version (e.g., "@patternfly/react-core": "^5.0.0")
-   - React and TypeScript dependencies
-   - Minimal required packages
-
-2. **{main_file}** - React/TypeScript component (.tsx file) with:
-   - Import statements for EACH component specified in the rules
-   - ACTUAL JSX CODE using each component with the exact deprecated patterns
-   - Comments before each pattern: // Rule {source}-to-{target}-XXXXX
-   - Export a React component
-
-CRITICAL REQUIREMENTS FOR REACT/JSX:
-- File MUST be valid TSX (TypeScript + JSX) - NO syntax errors
-- All import statements MUST be at the TOP of the file, NOT inside functions or useEffect
-- Components MUST be used in JSX, not just imported
-- JSX code MUST match the exact patterns shown above (attributes, props, children)
-- Each deprecated pattern MUST appear at least once in the JSX
-- Do NOT generate generic examples - use the EXACT code patterns specified above
-- For method call patterns like "ReactDOM.render()", use the EXACT syntax shown in the code hint
-- NEVER put import statements inside functions, useEffect hooks, or any other code blocks
-""",
-        'go': """
-1. **{build_file}** - Go module file with:
-   - Module name
-   - Go version at SOURCE
-   - Required dependencies
-
-2. **{main_file}** - Main application with:
-   - Package main
-   - Imports using each deprecated pattern
-   - Comments: // Rule {source}-to-{target}-00001
-
-For Go patterns:
-- Import deprecated packages
-- Use deprecated functions/types
-- Reference deprecated APIs
-""",
-        'python': """
-1. **{build_file}** - requirements.txt with:
-   - Dependencies at SOURCE version
-   - Minimal required packages
-
-2. **{main_file}** - Main application with:
-   - Imports using each deprecated pattern
-   - Comments: # Rule {source}-to-{target}-00001
-
-For Python patterns:
-- Import statements for deprecated modules
-- Usage of deprecated functions/classes
-- References to deprecated APIs
-""",
-    }
-
-    specific_instructions = lang_instructions.get(language, lang_instructions['java']).format(
+    # Load language-specific instructions template
+    lang_template = jinja_env.get_template(f'lang/{language}.j2')
+    lang_instructions = lang_template.render(
         build_file=lang_config['build_file'],
         main_file=lang_config['main_file'],
         source=source,
@@ -868,140 +782,23 @@ For Python patterns:
         config_file_instructions=config_file_instructions,
     )
 
-    prompt = """Generate a minimal {language.upper()} test application
-for Konveyor analyzer rule testing.
-
-Migration: {source} → {target}
-Guide: {guide_url}
-
-========================================================================
-CRITICAL LANGUAGE REQUIREMENT - READ THIS FIRST:
-========================================================================
-TARGET LANGUAGE: {language.upper()}
-
-YOU MUST GENERATE {language.upper()} CODE ONLY.
-DO NOT GENERATE JAVA CODE.
-DO NOT GENERATE SPRING BOOT CODE.
-DO NOT USE JAVA SYNTAX, IMPORTS, OR ANNOTATIONS.
-
-If the language is "typescript", you MUST generate:
-- TypeScript/React code (.tsx files)
-- package.json (NOT pom.xml)
-- React components with JSX syntax
-- JavaScript/TypeScript imports (NOT Java imports)
-
-WRONG (DO NOT DO THIS):
-```java
-package com.example;
-import org.springframework.boot.SpringApplication;
-@SpringBootApplication
-public class Application {{
-```
-
-CORRECT (DO THIS):
-```tsx
-import React from 'react';
-import {{ createRoot }} from 'react-dom/client';
-
-export default function App() {{
-  return <div>Hello</div>;
-}}
-```
-========================================================================
-
-CRITICAL: You MUST create code that triggers these SPECIFIC analyzer rules.
-Each rule looks for EXACT patterns in the code. You MUST include the EXACT code shown below.
-
-{patterns_summary}
-
-REQUIREMENTS:
-1. Create a complete, compilable {language} project structure (NOT Java, NOT Spring Boot)
-2. For EACH rule above, include the EXACT code/configuration pattern specified
-3. If a code example is shown with "YOU MUST GENERATE THIS EXACT JSX CODE", copy it EXACTLY
-4. Add comment before each pattern: // Rule ID (or # Rule ID for properties/yaml files)
-5. Keep the code minimal - one example per rule
-6. Ensure static analysis can detect each pattern
-7. VERIFY your output is {language.upper()} code, NOT Java code
-
-CRITICAL FOR CONFIGURATION FILES:
-- If a rule says "MUST BE IN CONFIG FILE", create the configuration file
-  (application.properties or application.yaml)
-- Extract the EXACT deprecated property names from the rule's "Before:" code example
-- Include those deprecated properties with realistic values in your configuration file
-- Do NOT use @Value annotations in Java code for config file patterns -
-  put them in the actual config file
-
-CRITICAL FOR TSX/JSX FILES:
-- Components must be USED in JSX, not just imported
-- Match the EXACT JSX syntax: attributes, props, children
-- Do not improvise - use the patterns shown above
-
-Output files:
-
-{specific_instructions}
-
-Format your response with EXACTLY TWO code blocks (no more, no less):
-
-FIRST code block - {lang_config['build_file']} contents:
-```{lang_config['build_file_type']}
-... actual {lang_config['build_file']} file content here ...
-```
-
-SECOND code block - {lang_config['main_file']} contents:
-```{lang_config['main_file_type']}
-... actual {lang_config['main_file']} file content here ...
-```
-{"" if not has_config_files else '''
-```{config_file_type}
-{final_config_file_name}
-```
-'''}
-Generate ONLY the file contents. Do not include explanations before or after the code blocks.
-
-IMPORTANT: If generating a config file other than application.properties/yaml,
-include the FULL filename in the code block header.
-For example: ```properties spring.factories``` or ```yaml application-dev.yaml```
-
-========================================================================
-FINAL VERIFICATION BEFORE RESPONDING:
-========================================================================
-✓ Check 1: Am I generating {language.upper()} code? (NOT Java)
-✓ Check 2: For TypeScript: Do I have React/JSX syntax? (NOT @SpringBootApplication)
-✓ Check 3: For TypeScript: Is my build file package.json? (NOT pom.xml)
-✓ Check 4: Does my code match the language requirement at the top?
-
-If you generated Java code when {language} was requested, START OVER and
-generate {language.upper()} code.
-========================================================================
-"""
-
-    # Format the prompt with all variables using manual replacement
-    # (avoiding .format() due to {{ }} escaping issues in template)
-    prompt = prompt.replace('{language.upper()}', language.upper())
-    prompt = prompt.replace('{language}', language)
-    prompt = prompt.replace('{source}', source)
-    prompt = prompt.replace('{target}', target)
-    prompt = prompt.replace('{guide_url}', guide_url)
-    prompt = prompt.replace('{patterns_summary}', patterns_summary)
-    prompt = prompt.replace('{specific_instructions}', specific_instructions)
-    prompt = prompt.replace('{config_file_instructions}', config_file_instructions)
-    prompt = prompt.replace('{lang_config[\'build_file_type\']}', lang_config['build_file_type'])
-    prompt = prompt.replace('{lang_config[\'build_file\']}', lang_config['build_file'])
-    prompt = prompt.replace('{lang_config[\'main_file_type\']}', lang_config['main_file_type'])
-    prompt = prompt.replace('{lang_config[\'main_file\']}', lang_config['main_file'])
-    prompt = prompt.replace('{config_file_type}', config_file_type)
-    prompt = prompt.replace('{final_config_file_name}', final_config_file_name)
-
-    # Handle conditional config file section
-    if not has_config_files:
-        # Remove the config file section
-        import re
-
-        prompt = re.sub(r'\{"" if not has_config_files.*?\'\'\'}\s*', '', prompt, flags=re.DOTALL)
-    else:
-        # Remove the template markers but keep the content
-        prompt = prompt.replace('{"" if not has_config_files else \'\'\'', '')
-        prompt = prompt.replace('\'\'\'}', '')
+    # Render main prompt template
+    main_template = jinja_env.get_template('main.j2')
+    prompt = main_template.render(
+        language=language,
+        source=source,
+        target=target,
+        guide_url=guide_url,
+        patterns_summary=patterns_summary,
+        lang_instructions=lang_instructions,
+        build_file=lang_config['build_file'],
+        build_file_type=lang_config['build_file_type'],
+        main_file=lang_config['main_file'],
+        main_file_type=lang_config['main_file_type'],
+        has_config_files=has_config_files,
+        config_file_type=config_file_type,
+        config_file_name=config_file_name,
+    )
 
     return prompt
 

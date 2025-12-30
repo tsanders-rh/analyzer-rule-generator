@@ -921,20 +921,34 @@ If you generated Java code when {language} was requested, START OVER and generat
 ========================================================================
 """
 
-    # Format the prompt with all variables
-    return prompt.format(
-        language=language,
-        source=source,
-        target=target,
-        guide_url=guide_url,
-        patterns_summary=patterns_summary,
-        specific_instructions=specific_instructions,
-        config_file_instructions=config_file_instructions,
-        lang_config=lang_config,
-        has_config_files=has_config_files,
-        config_file_type=config_file_type,
-        final_config_file_name=final_config_file_name,
-    )
+    # Format the prompt with all variables using manual replacement
+    # (avoiding .format() due to {{ }} escaping issues in template)
+    prompt = prompt.replace('{language.upper()}', language.upper())
+    prompt = prompt.replace('{language}', language)
+    prompt = prompt.replace('{source}', source)
+    prompt = prompt.replace('{target}', target)
+    prompt = prompt.replace('{guide_url}', guide_url)
+    prompt = prompt.replace('{patterns_summary}', patterns_summary)
+    prompt = prompt.replace('{specific_instructions}', specific_instructions)
+    prompt = prompt.replace('{config_file_instructions}', config_file_instructions)
+    prompt = prompt.replace('{lang_config[\'build_file_type\']}', lang_config['build_file_type'])
+    prompt = prompt.replace('{lang_config[\'build_file\']}', lang_config['build_file'])
+    prompt = prompt.replace('{lang_config[\'main_file_type\']}', lang_config['main_file_type'])
+    prompt = prompt.replace('{lang_config[\'main_file\']}', lang_config['main_file'])
+    prompt = prompt.replace('{config_file_type}', config_file_type)
+    prompt = prompt.replace('{final_config_file_name}', final_config_file_name)
+
+    # Handle conditional config file section
+    if not has_config_files:
+        # Remove the config file section
+        import re
+        prompt = re.sub(r'\{"" if not has_config_files.*?\'\'\'}\s*', '', prompt, flags=re.DOTALL)
+    else:
+        # Remove the template markers but keep the content
+        prompt = prompt.replace('{"" if not has_config_files else \'\'\'', '')
+        prompt = prompt.replace('\'\'\'}', '')
+
+    return prompt
 
 
 def extract_code_blocks(response: str, language: str) -> dict:

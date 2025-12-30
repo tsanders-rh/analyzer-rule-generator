@@ -364,6 +364,83 @@ class RuleValidator:
                 except re.error:
                     pass
 
+        # Strategy 5: Fix overly strict patterns (missing optional semicolons, etc.)
+        # If the pattern ends with $ (end-of-line) but example has trailing punctuation
+        if original_pattern.endswith('$'):
+            # Check if example code has trailing semicolons
+            has_semicolons = any(line.rstrip().endswith(';') for line in lines if line.strip())
+
+            if has_semicolons:
+                # Try adding optional semicolon before $
+                # First, check what comes before the $
+                pattern_without_anchor = original_pattern[:-1]  # Remove $
+
+                # If pattern ends with a quote (like ['"] or ['"]), add optional semicolon
+                if pattern_without_anchor.endswith(r"['\"]") or pattern_without_anchor.endswith(r'["\']'):
+                    fixed_pattern = pattern_without_anchor + ';?$'
+                elif pattern_without_anchor.endswith('"') or pattern_without_anchor.endswith("'"):
+                    fixed_pattern = pattern_without_anchor + ';?$'
+                else:
+                    # Generic: just add optional semicolon
+                    fixed_pattern = pattern_without_anchor + ';?$'
+
+                # Test if this fixed pattern matches
+                try:
+                    for line in lines:
+                        if re.search(fixed_pattern, line):
+                            return fixed_pattern
+                except re.error:
+                    pass
+
+        # Strategy 6: Fix import statement patterns
+        # Import statements commonly have variations that should be handled
+        if 'import' in original_pattern:
+            # If pattern is for imports, try variations
+            for line in lines:
+                line = line.strip()
+                if not line.startswith('import'):
+                    continue
+
+                # Try to match the line with a more flexible pattern
+                # Extract what's being imported and from where
+                import_match = re.search(
+                    r'import\s+(?:{?\s*)?(\w+)(?:\s*}?)?\s+from\s+[\'"]([^\'"]+)[\'"]', line
+                )
+                if import_match:
+                    imported = import_match.group(1)
+                    source = import_match.group(2)
+
+                    # Check if this matches what the description mentions
+                    if imported.lower() in description or source.lower() in description:
+                        # Build a flexible import pattern
+                        # Allow optional braces, whitespace, and semicolon
+                        flexible_pattern = (
+                            r'import\s+[{\s]*[\w\s,]*'
+                            + re.escape(imported)
+                            + r'[\w\s,]*[}\s]*\s+from\s+[\'"]{}'
+                            + r'[\'"];?$'
+                        ).format(re.escape(source))
+
+                        try:
+                            if re.search(flexible_pattern, line):
+                                return flexible_pattern
+                        except re.error:
+                            pass
+
+        # Strategy 7: Try relaxing strict whitespace requirements
+        # If pattern has \s+ or \s*, try making them more flexible
+        if r'\s' in original_pattern and original_pattern.endswith('$'):
+            # Remove the $ anchor and add optional trailing content
+            pattern_without_anchor = original_pattern[:-1]
+            relaxed_pattern = pattern_without_anchor + r'\s*;?\s*$'
+
+            try:
+                for line in lines:
+                    if re.search(relaxed_pattern, line):
+                        return relaxed_pattern
+            except re.error:
+                pass
+
         # Unable to auto-fix
         return None
 

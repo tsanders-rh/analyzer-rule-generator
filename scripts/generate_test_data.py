@@ -587,7 +587,11 @@ def generate_code_hint_from_pattern(
         alternatives = [alt.replace('\\', '').strip() for alt in pattern.split('|')]
 
         # Try to generate code that uses all alternatives in one line if they're related
-        if 'Promise' in alternatives and 'Symbol' in alternatives and 'Object.assign' in alternatives:
+        if (
+            'Promise' in alternatives
+            and 'Symbol' in alternatives
+            and 'Object.assign' in alternatives
+        ):
             # Modern browser features - use all in one statement
             return "new Promise((resolve) => { const key = Symbol('id'); Object.assign({}, { data: 'value' }); resolve(true); });"
         elif 'Promise' in alternatives:

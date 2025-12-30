@@ -942,6 +942,7 @@ If you generated Java code when {language} was requested, START OVER and generat
     if not has_config_files:
         # Remove the config file section
         import re
+
         prompt = re.sub(r'\{"" if not has_config_files.*?\'\'\'}\s*', '', prompt, flags=re.DOTALL)
     else:
         # Remove the template markers but keep the content
@@ -1657,6 +1658,7 @@ Examples:
 
         # Debug: Save prompt to file for inspection (only if debug environment variable is set)
         import os
+
         if os.environ.get('DEBUG_PROMPTS'):
             debug_dir = output_dir / 'debug'
             debug_dir.mkdir(exist_ok=True)
@@ -1933,7 +1935,9 @@ Examples:
                     debug_prompt_file = test_data_dir / 'debug_prompt.txt'
                     with open(debug_prompt_file, 'w') as f:
                         f.write(prompt)
-                    print(f"    📝 Debug: Saved prompt to {debug_prompt_file.relative_to(output_dir)}")
+                    print(
+                        f"    📝 Debug: Saved prompt to {debug_prompt_file.relative_to(output_dir)}"
+                    )
 
                 # Generate with LLM
                 result = llm.generate(prompt)
@@ -1946,7 +1950,10 @@ Examples:
                     is_valid, error_msg = validate_generated_language(code, language)
                     if not is_valid:
                         print(f"    ✗ {error_msg}", file=sys.stderr)
-                        print(f"    ↻ Regenerating with stronger language constraints...", file=sys.stderr)
+                        print(
+                            f"    ↻ Regenerating with stronger language constraints...",
+                            file=sys.stderr,
+                        )
                         continue  # Will retry in next iteration
 
                     src_dir = create_directory_structure(test_data_dir, language)

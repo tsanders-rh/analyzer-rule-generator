@@ -97,8 +97,7 @@ def validate_rules_temp_file(rules):
 
         try:
             validator = SyntacticRuleValidator(
-                use_semantic=False,
-                auto_fix=True  # Enable auto-fix for pattern errors
+                use_semantic=False, auto_fix=True  # Enable auto-fix for pattern errors
             )
             validator.validate_ruleset(temp_path)
         finally:
@@ -119,7 +118,7 @@ def validate_rules_temp_file(rules):
         combined = {
             'issues': validator.issues,
             'warnings': validator.warnings,
-            'fixes': validator.fixes_applied
+            'fixes': validator.fixes_applied,
         }
         return combined
     finally:

@@ -34,7 +34,9 @@ from rule_generator.security import is_safe_path
 class RuleValidator:
     """Validates Konveyor analyzer rules for common issues."""
 
-    def __init__(self, use_semantic: bool = False, llm_provider: str = "anthropic", auto_fix: bool = False):
+    def __init__(
+        self, use_semantic: bool = False, llm_provider: str = "anthropic", auto_fix: bool = False
+    ):
         """
         Initialize validator.
 
@@ -132,7 +134,7 @@ class RuleValidator:
             'valid': len(self.issues) == 0,
             'issues': self.issues,
             'warnings': self.warnings,
-            'fixes': self.fixes_applied
+            'fixes': self.fixes_applied,
         }
 
     def _validate_required_fields(self, rule: Dict, rule_id: str):
@@ -279,7 +281,9 @@ class RuleValidator:
         except re.error as e:
             self.warnings.append(f"{rule_id}: Invalid regex pattern '{pattern}': {e}")
 
-    def _auto_fix_pattern(self, rule: Dict, rule_id: str, original_pattern: str, example_code: str) -> str:
+    def _auto_fix_pattern(
+        self, rule: Dict, rule_id: str, original_pattern: str, example_code: str
+    ) -> str:
         """
         Attempt to automatically fix a pattern that doesn't match its example.
 
@@ -498,9 +502,7 @@ Examples:
 
     # Create validator
     validator = RuleValidator(
-        use_semantic=args.semantic,
-        llm_provider=args.provider,
-        auto_fix=args.auto_fix
+        use_semantic=args.semantic, llm_provider=args.provider, auto_fix=args.auto_fix
     )
 
     # Validate all files

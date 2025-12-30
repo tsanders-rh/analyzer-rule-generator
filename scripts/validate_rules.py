@@ -376,7 +376,9 @@ class RuleValidator:
                 pattern_without_anchor = original_pattern[:-1]  # Remove $
 
                 # If pattern ends with a quote (like ['"] or ['"]), add optional semicolon
-                if pattern_without_anchor.endswith(r"['\"]") or pattern_without_anchor.endswith(r'["\']'):
+                if pattern_without_anchor.endswith(r"['\"]") or pattern_without_anchor.endswith(
+                    r'["\']'
+                ):
                     fixed_pattern = pattern_without_anchor + ';?$'
                 elif pattern_without_anchor.endswith('"') or pattern_without_anchor.endswith("'"):
                     fixed_pattern = pattern_without_anchor + ';?$'

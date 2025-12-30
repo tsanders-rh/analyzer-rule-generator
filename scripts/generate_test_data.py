@@ -579,6 +579,28 @@ def generate_code_hint_from_pattern(
         package = import_match.group(1)
         return f'import {{ Component }} from "{package}";'
 
+    # Pattern 5: Simple alternation patterns (e.g., "Promise|Symbol|Object\.assign")
+    # These are common for detecting usage of specific identifiers
+    if '|' in pattern and not re.search(r'[<>(){}\[\]]', pattern):
+        # This looks like a simple alternation of identifiers
+        # Split by | and clean up alternatives
+        alternatives = [alt.replace('\\', '').strip() for alt in pattern.split('|')]
+
+        # Try to generate code that uses all alternatives in one line if they're related
+        if 'Promise' in alternatives and 'Symbol' in alternatives and 'Object.assign' in alternatives:
+            # Modern browser features - use all in one statement
+            return "new Promise((resolve) => { const key = Symbol('id'); Object.assign({}, { data: 'value' }); resolve(true); });"
+        elif 'Promise' in alternatives:
+            return "new Promise((resolve) => resolve('data'));"
+        elif 'Symbol' in alternatives:
+            return "const uniqueKey = Symbol('unique');"
+        elif any(alt.startswith('Object.') for alt in alternatives):
+            return "Object.assign({}, { theme: 'dark' }, { locale: 'en' });"
+        else:
+            # Use the first alternative generically
+            first_alt = alternatives[0]
+            return f"const result = {first_alt};"
+
     return None
 
 

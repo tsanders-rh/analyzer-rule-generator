@@ -921,7 +921,20 @@ If you generated Java code when {language} was requested, START OVER and generat
 ========================================================================
 """
 
-    return prompt
+    # Format the prompt with all variables
+    return prompt.format(
+        language=language,
+        source=source,
+        target=target,
+        guide_url=guide_url,
+        patterns_summary=patterns_summary,
+        specific_instructions=specific_instructions,
+        config_file_instructions=config_file_instructions,
+        lang_config=lang_config,
+        has_config_files=has_config_files,
+        config_file_type=config_file_type,
+        final_config_file_name=final_config_file_name,
+    )
 
 
 def extract_code_blocks(response: str, language: str) -> dict:
@@ -1628,6 +1641,16 @@ Examples:
             rules, args.source, args.target, args.guide_url, language
         )
 
+        # Debug: Save prompt to file for inspection (only if debug environment variable is set)
+        import os
+        if os.environ.get('DEBUG_PROMPTS'):
+            debug_dir = output_dir / 'debug'
+            debug_dir.mkdir(exist_ok=True)
+            debug_prompt_file = debug_dir / f'{data_dir_name}_prompt.txt'
+            with open(debug_prompt_file, 'w') as f:
+                f.write(prompt)
+            print(f"    📝 Debug: Saved prompt to {debug_prompt_file}")
+
         # Generate with LLM (with retry logic for rate limits)
         response = None
         for retry in range(args.max_retries):
@@ -1890,6 +1913,13 @@ Examples:
                 prompt = build_test_generation_prompt(
                     rules, args.source, args.target, args.guide_url, language
                 )
+
+                # Debug: Save prompt to file for inspection
+                if args.max_iterations > 0:  # Only on first iteration
+                    debug_prompt_file = test_data_dir / 'debug_prompt.txt'
+                    with open(debug_prompt_file, 'w') as f:
+                        f.write(prompt)
+                    print(f"    📝 Debug: Saved prompt to {debug_prompt_file.relative_to(output_dir)}")
 
                 # Generate with LLM
                 result = llm.generate(prompt)

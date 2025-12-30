@@ -940,14 +940,16 @@ Output files:
 
 {specific_instructions}
 
-Format your response with clear code blocks:
+Format your response with EXACTLY TWO code blocks (no more, no less):
 
+FIRST code block - {lang_config['build_file']} contents:
 ```{lang_config['build_file_type']}
-{lang_config['build_file']}
+... actual {lang_config['build_file']} file content here ...
 ```
 
+SECOND code block - {lang_config['main_file']} contents:
 ```{lang_config['main_file_type']}
-{lang_config['main_file']}
+... actual {lang_config['main_file']} file content here ...
 ```
 {"" if not has_config_files else '''
 ```{config_file_type}
@@ -1027,8 +1029,14 @@ def extract_code_blocks(response: str, language: str) -> dict:
     for block_type, content in code_blocks:
         content = content.strip()
 
-        # Match build file types
-        if block_type.lower() in ['xml', 'json', 'go', 'text', 'txt', 'toml']:
+        # Special handling for Go: first 'go' block is build file, second is source file
+        if block_type.lower() == 'go':
+            if not result['build_file']:
+                result['build_file'] = content
+            elif not result['source_file']:
+                result['source_file'] = content
+        # Match build file types (excluding 'go' since it's handled above)
+        elif block_type.lower() in ['xml', 'json', 'text', 'txt', 'toml']:
             if not result['build_file']:
                 result['build_file'] = content
         # Match config file types
@@ -1052,7 +1060,7 @@ def extract_code_blocks(response: str, language: str) -> dict:
                     'content': content,
                     'filename': filename,
                 }
-        # Match source file types
+        # Match source file types ('go' is handled specially above)
         elif block_type.lower() in [
             'java',
             'typescript',
@@ -1060,7 +1068,6 @@ def extract_code_blocks(response: str, language: str) -> dict:
             'ts',
             'python',
             'py',
-            'go',
             'javascript',
             'jsx',
             'js',
@@ -1772,6 +1779,9 @@ Examples:
 
         if not code['build_file'] or not code['source_file']:
             print("  ✗ Could not extract required files from response", file=sys.stderr)
+            print(f"    Debug: build_file={bool(code['build_file'])}, source_file={bool(code['source_file'])}", file=sys.stderr)
+            if os.environ.get('DEBUG_EXTRACTION'):
+                print(f"    Response preview: {response[:500]}...", file=sys.stderr)
             continue  # Skip to next file
 
         # Validate generated code is in the correct language

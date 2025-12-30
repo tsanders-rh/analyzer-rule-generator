@@ -1,15 +1,63 @@
 **Go Detection Instructions:**
 
-For Go code patterns, use the **builtin provider** with file content matching:
+For Go code patterns, choose the appropriate provider based on what you're detecting:
 
-**Builtin Provider (for pattern matching in .go files):**
-Use for detecting Go-specific patterns in source code:
-- Types and interfaces (e.g., `interface{}`, custom types)
-- Function calls and method invocations
-- Import statements
-- Build tags and compiler directives (e.g., `//+build`, `//go:build`)
-- Language constructs and keywords
-- Package references
+**Option 1: Go Provider (for semantic analysis) - PREFERRED for symbol references**
+Use when you need to find **symbol REFERENCES** (imports, identifiers, type usage) in Go code:
+- Package imports (e.g., `import "fmt"`, `import "io/ioutil"`)
+- Type references (e.g., `http.Client`, `context.Context`)
+- Function/method names (e.g., `ReadBuildInfo`, `json.Marshal`)
+- Interface references (e.g., `io.Reader`, `error`)
+- Struct types (e.g., `time.Time`, `bytes.Buffer`)
+- Variable/constant references
+
+**CRITICAL: go.referenced finds SYMBOL REFERENCES, NOT expressions or syntax patterns**
+- ✅ Use for imports: `import "io/ioutil"` → pattern: "io/ioutil"
+- ✅ Use for type usage: `var client http.Client` → pattern: "http.Client"
+- ✅ Use for function references: `json.Marshal` → pattern: "json.Marshal"
+- ❌ DO NOT use for syntax patterns: `interface{}` (this is a language construct, use builtin)
+- ❌ DO NOT use for build tags: `//+build` (this is a comment pattern, use builtin)
+
+Fields:
+- **provider_type**: Set to "go"
+- **source_fqn**: Symbol/package name to find (e.g., "io/ioutil", "http.Client", "ReadBuildInfo")
+  * For packages: use the full import path (e.g., "io/ioutil", "context")
+  * For types/functions: use qualified name if from standard library (e.g., "http.Client")
+- **file_pattern**: Must be null (go provider doesn't support file filtering)
+- **location_type**: Must be null
+
+Example for package import reference:
+```json
+{
+  "source_pattern": "io/ioutil",
+  "target_pattern": "io and os packages",
+  "source_fqn": "io/ioutil",
+  "provider_type": "go",
+  "file_pattern": null,
+  "location_type": null,
+  "category": "api"
+}
+```
+
+Example for function reference:
+```json
+{
+  "source_pattern": "ReadBuildInfo",
+  "target_pattern": "buildinfo.Read",
+  "source_fqn": "ReadBuildInfo",
+  "provider_type": "go",
+  "file_pattern": null,
+  "location_type": null,
+  "category": "api"
+}
+```
+
+**Option 2: Builtin Provider (for text/regex matching) - Use for syntax patterns and expressions**
+Use for patterns that require regex matching or are language syntax (not symbols):
+- **Language constructs**: `interface{}` (empty interface syntax)
+- **Build tags/directives**: `//+build`, `//go:build`, `//go:generate`
+- **Complex expressions**: Patterns that need regex matching
+- **Syntax patterns**: Code patterns that aren't simple symbol references
 
 Fields:
 - **provider_type**: Set to "builtin"
@@ -62,27 +110,44 @@ Example 3 - Function/method call:
 }
 ```
 
-Example 4 - Import path change:
+**When to use go.referenced vs builtin:**
+- For SYMBOL REFERENCES (packages, types, functions): Use go.referenced
+- For SYNTAX PATTERNS (interface{}, build tags, expressions): Use builtin.filecontent
+- When in doubt: If it's a language construct or regex pattern → use builtin; if it's a symbol → use go
+
+**Go Module Dependencies:**
+For Go module dependency changes in go.mod, you can use either:
+
+**Option 1: go.dependency (PREFERRED for semantic dependency analysis)**
+- Detects when a module is actually imported/used in code, not just listed in go.mod
+- **provider_type**: Set to "go"
+- **source_fqn**: Module path (e.g., "golang.org/x/crypto")
+- **file_pattern**: null
+- **location_type**: null
+- **category**: "dependency"
+
+Example using go.dependency:
 ```json
 {
-  "source_pattern": "io/ioutil",
-  "target_pattern": "io and os packages",
-  "source_fqn": "io/ioutil",
-  "provider_type": "builtin",
-  "file_pattern": "\\\\.go$",
+  "source_pattern": "golang.org/x/crypto",
+  "target_pattern": "updated crypto module",
+  "source_fqn": "golang.org/x/crypto",
+  "provider_type": "go",
+  "file_pattern": null,
   "location_type": null,
-  "category": "api"
+  "category": "dependency"
 }
 ```
 
-**Go Module Dependencies (go.mod):**
-For Go module dependency changes, use builtin provider with go.mod file pattern:
+**Option 2: builtin (for go.mod file pattern matching)**
+- Detects module declarations in go.mod file text
+- Use when you need to find modules listed in go.mod regardless of usage
 - **provider_type**: Set to "builtin"
-- **source_fqn**: Module path pattern (e.g., "golang\\.org/x/.*")
-- **file_pattern**: Set to `go\\.mod$` to match go.mod files
+- **source_fqn**: Module path pattern with regex escaping (e.g., "golang\\.org/x/crypto")
+- **file_pattern**: Set to `go\\.mod$`
 - **category**: "dependency"
 
-Example - Module dependency:
+Example using builtin for go.mod:
 ```json
 {
   "source_pattern": "golang.org/x/crypto",

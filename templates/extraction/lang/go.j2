@@ -1,0 +1,111 @@
+**Go Detection Instructions:**
+
+For Go code patterns, use the **builtin provider** with file content matching:
+
+**Builtin Provider (for pattern matching in .go files):**
+Use for detecting Go-specific patterns in source code:
+- Types and interfaces (e.g., `interface{}`, custom types)
+- Function calls and method invocations
+- Import statements
+- Build tags and compiler directives (e.g., `//+build`, `//go:build`)
+- Language constructs and keywords
+- Package references
+
+Fields:
+- **provider_type**: Set to "builtin"
+- **source_fqn**: Regex pattern to match the code. Use `.*` for wildcards and escape special regex characters with \\\\
+  * For literal braces: use `interface\\{\\}` to match `interface{}`
+  * For dots: use `\\.` to match a literal dot
+  * For function calls: use `FunctionName\\(` to match `FunctionName(`
+  * For build tags: use `//\\+build` to match `//+build`
+- **file_pattern**: Set to `\\.go$` to match .go files (escape the dot!)
+- **location_type**: null (not needed for builtin provider)
+
+**Common Go Pattern Examples:**
+
+Example 1 - Interface type replacement (interface{} → any):
+```json
+{
+  "source_pattern": "interface{}",
+  "target_pattern": "any",
+  "source_fqn": "interface{}",
+  "provider_type": "builtin",
+  "file_pattern": "\\\\.go$",
+  "location_type": null,
+  "category": "api"
+}
+```
+
+Example 2 - Build constraint directive (//+build → //go:build):
+```json
+{
+  "source_pattern": "//+build",
+  "target_pattern": "//go:build",
+  "source_fqn": "//\\\\+build",
+  "provider_type": "builtin",
+  "file_pattern": "\\\\.go$",
+  "location_type": null,
+  "category": "other"
+}
+```
+
+Example 3 - Function/method call:
+```json
+{
+  "source_pattern": "ReadBuildInfo",
+  "target_pattern": "buildinfo.Read",
+  "source_fqn": "ReadBuildInfo\\\\(",
+  "provider_type": "builtin",
+  "file_pattern": "\\\\.go$",
+  "location_type": null,
+  "category": "api"
+}
+```
+
+Example 4 - Import path change:
+```json
+{
+  "source_pattern": "io/ioutil",
+  "target_pattern": "io and os packages",
+  "source_fqn": "io/ioutil",
+  "provider_type": "builtin",
+  "file_pattern": "\\\\.go$",
+  "location_type": null,
+  "category": "api"
+}
+```
+
+**Go Module Dependencies (go.mod):**
+For Go module dependency changes, use builtin provider with go.mod file pattern:
+- **provider_type**: Set to "builtin"
+- **source_fqn**: Module path pattern (e.g., "golang\\.org/x/.*")
+- **file_pattern**: Set to `go\\.mod$` to match go.mod files
+- **category**: "dependency"
+
+Example - Module dependency:
+```json
+{
+  "source_pattern": "golang.org/x/crypto",
+  "target_pattern": "updated version",
+  "source_fqn": "golang\\.org/x/crypto",
+  "provider_type": "builtin",
+  "file_pattern": "go\\\\.mod$",
+  "location_type": null,
+  "category": "dependency"
+}
+```
+
+**CRITICAL REGEX ESCAPING RULES:**
+- In JSON strings, backslashes must be escaped: `\\` becomes `\\\\`
+- For regex special characters that need escaping:
+  * Literal dot: `\\\\.` (four backslashes + dot in JSON → `\\.` in regex → `.` literal match)
+  * Literal braces: `\\\\{` and `\\\\}` (for `interface{}`)
+  * Literal plus: `\\\\+` (for `//+build`)
+  * Literal parenthesis: `\\\\(` (for function calls)
+  * Literal backslash: `\\\\\\\\` (rare, but needed for escaped sequences)
+- For non-special characters, no escaping needed: `interface`, `ReadBuildInfo`, etc.
+
+**File Pattern Tips:**
+- Always escape the dot in file extensions: `\\.go$` not `.go$`
+- Use `$` anchor to match end of filename: `\\.go$` matches files ending in .go
+- For multiple extensions: `\\.(go|mod)$` matches .go or .mod files

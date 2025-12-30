@@ -389,6 +389,9 @@ class MigrationPatternExtractor:
         elif language == "java":
             lang_template = jinja_env.get_template('lang/java.j2')
             lang_instructions = lang_instructions = lang_template.render()
+        elif language == "go":
+            lang_template = jinja_env.get_template('lang/go.j2')
+            lang_instructions = lang_template.render()
 
         # Render main prompt template
         main_template = jinja_env.get_template('main.j2')

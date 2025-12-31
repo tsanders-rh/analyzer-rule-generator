@@ -19,7 +19,7 @@ COMPLEXITY_VALUES = ["TRIVIAL", "LOW", "MEDIUM", "HIGH", "EXPERT"]
 
 # Compiled regex patterns for performance (used in validation functions)
 FRAMEWORK_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9\-._]+$')
-RULE_ID_PATTERN = re.compile(r'^[a-z0-9\-]+-\d{5}$', re.IGNORECASE)
+RULE_ID_PATTERN = re.compile(r'^[a-z0-9\-.]+-\d{5}$', re.IGNORECASE)
 
 
 def validate_path(path: Union[str, Path], base_dir: Union[str, Path]) -> Path:

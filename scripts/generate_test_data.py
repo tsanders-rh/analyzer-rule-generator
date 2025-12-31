@@ -1003,6 +1003,37 @@ def create_directory_structure(output_dir: Path, language: str):
     return src_dir
 
 
+def sanitize_dir_name(name: str) -> str:
+    """
+    Sanitize directory name to avoid analyzer's default exclude patterns.
+
+    The builtin provider excludes: node_modules, vendor, .git, dist, build, target, .venv, venv
+    Replace problematic words in directory names to prevent exclusion.
+
+    Args:
+        name: Original directory name
+
+    Returns:
+        Sanitized directory name
+    """
+    replacements = {
+        'build': 'builds',
+        'target': 'targets',
+        'vendor': 'vendors',
+        'dist': 'distribution',
+    }
+
+    result = name
+    for bad, good in replacements.items():
+        # Replace word when surrounded by hyphens or at boundaries
+        result = result.replace(f'{bad}-', f'{good}-')
+        result = result.replace(f'-{bad}', f'-{good}')
+        if result == bad:
+            result = good
+
+    return result
+
+
 def generate_test_yaml(
     rule_file_path: Path, data_dir_name: str, rules: list, output_dir: Path
 ) -> Path:
@@ -1102,19 +1133,12 @@ def generate_test_yaml(
             relative_rules_path = f'../rules/{rule_file_path.name}'
 
     # Build test structure
-    # Build provider configurations with excludedDirs override for builtin provider
-    provider_configs = []
-    for provider in sorted(providers):
-        config = {'name': provider, 'dataPath': f'./data/{data_dir_name}'}
-        # Override excludedDirs for builtin provider to prevent default exclusions
-        # (e.g., "build", "target") from excluding test data directories
-        if provider == 'builtin':
-            config['providerSpecificConfig'] = {'excludedDirs': []}
-        provider_configs.append(config)
-
     test_data = {
         'rulesPath': relative_rules_path,
-        'providers': provider_configs,
+        'providers': [
+            {'name': provider, 'dataPath': f'./data/{data_dir_name}'}
+            for provider in sorted(providers)
+        ],
         'tests': [
             {'ruleID': rule_id, 'testCases': [{'name': 'tc - 1', 'hasIncidents': {'atLeast': 1}}]}
             for rule_id in rule_ids
@@ -1516,7 +1540,10 @@ Examples:
 
         # Generate data directory name from rule file
         # e.g., "patternfly-v5-to-patternfly-v6-button.yaml" -> "button"
-        data_dir_name = rule_file.stem.replace(f'{args.source}-to-{args.target}-', '')
+        # Sanitize to avoid analyzer's default exclude patterns (build, target, etc.)
+        data_dir_name = sanitize_dir_name(
+            rule_file.stem.replace(f'{args.source}-to-{args.target}-', '')
+        )
 
         # Build prompt
         print("  Generating test data with AI...")
@@ -1764,7 +1791,9 @@ Examples:
 
             # Regenerate failed tests
             for rule_file in rules_to_regen:
-                data_dir_name = rule_file.stem.replace(f'{args.source}-to-{args.target}-', '')
+                data_dir_name = sanitize_dir_name(
+                    rule_file.stem.replace(f'{args.source}-to-{args.target}-', '')
+                )
                 test_data_dir = data_dir / data_dir_name
 
                 # Remove old test data

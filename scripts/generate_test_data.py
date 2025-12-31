@@ -1333,7 +1333,14 @@ def fix_pattern_detection(failure_info: dict, llm) -> str:
         # Check if pattern looks like Go
         if any(
             go_indicator in str(pattern)
-            for go_indicator in ['net.', 'net/', 'golang.org', 'interface{}', '//+build', 'syscall.']
+            for go_indicator in [
+                'net.',
+                'net/',
+                'golang.org',
+                'interface{}',
+                '//+build',
+                'syscall.',
+            ]
         ):
             language_hint = "Go"
     elif provider == 'nodejs.referenced':

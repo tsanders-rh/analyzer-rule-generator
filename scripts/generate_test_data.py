@@ -1834,6 +1834,7 @@ Examples:
 
                 # Debug: Save prompt to file for inspection
                 if args.max_iterations > 0:  # Only on first iteration
+                    test_data_dir.mkdir(parents=True, exist_ok=True)
                     debug_prompt_file = test_data_dir / 'debug_prompt.txt'
                     with open(debug_prompt_file, 'w') as f:
                         f.write(prompt)

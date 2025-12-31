@@ -1294,12 +1294,20 @@ def analyze_test_failure(debug_path: str) -> dict:
     pattern = None
     provider = None
 
-    if 'builtin.filecontent' in when:
-        pattern = when['builtin.filecontent'].get('pattern')
-        provider = 'builtin.filecontent'
-    elif 'nodejs.referenced' in when:
-        pattern = when['nodejs.referenced'].get('pattern')
-        provider = 'nodejs.referenced'
+    # Check for all known provider types
+    provider_types = [
+        'builtin.filecontent',
+        'go.referenced',
+        'nodejs.referenced',
+        'java.referenced',
+        'csharp.referenced',
+    ]
+
+    for provider_type in provider_types:
+        if provider_type in when:
+            pattern = when[provider_type].get('pattern')
+            provider = provider_type
+            break
 
     return {'rule_id': rule_id, 'pattern': pattern, 'provider': provider}
 
@@ -1319,24 +1327,44 @@ def fix_pattern_detection(failure_info: dict, llm) -> str:
     provider = failure_info['provider']
     rule_id = failure_info['rule_id']
 
-    prompt = """Generate a single-line code snippet that matches this
+    # Determine language from provider and pattern
+    language_hint = ""
+    if provider in ['go.referenced', 'builtin.filecontent']:
+        # Check if pattern looks like Go
+        if any(
+            go_indicator in str(pattern)
+            for go_indicator in ['net.', 'net/', 'golang.org', 'interface{}', '//+build', 'syscall.']
+        ):
+            language_hint = "Go"
+    elif provider == 'nodejs.referenced':
+        language_hint = "TypeScript/JavaScript"
+    elif provider == 'java.referenced':
+        language_hint = "Java"
+    elif provider == 'csharp.referenced':
+        language_hint = "C#"
+
+    prompt = f"""Generate a single-line code snippet that matches this
 Konveyor analyzer rule pattern.
 
 Rule ID: {rule_id}
 Provider: {provider}
-Pattern (regex): {pattern}
+Pattern: {pattern}
+Language: {language_hint or "detect from pattern"}
 
 Requirements:
 1. MUST be a SINGLE line of code (no newlines)
-2. MUST match the regex pattern exactly
-3. For TypeScript/JavaScript, use realistic syntax
+2. MUST match the pattern exactly
+3. Use realistic syntax for the detected language
 4. Keep it minimal and simple
 
 Return ONLY the code snippet, nothing else. No markdown, no explanations.
-Example formats:
-- For setTimeout pattern: setTimeout(() => {{ setCount(c => c + 1); setFlag(f => !f); }}, 1000);
-- For render callback: render(<App />, container, () => {{ console.log('rendered'); }});
-- For interface: interface ButtonProps {{ onClick: () => void; disabled?: boolean; }}
+
+Example formats by language:
+- Go: var ip net.IP = net.ParseIP("192.168.1.1")
+- Go build constraint: //+build linux darwin
+- TypeScript: setTimeout(() => {{ setCount(c => c + 1); setFlag(f => !f); }}, 1000);
+- TypeScript: render(<App />, container, () => {{ console.log('rendered'); }});
+- TypeScript: interface ButtonProps {{ onClick: () => void; disabled?: boolean; }}
 """
 
     result = llm.generate(prompt)

@@ -180,12 +180,17 @@ class MigrationPattern(BaseModel):
         None,
         description=(
             "Fully qualified name (e.g., 'javax.ejb.Stateless' for Java, "
+            "'net.IP' or 'bytes.Title' for Go, "
             "'System.Web.Http' for C#)"
         ),
     )
     location_type: Optional[Union[LocationType, CSharpLocationType, str]] = Field(
         None,
-        description="Where to look (Java: ANNOTATION, IMPORT, etc.; C#: FIELD, CLASS, METHOD, ALL)",
+        description=(
+            "Where to look (Java: ANNOTATION, IMPORT, etc.; "
+            "Go: IMPORT, METHOD_CALL, TYPE, VARIABLE; "
+            "C#: FIELD, CLASS, METHOD, ALL)"
+        ),
     )
 
     # Alternative FQNs (for or conditions - javax vs jakarta)
@@ -207,7 +212,7 @@ class MigrationPattern(BaseModel):
     provider_type: Optional[str] = Field(
         default=None,
         description=(
-            "Provider type: 'java', 'nodejs', 'csharp', 'builtin', or 'combo' "
+            "Provider type: 'java', 'go', 'nodejs', 'csharp', 'builtin', or 'combo' "
             "(auto-detected if not specified)"
         ),
     )

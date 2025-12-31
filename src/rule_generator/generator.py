@@ -61,6 +61,7 @@ from .condition_builder import (
     build_builtin_condition,
     build_combo_condition,
     build_csharp_condition,
+    build_go_referenced_condition,
     build_java_dependency_condition,
     build_java_referenced_condition,
     build_nodejs_condition,
@@ -266,7 +267,21 @@ class AnalyzerRuleGenerator:
             When condition dict or None if cannot be built
         """
         # Check provider type first
-        provider = pattern.provider_type or "java"  # Default to java for backward compatibility
+        # Auto-detect provider from frameworks if not explicitly set
+        if pattern.provider_type:
+            provider = pattern.provider_type
+        else:
+            # Detect provider based on source/target frameworks
+            frameworks_str = f"{self.source_framework} {self.target_framework}".lower()
+            if "go" in frameworks_str or "golang" in frameworks_str:
+                provider = "go"
+            elif "node" in frameworks_str or "react" in frameworks_str or "typescript" in frameworks_str or "javascript" in frameworks_str:
+                provider = "nodejs"
+            elif "csharp" in frameworks_str or ".net" in frameworks_str or "dotnet" in frameworks_str:
+                provider = "csharp"
+            else:
+                # Default to java for backward compatibility (Java, Spring, Quarkus, Jakarta, etc.)
+                provider = "java"
 
         # Handle combo rules (nodejs + builtin OR import + builtin)
         if provider == "combo":
@@ -385,6 +400,25 @@ class AnalyzerRuleGenerator:
 
             return build_csharp_condition(
                 pattern.source_fqn or pattern.source_pattern, location_str
+            )
+
+        elif provider == "go":
+            # Use go.referenced for semantic symbol analysis in Go code
+            # The go provider finds references to functions, methods, packages, etc.
+
+            # Determine location (default to METHOD_CALL for function/method references)
+            # Go location types: IMPORT, METHOD_CALL, VARIABLE, TYPE, etc.
+            location_str = "METHOD_CALL"  # Default for Go functions
+            if pattern.location_type:
+                # Convert enum to string if necessary
+                location_str = (
+                    pattern.location_type.value
+                    if hasattr(pattern.location_type, 'value')
+                    else str(pattern.location_type)
+                )
+
+            return build_go_referenced_condition(
+                pattern.source_fqn or pattern.source_pattern, location_str, pattern.alternative_fqns
             )
 
         else:  # Java provider

@@ -666,6 +666,8 @@ def build_test_generation_prompt(
     patterns_list = []
     has_config_files = False
     config_file_type = 'properties'  # default
+    config_file_name = None
+    config_file_path = None
 
     for p in patterns:
         pattern_text = f"- Rule {p['ruleID']}: {p['description']}"
@@ -673,8 +675,6 @@ def build_test_generation_prompt(
         # Check if any pattern needs config files or has Java imports
         has_java_imports = False
         has_nodejs_referenced = False
-        config_file_name = None
-        config_file_path = None
         for pattern in p.get('patterns', []):
             if pattern.get('is_config_file'):
                 has_config_files = True

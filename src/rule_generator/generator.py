@@ -275,9 +275,16 @@ class AnalyzerRuleGenerator:
             frameworks_str = f"{self.source_framework} {self.target_framework}".lower()
             if "go" in frameworks_str or "golang" in frameworks_str:
                 provider = "go"
-            elif "node" in frameworks_str or "react" in frameworks_str or "typescript" in frameworks_str or "javascript" in frameworks_str:
+            elif (
+                "node" in frameworks_str
+                or "react" in frameworks_str
+                or "typescript" in frameworks_str
+                or "javascript" in frameworks_str
+            ):
                 provider = "nodejs"
-            elif "csharp" in frameworks_str or ".net" in frameworks_str or "dotnet" in frameworks_str:
+            elif (
+                "csharp" in frameworks_str or ".net" in frameworks_str or "dotnet" in frameworks_str
+            ):
                 provider = "csharp"
             else:
                 # Default to java for backward compatibility (Java, Spring, Quarkus, Jakarta, etc.)

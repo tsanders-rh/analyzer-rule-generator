@@ -1102,12 +1102,19 @@ def generate_test_yaml(
             relative_rules_path = f'../rules/{rule_file_path.name}'
 
     # Build test structure
+    # Build provider configurations with excludedDirs override for builtin provider
+    provider_configs = []
+    for provider in sorted(providers):
+        config = {'name': provider, 'dataPath': f'./data/{data_dir_name}'}
+        # Override excludedDirs for builtin provider to prevent default exclusions
+        # (e.g., "build", "target") from excluding test data directories
+        if provider == 'builtin':
+            config['providerSpecificConfig'] = {'excludedDirs': []}
+        provider_configs.append(config)
+
     test_data = {
         'rulesPath': relative_rules_path,
-        'providers': [
-            {'name': provider, 'dataPath': f'./data/{data_dir_name}'}
-            for provider in sorted(providers)
-        ],
+        'providers': provider_configs,
         'tests': [
             {'ruleID': rule_id, 'testCases': [{'name': 'tc - 1', 'hasIncidents': {'atLeast': 1}}]}
             for rule_id in rule_ids

@@ -103,7 +103,7 @@ def detect_language_from_frameworks(source: str, target: str) -> str:
         target: Target framework name
 
     Returns:
-        Language identifier: 'java', 'javascript', 'typescript', or 'unknown'
+        Language identifier: 'java', 'javascript', 'typescript', 'go', 'csharp', or 'unknown'
     """
     # Combine source and target for analysis
     frameworks = f"{source} {target}".lower()
@@ -170,6 +170,22 @@ def detect_language_from_frameworks(source: str, target: str) -> str:
         'netcore',
         'netframework',
     ]
+
+    # Go frameworks and version identifiers
+    go_keywords = [
+        'go',
+        'golang',
+        'go-1.',  # Matches go-1.17, go-1.18, go-1.19, etc.
+        'go1.',   # Matches go1.17, go1.18, go1.19, etc.
+    ]
+
+    # Check for Go patterns (check first as "go" is short and might appear in other contexts)
+    # Only match if it's clearly a Go version or "golang"
+    if any(keyword in frameworks for keyword in go_keywords):
+        # Additional validation: ensure it's not a false positive
+        # (e.g., "go" appearing in "django" or other frameworks)
+        if 'golang' in frameworks or 'go-1.' in frameworks or 'go1.' in frameworks or frameworks.startswith('go ') or frameworks.endswith(' go') or frameworks == 'go':
+            return 'go'
 
     # Check for JS/TS patterns
     if any(keyword in frameworks for keyword in js_ts_keywords):
@@ -753,9 +769,9 @@ Return ONLY the JSON array, no additional commentary."""
 
         Args:
             patterns: List of patterns to validate
-            language: Detected language (javascript, typescript, java, csharp)
-            source_framework: Source framework name (e.g., "patternfly-v5", "react-17")
-            target_framework: Target framework name (e.g., "patternfly-v6", "react-18")
+            language: Detected language (javascript, typescript, java, csharp, go, unknown)
+            source_framework: Source framework name (e.g., "patternfly-v5", "react-17", "go-1.17")
+            target_framework: Target framework name (e.g., "patternfly-v6", "react-18", "go-1.18")
 
         Returns:
             List of validated/fixed patterns
@@ -806,6 +822,22 @@ Return ONLY the JSON array, no additional commentary."""
                         f"{pattern.source_pattern}"
                     )
                     continue
+
+            # RULE 4: Validate and fix provider_type for detected language
+            if pattern.provider_type:
+                corrected_provider = self._validate_provider_for_language(
+                    pattern.provider_type, language, pattern.source_pattern
+                )
+                if corrected_provider != pattern.provider_type:
+                    log_decision(
+                        logger,
+                        "Auto-correcting provider type",
+                        f"Provider '{pattern.provider_type}' is incorrect for {language} code",
+                        pattern=pattern.source_pattern,
+                        old_provider=pattern.provider_type,
+                        new_provider=corrected_provider,
+                    )
+                    pattern.provider_type = corrected_provider
 
             validated.append(pattern)
 
@@ -963,3 +995,50 @@ Return ONLY the JSON array, no additional commentary."""
             return True
 
         return False
+
+    def _validate_provider_for_language(
+        self, provider_type: str, language: str, pattern_text: Optional[str] = None
+    ) -> str:
+        """
+        Validate that provider_type is appropriate for the detected language.
+
+        Auto-corrects common mistakes where LLM chooses wrong provider for the language.
+        For example, using 'nodejs.referenced' for Go code or 'java.referenced' for Go.
+
+        Args:
+            provider_type: Current provider type from pattern
+            language: Detected language (go, java, javascript, typescript, csharp, unknown)
+            pattern_text: Pattern text for logging/debugging
+
+        Returns:
+            Corrected provider_type (may be same as input if already correct)
+        """
+        # Valid provider combinations for each language
+        # 'builtin' is valid for all languages (text/regex matching)
+        valid_providers = {
+            'go': {'go', 'builtin'},
+            'java': {'java', 'builtin'},
+            'javascript': {'nodejs', 'combo', 'builtin'},
+            'typescript': {'nodejs', 'combo', 'builtin'},
+            'csharp': {'csharp', 'builtin'},
+        }
+
+        # If language unknown or provider is already builtin/combo, keep as-is
+        if language not in valid_providers or provider_type in {'builtin', 'combo'}:
+            return provider_type
+
+        # Check if provider is valid for this language
+        if provider_type in valid_providers[language]:
+            return provider_type
+
+        # Provider is incorrect - auto-correct to the semantic provider for this language
+        # Map: go -> go, java -> java, javascript/typescript -> nodejs, csharp -> csharp
+        language_to_provider = {
+            'go': 'go',
+            'java': 'java',
+            'javascript': 'nodejs',
+            'typescript': 'nodejs',
+            'csharp': 'csharp',
+        }
+
+        return language_to_provider.get(language, provider_type)

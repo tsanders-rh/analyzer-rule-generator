@@ -612,25 +612,103 @@ show_summary() {
 }
 
 cleanup_demo() {
-    print_header "Cleanup Demo Files"
+    # Check for --force flag and clean mode
+    local FORCE_CLEAN="${1:-}"
+    local CLEAN_MODE="${2:-demo}"  # "demo" or "all"
 
+    if [ "${CLEAN_MODE}" = "all" ]; then
+        print_header "Cleanup Demo Files and Caches"
+    else
+        print_header "Cleanup Demo Files"
+    fi
+
+    # Count what we'll be removing
+    ITEMS_TO_CLEAN=()
+
+    # Always check for demo output
     if [ -d "${DEMO_DIR}" ]; then
-        # Show what's in the demo directory
-        echo "Demo output contains:"
-        ls -1 "${DEMO_DIR}" | sed 's/^/  - /'
-        echo ""
+        ITEMS_TO_CLEAN+=("demo-output/")
+    fi
 
-        echo -e "${YELLOW}Remove demo output directory (all migrations)? (y/N)${NC}"
+    # If clean-all mode, also check for cache files
+    if [ "${CLEAN_MODE}" = "all" ]; then
+        # Find Python cache files
+        PYCACHE_DIRS=$(find . -type d -name "__pycache__" 2>/dev/null | wc -l | tr -d ' ')
+        if [ "${PYCACHE_DIRS}" -gt 0 ]; then
+            ITEMS_TO_CLEAN+=("__pycache__ directories (${PYCACHE_DIRS})")
+        fi
+
+        PYC_FILES=$(find . -type f -name "*.pyc" 2>/dev/null | wc -l | tr -d ' ')
+        if [ "${PYC_FILES}" -gt 0 ]; then
+            ITEMS_TO_CLEAN+=("*.pyc files (${PYC_FILES})")
+        fi
+
+        # Find pytest cache
+        if [ -d ".pytest_cache" ]; then
+            ITEMS_TO_CLEAN+=(".pytest_cache/")
+        fi
+    fi
+
+    # Show what will be cleaned
+    if [ ${#ITEMS_TO_CLEAN[@]} -eq 0 ]; then
+        print_info "Environment is already clean"
+        return 0
+    fi
+
+    echo "Items to clean:"
+    for item in "${ITEMS_TO_CLEAN[@]}"; do
+        echo "  - ${item}"
+    done
+    echo ""
+
+    # If force flag provided, skip confirmation
+    if [ "${FORCE_CLEAN}" = "--force" ]; then
+        CONFIRMED=true
+    else
+        echo -e "${YELLOW}Remove all listed items? (y/N)${NC}"
         read -r response
         if [[ "$response" =~ ^[Yy]$ ]]; then
-            rm -rf "${DEMO_DIR}"
-            print_success "Demo files removed"
+            CONFIRMED=true
         else
-            print_info "Keeping demo files in ${DEMO_DIR}/"
-            print_info "Each migration is in its own subdirectory"
+            CONFIRMED=false
         fi
+    fi
+
+    if [ "${CONFIRMED}" = true ]; then
+        # Remove demo output
+        if [ -d "${DEMO_DIR}" ]; then
+            print_info "Removing ${DEMO_DIR}..."
+            rm -rf "${DEMO_DIR}"
+            print_success "Demo output removed"
+        fi
+
+        # Remove cache files only in clean-all mode
+        if [ "${CLEAN_MODE}" = "all" ]; then
+            # Remove Python cache
+            if [ "${PYCACHE_DIRS}" -gt 0 ]; then
+                print_info "Removing __pycache__ directories..."
+                find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+                print_success "Python cache directories removed"
+            fi
+
+            if [ "${PYC_FILES}" -gt 0 ]; then
+                print_info "Removing .pyc files..."
+                find . -type f -name "*.pyc" -delete 2>/dev/null || true
+                print_success "Python compiled files removed"
+            fi
+
+            # Remove pytest cache
+            if [ -d ".pytest_cache" ]; then
+                print_info "Removing .pytest_cache..."
+                rm -rf ".pytest_cache"
+                print_success "Pytest cache removed"
+            fi
+        fi
+
+        echo ""
+        print_success "Environment cleaned successfully!"
     else
-        print_info "No demo files to clean up"
+        print_info "Cleanup cancelled"
     fi
 }
 
@@ -642,14 +720,16 @@ Usage:
   $0 [step]
 
 Steps:
-  1      - Generate rules from migration guide
-  1b     - Validate generated rules (optional)
-  1c     - View rules in interactive HTML viewer (optional)
-  2      - Generate test data
-  3      - Validate with kantra (if installed)
-  4      - Show submission next steps
-  all    - Run all steps sequentially
-  clean  - Remove demo output files
+  1         - Generate rules from migration guide
+  1b        - Validate generated rules (optional)
+  1c        - View rules in interactive HTML viewer (optional)
+  2         - Generate test data
+  3         - Validate with kantra (if installed)
+  4         - Show submission next steps
+  all       - Run all steps sequentially
+  clean     - Remove demo output files (interactive)
+  clean-all - Remove demo output and all cache files (interactive)
+  --force   - Add to clean commands to skip confirmation
 
 Environment Variables:
   ANTHROPIC_API_KEY - Anthropic API key (recommended)
@@ -667,8 +747,15 @@ Examples:
   # Run all steps without pauses (for CI)
   INTERACTIVE=no $0 all
 
-  # Clean up demo files
+  # Clean up demo files (with confirmation)
   $0 clean
+
+  # Clean up everything including caches (with confirmation)
+  $0 clean-all
+
+  # Force clean without confirmation
+  $0 clean --force
+  $0 clean-all --force
 EOF
 }
 
@@ -707,7 +794,20 @@ main() {
             show_summary
             ;;
         clean)
-            cleanup_demo
+            # Check for --force flag in second argument
+            if [ "${2:-}" = "--force" ]; then
+                cleanup_demo "--force" "demo"
+            else
+                cleanup_demo "" "demo"
+            fi
+            ;;
+        clean-all)
+            # Check for --force flag in second argument
+            if [ "${2:-}" = "--force" ]; then
+                cleanup_demo "--force" "all"
+            else
+                cleanup_demo "" "all"
+            fi
             ;;
         -h|--help|help)
             show_usage

@@ -298,19 +298,9 @@ class RuleValidator:
         """
         description = rule.get('description', '').lower()
 
-        # Strategy 1: Extract key identifier from description
-        # Look for patterns like "ReactDOM.render", "interface", "hydrate", etc.
+        # Strategy 1: DISABLED for React patterns - now handled by Strategy 8-13
+        # This was causing loss of namespace qualifiers and over-simplification
         key_terms = []
-
-        # Common patterns to look for
-        if 'reactdom.render' in description or 'render(' in description:
-            key_terms.append('render\\(')
-        if 'interface' in description:
-            key_terms.append('interface\\s+\\w+')
-        if 'hydrate' in description:
-            key_terms.append('hydrate\\(')
-        if 'unmount' in description:
-            key_terms.append('unmount')
 
         # Strategy 2: Extract from example code
         # Find the most distinctive line (longest, or contains keywords)
@@ -324,21 +314,18 @@ class RuleValidator:
             if len(line) > 10:  # Skip very short lines
                 distinctive_lines.append(line)
 
-        # Try key terms first
-        for term in key_terms:
-            try:
-                # Test if this term matches any line
-                for line in lines:
-                    if re.search(term, line):
-                        # Found a match! Use this as the pattern
-                        return term
-            except re.error:
-                continue
-
         # Strategy 3: Find the actual content mentioned in description
         # Extract words from description that might be code identifiers
+        # BUT exclude common example names
+        example_names = {
+            'mycomponent', 'mybutton', 'myapp', 'app', 'button',
+            'example', 'test', 'demo', 'sample'
+        }
         code_words = re.findall(r'\b[A-Z][a-zA-Z]+\b|\b\w+\(\)', description)
         for word in code_words:
+            # Skip if it's a common example name
+            if word.lower() in example_names:
+                continue
             # Escape special regex chars and try as pattern
             escaped = re.escape(word)
             try:
@@ -349,6 +336,7 @@ class RuleValidator:
                 continue
 
         # Strategy 4: Use the first distinctive line as a simple substring match
+        # BUT avoid extracting example component names
         if distinctive_lines:
             first_distinctive = distinctive_lines[0]
             # Extract the main identifier (function call, class name, etc.)
@@ -356,13 +344,15 @@ class RuleValidator:
             match = re.search(r'\b(\w+)\s*\(', first_distinctive)
             if match:
                 identifier = match.group(1)
-                pattern = f'{identifier}\\('
-                try:
-                    for line in lines:
-                        if re.search(pattern, line):
-                            return pattern
-                except re.error:
-                    pass
+                # Skip common example names
+                if identifier.lower() not in example_names:
+                    pattern = f'{identifier}\\('
+                    try:
+                        for line in lines:
+                            if re.search(pattern, line):
+                                return pattern
+                    except re.error:
+                        pass
 
         # Strategy 5: Fix overly strict patterns (missing optional semicolons, etc.)
         # If the pattern ends with $ (end-of-line) but example has trailing punctuation
@@ -443,7 +433,116 @@ class RuleValidator:
             except re.error:
                 pass
 
-        # Strategy 8: Go command patterns (go build, go test, etc.)
+        # Strategy 8: React/JavaScript namespace-qualified API calls
+        # Preserve namespace qualifiers like ReactDOM.render, React.createRoot, etc.
+        react_api_match = re.search(
+            r'\b(ReactDOM|React|useState|useEffect|useRef|useCallback|useMemo|useContext|useReducer|useLayoutEffect|useImperativeHandle|useDebugValue|useDeferredValue|useTransition|useId|useSyncExternalStore|useInsertionEffect)\.(\w+)',
+            description
+        )
+        if react_api_match:
+            namespace = react_api_match.group(1)
+            method = react_api_match.group(2)
+            # Check if this appears in the example code
+            pattern = f'{re.escape(namespace)}\\.{re.escape(method)}\\('
+            try:
+                for line in lines:
+                    if re.search(pattern, line):
+                        return pattern
+            except re.error:
+                pass
+
+        # Strategy 9: React Hook and API function calls (without namespace)
+        # Detect React hooks and APIs mentioned in description
+        react_hooks = [
+            'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo',
+            'useContext', 'useReducer', 'useLayoutEffect', 'useImperativeHandle',
+            'useDebugValue', 'useDeferredValue', 'useTransition', 'useId',
+            'useSyncExternalStore', 'useInsertionEffect', 'flushSync',
+            'createRoot', 'hydrateRoot', 'renderToPipeableStream', 'renderToNodeStream',
+            'renderToReadableStream', 'renderToStaticNodeStream'
+        ]
+        for hook in react_hooks:
+            if hook.lower() in description:
+                # Check if this appears in the example code
+                pattern = f'{re.escape(hook)}\\('
+                try:
+                    for line in lines:
+                        if re.search(pattern, line):
+                            return pattern
+                except re.error:
+                    pass
+
+        # Strategy 10: JSX element patterns (<Component>)
+        # Detect JSX/TSX element opening tags
+        jsx_component_match = re.search(r'<(\w+)', original_pattern)
+        if jsx_component_match:
+            component = jsx_component_match.group(1)
+            # Check if this is a well-known React component, not an example name
+            well_known_react = [
+                'StrictMode', 'Fragment', 'Suspense', 'Profiler',
+                'ErrorBoundary', 'Provider', 'Consumer', 'Portal'
+            ]
+            if component in well_known_react:
+                # This is a real React component, keep the pattern
+                pattern = f'<{re.escape(component)}'
+                try:
+                    for line in lines:
+                        if re.search(pattern, line):
+                            return pattern
+                except re.error:
+                    pass
+            # If it's in description as a known API, use it
+            elif component.lower() in description:
+                pattern = f'<{re.escape(component)}'
+                try:
+                    for line in lines:
+                        if re.search(pattern, line):
+                            return pattern
+                except re.error:
+                    pass
+
+        # Strategy 11: React TypeScript interface patterns
+        # For TypeScript interfaces, try to preserve some specificity
+        if 'interface' in description and 'typescript' in description:
+            # If the description mentions "children prop" or "props", look for Props interfaces
+            if 'props' in description or 'children' in description:
+                # Look for interfaces ending in Props
+                for line in lines:
+                    props_match = re.search(r'interface\s+(\w+Props)\b', line)
+                    if props_match:
+                        # Match interfaces ending in Props
+                        return r'interface\s+\w+Props\b'
+                # If no Props interface found, just match any interface
+                return r'interface\s+\w+\b'
+
+        # Strategy 12: React configuration/global variables
+        # Match React-specific global configs or constants
+        react_globals = [
+            'IS_REACT_ACT_ENVIRONMENT',
+            'globalThis.IS_REACT_ACT_ENVIRONMENT'
+        ]
+        for global_var in react_globals:
+            if global_var.lower() in description:
+                pattern = re.escape(global_var)
+                try:
+                    for line in lines:
+                        if re.search(pattern, line):
+                            return pattern
+                except re.error:
+                    pass
+
+        # Strategy 13: React setTimeout/Promise patterns with state updates
+        # Detect patterns for automatic batching (setTimeout with setState calls)
+        if 'settimeout' in description and ('batching' in description or 'state' in description):
+            # Look for setTimeout in the example
+            for line in lines:
+                if 'setTimeout' in line and '(' in line:
+                    # Check if there are multiple setState-like calls nearby
+                    # For automatic batching, just match setTimeout is sufficient
+                    # as the rule is about behavior change, not specific pattern
+                    return r'setTimeout\('
+
+        # Strategy 14: Go command patterns (go build, go test, etc.)
         # Detect if this is a Go command pattern that should match command line usage
         if 'go build' in description or 'go test' in description or 'go ' in description:
             # Extract the go command from example
@@ -569,8 +668,13 @@ class RuleValidator:
             except re.error:
                 pass
 
-        # Strategy 14: Extract simple identifiers from first non-comment line
+        # Final Strategy: Extract simple identifiers from first non-comment line
         # As a last resort, try to find any distinctive identifier
+        # BUT skip example component names
+        example_names_lower = {
+            'mycomponent', 'mybutton', 'myapp', 'app', 'button',
+            'example', 'test', 'demo', 'sample'
+        }
         for line in lines:
             line = line.strip()
             if not line or line.startswith('//') or line.startswith('#') or line.startswith('/*'):
@@ -579,8 +683,8 @@ class RuleValidator:
             call_match = re.search(r'\b(\w{3,})\s*\(', line)
             if call_match:
                 identifier = call_match.group(1)
-                # Skip common keywords
-                if identifier not in ['if', 'for', 'while', 'func', 'return', 'var', 'const']:
+                # Skip common keywords and example names
+                if identifier not in ['if', 'for', 'while', 'func', 'return', 'var', 'const'] and identifier.lower() not in example_names_lower:
                     pattern = f'{re.escape(identifier)}\\('
                     try:
                         if re.search(pattern, line):
@@ -591,12 +695,14 @@ class RuleValidator:
             id_match = re.search(r'\b([A-Z]\w+|[\w.]+\.\w+)\b', line)
             if id_match:
                 identifier = id_match.group(1)
-                pattern = re.escape(identifier)
-                try:
-                    if re.search(pattern, line):
-                        return pattern
-                except re.error:
-                    pass
+                # Skip example names
+                if identifier.lower() not in example_names_lower:
+                    pattern = re.escape(identifier)
+                    try:
+                        if re.search(pattern, line):
+                            return pattern
+                    except re.error:
+                        pass
             break  # Only check first meaningful line
 
         # Unable to auto-fix

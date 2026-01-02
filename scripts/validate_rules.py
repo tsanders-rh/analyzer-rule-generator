@@ -319,7 +319,8 @@ class RuleValidator:
         # BUT exclude common example names
         example_names = {
             'mycomponent', 'mybutton', 'myapp', 'app', 'button',
-            'example', 'test', 'demo', 'sample'
+            'example', 'test', 'demo', 'sample',
+            'mybuttonprops', 'mycomponentprops', 'myappprops', 'props'
         }
         code_words = re.findall(r'\b[A-Z][a-zA-Z]+\b|\b\w+\(\)', description)
         for word in code_words:
@@ -503,7 +504,8 @@ class RuleValidator:
 
         # Strategy 11: React TypeScript interface patterns
         # For TypeScript interfaces, try to preserve some specificity
-        if 'interface' in description and 'typescript' in description:
+        # Check both description and original pattern for "interface"
+        if ('interface' in description and 'typescript' in description) or 'interface' in original_pattern.lower():
             # If the description mentions "children prop" or "props", look for Props interfaces
             if 'props' in description or 'children' in description:
                 # Look for interfaces ending in Props
@@ -513,6 +515,9 @@ class RuleValidator:
                         # Match interfaces ending in Props
                         return r'interface\s+\w+Props\b'
                 # If no Props interface found, just match any interface
+                return r'interface\s+\w+\b'
+            # For generic interface patterns without props context
+            elif 'interface' in original_pattern.lower():
                 return r'interface\s+\w+\b'
 
         # Strategy 12: React configuration/global variables
@@ -673,7 +678,8 @@ class RuleValidator:
         # BUT skip example component names
         example_names_lower = {
             'mycomponent', 'mybutton', 'myapp', 'app', 'button',
-            'example', 'test', 'demo', 'sample'
+            'example', 'test', 'demo', 'sample',
+            'mybuttonprops', 'mycomponentprops', 'myappprops', 'props'
         }
         for line in lines:
             line = line.strip()

@@ -176,7 +176,7 @@ def detect_language_from_frameworks(source: str, target: str) -> str:
         'go',
         'golang',
         'go-1.',  # Matches go-1.17, go-1.18, go-1.19, etc.
-        'go1.',   # Matches go1.17, go1.18, go1.19, etc.
+        'go1.',  # Matches go1.17, go1.18, go1.19, etc.
     ]
 
     # Check for Go patterns (check first as "go" is short and might appear in other contexts)
@@ -184,7 +184,14 @@ def detect_language_from_frameworks(source: str, target: str) -> str:
     if any(keyword in frameworks for keyword in go_keywords):
         # Additional validation: ensure it's not a false positive
         # (e.g., "go" appearing in "django" or other frameworks)
-        if 'golang' in frameworks or 'go-1.' in frameworks or 'go1.' in frameworks or frameworks.startswith('go ') or frameworks.endswith(' go') or frameworks == 'go':
+        if (
+            'golang' in frameworks
+            or 'go-1.' in frameworks
+            or 'go1.' in frameworks
+            or frameworks.startswith('go ')
+            or frameworks.endswith(' go')
+            or frameworks == 'go'
+        ):
             return 'go'
 
     # Check for JS/TS patterns

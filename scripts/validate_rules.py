@@ -318,9 +318,19 @@ class RuleValidator:
         # Extract words from description that might be code identifiers
         # BUT exclude common example names
         example_names = {
-            'mycomponent', 'mybutton', 'myapp', 'app', 'button',
-            'example', 'test', 'demo', 'sample',
-            'mybuttonprops', 'mycomponentprops', 'myappprops', 'props'
+            'mycomponent',
+            'mybutton',
+            'myapp',
+            'app',
+            'button',
+            'example',
+            'test',
+            'demo',
+            'sample',
+            'mybuttonprops',
+            'mycomponentprops',
+            'myappprops',
+            'props',
         }
         code_words = re.findall(r'\b[A-Z][a-zA-Z]+\b|\b\w+\(\)', description)
         for word in code_words:
@@ -438,7 +448,7 @@ class RuleValidator:
         # Preserve namespace qualifiers like ReactDOM.render, React.createRoot, etc.
         react_api_match = re.search(
             r'\b(ReactDOM|React|useState|useEffect|useRef|useCallback|useMemo|useContext|useReducer|useLayoutEffect|useImperativeHandle|useDebugValue|useDeferredValue|useTransition|useId|useSyncExternalStore|useInsertionEffect)\.(\w+)',
-            description
+            description,
         )
         if react_api_match:
             namespace = react_api_match.group(1)
@@ -455,12 +465,28 @@ class RuleValidator:
         # Strategy 9: React Hook and API function calls (without namespace)
         # Detect React hooks and APIs mentioned in description
         react_hooks = [
-            'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo',
-            'useContext', 'useReducer', 'useLayoutEffect', 'useImperativeHandle',
-            'useDebugValue', 'useDeferredValue', 'useTransition', 'useId',
-            'useSyncExternalStore', 'useInsertionEffect', 'flushSync',
-            'createRoot', 'hydrateRoot', 'renderToPipeableStream', 'renderToNodeStream',
-            'renderToReadableStream', 'renderToStaticNodeStream'
+            'useState',
+            'useEffect',
+            'useRef',
+            'useCallback',
+            'useMemo',
+            'useContext',
+            'useReducer',
+            'useLayoutEffect',
+            'useImperativeHandle',
+            'useDebugValue',
+            'useDeferredValue',
+            'useTransition',
+            'useId',
+            'useSyncExternalStore',
+            'useInsertionEffect',
+            'flushSync',
+            'createRoot',
+            'hydrateRoot',
+            'renderToPipeableStream',
+            'renderToNodeStream',
+            'renderToReadableStream',
+            'renderToStaticNodeStream',
         ]
         for hook in react_hooks:
             if hook.lower() in description:
@@ -480,8 +506,14 @@ class RuleValidator:
             component = jsx_component_match.group(1)
             # Check if this is a well-known React component, not an example name
             well_known_react = [
-                'StrictMode', 'Fragment', 'Suspense', 'Profiler',
-                'ErrorBoundary', 'Provider', 'Consumer', 'Portal'
+                'StrictMode',
+                'Fragment',
+                'Suspense',
+                'Profiler',
+                'ErrorBoundary',
+                'Provider',
+                'Consumer',
+                'Portal',
             ]
             if component in well_known_react:
                 # This is a real React component, keep the pattern
@@ -505,7 +537,9 @@ class RuleValidator:
         # Strategy 11: React TypeScript interface patterns
         # For TypeScript interfaces, try to preserve some specificity
         # Check both description and original pattern for "interface"
-        if ('interface' in description and 'typescript' in description) or 'interface' in original_pattern.lower():
+        if (
+            'interface' in description and 'typescript' in description
+        ) or 'interface' in original_pattern.lower():
             # If the description mentions "children prop" or "props", look for Props interfaces
             if 'props' in description or 'children' in description:
                 # Look for interfaces ending in Props
@@ -522,10 +556,7 @@ class RuleValidator:
 
         # Strategy 12: React configuration/global variables
         # Match React-specific global configs or constants
-        react_globals = [
-            'IS_REACT_ACT_ENVIRONMENT',
-            'globalThis.IS_REACT_ACT_ENVIRONMENT'
-        ]
+        react_globals = ['IS_REACT_ACT_ENVIRONMENT', 'globalThis.IS_REACT_ACT_ENVIRONMENT']
         for global_var in react_globals:
             if global_var.lower() in description:
                 pattern = re.escape(global_var)
@@ -677,9 +708,19 @@ class RuleValidator:
         # As a last resort, try to find any distinctive identifier
         # BUT skip example component names
         example_names_lower = {
-            'mycomponent', 'mybutton', 'myapp', 'app', 'button',
-            'example', 'test', 'demo', 'sample',
-            'mybuttonprops', 'mycomponentprops', 'myappprops', 'props'
+            'mycomponent',
+            'mybutton',
+            'myapp',
+            'app',
+            'button',
+            'example',
+            'test',
+            'demo',
+            'sample',
+            'mybuttonprops',
+            'mycomponentprops',
+            'myappprops',
+            'props',
         }
         for line in lines:
             line = line.strip()
@@ -690,7 +731,10 @@ class RuleValidator:
             if call_match:
                 identifier = call_match.group(1)
                 # Skip common keywords and example names
-                if identifier not in ['if', 'for', 'while', 'func', 'return', 'var', 'const'] and identifier.lower() not in example_names_lower:
+                if (
+                    identifier not in ['if', 'for', 'while', 'func', 'return', 'var', 'const']
+                    and identifier.lower() not in example_names_lower
+                ):
                     pattern = f'{re.escape(identifier)}\\('
                     try:
                         if re.search(pattern, line):

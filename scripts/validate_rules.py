@@ -447,7 +447,10 @@ class RuleValidator:
         # Strategy 8: React/JavaScript namespace-qualified API calls
         # Preserve namespace qualifiers like ReactDOM.render, React.createRoot, etc.
         react_api_match = re.search(
-            r'\b(ReactDOM|React|useState|useEffect|useRef|useCallback|useMemo|useContext|useReducer|useLayoutEffect|useImperativeHandle|useDebugValue|useDeferredValue|useTransition|useId|useSyncExternalStore|useInsertionEffect)\.(\w+)',
+            r'\b(ReactDOM|React|useState|useEffect|useRef|useCallback|useMemo|'
+            r'useContext|useReducer|useLayoutEffect|useImperativeHandle|'
+            r'useDebugValue|useDeferredValue|useTransition|useId|'
+            r'useSyncExternalStore|useInsertionEffect)\.(\w+)',
             description,
         )
         if react_api_match:

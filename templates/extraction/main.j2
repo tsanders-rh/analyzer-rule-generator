@@ -1,10 +1,20 @@
 Analyze this migration guide and extract specific code migration patterns for static analysis rule generation.
 
+**CRITICAL**: You are creating DETECTION patterns to find OLD code that needs to be migrated, NOT patterns to find the NEW code.
+
 {{ frameworks }}{{ lang_instructions }}For each pattern you find, identify:
 
 1. **Source Pattern**: The old code/annotation/configuration (e.g., "@Stateless", "Button isActive prop", "@patternfly/react-core/v5 import")
 2. **Target Pattern**: The new replacement (e.g., "@ApplicationScoped", "Button isPressed prop", "@patternfly/react-core import")
-3. **Source FQN**: Fully qualified name for detection (e.g., "javax.ejb.Stateless")
+3. **Source FQN**: Fully qualified name for DETECTING THE OLD CODE (e.g., "javax.ejb.Stateless")
+
+   **CRITICAL - DETECTION vs REPLACEMENT**:
+   - The `source_fqn` field is a DETECTION pattern - it finds the OLD code that needs changing
+   - ✅ CORRECT: For "ReactDOM.render → createRoot", set source_fqn to "ReactDOM\\.render\\(" (detects OLD)
+   - ❌ WRONG: For "ReactDOM.render → createRoot", setting source_fqn to "createRoot\\(" (detects NEW - backwards!)
+   - ✅ CORRECT: For "hydrate → hydrateRoot", set source_fqn to "hydrate\\(" (detects OLD)
+   - ❌ WRONG: For "hydrate → hydrateRoot", setting source_fqn to "hydrateRoot\\(" (detects NEW - backwards!)
+   - The pattern MUST match what appears in the "Before:" section of your examples, NOT the "After:" section
 
    **CRITICAL ALIGNMENT RULE**: Your source_pattern MUST accurately describe what the detection pattern will actually find:
    - If detecting an import path change: source_pattern should be the import path (e.g., "@patternfly/react-core/v5")

@@ -495,11 +495,12 @@ class RuleValidator:
         ]
         for hook in react_hooks:
             if hook.lower() in description:
-                # Check if current pattern already looks like a valid React API/method call
-                # If so, don't change it (might be detecting the old API correctly)
-                if re.search(r'[A-Z][a-zA-Z]+\.\w+\(|[a-z][a-zA-Z]+\(', original_pattern):
-                    # Pattern already looks like an API call (e.g., ReactDOM.render( or hydrate()
-                    # Skip this strategy to avoid changing correct patterns
+                # Check if current pattern already looks like a function/method call
+                # If it ends with \(, it's already detecting a function call - don't change it
+                # This preserves SOURCE patterns like ReactDOM\\.render\\( or hydrate\\(
+                if original_pattern.endswith('\\('):
+                    # Pattern already looks like a function/method call
+                    # Skip this strategy to avoid changing correct SOURCE patterns to TARGET patterns
                     continue
                 # For React hooks/APIs, return the pattern even if not in example
                 # This handles NEW React 18 hooks that didn't exist in React 17

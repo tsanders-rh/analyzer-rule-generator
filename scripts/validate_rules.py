@@ -572,7 +572,13 @@ class RuleValidator:
 
         # Strategy 13: React setTimeout/Promise patterns with state updates
         # Detect patterns for automatic batching (setTimeout with setState calls)
-        if 'settimeout' in description and ('batching' in description or 'state' in description):
+        # BUT: Don't trigger if the rule is actually about flushSync or other specific APIs
+        if (
+            'settimeout' in description
+            and ('batching' in description or 'state' in description)
+            and 'flushsync' not in description
+            and 'flushsync' not in original_pattern.lower()
+        ):
             # Look for setTimeout in the example
             for line in lines:
                 if 'setTimeout' in line and '(' in line:

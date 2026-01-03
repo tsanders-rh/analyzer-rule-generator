@@ -65,6 +65,32 @@ Example for React method CALL (use builtin, not nodejs):
 }
 ```
 
+**CRITICAL: Pattern-Example Alignment for Method Calls**
+
+When creating patterns for method/function calls, your example code MUST use the same style as your pattern:
+
+✅ CORRECT - Pattern uses namespace style, example uses namespace style:
+- Pattern: `ReactDOM\\\\.render\\\\(`
+- Example Before:
+  ```javascript
+  ReactDOM.render(<App />, container);
+  ```
+
+❌ WRONG - Pattern uses namespace style, but example uses destructured import:
+- Pattern: `ReactDOM\\\\.render\\\\(`
+- Example Before:
+  ```javascript
+  import { render } from 'react-dom';
+  render(<App />, container);  // This WON'T match the pattern!
+  ```
+
+**Pattern Style Guidelines:**
+- If detecting namespace calls (e.g., `ReactDOM.render()`): Use pattern `ReactDOM\\\\.render\\\\(` and show namespace style in examples
+- If detecting destructured calls (e.g., `render()`): Use pattern `\\\\brender\\\\(` but be aware this may be too broad
+- **BEST PRACTICE**: Prefer namespace-style patterns for APIs (ReactDOM.render, React.FC) as they're more specific
+- Always ensure your "example_before" code will actually match your "source_fqn" pattern
+- Test mentally: "Would my regex pattern match my example code?"
+
 **Option 2: Builtin Provider (for text/regex matching) - For method calls, expressions, and file-specific patterns**
 Use for patterns that require regex matching or file filtering:
 - **METHOD CALLS**: `ReactDOM.render()`, `obj.method()`, function invocations

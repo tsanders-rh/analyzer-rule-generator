@@ -480,6 +480,7 @@ class RuleValidator:
             'useDebugValue',
             'useDeferredValue',
             'useTransition',
+            'startTransition',
             'useId',
             'useSyncExternalStore',
             'useInsertionEffect',
@@ -493,14 +494,11 @@ class RuleValidator:
         ]
         for hook in react_hooks:
             if hook.lower() in description:
-                # Check if this appears in the example code
+                # For React hooks/APIs, return the pattern even if not in example
+                # This handles NEW React 18 hooks that didn't exist in React 17
+                # (the "Before" section shows custom workarounds, not the actual hook)
                 pattern = f'{re.escape(hook)}\\('
-                try:
-                    for line in lines:
-                        if re.search(pattern, line):
-                            return pattern
-                except re.error:
-                    pass
+                return pattern
 
         # Strategy 10: JSX element patterns (<Component>)
         # Detect JSX/TSX element opening tags

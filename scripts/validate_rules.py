@@ -467,6 +467,7 @@ class RuleValidator:
 
         # Strategy 9: React Hook and API function calls (without namespace)
         # Detect React hooks and APIs mentioned in description
+        # BUT ONLY if the current pattern is clearly wrong or missing
         react_hooks = [
             'useState',
             'useEffect',
@@ -494,6 +495,12 @@ class RuleValidator:
         ]
         for hook in react_hooks:
             if hook.lower() in description:
+                # Check if current pattern already looks like a valid React API/method call
+                # If so, don't change it (might be detecting the old API correctly)
+                if re.search(r'[A-Z][a-zA-Z]+\.\w+\(|[a-z][a-zA-Z]+\(', original_pattern):
+                    # Pattern already looks like an API call (e.g., ReactDOM.render( or hydrate()
+                    # Skip this strategy to avoid changing correct patterns
+                    continue
                 # For React hooks/APIs, return the pattern even if not in example
                 # This handles NEW React 18 hooks that didn't exist in React 17
                 # (the "Before" section shows custom workarounds, not the actual hook)

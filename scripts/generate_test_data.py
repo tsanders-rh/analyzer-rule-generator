@@ -171,6 +171,99 @@ def get_language_config(language: str) -> dict:
     return configs.get(language, configs['java'])
 
 
+def determine_filename_from_filepattern(
+    rules: list, base_filename: str, language: str
+) -> str:
+    """
+    Determine appropriate filename based on filePattern requirements from rules.
+
+    Args:
+        rules: List of rule dictionaries
+        base_filename: Base filename from lang_config (e.g., 'App.tsx')
+        language: Programming language
+
+    Returns:
+        Appropriate filename that matches filePattern requirements
+    """
+    # Extract all filePatterns from rules
+    file_patterns = []
+    for rule in rules:
+        when = rule.get('when', {})
+
+        def extract_file_pattern(cond):
+            """Extract filePattern from a condition."""
+            if 'builtin.filecontent' in cond:
+                return cond['builtin.filecontent'].get('filePattern', '')
+            elif 'builtin.file' in cond:
+                return cond['builtin.file'].get('filePattern', '')
+            return ''
+
+        # Check different condition structures
+        if 'and' in when:
+            and_conditions = when['and'] if isinstance(when['and'], list) else [when['and']]
+            for cond in and_conditions:
+                pattern = extract_file_pattern(cond)
+                if pattern:
+                    file_patterns.append(pattern)
+        elif 'or' in when:
+            or_conditions = when['or'] if isinstance(when['or'], list) else [when['or']]
+            for cond in or_conditions:
+                pattern = extract_file_pattern(cond)
+                if pattern:
+                    file_patterns.append(pattern)
+        else:
+            # Direct condition
+            pattern = extract_file_pattern(when)
+            if pattern:
+                file_patterns.append(pattern)
+
+    # If no filePatterns found, return base filename
+    if not file_patterns:
+        return base_filename
+
+    # Use the first filePattern to determine the filename
+    file_pattern = file_patterns[0]
+
+    # Extract base name and extension from base_filename
+    parts = base_filename.rsplit('.', 1)
+    base_name = parts[0] if len(parts) == 2 else base_filename
+    extension = parts[1] if len(parts) == 2 else ''
+
+    # Check for test file patterns (common across languages)
+    # Look for patterns like: .test. or .spec. in the filePattern
+    # The filePattern is a regex, so it may contain escapes like \. for literal dots
+    has_test = 'test' in file_pattern.lower()
+    has_spec = 'spec' in file_pattern.lower()
+
+    if has_test or has_spec:
+        # Determine which pattern to use (prefer test over spec)
+        pattern_type = 'test' if has_test else 'spec'
+
+        # Determine the extension from the pattern
+        if language == 'typescript':
+            # Check if pattern allows tsx files
+            # Look for tsx, (j|t)sx, or similar patterns
+            if 'tsx' in file_pattern or '(j|t)sx' in file_pattern or '(ts|tsx)' in file_pattern:
+                return f"{base_name}.{pattern_type}.tsx"
+            else:
+                return f"{base_name}.{pattern_type}.ts"
+        elif language == 'java':
+            # Java uses suffix style: AppTest.java
+            return f"{base_name}Test.java"
+        elif language == 'go':
+            # Go uses suffix style: app_test.go
+            return f"{base_name}_test.go"
+        elif language == 'python':
+            # Python uses prefix style: test_app.py
+            return f"test_{base_name}.py"
+        else:
+            # Generic fallback
+            return f"{base_name}.{pattern_type}.{extension}" if extension else f"{base_name}.{pattern_type}"
+
+    # If no special pattern detected, return base filename
+    return base_filename
+
+
 def extract_patterns_from_rules(rules: list, language: str) -> list:
     """
     Extract patterns that need to be tested from rules.
@@ -1675,8 +1768,13 @@ Examples:
             f.write(code['build_file'])
         print(f"  ✓ {build_file_path.relative_to(output_dir)}")
 
+        # Determine appropriate filename based on filePattern requirements
+        main_filename = determine_filename_from_filepattern(
+            rules, lang_config['main_file'], language
+        )
+
         # Write source file
-        source_file_path = src_dir / lang_config['main_file']
+        source_file_path = src_dir / main_filename
         source_content = code['source_file']
 
         # Post-process Java files to inject missing imports

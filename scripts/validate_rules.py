@@ -626,17 +626,17 @@ class RuleValidator:
 
         # Strategy 9: Go directives (//go:build, //+build, //go:embed)
         # These are special comment patterns in Go
-        if '//go:' in description or '//+build' in description or 'directive' in description:
+        if '//go:' in description or '//+build' in description or '+build' in description or 'directive' in description:
             for line in lines:
                 line = line.strip()
-                # Look for Go directive comments
-                if line.startswith('//go:') or line.startswith('//+'):
-                    # Extract the full directive
-                    directive_match = re.search(r'(//(?:go:)?\w+(?:\s+[^\s]+)*)', line)
+                # Look for Go directive comments (with or without space after //)
+                if line.startswith('//go:') or line.startswith('//+') or line.startswith('// +'):
+                    # Extract just the directive name, not its arguments
+                    directive_match = re.search(r'(//(go:|\s+\+)\w+)', line)
                     if directive_match:
                         directive = directive_match.group(1)
-                        # Escape and create pattern
-                        pattern = re.escape(directive).replace(r'\ ', r'\\s+')
+                        # Escape and create pattern, normalizing spaces to \s+
+                        pattern = re.escape(directive).replace('\\ ', '\\s+')
                         try:
                             if re.search(pattern, line):
                                 return pattern

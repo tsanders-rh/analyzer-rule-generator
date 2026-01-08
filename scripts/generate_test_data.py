@@ -413,6 +413,7 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
             merged = {
                 'ruleID': rule_id,
                 'description': description,
+                'message': message,
                 'patterns': patterns,
                 'component': None,
                 'code_hint': None,
@@ -825,6 +826,35 @@ def build_test_generation_prompt(
                     f"  // Then CALL or USE {api_name} somewhere in your component code\n"
                     f"  // Example: const result = {api_name}(...);\n  ```"
                 )
+
+            # Check for builtin.filecontent patterns
+            if pattern.get('provider') == 'builtin' and 'pattern' in pattern:
+                pattern_value = pattern.get('pattern', '')
+                # Extract "Before:" example from message if available
+                message = p.get('message', '')
+                before_example = None
+                if 'Before:' in message:
+                    try:
+                        before_start = message.index('Before:')
+                        after_start = message.index('After:') if 'After:' in message else len(message)
+                        before_section = message[before_start:after_start]
+                        # Extract code block from Before section
+                        if '```' in before_section:
+                            code_start = before_section.index('```') + 3
+                            # Skip language identifier if present
+                            if '\n' in before_section[code_start:]:
+                                code_start = before_section.index('\n', code_start) + 1
+                            code_end = before_section.index('```', code_start)
+                            before_example = before_section[code_start:code_end].strip()
+                    except (ValueError, IndexError):
+                        pass
+
+                if before_example and pattern_value:
+                    pattern_text += (
+                        f"\n\n  **Pattern to detect:** `{pattern_value}`\n"
+                        f"  **You MUST include code that matches this pattern:**\n"
+                        f"  ```\n  // {p['ruleID']}\n  {before_example}\n  ```"
+                    )
 
         # Add code hint if available (for code-based rules)
         if p.get('code_hint') and not has_java_imports and not has_nodejs_referenced:

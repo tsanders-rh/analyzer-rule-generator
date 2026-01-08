@@ -258,7 +258,9 @@ def determine_filename_from_filepattern(
             return f"test_{base_name}.py"
         else:
             # Generic fallback
-            return f"{base_name}.{pattern_type}.{extension}" if extension else f"{base_name}.{pattern_type}"
+            if extension:
+                return f"{base_name}.{pattern_type}.{extension}"
+            return f"{base_name}.{pattern_type}"
 
     # If no special pattern detected, return base filename
     return base_filename

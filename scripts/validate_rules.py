@@ -271,9 +271,11 @@ class RuleValidator:
                                 f"{rule_id}: Fixed pattern from '{pattern}' to '{fixed_pattern}'"
                             )
                         else:
-                            # Pattern unchanged - auto-fix determined it's correct despite example mismatch
+                            # Pattern unchanged - auto-fix determined it's
+                            # correct despite example mismatch
                             self.fixes_applied.append(
-                                f"{rule_id}: Kept pattern '{pattern}' (correct despite example mismatch)"
+                                f"{rule_id}: Kept pattern '{pattern}' "
+                                f"(correct despite example mismatch)"
                             )
                         return  # Skip adding to issues since we validated/fixed it
 
@@ -507,7 +509,8 @@ class RuleValidator:
                 # This preserves SOURCE patterns like ReactDOM\\.render\\( or hydrate\\(
                 if original_pattern.endswith('\\('):
                     # Pattern already looks like a function/method call
-                    # Skip this strategy to avoid changing correct SOURCE patterns to TARGET patterns
+                    # Skip this strategy to avoid changing correct SOURCE
+                    # patterns to TARGET patterns
                     continue
                 # For React hooks/APIs, return the pattern even if not in example
                 # This handles NEW React 18 hooks that didn't exist in React 17

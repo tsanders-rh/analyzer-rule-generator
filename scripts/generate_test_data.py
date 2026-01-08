@@ -171,9 +171,7 @@ def get_language_config(language: str) -> dict:
     return configs.get(language, configs['java'])
 
 
-def determine_filename_from_filepattern(
-    rules: list, base_filename: str, language: str
-) -> str:
+def determine_filename_from_filepattern(rules: list, base_filename: str, language: str) -> str:
     """
     Determine appropriate filename based on filePattern requirements from rules.
 

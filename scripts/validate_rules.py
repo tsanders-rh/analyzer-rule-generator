@@ -784,9 +784,7 @@ class RuleValidator:
         # If pattern is a namespace-qualified call that matches the description,
         # keep it even if the example uses destructured imports
         # This handles cases where pattern is CORRECT but example style differs
-        namespace_pattern_match = re.match(
-            r'(ReactDOM|React)\\\.(\w+)\\\(', original_pattern
-        )
+        namespace_pattern_match = re.match(r'(ReactDOM|React)\\\.(\w+)\\\(', original_pattern)
         if namespace_pattern_match:
             namespace = namespace_pattern_match.group(1)
             method = namespace_pattern_match.group(2)
@@ -796,9 +794,7 @@ class RuleValidator:
                 import_pattern = (
                     rf'import\s+{{[^}}]*\b{method}\b[^}}]*}}\s+from\s+[\'"]react-dom[\'"]'
                 )
-                has_destructured_import = any(
-                    re.search(import_pattern, line) for line in lines
-                )
+                has_destructured_import = any(re.search(import_pattern, line) for line in lines)
                 if has_destructured_import:
                     # Example uses destructured import but pattern uses namespace style
                     # The pattern is likely CORRECT (detecting old namespace style)

@@ -45,7 +45,7 @@ class Config:
     # Test generation settings
     TEST_GENERATION_DELAY: float = 8.0  # Delay between test generation API calls
     TEST_MAX_ITERATIONS: int = 3  # Max test-fix iterations
-    KANTRA_TIMEOUT_SECONDS: int = 300  # Timeout for kantra test command
+    KANTRA_TIMEOUT_SECONDS: int = 900  # Timeout for kantra test command (15 min for Maven builds)
 
     # File handling settings
     MAX_CONTENT_SIZE: int = 40000  # Max content size before chunking

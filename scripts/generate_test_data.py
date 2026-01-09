@@ -332,6 +332,18 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
             pattern_info['provider'] = 'builtin'
             pattern_info['filePattern'] = builtin.get('filePattern', '')
 
+            # Extract component name from import patterns
+            # Pattern like: import.*\{{[^}}]*\\bComponentName\\b[^}}]*\}}.*from
+            builtin_pattern = builtin.get('pattern', '')
+            if builtin_pattern.startswith('import') and '\\b' in builtin_pattern:
+                # Extract component name between \b markers in import pattern
+                import re as pattern_re
+                # Look for \bWordCharacters\b or \\bWordCharacters\\b (double-escaped) pattern
+                # Handle both single and double backslashes
+                component_match = pattern_re.search(r'\\+b([A-Z]\w+)\\+b', builtin_pattern)
+                if component_match:
+                    pattern_info['import_component'] = component_match.group(1)
+
             # Check if this is a configuration file pattern
             file_pattern = builtin.get('filePattern', '')
             if any(
@@ -1079,6 +1091,22 @@ def build_test_generation_prompt(
             # Check for builtin.filecontent patterns
             if pattern.get('provider') == 'builtin' and 'pattern' in pattern:
                 pattern_value = pattern.get('pattern', '')
+
+                # Check for import component patterns
+                if pattern.get('import_component'):
+                    import_component = pattern.get('import_component')
+                    # Extract the package path from the pattern
+                    import_package = '@patternfly/react-core/v5'  # default
+                    if '@patternfly/react-' in pattern_value:
+                        import_package = '@patternfly/react-core/v5'
+
+                    pattern_text += (
+                        f"\n\n  **CRITICAL - Import pattern:**\n"
+                        f"  You MUST import `{import_component}` from the v5 path:\n"
+                        f"  ```tsx\n  // {p['ruleID']}\n  "
+                        f"import {{ {import_component} }} from '{import_package}';\n  ```\n"
+                        f"  And then USE the `{import_component}` component in JSX."
+                    )
                 # Extract "Before:" example from message if available
                 message = p.get('message', '')
                 before_example = None

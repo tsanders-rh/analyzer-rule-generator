@@ -365,9 +365,17 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
 
             # Parse JSX/TSX patterns to generate code hints
             jsx_pattern = builtin.get('pattern', '')
+            # Debug: Print what we're about to call
+            import os
+            if os.environ.get('DEBUG_CODE_HINTS'):
+                print(f"  DEBUG: Calling generate_code_hint_from_pattern")
+                print(f"    Pattern: {repr(jsx_pattern)}")
+                print(f"    Language: {language}")
             pattern_info['code_hint'] = generate_code_hint_from_pattern(
                 jsx_pattern, language, description, message
             )
+            if os.environ.get('DEBUG_CODE_HINTS'):
+                print(f"    Result: {repr(pattern_info['code_hint'])}")
 
         elif 'builtin.file' in cond:
             builtin = cond['builtin.file']
@@ -745,6 +753,26 @@ def generate_code_hint_from_pattern(
     if language not in ['typescript', 'go']:
         return None
 
+    # Normalize double-escaped patterns (e.g., \\\\b -> \\b)
+    # Some rule generators double-escape backslashes, resulting in \\\\b instead of \\b
+    if '\\\\b' in pattern or '\\\\.' in pattern or '\\\\(' in pattern or '\\\\{' in pattern:
+        # Replace double backslashes with single backslashes for regex metacharacters
+        pattern = pattern.replace('\\\\b', '\\b')
+        pattern = pattern.replace('\\\\B', '\\B')
+        pattern = pattern.replace('\\\\d', '\\d')
+        pattern = pattern.replace('\\\\D', '\\D')
+        pattern = pattern.replace('\\\\s', '\\s')
+        pattern = pattern.replace('\\\\S', '\\S')
+        pattern = pattern.replace('\\\\w', '\\w')
+        pattern = pattern.replace('\\\\W', '\\W')
+        pattern = pattern.replace('\\\\.', '\\.')
+        pattern = pattern.replace('\\\\(', '\\(')
+        pattern = pattern.replace('\\\\)', '\\)')
+        pattern = pattern.replace('\\\\{', '\\{')
+        pattern = pattern.replace('\\\\}', '\\}')
+        pattern = pattern.replace('\\\\[', '\\[')
+        pattern = pattern.replace('\\\\]', '\\]')
+
     # FIRST: Try to extract code from the message's "Before:" section
     # This is the most reliable source of correct JSX
     if message:
@@ -844,8 +872,9 @@ def generate_code_hint_from_pattern(
         else:
             return f"{func_name}();"
 
-    # Pattern 3: JSX tag patterns <ComponentName[^>]*\battribute=['"]value['"][^>]*>
-    jsx_match = re.search(r'<(\w+)([^>]*?)>', pattern)
+    # Pattern 3: JSX tag patterns <ComponentName[^>]*\battribute['"]value['"]*>
+    # Don't require closing > since patterns often don't include it
+    jsx_match = re.search(r'<(\w+)(.*)', pattern)
     if jsx_match:
         component = jsx_match.group(1)
         attributes_pattern = jsx_match.group(2)
@@ -853,20 +882,46 @@ def generate_code_hint_from_pattern(
         # Extract specific attributes
         attrs = []
 
-        # Look for variant="value"
+        # Look for variant="value" or similar explicit value patterns
         variant_match = re.search(r'\\bvariant=.*?[\'"](\w+)[\'"]', attributes_pattern)
         if variant_match:
             attrs.append(f'variant="{variant_match.group(1)}"')
 
-        # Look for isFlat, isCompact, etc (boolean props)
-        bool_props = re.findall(r'\\b(is[A-Z]\w+)', attributes_pattern)
-        for prop in bool_props:
-            attrs.append(prop)
+        # Look for word-boundary props (e.g., \bisActive\b, \bfrom\b)
+        # Extract all \bword\b patterns from the attributes
+        # Note: attributes_pattern is a string like "[^>]*\bisActive\b"
+        # where \b is the literal backslash character followed by 'b'
+        # Use r'\\b' to match this two-character sequence
+        prop_matches = re.findall(r'\\b(\w+)\\b', attributes_pattern)
+        for prop in prop_matches:
+            # Skip if already added
+            if any(prop in attr for attr in attrs):
+                continue
+
+            # Determine appropriate value based on prop name
+            if prop.startswith('is') or prop.startswith('has') or prop.startswith('should'):
+                # Boolean props - no value needed in JSX
+                attrs.append(prop)
+            elif prop in ['variant', 'size', 'position', 'align']:
+                # Already handled by variant_match or needs explicit value
+                attrs.append(f'{prop}="default"')
+            elif prop == 'from':
+                # Common prop that needs a value (like in Import component)
+                attrs.append('from="source"')
+            elif prop == 'to':
+                # Navigation prop
+                attrs.append('to="/path"')
+            elif prop in ['onClick', 'onChange', 'onToggle', 'onSelect']:
+                # Event handler props
+                attrs.append(f'{prop}={{() => {{}}}}')
+            else:
+                # Generic prop with string value
+                attrs.append(f'{prop}="value"')
 
         # Build example
         attr_str = ' ' + ' '.join(attrs) if attrs else ''
 
-        # Check if it's a self-closing or has children
+        # Check if it's self-closing or has children
         if 'icon' in pattern.lower() or 'children' in pattern.lower():
             return f'<{component}{attr_str}>\n  <SomeIcon />\n</{component}>'
         else:

@@ -628,11 +628,12 @@ Return ONLY the JSON array, no additional commentary."""
         if matches:
             print(f"[Extraction] Debug: Applied triple-backslash fix")
 
-        # SKIP the invalid escape fixing - it breaks valid JSON!
-        # The LLM generates valid JSON with correct escapes (e.g., \\s)
-        # The STRING_VALUE_PATTERN.sub() was turning \\s into \\\s (breaking it)
-        # If there are genuine invalid escapes, json.loads() will catch them
-        # and we'll handle them in the targeted repairs below
+        # Fix invalid single-quote escapes in JSON strings
+        # JSON doesn't allow \' (single quotes don't need escaping in double-quoted strings)
+        # But LLM often generates JSX with \' which is valid in JS but not JSON
+        # Example: "example_before": "<Avatar border={\'dark\'} />"
+        # Should be: "example_before": "<Avatar border={'dark'} />"
+        json_str = json_str.replace("\\'", "'")
 
         # Remove trailing commas before closing brackets/braces
         # e.g., {"key": "value",} -> {"key": "value"}

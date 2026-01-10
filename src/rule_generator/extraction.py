@@ -963,13 +963,15 @@ Return ONLY the JSON array, no additional commentary."""
 
             # RULE 2: Reject overly generic builtin patterns (PatternFly only)
             if language in ["javascript", "typescript"] and is_patternfly:
-                if pattern.provider_type == "builtin" and pattern.source_fqn:
-                    if self._is_overly_broad_pattern(pattern.source_fqn):
+                if pattern.provider_type == "builtin":
+                    # Check both source_fqn and source_pattern for overly broad terms
+                    pattern_to_check = pattern.source_fqn or pattern.source_pattern or ""
+                    if self._is_overly_broad_pattern(pattern_to_check):
                         log_decision(
                             logger,
                             "Rejecting overly broad pattern",
                             "Pattern is too generic and would cause false positives",
-                            pattern=pattern.source_fqn,
+                            pattern=pattern_to_check,
                             provider_type="builtin",
                         )
                         continue
@@ -983,7 +985,34 @@ Return ONLY the JSON array, no additional commentary."""
                     )
                     continue
 
-            # RULE 4: Validate and fix provider_type for detected language
+            # RULE 4: Generic component names need import verification (JS/TS only)
+            if language in ["javascript", "typescript"] and is_patternfly:
+                if pattern.provider_type == "nodejs" and pattern.source_fqn:
+                    if self._is_generic_component_name(pattern.source_fqn):
+                        log_decision(
+                            logger,
+                            "Adding import verification for generic component",
+                            "Component name is common across libraries, adding import check",
+                            component=pattern.source_fqn,
+                        )
+                        pattern = self._add_import_verification_to_nodejs_pattern(pattern)
+
+            # RULE 5: Auto-fix import patterns to add optional semicolon
+            if language in ["javascript", "typescript"]:
+                if pattern.provider_type == "builtin" and pattern.source_fqn:
+                    if "import" in pattern.source_fqn.lower():
+                        fixed_pattern = self._fix_import_pattern_semicolon(pattern.source_fqn)
+                        if fixed_pattern != pattern.source_fqn:
+                            log_decision(
+                                logger,
+                                "Auto-fixing import pattern",
+                                "Added optional semicolon to import pattern",
+                                original=pattern.source_fqn,
+                                fixed=fixed_pattern,
+                            )
+                            pattern.source_fqn = fixed_pattern
+
+            # RULE 6: Validate and fix provider_type for detected language
             if pattern.provider_type:
                 corrected_provider = self._validate_provider_for_language(
                     pattern.provider_type, language, pattern.source_pattern
@@ -1161,13 +1190,20 @@ Return ONLY the JSON array, no additional commentary."""
             "onChange",
             "onSubmit",
             "onClose",
+            # Alignment values (used across many components)
             "alignLeft",
             "alignRight",
             "alignCenter",
+            "alignStart",
+            "alignEnd",
+            "alignBaseline",
+            # Other common enum values
             "variant",
             "size",
             "color",
             "type",
+            "position",
+            "status",
         ]
 
         # If pattern is just one of these words, it's too broad
@@ -1179,6 +1215,115 @@ Return ONLY the JSON array, no additional commentary."""
             return True
 
         return False
+
+    def _is_generic_component_name(self, component_name: str) -> bool:
+        """
+        Check if component name is generic and likely to collide across libraries.
+
+        These components need import verification to avoid false positives.
+
+        Args:
+            component_name: Component name to check
+
+        Returns:
+            True if component name is generic and needs import verification
+        """
+        # Common component names that exist in many React libraries
+        generic_names = {
+            # UI primitives (exist in React Native, MUI, Ant Design, etc.)
+            "Text",
+            "Button",
+            "Input",
+            "Select",
+            "Modal",
+            "Form",
+            "Label",
+            "Card",
+            "List",
+            "Table",
+            "Grid",
+            "Image",
+            "Link",
+            "Menu",
+            # Layout components
+            "Container",
+            "Box",
+            "Stack",
+            "Flex",
+            "Content",
+            "Header",
+            "Footer",
+            "Sidebar",
+            # Form components
+            "Checkbox",
+            "Radio",
+            "Switch",
+            "Slider",
+            "TextArea",
+            # Feedback components
+            "Alert",
+            "Toast",
+            "Spinner",
+            "Loading",
+            "Progress",
+        }
+
+        return component_name in generic_names
+
+    def _add_import_verification_to_nodejs_pattern(
+        self, pattern: MigrationPattern
+    ) -> MigrationPattern:
+        """
+        Convert nodejs.referenced pattern to combo rule with import verification.
+
+        For generic component names, adds import verification from @patternfly/react-core
+        to prevent false positives from identically-named components in other libraries.
+
+        Args:
+            pattern: Pattern with nodejs provider and generic component name
+
+        Returns:
+            Pattern converted to combo rule with import verification
+        """
+        if not pattern.source_fqn:
+            return pattern
+
+        component = pattern.source_fqn
+
+        # Convert to combo rule with import + component detection
+        pattern.provider_type = "combo"
+        pattern.when_combo = {
+            "import_pattern": f"import.*{component}.*from.*@patternfly/react-core",
+            "nodejs_pattern": component,
+            "file_pattern": "\\.(j|t)sx?$",
+        }
+
+        return pattern
+
+    def _fix_import_pattern_semicolon(self, pattern: str) -> str:
+        """
+        Auto-fix import patterns to add optional semicolon before $.
+
+        Import statements may or may not have semicolons, so patterns should
+        accept both forms with `;?$` instead of just `$`.
+
+        Args:
+            pattern: Import pattern string
+
+        Returns:
+            Fixed pattern with optional semicolon
+
+        Examples:
+            >>> _fix_import_pattern_semicolon("import.*from.*react$")
+            "import.*from.*react;?$"
+            >>> _fix_import_pattern_semicolon("import.*from.*react;?$")
+            "import.*from.*react;?$"  # Already fixed
+        """
+        # If pattern ends with $ but not ;?$, add ;?
+        if pattern.endswith("$") and not pattern.endswith(";?$"):
+            return pattern[:-1] + ";?$"
+
+        return pattern
 
     def _validate_provider_for_language(
         self, provider_type: str, language: str, pattern_text: Optional[str] = None

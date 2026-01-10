@@ -148,7 +148,7 @@ class TestRuleValidator:
         assert validator.language == 'javascript'
 
     def test_needs_import_verification_combo_rule_without_import(self):
-        """Test detecting combo rule needing import verification."""
+        """Test that nodejs.referenced rules don't need import verification."""
         llm = Mock(spec=LLMProvider)
         validator = RuleValidator(llm, 'javascript')
 
@@ -168,7 +168,8 @@ class TestRuleValidator:
             customVariables=[],
         )
 
-        assert validator._needs_import_verification(rule) is True
+        # nodejs.referenced already does semantic analysis, no import verification needed
+        assert validator._needs_import_verification(rule) is False
 
     def test_needs_import_verification_combo_rule_with_import(self):
         """Test detecting combo rule that already has import verification."""
@@ -195,7 +196,7 @@ class TestRuleValidator:
         assert validator._needs_import_verification(rule) is False
 
     def test_needs_import_verification_simple_nodejs_rule(self):
-        """Test detecting simple nodejs.referenced rule needing import verification."""
+        """Test that simple nodejs.referenced rules don't need import verification."""
         llm = Mock(spec=LLMProvider)
         validator = RuleValidator(llm, 'javascript')
 
@@ -210,7 +211,8 @@ class TestRuleValidator:
             customVariables=[],
         )
 
-        assert validator._needs_import_verification(rule) is True
+        # nodejs.referenced already does semantic analysis, no import verification needed
+        assert validator._needs_import_verification(rule) is False
 
     def test_needs_import_verification_lowercase_pattern(self):
         """Test that lowercase patterns don't need import verification."""
@@ -529,7 +531,7 @@ class TestRuleValidator:
         assert len(duplicates) == 0
 
     def test_validate_rules_javascript(self, capsys):
-        """Test validate_rules for JavaScript with import verification."""
+        """Test validate_rules for JavaScript (no import verification for nodejs.referenced)."""
         llm = Mock(spec=LLMProvider)
         validator = RuleValidator(llm, 'javascript', 'patternfly-v5', 'patternfly-v6')
 
@@ -558,7 +560,8 @@ class TestRuleValidator:
         report = validator.validate_rules([rule1, rule2])
 
         assert report.statistics['total_rules'] == 2
-        assert report.statistics['rules_improved'] >= 1  # At least import verification
+        # nodejs.referenced rules don't need import verification
+        assert report.statistics['rules_improved'] == 0
         assert len(report.issues) >= 1  # At least overly broad pattern
 
         # Check console output

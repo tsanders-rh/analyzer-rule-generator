@@ -442,14 +442,14 @@ class TestValidateLLMResponse:
             validate_llm_response("[", expected_format="json_array")
 
     def test_json_array_invalid_start(self):
-        """Should reject JSON arrays that don't start with [."""
-        with pytest.raises(ValueError, match="does not start with"):
+        """Should reject responses that don't contain [ and ]."""
+        with pytest.raises(ValueError, match="does not contain"):
             validate_llm_response('{"key": "value"}', expected_format="json_array")
 
     def test_json_array_invalid_end(self):
-        """Should reject JSON arrays that don't end with ]."""
-        with pytest.raises(ValueError, match="does not end with"):
-            validate_llm_response('[{"key": "value"}', expected_format="json_array")
+        """Should reject responses with malformed array structure."""
+        with pytest.raises(ValueError, match="malformed JSON array structure"):
+            validate_llm_response(']{"key": "value"}[', expected_format="json_array")
 
     def test_json_object_invalid_start(self):
         """Should reject JSON objects that don't start with {."""

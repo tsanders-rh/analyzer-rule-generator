@@ -1695,8 +1695,8 @@ class TestComboRuleGeneration:
         # Should return None due to missing import/nodejs pattern
         assert rule is None
 
-    def test_combo_rule_prefers_import_over_nodejs(self):
-        """Should use import_pattern if both import and nodejs patterns present"""
+    def test_combo_rule_prefers_nodejs_over_import(self):
+        """Should prefer nodejs.referenced over import_pattern (matches official Konveyor)"""
         generator = AnalyzerRuleGenerator(
             source_framework="patternfly-v5", target_framework="patternfly-v6"
         )
@@ -1708,8 +1708,8 @@ class TestComboRuleGeneration:
             rationale="Test",
             provider_type="combo",
             when_combo={
-                "import_pattern": "import.*Alert",
-                "nodejs_pattern": "Alert",  # Should be ignored
+                "import_pattern": "import.*Alert",  # Should be ignored
+                "nodejs_pattern": "Alert",  # Should be preferred
                 "builtin_pattern": "<Alert",
             },
         )
@@ -1719,11 +1719,11 @@ class TestComboRuleGeneration:
         assert rule is not None
         conditions = rule.when["and"]
 
-        # First condition should use import_pattern, not nodejs
-        assert "builtin.filecontent" in conditions[0]
-        assert "import" in conditions[0]["builtin.filecontent"]["pattern"]
-        # Should NOT have nodejs.referenced
-        assert "nodejs.referenced" not in conditions[0]
+        # First condition should use nodejs.referenced (semantic analysis)
+        assert "nodejs.referenced" in conditions[0]
+        assert conditions[0]["nodejs.referenced"]["pattern"] == "Alert"
+        # Should NOT use import regex pattern
+        assert "import" not in str(conditions[0])
 
 
 class TestProviderFallbacks:

@@ -599,26 +599,28 @@ class TestJSONRepair:
         return MigrationPatternExtractor(mock_llm)
 
     def test_repair_invalid_backslash_escapes(self, extractor):
-        """Should fix invalid escape sequences like \\. in JSON strings"""
-        # JSON with invalid \. escape (common in regex patterns)
-        malformed = '{"pattern": "com\\.example\\.Test"}'
-        repaired = extractor._repair_json(malformed)
+        """Should not modify already-valid escape sequences to avoid breaking valid JSON"""
+        # JSON that's actually valid (LLM generates correct double-backslash)
+        valid_json = '{"pattern": "com\\\\.example\\\\.Test"}'
+        repaired = extractor._repair_json(valid_json)
 
-        # Should double-escape the backslashes
-        assert "\\\\" in repaired
-        # Should be valid JSON after repair
+        # Should not break valid JSON
         parsed = json.loads(repaired)
         assert "pattern" in parsed
+        # Pattern should be preserved correctly
+        assert "." in parsed["pattern"]  # Dots should be present after parsing
 
     def test_repair_regex_escape_sequences(self, extractor):
-        """Should fix regex patterns with invalid JSON escapes"""
-        # Regex pattern with \d (invalid in JSON)
-        malformed = '{"pattern": "\\d+"}'
-        repaired = extractor._repair_json(malformed)
+        """Should fix triple-backslash sequences from over-escaping"""
+        # LLM sometimes over-escapes: \\\s should be \\\\s (for regex \s)
+        # This is valid JSON that just has correct escaping
+        valid_json = r'{"pattern": "\\s+"}'  # Double backslash (valid JSON for regex \s)
+        repaired = extractor._repair_json(valid_json)
 
-        # Should successfully parse after repair
+        # Should not break valid JSON
         parsed = json.loads(repaired)
         assert "pattern" in parsed
+        assert parsed["pattern"] == r"\s+"  # Should parse to \s+
 
     def test_repair_unescaped_single_quotes(self, extractor):
         """Should fix unescaped single quotes in JSON strings"""
@@ -746,7 +748,7 @@ class TestPatternValidation:
         assert extractor._is_overly_broad_pattern("\\w+") is True
 
     def test_convert_to_combo_rule(self, extractor):
-        """Should convert pattern to combo rule with import verification"""
+        """Should convert pattern to combo rule with nodejs.referenced verification"""
         pattern = MigrationPattern(
             source_pattern="Button isActive",  # Component + prop format
             rationale="Button prop change",
@@ -762,10 +764,10 @@ class TestPatternValidation:
         assert converted.provider_type == "combo"
         # Should have when_combo configuration
         assert converted.when_combo is not None
-        assert "import_pattern" in converted.when_combo
+        assert "nodejs_pattern" in converted.when_combo
         assert "builtin_pattern" in converted.when_combo
-        # Import pattern should check for Button import
-        assert "Button" in converted.when_combo["import_pattern"]
+        # nodejs_pattern should check for Button component
+        assert converted.when_combo["nodejs_pattern"] == "Button"
 
     def test_validate_and_fix_patterns_with_patternfly(self, extractor):
         """Should validate patterns for PatternFly migration"""

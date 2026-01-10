@@ -27,7 +27,8 @@ class Config:
 
     # Extraction settings
     EXTRACTION_CHUNK_SIZE: int = 40000  # Characters per chunk for large guides
-    EXTRACTION_MAX_TOKENS: int = 6000  # Max tokens per chunk for LLM processing (~24k chars)
+    EXTRACTION_MAX_TOKENS: int = 4000  # Max tokens per chunk for LLM processing (~16k chars)
+    # Reduced from 6000 to prevent output truncation on pattern-dense content
 
     # Rule generation settings
     # Convention from https://github.com/konveyor/rulesets/blob/main/CONTRIBUTING.md

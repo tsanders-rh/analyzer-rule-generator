@@ -621,7 +621,12 @@ Return ONLY the JSON array, no additional commentary."""
         # This happens when LLM over-escapes regex patterns
         # \\\s in JSON = \\ (one backslash) + \s (invalid!)
         # Should be \\\\s = \\ + \\ (two backslashes) for the regex \s
+        matches = TRIPLE_BACKSLASH_PATTERN.findall(json_str)
+        if matches:
+            print(f"[Extraction] Debug: Found {len(matches)} triple-backslash patterns: {matches}")
         json_str = TRIPLE_BACKSLASH_PATTERN.sub(r'\\\\\\\\\1', json_str)
+        if matches:
+            print(f"[Extraction] Debug: Applied triple-backslash fix")
 
         # Fix invalid escape sequences in string values FIRST
         # JSON only allows: \" \\ \/ \b \f \n \r \t \uXXXX
@@ -691,6 +696,17 @@ Return ONLY the JSON array, no additional commentary."""
         except json.JSONDecodeError as e:
             print(f"[Extraction] Warning: JSON parsing failed: {e} (attempting repair)")
             print("[Extraction] Info: Attempting to repair malformed JSON...")
+
+            # Write ORIGINAL failed JSON before any repairs for debugging
+            import tempfile
+            try:
+                with tempfile.NamedTemporaryFile(
+                    mode='w', suffix='_original.json', delete=False, prefix='failed_json_'
+                ) as f:
+                    f.write(json_str)
+                    print(f"[Extraction] Debug: Original failed JSON written to {f.name}")
+            except Exception:
+                pass
 
             # Try to repair the JSON
             repaired_json = self._repair_json(json_str)

@@ -626,7 +626,12 @@ class RuleValidator:
 
         # Strategy 9: Go directives (//go:build, //+build, //go:embed)
         # These are special comment patterns in Go
-        if '//go:' in description or '//+build' in description or '+build' in description or 'directive' in description:
+        if (
+            '//go:' in description
+            or '//+build' in description
+            or '+build' in description
+            or 'directive' in description
+        ):
             for line in lines:
                 line = line.strip()
                 # Look for Go directive comments (with or without space after //)

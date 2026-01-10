@@ -680,6 +680,7 @@ Return ONLY the JSON array, no additional commentary."""
 
             # Write ORIGINAL failed JSON before any repairs for debugging
             import tempfile
+
             try:
                 with tempfile.NamedTemporaryFile(
                     mode='w', suffix='_original.json', delete=False, prefix='failed_json_'
@@ -700,6 +701,7 @@ Return ONLY the JSON array, no additional commentary."""
 
                 # Write failed JSON to temp file for debugging
                 import tempfile
+
                 try:
                     with tempfile.NamedTemporaryFile(
                         mode='w', suffix='.json', delete=False, prefix='failed_json_'

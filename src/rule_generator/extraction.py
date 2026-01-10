@@ -628,20 +628,11 @@ Return ONLY the JSON array, no additional commentary."""
         if matches:
             print(f"[Extraction] Debug: Applied triple-backslash fix")
 
-        # Fix invalid escape sequences in string values FIRST
-        # JSON only allows: \" \\ \/ \b \f \n \r \t \uXXXX
-        # Regex patterns often have: \. \d \w \s etc. which are invalid in JSON
-        def fix_invalid_escapes(match):
-            value = match.group(1)
-            # Double-escape backslashes that aren't followed by valid JSON escape chars
-            # Valid JSON escapes: " \ / b f n r t u
-            # Replace \X (where X is not a valid escape) with \\X
-            fixed = INVALID_ESCAPE_PATTERN.sub(r'\\\\\1', value)
-            return f'"{fixed}"'
-
-        # Match string values and fix invalid escapes
-        # This pattern matches: "..." string values
-        json_str = STRING_VALUE_PATTERN.sub(fix_invalid_escapes, json_str)
+        # SKIP the invalid escape fixing - it breaks valid JSON!
+        # The LLM generates valid JSON with correct escapes (e.g., \\s)
+        # The STRING_VALUE_PATTERN.sub() was turning \\s into \\\s (breaking it)
+        # If there are genuine invalid escapes, json.loads() will catch them
+        # and we'll handle them in the targeted repairs below
 
         # Remove trailing commas before closing brackets/braces
         # e.g., {"key": "value",} -> {"key": "value"}

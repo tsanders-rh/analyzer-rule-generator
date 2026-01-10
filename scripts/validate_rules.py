@@ -426,12 +426,15 @@ class RuleValidator:
                     if imported.lower() in description or source.lower() in description:
                         # Build a flexible import pattern
                         # Allow optional braces, whitespace, and semicolon
+                        # Build pattern without using .format() to avoid brace escaping issues
+                        escaped_source = re.escape(source)
                         flexible_pattern = (
                             r'import\s+[{\s]*[\w\s,]*'
                             + re.escape(imported)
-                            + r'[\w\s,]*[}\s]*\s+from\s+[\'"]{}'
+                            + r'[\w\s,]*[}\s]*\s+from\s+[\'"]'
+                            + escaped_source
                             + r'[\'"];?$'
-                        ).format(re.escape(source))
+                        )
 
                         try:
                             if re.search(flexible_pattern, line):

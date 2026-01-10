@@ -209,19 +209,13 @@ class OpenAIProvider(LLMProvider):
                 },
             }
         except RateLimitError as e:
-            log_error_with_context(
-                logger, e, "OpenAI API call", model=self.model, operation="generate"
-            )
+            log_error_with_context(logger, e, "OpenAI API call", model=self.model)
             raise LLMRateLimitError(f"OpenAI rate limit exceeded: {e}") from e
         except AuthenticationError as e:
-            log_error_with_context(
-                logger, e, "OpenAI API call", model=self.model, operation="generate"
-            )
+            log_error_with_context(logger, e, "OpenAI API call", model=self.model)
             raise LLMAuthenticationError(f"OpenAI authentication failed: {e}") from e
         except APIError as e:
-            log_error_with_context(
-                logger, e, "OpenAI API call", model=self.model, operation="generate"
-            )
+            log_error_with_context(logger, e, "OpenAI API call", model=self.model)
             raise LLMAPIError(f"OpenAI API error: {e}") from e
 
 
@@ -288,19 +282,13 @@ class AnthropicProvider(LLMProvider):
                 },
             }
         except RateLimitError as e:
-            log_error_with_context(
-                logger, e, "Anthropic API call", model=self.model, operation="generate"
-            )
+            log_error_with_context(logger, e, "Anthropic API call", model=self.model)
             raise LLMRateLimitError(f"Anthropic rate limit exceeded: {e}") from e
         except AuthenticationError as e:
-            log_error_with_context(
-                logger, e, "Anthropic API call", model=self.model, operation="generate"
-            )
+            log_error_with_context(logger, e, "Anthropic API call", model=self.model)
             raise LLMAuthenticationError(f"Anthropic authentication failed: {e}") from e
         except APIError as e:
-            log_error_with_context(
-                logger, e, "Anthropic API call", model=self.model, operation="generate"
-            )
+            log_error_with_context(logger, e, "Anthropic API call", model=self.model)
             raise LLMAPIError(f"Anthropic API error: {e}") from e
 
 

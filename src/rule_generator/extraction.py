@@ -906,6 +906,13 @@ Return ONLY the JSON array, no additional commentary."""
                     "component",
                     "class",
                     "function",
+                    # CSS/styling related (exclude only clearly non-prop keywords)
+                    "variable",  # CSS variables, not props
+                    "property",  # CSS properties, not component props
+                    "attribute",  # HTML attributes description
+                    "selector",  # CSS selectors
+                    # Note: "value" is NOT excluded - it's a common prop name
+                    # (Input value, Select value, etc.)
                 ]
                 if parts[1] in excluded_keywords:
                     return False

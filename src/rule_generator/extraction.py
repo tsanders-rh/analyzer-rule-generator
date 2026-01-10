@@ -647,20 +647,9 @@ Return ONLY the JSON array, no additional commentary."""
         # e.g., ]["key" -> ],["key"
         json_str = ARRAY_SEPARATOR_PATTERN.sub(r'],\1[', json_str)
 
-        # Fix unescaped quotes in string values (basic heuristic)
-        # This is tricky - only fix obvious cases like: "description": "It's a test"
-        # Convert to: "description": "It\'s a test"
-        # But skip already escaped quotes
-        def fix_unescaped_quotes(match):
-            key = match.group(1)
-            value = match.group(2)
-            # Escape single quotes that aren't already escaped
-            value = UNESCAPED_QUOTE_PATTERN.sub(r"\'", value)
-            return f'"{key}": "{value}"'
-
-        # Match "key": "value" pairs and fix unescaped quotes in values
-        # This pattern is conservative to avoid breaking valid JSON
-        json_str = KEY_VALUE_PATTERN.sub(fix_unescaped_quotes, json_str)
+        # DON'T escape single quotes - they don't need escaping in JSON double-quoted strings!
+        # The fix_unescaped_quotes() was ADDING \' which is invalid JSON
+        # Single quotes have no special meaning in JSON strings
 
         return json_str
 

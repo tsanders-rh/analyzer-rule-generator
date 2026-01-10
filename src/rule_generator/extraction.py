@@ -626,7 +626,7 @@ Return ONLY the JSON array, no additional commentary."""
             print(f"[Extraction] Debug: Found {len(matches)} triple-backslash patterns: {matches}")
         json_str = TRIPLE_BACKSLASH_PATTERN.sub(r'\\\\\\\\\1', json_str)
         if matches:
-            print(f"[Extraction] Debug: Applied triple-backslash fix")
+            print("[Extraction] Debug: Applied triple-backslash fix")
 
         # Fix invalid single-quote escapes in JSON strings
         # JSON doesn't allow \' (single quotes don't need escaping in double-quoted strings)

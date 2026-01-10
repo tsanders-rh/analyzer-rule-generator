@@ -382,7 +382,7 @@ def extract_patterns_from_rules(rules: list, language: str) -> list:
             import os
 
             if os.environ.get('DEBUG_CODE_HINTS'):
-                print(f"  DEBUG: Calling generate_code_hint_from_pattern")
+                print("  DEBUG: Calling generate_code_hint_from_pattern")
                 print(f"    Pattern: {repr(jsx_pattern)}")
                 print(f"    Language: {language}")
             pattern_info['code_hint'] = generate_code_hint_from_pattern(
@@ -466,8 +466,6 @@ def extract_java_imports_from_message(message: str) -> list:
     if not message:
         return []
 
-    import re
-
     imports = []
 
     # Look for code blocks after "Before:"
@@ -502,8 +500,6 @@ def extract_config_content_from_message(message: str) -> str:
     """
     if not message or 'Before:' not in message:
         return ''
-
-    import re
 
     # Look for code blocks after "Before:"
     before_match = re.search(
@@ -642,8 +638,6 @@ def create_file_based_patterns(rules: list, test_data_dir, language: str) -> lis
             continue
 
         # Check if it's a file extension pattern (e.g., banner.(gif|jpg|png))
-        import re
-
         file_match = re.match(r'([^.]+)\\.?\(([\w|]+)\)', pattern)
         if file_match:
             base_name = file_match.group(1)
@@ -690,8 +684,6 @@ def inject_missing_java_imports(source_code: str, patterns_to_test: list, rules:
     Returns:
         Java source code with missing imports injected
     """
-    import re
-
     # Collect all required imports from IMPORT location patterns
     required_imports = set()
 
@@ -752,8 +744,6 @@ def generate_code_hint_from_pattern(
     Returns:
         Code example string
     """
-    import re
-
     # For languages other than TypeScript/Go, don't generate hints
     if language not in ['typescript', 'go']:
         return None
@@ -1214,8 +1204,6 @@ def extract_code_blocks(response: str, language: str) -> dict:
     Returns:
         Dict with build_file, source_file, and config_file keys
     """
-    import re
-
     lang_config = get_language_config(language)
     result = {'build_file': None, 'source_file': None, 'config_file': None}
 

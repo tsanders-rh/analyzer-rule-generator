@@ -86,6 +86,7 @@ jinja_env = Environment(
 # Compiled regex patterns for performance (used in JSON repair and parsing)
 JSON_ARRAY_PATTERN = re.compile(r'\[.*\]', re.DOTALL)
 INVALID_ESCAPE_PATTERN = re.compile(r'\\([^"\\/bfnrtu])')
+TRIPLE_BACKSLASH_PATTERN = re.compile(r'\\\\\\([^"\\/bfnrtu])')  # Matches \\\X where X is invalid
 STRING_VALUE_PATTERN = re.compile(r'"((?:[^"\\]|\\.)*)"')
 TRAILING_COMMA_PATTERN = re.compile(r',(\s*[}\]])')
 OBJECT_SEPARATOR_PATTERN = re.compile(r'\}(\s*)\{')
@@ -615,6 +616,12 @@ Return ONLY the JSON array, no additional commentary."""
         Returns:
             Repaired JSON string
         """
+
+        # Fix triple-backslash + invalid escape (e.g., \\\s → \\\\s)
+        # This happens when LLM over-escapes regex patterns
+        # \\\s in JSON = \\ (one backslash) + \s (invalid!)
+        # Should be \\\\s = \\ + \\ (two backslashes) for the regex \s
+        json_str = TRIPLE_BACKSLASH_PATTERN.sub(r'\\\\\\\\\1', json_str)
 
         # Fix invalid escape sequences in string values FIRST
         # JSON only allows: \" \\ \/ \b \f \n \r \t \uXXXX

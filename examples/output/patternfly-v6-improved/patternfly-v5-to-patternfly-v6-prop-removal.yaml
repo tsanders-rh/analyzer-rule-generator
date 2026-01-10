@@ -1,0 +1,34 @@
+- ruleID: patternfly-v5-to-patternfly-v6-00030
+  description: Expandable section isActive prop should be replaced with Expandable
+    section
+  effort: 5
+  category: mandatory
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: ExpandableSection
+    - builtin.filecontent:
+        pattern: <ExpandableSection[^>]*\bisActive\b
+        filePattern: \.(j|t)sx?$
+  message: |-
+    The isActive prop has been removed from the ExpandableSection component in PatternFly 6.
+
+    Replace `Expandable section isActive prop` with `Expandable section`.
+
+    Before:
+    ```
+    <ExpandableSection isActive />
+    ```
+
+    After:
+    ```
+    <ExpandableSection />
+    ```
+  links:
+  - url: https://www.patternfly.org/components/expandable-section
+    title: patternfly-v6 Documentation
+  customVariables: []
+  migration_complexity: MEDIUM

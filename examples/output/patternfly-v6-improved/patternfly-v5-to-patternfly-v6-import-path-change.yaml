@@ -1,0 +1,34 @@
+- ruleID: patternfly-v5-to-patternfly-v6-00040
+  description: Victory-based chart import paths should be replaced with Updated Victory-based
+    chart import paths
+  effort: 3
+  category: potential
+  labels:
+  - konveyor.io/source=patternfly-v5
+  - konveyor.io/target=patternfly-v6
+  when:
+    and:
+    - nodejs.referenced:
+        pattern: Victory-based
+    - builtin.filecontent:
+        pattern: <Victory-based[^>]*\\bchart\\b
+        filePattern: \.(j|t)sx?$
+  message: |-
+    Victory-based charts have moved to a 'victory' directory in PatternFly 6.
+
+    Replace `Victory-based chart import paths` with `Updated Victory-based chart import paths`.
+
+    Before:
+    ```
+    import { Area } from '@patternfly/react-charts';
+    ```
+
+    After:
+    ```
+    import { Area } from '@patternfly/react-charts/victory';
+    ```
+  links:
+  - url: https://www.npmjs.com/package/@patternfly/react-charts
+    title: patternfly-v6 Documentation
+  customVariables: []
+  migration_complexity: LOW

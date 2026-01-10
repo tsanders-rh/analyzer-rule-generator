@@ -1290,11 +1290,11 @@ Return ONLY the JSON array, no additional commentary."""
 
         component = pattern.source_fqn
 
-        # Convert to combo rule with import + component detection
+        # Convert to combo rule with import + component detection + JSX usage
         pattern.provider_type = "combo"
         pattern.when_combo = {
             "import_pattern": f"import.*{component}.*from.*@patternfly/react-core",
-            "nodejs_pattern": component,
+            "builtin_pattern": f"<{component}",  # Match JSX usage of component
             "file_pattern": "\\.(j|t)sx?$",
         }
 

@@ -357,8 +357,10 @@ class MigrationPatternExtractor:
         for i, chunk in enumerate(chunks, 1):
             print(f"  → Processing chunk {i}/{len(chunks)} ({len(chunk):,} chars)")
 
-            # Extract from this chunk
-            patterns = self._extract_patterns_single(chunk, source_framework, target_framework)
+            # Extract from this chunk with retry logic
+            patterns = self._extract_with_retry(
+                chunk, source_framework, target_framework, depth=0, chunk_id=i
+            )
 
             if patterns:
                 print(f"    ✓ Extracted {len(patterns)} patterns from chunk {i}")
@@ -385,6 +387,143 @@ class MigrationPatternExtractor:
                 unique.append(pattern)
 
         return unique
+
+    def _extract_with_retry(
+        self,
+        chunk: str,
+        source_framework: Optional[str],
+        target_framework: Optional[str],
+        depth: int = 0,
+        chunk_id: int = 0,
+        max_depth: int = 2,
+    ) -> List[MigrationPattern]:
+        """
+        Extract patterns with automatic split-retry on truncation.
+
+        Args:
+            chunk: Content chunk to process
+            source_framework: Source framework name
+            target_framework: Target framework name
+            depth: Current recursion depth
+            chunk_id: Original chunk identifier for logging
+            max_depth: Maximum recursion depth
+
+        Returns:
+            List of extracted patterns
+        """
+        # Try extracting from this chunk
+        patterns = self._extract_patterns_single(chunk, source_framework, target_framework)
+
+        if patterns:
+            return patterns  # Success!
+
+        # No patterns extracted - check if we should retry with splitting
+        if depth >= max_depth:
+            print(f"    ⚠ Max retry depth ({max_depth}) reached for chunk {chunk_id}")
+            return []  # Max retries reached
+
+        # Check if this looks like a truncation issue (pattern-dense content)
+        if self._is_likely_truncation(chunk):
+            print(f"    ⟲ Chunk {chunk_id} appears truncated, splitting and retrying...")
+
+            # Split chunk at paragraph boundary
+            chunk1, chunk2 = self._split_at_paragraph(chunk)
+
+            if len(chunk1) < 100 or len(chunk2) < 100:
+                # Split produced a chunk too small, give up
+                print("    ⚠ Split produced too-small chunks, skipping")
+                return []
+
+            print(f"      → Split into {len(chunk1):,} + {len(chunk2):,} chars")
+
+            # Retry both halves
+            patterns1 = self._extract_with_retry(
+                chunk1, source_framework, target_framework, depth + 1, chunk_id
+            )
+            patterns2 = self._extract_with_retry(
+                chunk2, source_framework, target_framework, depth + 1, chunk_id
+            )
+
+            combined = patterns1 + patterns2
+            if combined:
+                print(
+                    f"    ✓ Split-retry recovered {len(combined)} patterns "
+                    f"({len(patterns1)} + {len(patterns2)})"
+                )
+            return combined
+
+        # Other error (network, auth, etc.), give up
+        return []
+
+    def _is_likely_truncation(self, chunk: str) -> bool:
+        """
+        Check if chunk is likely pattern-dense and would cause output truncation.
+
+        Args:
+            chunk: Content chunk
+
+        Returns:
+            True if chunk appears pattern-dense
+        """
+        # Count migration-related keywords that typically indicate pattern density
+        pattern_keywords = [
+            'deprecated',
+            'removed',
+            'replaced',
+            'migrat',
+            'upgrad',
+            'breaking change',
+            'renamed',
+            'moved',
+            'prop',
+            'component',
+            'import',
+            'export',
+        ]
+
+        chunk_lower = chunk.lower()
+        keyword_count = sum(chunk_lower.count(keyword) for keyword in pattern_keywords)
+
+        # Heuristic: More than 20 keywords in a chunk suggests pattern density
+        # This correlates with chunks that generate 50+ patterns
+        is_dense = keyword_count > 20
+
+        if is_dense:
+            print(f"      → Detected pattern-dense content ({keyword_count} migration keywords)")
+
+        return is_dense
+
+    def _split_at_paragraph(self, chunk: str) -> tuple[str, str]:
+        """
+        Split chunk at a paragraph boundary near the middle.
+
+        Args:
+            chunk: Content chunk to split
+
+        Returns:
+            Tuple of (first_half, second_half)
+        """
+        # Find paragraph breaks (double newline or markdown headers)
+        paragraph_breaks = []
+
+        # Look for double newlines
+        for match in re.finditer(r'\n\n+', chunk):
+            paragraph_breaks.append(match.start())
+
+        # Look for markdown headers (# Header)
+        for match in re.finditer(r'\n#+\s', chunk):
+            paragraph_breaks.append(match.start())
+
+        if not paragraph_breaks:
+            # No paragraph breaks found, split at middle
+            mid = len(chunk) // 2
+            return chunk[:mid], chunk[mid:]
+
+        # Find break closest to middle
+        mid = len(chunk) // 2
+        closest_break = min(paragraph_breaks, key=lambda x: abs(x - mid))
+
+        return chunk[:closest_break].strip(), chunk[closest_break:].strip()
 
     def _build_extraction_prompt(
         self, guide_content: str, source_framework: Optional[str], target_framework: Optional[str]

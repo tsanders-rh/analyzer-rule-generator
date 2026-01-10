@@ -692,17 +692,25 @@ Return ONLY the JSON array, no additional commentary."""
                 patterns_data = json.loads(repaired_json)
                 print("[Extraction] Info: Successfully repaired JSON")
             except json.JSONDecodeError as e2:
-                print(f"[Extraction] Warning: JSON repair failed: {e2} (trying aggressive repair)")
-                # Try one more aggressive repair: escape all single backslashes
+                print(f"[Extraction] Warning: JSON repair failed: {e2}")
+
+                # Write failed JSON to temp file for debugging
+                import tempfile
                 try:
-                    # Replace single backslash with double backslash in string values
-                    aggressive_json = repaired_json
-                    # This is a last resort - may break some patterns but better than nothing
-                    aggressive_json = aggressive_json.replace('\\', '\\\\')
-                    # But we may have over-escaped, so fix double-double backslashes
-                    aggressive_json = aggressive_json.replace('\\\\\\\\', '\\\\')
-                    patterns_data = json.loads(aggressive_json)
-                    print("[Extraction] Info: Successfully repaired JSON with aggressive escaping")
+                    with tempfile.NamedTemporaryFile(
+                        mode='w', suffix='.json', delete=False, prefix='failed_json_'
+                    ) as f:
+                        f.write(repaired_json)
+                        print(f"[Extraction] Debug: Failed JSON written to {f.name}")
+                except Exception:
+                    pass  # Don't fail if we can't write debug file
+
+                # Try fixing missing commas between adjacent strings (common LLM error)
+                # Pattern: "value""key" -> "value","key"
+                try:
+                    comma_fixed = re.sub(r'"\s*"([a-zA-Z_])', r'","\1', repaired_json)
+                    patterns_data = json.loads(comma_fixed)
+                    print("[Extraction] Info: Successfully repaired JSON (added missing commas)")
                 except json.JSONDecodeError as e3:
                     print(f"[Extraction] Error: All JSON repair attempts failed: {e3}")
                     print(f"[Extraction] Debug: Response preview: {response[:500]}")

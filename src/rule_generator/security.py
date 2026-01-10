@@ -351,14 +351,18 @@ def validate_llm_response(response: str, expected_format: str = "json_array") ->
 
     # Validate based on expected format
     if expected_format == "json_array":
-        if not response.startswith('['):
+        # Check if response contains a JSON array anywhere (not just at start)
+        # This handles cases where LLM adds explanation before the JSON
+        if '[' not in response or ']' not in response:
             raise ValueError(
-                f"LLM response does not start with '[' (expected JSON array): "
-                f"{response[:50]}..."
+                f"LLM response does not contain '[' and ']' (expected JSON array): "
+                f"{response[:100]}..."
             )
-        if not response.rstrip().endswith(']'):
+        # Additional check: ensure [ comes before ] (basic structure check)
+        if response.index('[') > response.rindex(']'):
             raise ValueError(
-                f"LLM response does not end with ']' (expected JSON array): " f"...{response[-50:]}"
+                f"LLM response has malformed JSON array structure (']' before '['): "
+                f"{response[:100]}..."
             )
 
     elif expected_format == "json_object":

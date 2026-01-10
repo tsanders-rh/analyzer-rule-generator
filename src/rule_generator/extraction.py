@@ -882,9 +882,10 @@ Return ONLY the JSON array, no additional commentary."""
             # First part looks like component name (PascalCase)
             # Second part looks like prop name (camelCase)
             if parts[0] and parts[0][0].isupper() and parts[1] and parts[1][0].islower():
-                # Exclude common method names that look like props but aren't
-                # These are method calls, not component props
-                method_names = [
+                # Exclude keywords that look like props but aren't
+                # These are method calls, imports, exports, or other non-prop patterns
+                excluded_keywords = [
+                    # Method names
                     "render",
                     "mount",
                     "unmount",
@@ -892,8 +893,21 @@ Return ONLY the JSON array, no additional commentary."""
                     "setState",
                     "useState",
                     "useEffect",
+                    # Import/export related
+                    "import",
+                    "export",
+                    "from",
+                    "next",
+                    "specifiers",
+                    # Type/interface related
+                    "interface",
+                    "type",
+                    # Generic descriptors
+                    "component",
+                    "class",
+                    "function",
                 ]
-                if parts[1] in method_names:
+                if parts[1] in excluded_keywords:
                     return False
                 return True
 

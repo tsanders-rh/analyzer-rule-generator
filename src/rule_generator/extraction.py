@@ -929,20 +929,23 @@ Return ONLY the JSON array, no additional commentary."""
             pattern.provider_type = "combo"
             pattern.source_fqn = component
 
-            # Create import verification pattern for PatternFly
-            # This matches: import { Component } from '@patternfly/react-core'
-            # or: import { Component } from '@patternfly/react-core/deprecated'
-            import_pattern = (
-                f"import.*\\{{{{[^}}}}]*\\\\b{component}\\\\b[^}}}}]*\\}}}}"
-                f".*from ['\"]@patternfly/react-"
-            )
-
-            # Use 2-condition combo rule (import verification + JSX pattern)
-            # This is simpler and more effective than 3-condition with nodejs.referenced
+            # Use nodejs.referenced for semantic component detection
+            # This matches how official Konveyor PatternFly rules work:
+            # - nodejs.referenced finds the component symbol (Button, Import, etc.)
+            # - builtin.filecontent matches the JSX pattern with the prop
+            #
+            # Example official rule structure:
+            # when:
+            #   and:
+            #   - nodejs.referenced:
+            #       pattern: Button
+            #   - builtin.filecontent:
+            #       pattern: <Button[^>]*\bvariant=['"]plain['"][^>]*>
+            #       filePattern: \.(j|t)sx?$
             pattern.when_combo = {
-                "import_pattern": import_pattern,
+                "nodejs_pattern": component,
                 "builtin_pattern": f"<{component}[^>]*\\\\b{prop}\\\\b",
-                "file_pattern": "\\\\.(j|t)sx?$",
+                "file_pattern": "\\.(j|t)sx?$",
             }
 
         return pattern

@@ -322,16 +322,16 @@ class AnalyzerRuleGenerator:
 
             conditions = []
 
-            # Add import verification condition if present (preferred over nodejs.referenced)
-            if import_pattern:
-                conditions.append(build_builtin_condition(import_pattern, file_pattern))
-
-            # Add nodejs.referenced condition if present and no import pattern
-            # (for backward compatibility with existing combo rules)
-            elif nodejs_pattern:
+            # Preferred: Use nodejs.referenced for TypeScript/JavaScript component detection
+            # This matches official Konveyor approach using semantic analysis
+            if nodejs_pattern:
                 conditions.append(build_nodejs_condition(nodejs_pattern))
 
-            # Add main builtin.filecontent condition for JSX pattern
+            # Fallback: Use import verification pattern (for environments without nodejs provider)
+            elif import_pattern:
+                conditions.append(build_builtin_condition(import_pattern, file_pattern))
+
+            # Add main builtin.filecontent condition for JSX/code pattern matching
             conditions.append(build_builtin_condition(builtin_pattern, file_pattern))
 
             return build_combo_condition(conditions)

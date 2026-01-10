@@ -265,39 +265,34 @@ class RuleValidator:
         """
         Check if rule needs import verification added.
 
+        NOTE: nodejs.referenced already performs semantic analysis and only finds
+        components that are actually imported. Rules using nodejs.referenced do NOT
+        need additional import verification patterns. This matches the official
+        Konveyor PatternFly rules which use nodejs.referenced + builtin.filecontent
+        for JSX patterns WITHOUT import regex patterns.
+
         Args:
             rule: Analyzer rule to check
 
         Returns:
-            True if rule needs import verification
+            True if rule needs import verification (always False for nodejs.referenced rules)
         """
         when = rule.when
 
-        # Check for combo rule with nodejs.referenced but no import check
-        if isinstance(when, dict) and 'and' in when:
-            has_nodejs = any('nodejs.referenced' in str(c) for c in when['and'])
-            has_import_check = any(
-                '@patternfly' in str(c) or 'import' in str(c).lower() for c in when['and']
-            )
+        # Rules with nodejs.referenced do NOT need import verification
+        # nodejs.referenced already does semantic analysis and only finds imported symbols
+        if isinstance(when, dict):
+            # Check for nodejs.referenced in combo rules
+            if 'and' in when:
+                has_nodejs = any('nodejs.referenced' in str(c) for c in when['and'])
+                if has_nodejs:
+                    return False  # nodejs.referenced is sufficient
 
-            # For JS/TS, component patterns should verify imports
-            if has_nodejs and not has_import_check:
-                # Extract component name
-                for cond in when['and']:
-                    if isinstance(cond, dict) and 'nodejs.referenced' in cond:
-                        pattern = cond['nodejs.referenced'].get('pattern', '')
-                        # If it looks like a component name (capitalized)
-                        if pattern and pattern[0].isupper():
-                            return True
+            # Check for simple nodejs.referenced rules
+            elif 'nodejs.referenced' in when:
+                return False  # nodejs.referenced is sufficient
 
-        # Check for simple nodejs.referenced rule (component rename/reference)
-        elif isinstance(when, dict) and 'nodejs.referenced' in when:
-            pattern = when['nodejs.referenced'].get('pattern', '')
-            # If it looks like a component name (capitalized)
-            if pattern and pattern[0].isupper():
-                return True
-
-        return False
+        return False  # No import verification needed
 
     def _add_import_verification(self, rule: AnalyzerRule) -> Optional[Dict[str, Any]]:
         """

@@ -86,7 +86,19 @@ python scripts/generate_rules.py \
 
 The analyzer-rule-generator has three main stages:
 1. **Guide Ingestion**: Retrieves and processes migration guide content
-2. **Pattern Extraction**: Uses LLMs to identify migration patterns
+2. **Pattern Extraction**: Uses LLMs to identify migration patterns with automatic quality improvements
 3. **Rule Generation**: Converts patterns into Konveyor analyzer rules
+
+### Automatic Quality Improvements (New!)
+
+During pattern extraction, the tool automatically applies quality improvements:
+
+- **Generic component detection** - Adds import verification for common component names (Text, Button, Modal, etc.) to prevent false positives from other libraries
+- **Overly broad pattern rejection** - Automatically rejects patterns that are too generic (like standalone "alignLeft", "isActive") that would cause false positives
+- **Combo rule auto-conversion** - Converts component prop patterns to combo rules with import verification for better accuracy
+- **Import pattern auto-fix** - Adds optional semicolons to import patterns to match both coding styles
+- **Adaptive chunking** - Automatically splits large documents and retries on truncation for reliable processing
+
+These improvements significantly reduce false positives and improve rule quality without any manual intervention.
 
 Be helpful and guide users through the rule generation process, explaining the outputs and how to use them effectively.

@@ -111,9 +111,20 @@ The skill will:
 
 1. **Validate inputs** - Check that guide source exists and parameters are correct
 2. **Run the generator** - Execute `scripts/generate_rules.py` with appropriate parameters
-3. **Monitor progress** - Show you the extraction and generation process
+3. **Monitor progress** - Show you the extraction and generation process with automatic quality improvements
 4. **Analyze output** - Review the generated YAML rule files
 5. **Provide guidance** - Explain the results and suggest next steps
+
+### Automatic Quality Improvements
+
+The generator includes built-in quality improvements that run automatically during extraction:
+
+- **Prevents false positives** - Detects and rejects overly broad patterns (6 patterns rejected in typical runs)
+- **Adds import verification** - Common component names like "Text", "Button", "Modal" get automatic import checks to avoid conflicts with other libraries
+- **Smart pattern enhancement** - Auto-converts simple patterns to combo rules with proper verification when needed
+- **Reliable processing** - Adaptive chunking ensures large guides (90k+ chars) process smoothly without timeouts
+
+You'll see these improvements in the logs as "Decision:" messages showing what was automatically fixed or enhanced.
 
 ## Output
 

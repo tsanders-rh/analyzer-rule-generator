@@ -102,8 +102,8 @@ class TestSkillFrontmatter:
         assert isinstance(frontmatter["description"], str), "Description should be a string"
 
     def test_name_value(self, frontmatter):
-        """Name should be 'Konveyor Rule Generator'."""
-        assert frontmatter["name"] == "Konveyor Rule Generator"
+        """Name should be 'konveyor-rules'."""
+        assert frontmatter["name"] == "konveyor-rules"
 
     def test_description_not_too_short(self, frontmatter):
         """Description should be descriptive (at least 20 characters)."""

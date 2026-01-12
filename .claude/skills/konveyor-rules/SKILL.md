@@ -1,5 +1,5 @@
 ---
-name: Konveyor Rule Generator
+name: konveyor-rules
 description: Generate Konveyor analyzer migration rules from migration guides using AI
 ---
 

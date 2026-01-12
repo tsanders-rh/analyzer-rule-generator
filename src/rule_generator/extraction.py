@@ -37,7 +37,7 @@ Pattern Auto-Fixing:
 
 Usage:
     >>> from rule_generator.llm import get_llm_provider
-    >>> llm = get_llm_provider("anthropic", model="claude-3-7-sonnet-latest")
+    >>> llm = get_llm_provider("anthropic", model="claude-sonnet-4-5-20250929")
     >>> extractor = MigrationPatternExtractor(llm)
     >>> patterns = extractor.extract_patterns(
     ...     guide_content="Migration guide text...",

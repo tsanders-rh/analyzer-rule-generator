@@ -160,7 +160,7 @@ class TestAnthropicProvider:
         """Should initialize with default model"""
         provider = AnthropicProvider()
 
-        assert provider.model == "claude-3-7-sonnet-latest"
+        assert provider.model == "claude-sonnet-4-5-20250929"
         mock_anthropic_class.assert_called_once()
 
     @patch('anthropic.Anthropic')
@@ -209,7 +209,7 @@ class TestAnthropicProvider:
 
         mock_client.messages.create.assert_called_once()
         call_args = mock_client.messages.create.call_args
-        assert call_args.kwargs["model"] == "claude-3-7-sonnet-latest"
+        assert call_args.kwargs["model"] == "claude-sonnet-4-5-20250929"
         assert call_args.kwargs["messages"] == [{"role": "user", "content": "Test prompt"}]
         assert call_args.kwargs["temperature"] == 0.0
         assert call_args.kwargs["max_tokens"] == 16000
@@ -360,7 +360,7 @@ class TestFactoryFunction:
         provider = get_llm_provider("anthropic")
 
         assert isinstance(provider, AnthropicProvider)
-        assert provider.model == "claude-3-7-sonnet-latest"
+        assert provider.model == "claude-sonnet-4-5-20250929"
 
     @patch('anthropic.Anthropic')
     def test_get_anthropic_with_custom_model(self, mock_anthropic):

@@ -225,12 +225,12 @@ class AnthropicProvider(LLMProvider):
     # Rate limiter: 50 calls per minute (conservative limit)
     _rate_limiter = RateLimiter(calls=50, period=60)
 
-    def __init__(self, model: str = "claude-3-7-sonnet-latest", api_key: Optional[str] = None):
+    def __init__(self, model: str = "claude-sonnet-4-5-20250929", api_key: Optional[str] = None):
         """
         Initialize Anthropic provider.
 
         Args:
-            model: Model name (default: claude-3-7-sonnet-latest)
+            model: Model name (default: claude-sonnet-4-5-20250929)
             api_key: API key (defaults to ANTHROPIC_API_KEY env var)
         """
         try:
@@ -403,7 +403,7 @@ def get_llm_provider(
     if provider == "openai":
         return OpenAIProvider(model=model or "gpt-4-turbo", api_key=api_key)
     elif provider == "anthropic":
-        return AnthropicProvider(model=model or "claude-3-7-sonnet-latest", api_key=api_key)
+        return AnthropicProvider(model=model or "claude-sonnet-4-5-20250929", api_key=api_key)
     elif provider == "google":
         return GoogleProvider(model=model or "gemini-1.5-pro", api_key=api_key)
     else:
